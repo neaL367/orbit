@@ -1,12 +1,11 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
-// import { Footer } from "@/components/footer";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
@@ -23,11 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={geistMono.className}>
+      <body className={geistSans.className}>
         <div className="flex min-h-screen flex-col">
           <Header />
           <main className="flex justify-center">{children}</main>
-          {/* <Footer /> */}
         </div>
       </body>
     </html>
