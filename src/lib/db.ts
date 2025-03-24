@@ -1,16 +1,32 @@
 import { Anime } from '@/types'
 import { Redis } from '@upstash/redis'
+import { unstable_cache } from 'next/cache'
 
-// Initialize Redis client using the provided environment variables
 export const redis = new Redis({
   url: process.env.KV_REST_API_URL || '',
   token: process.env.KV_REST_API_TOKEN || '',
 })
 
+const cachedRedisHgetall = unstable_cache(
+  async (key: string) => {
+    return redis.hgetall(key)
+  },
+  ["redis-hgetall"],
+  { revalidate: 3600 }, // Cache for 1 hour
+)
+
+const cachedRedisSmembers = unstable_cache(
+  async (key: string) => {
+    return redis.smembers(key)
+  },
+  ["redis-smembers"],
+  { revalidate: 3600 }, // Cache for 1 hour
+)
+
 // Database functions
 export async function getAnimeById(id: string): Promise<Anime | null> {
   try {
-    const anime = await redis.hgetall(`anime:${id}`)
+    const anime = await cachedRedisHgetall(`anime:${id}`)
     if (!anime || Object.keys(anime).length === 0) return null
     
     // Convert genres from string to array
@@ -27,7 +43,7 @@ export async function getAnimeById(id: string): Promise<Anime | null> {
 
 export async function getAllAnime(): Promise<Anime[]> {
   try {
-    const animeIds = await redis.smembers('animes')
+    const animeIds = await cachedRedisSmembers('animes')
     // console.log('Anime IDs:', animeIds)  // Log the IDs fetched
     if (!animeIds.length) return []
     
@@ -45,7 +61,7 @@ export async function getAllAnime(): Promise<Anime[]> {
 
 export async function getAnimeByGenre(genre: string): Promise<Anime[]> {
   try {
-    const animeIds = await redis.smembers(`genre:${genre}`)
+    const animeIds = await cachedRedisSmembers(`genre:${genre}`)
     if (!animeIds.length) return []
     
     const animeList = await Promise.all(
@@ -62,7 +78,7 @@ export async function getAnimeByGenre(genre: string): Promise<Anime[]> {
 export async function getSchedule(day?: string): Promise<Anime[]> {
   try {
     const today = day || getDayOfWeek()
-    const scheduleIds = await redis.smembers(`schedule:${today.toLowerCase()}`)
+    const scheduleIds = await cachedRedisSmembers(`schedule:${today.toLowerCase()}`)
     
     if (!scheduleIds.length) return []
     

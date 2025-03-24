@@ -30,6 +30,7 @@ export default async function SearchPage(props: SearchPageProps) {
 }
 
 async function SearchResults({ query }: { query: string }) {
+  
   const results = await searchAnime(query);
   return (
     <AnimeGrid
