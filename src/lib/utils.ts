@@ -7,7 +7,15 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatTime(time: string): string {
   const [hours, minutes] = time.split(":").map(Number)
-  const period = hours >= 12 ? "PM" : "AM"
-  const formattedHours = hours % 12 || 12
-  return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Bangkok",
+  }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)))
+}
+
+export function getDayOfWeek(): string {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  return days[new Date().getDay()]
 }

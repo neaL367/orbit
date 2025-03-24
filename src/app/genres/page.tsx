@@ -1,11 +1,10 @@
-import Link from "next/link"
+import { Link } from "next-view-transitions";
 import { Card, CardContent } from "@/components/ui/card"
 import { getAllAnime } from "@/lib/db"
 
 export default async function GenresPage() {
   const allAnime = await getAllAnime()
 
-  // Extract all unique genres
   const genresMap = new Map<string, number>()
 
   allAnime.forEach((anime) => {

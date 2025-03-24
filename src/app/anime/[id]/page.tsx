@@ -28,6 +28,7 @@ export default async function AnimeDetailPage(props: AnimeDetailPageProps) {
               fill
               className="object-cover object-bottom"
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { AnimeGrid } from "@/components/anime-grid";
-import { searchAnime } from "@/lib/db";
+import { getAllAnime } from "@/lib/db";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -15,27 +15,32 @@ export default async function SearchPage(props: SearchPageProps) {
   return (
     <div className="container py-8 space-y-6">
       <h1 className="text-3xl font-bold">
-        {q ? `Search Results for "${q}"` : "Search Results"}
+        {q ? `Search Results for "${q}"` : "Search"}
       </h1>
 
       {q ? (
-        <Suspense fallback={<div>Searching...</div>}>
+        <Suspense fallback={<div>Searching titles...</div>}>
           <SearchResults query={q} />
         </Suspense>
       ) : (
-        <p className="text-muted-foreground">Please enter a search query</p>
+        <p className="text-muted-foreground">
+          Please enter a title to search for
+        </p>
       )}
     </div>
   );
 }
 
 async function SearchResults({ query }: { query: string }) {
-  
-  const results = await searchAnime(query);
+  const allAnime = await getAllAnime();
+  const results = allAnime.filter((anime) =>
+    anime.title.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <AnimeGrid
       animeList={results}
-      emptyMessage={`No results found for "${query}"`}
+      emptyMessage={`No titles found matching "${query}"`}
     />
   );
 }

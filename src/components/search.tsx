@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useTransitionRouter } from "next-view-transitions"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SearchIcon, X } from "lucide-react"
@@ -11,7 +11,7 @@ import { SearchIcon, X } from "lucide-react"
 export function Search() {
   const [query, setQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const router = useRouter()
+  const router = useTransitionRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function Search() {
         </form>
       </div>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
+        <div className="fixed mx-3.5 inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
           <div className="container flex h-16 items-center">
             <form onSubmit={handleSubmit} className="relative flex-1">
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -95,7 +95,7 @@ export function Search() {
                   setIsOpen(false)
                 }}
               >
-                <X className="h-4 w-4" />
+                {/* <X className="h-4 w-4" /> */}
                 <span className="sr-only">Clear</span>
               </Button>
             </form>

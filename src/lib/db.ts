@@ -1,6 +1,7 @@
 import { Anime } from '@/types'
 import { Redis } from '@upstash/redis'
 import { unstable_cache } from 'next/cache'
+import { getDayOfWeek } from './utils'
 
 export const redis = new Redis({
   url: process.env.KV_REST_API_URL || '',
@@ -105,11 +106,4 @@ export async function searchAnime(query: string): Promise<Anime[]> {
     console.error('Error searching anime:', error)
     return []
   }
-}
-
-
-// Helper functions
-export function getDayOfWeek(): string {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  return days[new Date().getDay()]
 }

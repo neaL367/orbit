@@ -1,11 +1,20 @@
-import { Suspense } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScheduleDay } from "@/components/schedule-day"
-import { getSchedule, getDayOfWeek } from "@/lib/db"
+import { Suspense } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScheduleDay } from "@/components/schedule-day";
+import { getSchedule } from "@/lib/db";
+import { getDayOfWeek } from "@/lib/utils";
 
 export default function SchedulePage() {
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-  const today = getDayOfWeek()
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  const today = getDayOfWeek();
 
   return (
     <div className="container py-8 space-y-6">
@@ -22,18 +31,21 @@ export default function SchedulePage() {
 
         {days.map((day) => (
           <TabsContent key={day} value={day.toLowerCase()}>
-            <Suspense fallback={<div>Loading schedule...</div>}>
+            {/* <Suspense fallback={<div>Loading schedule...</div>}> */}
               <DaySchedule day={day} />
-            </Suspense>
+            {/* </Suspense> */}
           </TabsContent>
         ))}
       </Tabs>
     </div>
-  )
+  );
 }
 
 async function DaySchedule({ day }: { day: string }) {
-  const schedule = await getSchedule(day)
-  return <ScheduleDay day={day} animeList={schedule} />
+  const schedule = await getSchedule(day);
+  return (
+    <Suspense fallback={<div>Loading schedule...</div>}>
+      <ScheduleDay day={day} animeList={schedule} />{" "}
+    </Suspense>
+  );
 }
-
