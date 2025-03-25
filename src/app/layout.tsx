@@ -2,8 +2,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/header";
-import { ViewTransitions } from "next-view-transitions";
+import Header from "@/components/header";
+// import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,7 +12,8 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "Orbit",
-  description: "A comprehensive database and resource for anime enthusiasts",
+  description:
+    "Discover and explore anime with detailed information and recommendations",
 };
 
 export default function RootLayout({
@@ -21,15 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ViewTransitions>
-      <html lang="en" suppressHydrationWarning>
-        <body className={geistSans.className}>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex justify-center mx-3.5">{children}</main>
-          </div>
-        </body>
-      </html>
-    </ViewTransitions>
+    <html lang="en" suppressHydrationWarning className="dark">
+      <body className={geistSans.className}>
+        <div className="flex min-h-screen flex-col items-center">
+          <Header />
+          <main className="flex-1">{children}</main>
+          {/* <Footer /> */}
+        </div>
+      </body>
+    </html>
   );
 }

@@ -1,43 +1,76 @@
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Anime } from "@/types";
+import { formatStatus } from "@/lib/utils";
 
 interface AnimeCardProps {
-  anime: Anime;
+  anime: {
+    id: number;
+    title: {
+      romaji: string;
+      english: string | null;
+      native: string;
+    };
+    coverImage: {
+      large: string | null;
+      medium: string | null;
+    };
+    genres: string[];
+    averageScore: number | null;
+    status: string;
+    season?: string | null;
+    seasonYear?: number | null;
+  };
 }
 
-export function AnimeCard({ anime }: AnimeCardProps) {
+export default function AnimeCard({ anime }: AnimeCardProps) {
+  const title = anime.title.english || anime.title.romaji;
+
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg ">
-      <Link href={`/anime/${anime.id}`}>
-        <CardContent className="">
-          <div className="aspect-[1/1] relative">
-            <Image
-              src={anime.coverImage || ""}
-              alt={anime.title}
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+    <Link href={`/anime/${anime.id}`}>
+      <Card className="h-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-md">
+        <div className="relative aspect-[3/3] w-full overflow-hidden ">
+          <Image
+            src={anime.coverImage.large || anime.coverImage.medium || ""}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover "
+            priority
+          />
+          {anime.averageScore && anime.averageScore > 0 && (
+            <div className="absolute right-2 top-2 rounded-full bg-primary px-2 py-1 text-xs font-bold text-primary-foreground">
+              {anime.averageScore}%
+            </div>
+          )}
+          <div className="relative h-full p-3 pt-6 bg-gradient-to-t from-black/80 to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-2.5">
+              <h3 className="line-clamp-2 text-sm font-bold text-white">
+                {title}
+              </h3>
+            </div>
           </div>
-          <div className="p-4 hidden md:block">
-            <h3 className="font-semibold line-clamp-1">{anime.title}</h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-              {anime.description}
-            </p>
+        </div>
+        <CardContent className="p-3">
+          <div className="flex flex-wrap gap-1">
+            {anime.genres?.slice(0, 2).map((genre) => (
+              <Badge key={genre} variant="secondary" className="text-xs">
+                {genre}
+              </Badge>
+            ))}
+            <Badge variant="outline" className="text-xs">
+              {formatStatus(anime.status)}
+            </Badge>
+            {anime.season && anime.seasonYear && (
+              <Badge variant="outline" className="text-xs">
+                {anime.season.charAt(0) + anime.season.slice(1).toLowerCase()}{" "}
+                {anime.seasonYear}
+              </Badge>
+            )}
           </div>
         </CardContent>
-        <CardFooter className="hidden md:flex flex-wrap gap-1 md:p-4 pt-0">
-          {anime.genres.slice(0, 3).map((genre) => (
-            <Badge key={genre} variant="secondary" className="text-xs">
-              {genre}
-            </Badge>
-          ))}
-        </CardFooter>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 }

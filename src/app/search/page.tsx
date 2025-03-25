@@ -1,46 +1,74 @@
 import { Suspense } from "react";
-import { AnimeGrid } from "@/components/anime-grid";
-import { getAllAnime } from "@/lib/db";
+import { searchAnime } from "@/lib/anilist";
+import AnimeCard from "@/components/anime-card";
+import Pagination from "@/components/pagination";
+import { LoadingAnimeGrid } from "@/components/loading-anime";
 
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
+    page?: string;
   }>;
 }
 
 export default async function SearchPage(props: SearchPageProps) {
   const searchParams = await props.searchParams;
-  const { q } = searchParams;
+  const query = searchParams.q || "";
+  const page = Number.parseInt(searchParams.page || "1", 10);
+  const perPage = 24;
+
+  const data = query ? await searchAnime(query, page, perPage) : null;
+  const animeList = data?.data?.Page?.media || [];
+  const pageInfo = data?.data?.Page?.pageInfo || {
+    currentPage: 1,
+    lastPage: 1,
+    hasNextPage: false,
+    total: 0,
+  };
 
   return (
-    <div className="container py-8 space-y-6">
-      <h1 className="text-3xl font-bold">
-        {q ? `Search Results for "${q}"` : "Search"}
-      </h1>
+    <div className="container py-8">
+      <h1 className="mb-2 text-3xl font-bold">Search Results</h1>
 
-      {q ? (
-        <Suspense fallback={<div>Searching titles...</div>}>
-          <SearchResults query={q} />
-        </Suspense>
+      {query ? (
+        <>
+          <p className="mb-8 text-muted-foreground">
+            Found {pageInfo.total || 0} results for &quot;{query}&quot;
+          </p>
+
+          <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
+            {animeList.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {animeList.map((anime) => (
+                  <AnimeCard key={anime.id} anime={anime} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12">
+                <h2 className="text-xl font-semibold">No results found</h2>
+                <p className="text-muted-foreground">
+                  Try a different search term or browse trending anime
+                </p>
+              </div>
+            )}
+          </Suspense>
+
+          {animeList.length > 0 && (
+            <Pagination
+              currentPage={pageInfo.currentPage}
+              totalPages={pageInfo.lastPage}
+              hasNextPage={pageInfo.hasNextPage}
+            />
+          )}
+        </>
       ) : (
-        <p className="text-muted-foreground">
-          Please enter a title to search for
-        </p>
+        <div className="flex flex-col items-center justify-center py-12">
+          <h2 className="text-xl font-semibold">Enter a search term</h2>
+          <p className="text-muted-foreground">
+            Search for anime by title, genre, or description
+          </p>
+        </div>
       )}
     </div>
-  );
-}
-
-async function SearchResults({ query }: { query: string }) {
-  const allAnime = await getAllAnime();
-  const results = allAnime.filter((anime) =>
-    anime.title.toLowerCase().includes(query.toLowerCase())
-  );
-
-  return (
-    <AnimeGrid
-      animeList={results}
-      emptyMessage={`No titles found matching "${query}"`}
-    />
   );
 }

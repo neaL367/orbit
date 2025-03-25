@@ -1,39 +1,29 @@
-import { Link } from "next-view-transitions";
+import { Suspense } from "react"
+import Link from "next/link"
+import { getGenres } from "@/lib/anilist"
 import { Card, CardContent } from "@/components/ui/card"
-import { getAllAnime } from "@/lib/db"
 
 export default async function GenresPage() {
-  const allAnime = await getAllAnime()
-
-  const genresMap = new Map<string, number>()
-
-  allAnime.forEach((anime) => {
-    anime.genres.forEach((genre) => {
-      genresMap.set(genre, (genresMap.get(genre) || 0) + 1)
-    })
-  })
-
-  // Sort genres by count
-  const sortedGenres = Array.from(genresMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([genre, count]) => ({ genre, count }))
+  const data = await getGenres()
+  const genres = data?.data?.GenreCollection || []
 
   return (
-    <div className="container py-8 space-y-6">
-      <h1 className="text-3xl font-bold">Anime Genres</h1>
+    <div className="container py-8">
+      <h1 className="mb-8 text-3xl font-bold">Anime Genres</h1>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {sortedGenres.map(({ genre, count }) => (
-          <Link key={genre} href={`/anime?genre=${genre}`}>
-            <Card className="hover:bg-accent transition-colors">
-              <CardContent className="p-4 flex justify-between items-center">
-                <span className="font-medium">{genre}</span>
-                <span className="text-sm text-muted-foreground">{count}</span>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <Suspense fallback={<p>Loading genres...</p>}>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {genres.map((genre) => (
+            <Link key={genre} href={`/genres/${encodeURIComponent(genre)}`}>
+              <Card className="transition-all hover:scale-[1.02] hover:shadow-md">
+                <CardContent className="flex h-24 items-center justify-center p-4">
+                  <h2 className="text-center text-lg font-semibold">{genre}</h2>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </Suspense>
     </div>
   )
 }

@@ -1,40 +1,86 @@
-import { Link } from "next-view-transitions";
-import { Button } from "@/components/ui/button";
-import { AnimeGrid } from "@/components/anime-grid";
-// import { ScheduleDay } from "@/components/schedule-day";
-import { getAllAnime } from "@/lib/db";
-// import { getSchedule, getDayOfWeek } from "@/lib/db";
+import { Suspense } from "react"
+import Link from "next/link"
+import { getTrendingAnime, getPopularAnime, getSeasonalAnime } from "@/lib/anilist"
+import AnimeCard from "@/components/anime-card"
+import { LoadingAnimeGrid } from "@/components/loading-anime"
+import { Button } from "@/components/ui/button"
+import { ChevronRight } from "lucide-react"
+import { getCurrentSeason } from "@/lib/utils"
 
 export default async function Home() {
-  // Get featured anime (latest 10)
-  const allAnime = await getAllAnime();
-  const featuredAnime = allAnime.slice(0, 10);
+  // Fetch data in parallel
+  const [trendingData, popularData, seasonalData] = await Promise.all([
+    getTrendingAnime(1, 12),
+    getPopularAnime(1, 12),
+    getSeasonalAnime(getCurrentSeason().season, getCurrentSeason().year, 1, 12),
+  ])
 
-  // Get today's schedule
-  // const today = getDayOfWeek();
-  // const todaySchedule = await getSchedule(today);
+  const trending = trendingData?.data?.Page?.media || []
+  const popular = popularData?.data?.Page?.media || []
+  const seasonal = seasonalData?.data?.Page?.media || []
+  const { season, year } = getCurrentSeason()
 
   return (
-    <div className="container h-full py-8 space-y-12">
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold">Featured</h2>
-          <Button asChild variant="ghost">
-            <Link href="/anime">View All</Link>
-          </Button>
+    <div className="container py-8">
+      <section className="mb-12">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Trending Now</h2>
+          <Link href="/trending">
+            <Button variant="ghost" size="sm" className="gap-1">
+              View All <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
-        <AnimeGrid animeList={featuredAnime} />
+
+        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {trending.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </Suspense>
       </section>
-      {/* <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" /> */}
-      {/* <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold">Today&apos;s Schedule</h2>
-          <Button asChild variant="ghost">
-            <Link href="/schedule">Full Schedule</Link>
-          </Button>
+
+      <section className="mb-12">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">
+            {season.charAt(0) + season.slice(1).toLowerCase()} {year} Anime
+          </h2>
+          <Link href={`/seasonal?season=${season.toLowerCase()}&year=${year}`}>
+            <Button variant="ghost" size="sm" className="gap-1">
+              View All <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
-        <ScheduleDay day={today} animeList={todaySchedule} />
-      </section> */}
+
+        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {seasonal.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
+
+      <section>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">All-Time Popular</h2>
+          <Link href="/popular">
+            <Button variant="ghost" size="sm" className="gap-1">
+              View All <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {popular.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
     </div>
-  );
+  )
 }
+
