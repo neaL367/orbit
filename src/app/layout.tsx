@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
+import { ViewTransitions } from "next-view-transitions";
 // import Footer from "@/components/footer";
 
 const geistSans = Geist({
@@ -22,14 +23,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
-      <body className={geistSans.className}>
-        <div className="flex min-h-screen flex-col items-center">
-          <Header />
-          <main className="flex-1">{children}</main>
-          {/* <Footer /> */}
-        </div>
-      </body>
-    </html>
+    <ViewTransitions>
+      <html lang="en" suppressHydrationWarning className="dark">
+        <body className={geistSans.className}>
+          <div className="flex min-h-screen flex-col items-center">
+            <Header />
+            <main className="w-full">{children}</main>
+            {/* <Footer /> */}
+          </div>
+        </body>
+      </html>
+    </ViewTransitions>
   );
 }

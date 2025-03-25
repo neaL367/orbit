@@ -1,366 +1,311 @@
 import { AnilistResponse, GenreResponse, MediaResponse, PageResponse } from "@/types"
 
 // GraphQL endpoint for AniList API
-const ANILIST_API = "https://graphql.anilist.co"
+const ANILIST_API = "https://graphql.anilist.co" as const
 
-// Define a type for GraphQL variables
-type GraphQLVariables = Record<string, unknown>
+// Define a type for GraphQL variables with stricter typing
+type GraphQLVariables = Record<string, string | number | boolean | null | undefined>
 
-// Function to fetch data from AniList API without Redis caching
-export async function fetchFromAnilist<T>(
-  query: string,
+// Shared query fields to reduce repetition
+const BASE_MEDIA_FIELDS = `
+  id
+  title {
+    romaji
+    english
+    native
+  }
+  description
+  coverImage {
+    large
+    medium
+  }
+  bannerImage
+  format
+  episodes
+  duration
+  status
+  genres
+  averageScore
+  popularity
+  season
+  seasonYear
+`
+
+// Centralized error handling and fetch configuration
+async function apiRequest<T>(
+  query: string, 
   variables: GraphQLVariables = {},
+  options: RequestInit = {}
 ): Promise<AnilistResponse<T>> {
   try {
-    // Fetch directly from API with revalidation set to 1 hour
     const response = await fetch(ANILIST_API, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
+        "Accept": "application/json",
       },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      next: { revalidate: 3600 },
+      body: JSON.stringify({ query, variables }),
+      next: { revalidate: 3600 }, // 1-hour cache
+      ...options
     })
 
     if (!response.ok) {
-      throw new Error(`AniList API error: ${response.status}`)
+      throw new Error(`AniList API error: ${response.status} ${response.statusText}`)
     }
 
-    const data = (await response.json()) as AnilistResponse<T>
+    const data = await response.json() as AnilistResponse<T>
+    
+    // Basic validation
+    if (!data || !data.data) {
+      throw new Error("Invalid API response")
+    }
+
     return data
   } catch (error) {
-    console.error("Error fetching from AniList:", error)
+    console.error("AniList API request failed:", error)
     throw error
   }
 }
 
-// Query to get trending anime
-export async function getTrendingAnime(page = 1, perPage = 20): Promise<AnilistResponse<PageResponse>> {
-  const query = `
-    query ($page: Int, $perPage: Int) {
-      Page(page: $page, perPage: $perPage) {
-        pageInfo {
-          total
-          currentPage
-          lastPage
-          hasNextPage
-          perPage
-        }
-        media(sort: TRENDING_DESC, type: ANIME) {
-          id
-          title {
-            romaji
-            english
-            native
-          }
-          description
-          coverImage {
-            large
-            medium
-          }
-          bannerImage
-          format
-          episodes
-          duration
-          status
-          genres
-          averageScore
-          popularity
-          season
-          seasonYear
-        }
-      }
-    }
-  `
-  return fetchFromAnilist<PageResponse>(query, { page, perPage })
+// Pagination helper type
+interface PaginationParams {
+  page?: number
+  perPage?: number
 }
 
-// Query to get popular anime
-export async function getPopularAnime(page = 1, perPage = 20): Promise<AnilistResponse<PageResponse>> {
-  const query = `
-    query ($page: Int, $perPage: Int) {
-      Page(page: $page, perPage: $perPage) {
-        pageInfo {
-          total
-          currentPage
-          lastPage
-          hasNextPage
-          perPage
-        }
-        media(sort: POPULARITY_DESC, type: ANIME) {
-          id
-          title {
-            romaji
-            english
-            native
+export const AnilistQueries = {
+  // Trending anime with more robust typing
+  async getTrending({ 
+    page = 1, 
+    perPage = 20 
+  }: PaginationParams = {}): Promise<AnilistResponse<PageResponse>> {
+    const query = `
+      query ($page: Int, $perPage: Int) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
           }
-          description
-          coverImage {
-            large
-            medium
+          media(sort: TRENDING_DESC, type: ANIME) {
+            ${BASE_MEDIA_FIELDS}
           }
-          bannerImage
-          format
-          episodes
-          duration
-          status
-          genres
-          averageScore
-          popularity
-          season
-          seasonYear
         }
       }
-    }
-  `
-  return fetchFromAnilist<PageResponse>(query, { page, perPage })
-}
+    `
+    return apiRequest<PageResponse>(query, { page, perPage })
+  },
 
-// Query to get seasonal anime
-export async function getSeasonalAnime(
-  season: string,
-  year: number,
-  page = 1,
-  perPage = 20,
-): Promise<AnilistResponse<PageResponse>> {
-  const query = `
-    query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int) {
-      Page(page: $page, perPage: $perPage) {
-        pageInfo {
-          total
-          currentPage
-          lastPage
-          hasNextPage
-          perPage
-        }
-        media(season: $season, seasonYear: $seasonYear, type: ANIME, sort: POPULARITY_DESC) {
-          id
-          title {
-            romaji
-            english
-            native
+  // Popular anime with consistent structure
+  async getPopular({ 
+    page = 1, 
+    perPage = 20 
+  }: PaginationParams = {}): Promise<AnilistResponse<PageResponse>> {
+    const query = `
+      query ($page: Int, $perPage: Int) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
           }
-          description
-          coverImage {
-            large
-            medium
+          media(sort: POPULARITY_DESC, type: ANIME) {
+            ${BASE_MEDIA_FIELDS}
           }
-          bannerImage
-          format
-          episodes
-          duration
-          status
-          genres
-          averageScore
-          popularity
-          season
-          seasonYear
         }
       }
-    }
-  `
-  return fetchFromAnilist<PageResponse>(query, { page, perPage, season: season.toUpperCase(), seasonYear: year })
-}
+    `
+    return apiRequest<PageResponse>(query, { page, perPage })
+  },
 
-// Query to search anime
-export async function searchAnime(search: string, page = 1, perPage = 20): Promise<AnilistResponse<PageResponse>> {
-  const query = `
-    query ($page: Int, $perPage: Int, $search: String) {
-      Page(page: $page, perPage: $perPage) {
-        pageInfo {
-          total
-          currentPage
-          lastPage
-          hasNextPage
-          perPage
-        }
-        media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
-          id
-          title {
-            romaji
-            english
-            native
+  // Seasonal anime with type-safe parameters
+  async getSeasonal({ 
+    season, 
+    year, 
+    page = 1, 
+    perPage = 20 
+  }: {
+    season: string, 
+    year: number
+  } & PaginationParams): Promise<AnilistResponse<PageResponse>> {
+    const query = `
+      query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
           }
-          description
-          coverImage {
-            large
-            medium
+          media(season: $season, seasonYear: $seasonYear, type: ANIME, sort: POPULARITY_DESC) {
+            ${BASE_MEDIA_FIELDS}
           }
-          bannerImage
-          format
-          episodes
-          duration
-          status
-          genres
-          averageScore
-          popularity
-          season
-          seasonYear
         }
       }
-    }
-  `
-  return fetchFromAnilist<PageResponse>(query, { page, perPage, search })
-}
+    `
+    return apiRequest<PageResponse>(query, { 
+      page, 
+      perPage, 
+      season: season.toUpperCase(), 
+      seasonYear: year 
+    })
+  },
 
-// Query to get anime by ID
-export async function getAnimeById(id: number): Promise<AnilistResponse<MediaResponse>> {
-  const query = `
-    query ($id: Int) {
-      Media(id: $id, type: ANIME) {
-        id
-        title {
-          romaji
-          english
-          native
+  // Search with improved type safety
+  async search({ 
+    query: searchTerm, 
+    page = 1, 
+    perPage = 20 
+  }: { 
+    query: string 
+  } & PaginationParams): Promise<AnilistResponse<PageResponse>> {
+    const searchQuery = `
+      query ($page: Int, $perPage: Int, $search: String) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
+          }
+          media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+            ${BASE_MEDIA_FIELDS}
+          }
         }
-        description
-        coverImage {
-          large
-          extraLarge
-        }
-        bannerImage
-        format
-        episodes
-        duration
-        status
-        genres
-        tags {
-          id
-          name
-          category
-        }
-        averageScore
-        popularity
-        season
-        seasonYear
-        startDate {
-          year
-          month
-          day
-        }
-        endDate {
-          year
-          month
-          day
-        }
-        studios {
-          nodes {
+      }
+    `
+    return apiRequest<PageResponse>(searchQuery, { page, perPage, search: searchTerm })
+  },
+
+  // Detailed anime by ID with comprehensive data
+  async getById(id: number): Promise<AnilistResponse<MediaResponse>> {
+    const query = `
+      query ($id: Int) {
+        Media(id: $id, type: ANIME) {
+          ${BASE_MEDIA_FIELDS}
+          tags {
             id
             name
+            category
           }
-        }
-        characters(sort: ROLE, role: MAIN, page: 1, perPage: 8) {
-          nodes {
+          startDate {
+            year
+            month
+            day
+          }
+          endDate {
+            year
+            month
+            day
+          }
+          studios {
+            nodes {
+              id
+              name
+            }
+          }
+          characters(sort: ROLE, role: MAIN, page: 1, perPage: 8) {
+            nodes {
+              id
+              name {
+                full
+              }
+              image {
+                medium
+                large
+              }
+              gender
+              age
+            }
+          }
+          relations {
+            edges {
+              relationType
+              node {
+                id
+                title {
+                  romaji
+                  english
+                }
+                format
+                coverImage {
+                  medium
+                }
+              }
+            }
+          }
+          recommendations(page: 1, perPage: 8) {
+            nodes {
+              mediaRecommendation {
+                id
+                title {
+                  romaji
+                  english
+                }
+                coverImage {
+                  medium
+                }
+              }
+            }
+          }
+          trailer {
             id
-            name {
-              full
-            }
-            image {
-              medium
-              large
-            }
-            gender
-            age
+            site
+            thumbnail
           }
-        }
-        relations {
-          edges {
-            relationType
-            node {
-              id
-              title {
-                romaji
-                english
-              }
-              format
-              coverImage {
-                medium
-              }
-            }
+          externalLinks {
+            id
+            url
+            site
           }
-        }
-        recommendations(page: 1, perPage: 8) {
-          nodes {
-            mediaRecommendation {
-              id
-              title {
-                romaji
-                english
-              }
-              coverImage {
-                medium
-              }
-            }
-          }
-        }
-        trailer {
-          id
-          site
-          thumbnail
-        }
-        externalLinks {
-          id
-          url
-          site
         }
       }
-    }
-  `
-  return fetchFromAnilist<MediaResponse>(query, { id })
-}
+    `
+    return apiRequest<MediaResponse>(query, { id })
+  },
 
-// Query to get anime by genre
-export async function getAnimeByGenre(genre: string, page = 1, perPage = 20): Promise<AnilistResponse<PageResponse>> {
-  const query = `
-    query ($page: Int, $perPage: Int, $genre: String) {
-      Page(page: $page, perPage: $perPage) {
-        pageInfo {
-          total
-          currentPage
-          lastPage
-          hasNextPage
-          perPage
-        }
-        media(genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
-          id
-          title {
-            romaji
-            english
-            native
+  // Genre-based anime fetching
+  async getByGenre({ 
+    genre, 
+    page = 1, 
+    perPage = 20 
+  }: { 
+    genre: string 
+  } & PaginationParams): Promise<AnilistResponse<PageResponse>> {
+    const query = `
+      query ($page: Int, $perPage: Int, $genre: String) {
+        Page(page: $page, perPage: $perPage) {
+          pageInfo {
+            total
+            currentPage
+            lastPage
+            hasNextPage
+            perPage
           }
-          description
-          coverImage {
-            large
-            medium
+          media(genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
+            ${BASE_MEDIA_FIELDS}
           }
-          bannerImage
-          format
-          episodes
-          duration
-          status
-          genres
-          averageScore
-          popularity
-          season
-          seasonYear
         }
       }
-    }
-  `
-  return fetchFromAnilist<PageResponse>(query, { page, perPage, genre })
+    `
+    return apiRequest<PageResponse>(query, { page, perPage, genre })
+  },
+
+  // Simple genres retrieval
+  async getGenres(): Promise<AnilistResponse<GenreResponse>> {
+    const query = `
+      query {
+        GenreCollection
+      }
+    `
+    return apiRequest<GenreResponse>(query)
+  }
 }
 
-// Get all available genres
-export async function getGenres(): Promise<AnilistResponse<GenreResponse>> {
-  const query = `
-    query {
-      GenreCollection
-    }
-  `
-  return fetchFromAnilist<GenreResponse>(query)
-}
+export default AnilistQueries

@@ -1,49 +1,65 @@
-import { Suspense } from "react"
-import { getSeasonalAnime } from "@/lib/anilist"
-import AnimeCard from "@/components/anime-card"
-import Pagination from "@/components/pagination"
-import { LoadingAnimeGrid } from "@/components/loading-anime"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getCurrentSeason } from "@/lib/utils"
+import { Suspense } from "react";
+import AnimeCard from "@/components/anime-card";
+import Pagination from "@/components/pagination";
+import { LoadingAnimeGrid } from "@/components/loading-anime";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getCurrentSeason } from "@/lib/utils";
+import AnilistQueries from "@/lib/anilist";
 
 interface SeasonalPageProps {
   searchParams: Promise<{
-    season?: string
-    year?: string
-    page?: string
-  }>
+    season?: string;
+    year?: string;
+    page?: string;
+  }>;
 }
 
-export default async function SeasonalPage( props: SeasonalPageProps) {
-  const searchParams = await props.searchParams
-  const currentSeason = getCurrentSeason()
-  const season = (searchParams.season || currentSeason.season).toUpperCase()
-  const year = Number.parseInt(searchParams.year || currentSeason.year.toString(), 10)
-  const page = Number.parseInt(searchParams.page || "1", 10)
-  const perPage = 24
+export default async function SeasonalPage(props: SeasonalPageProps) {
+  const searchParams = await props.searchParams;
+  const currentSeason = getCurrentSeason();
+  const season = (searchParams.season || currentSeason.season).toUpperCase();
+  const year = Number.parseInt(
+    searchParams.year || currentSeason.year.toString(),
+    10
+  );
+  const page = Number.parseInt(searchParams.page || "1", 10);
+  const perPage = 24;
 
-  const data = await getSeasonalAnime(season, year, page, perPage)
-  const animeList = data?.data?.Page?.media || []
+  const data = await AnilistQueries.getSeasonal({
+    season,
+    year,
+    page,
+    perPage,
+  });
+  const animeList = data?.data?.Page?.media || [];
   const pageInfo = data?.data?.Page?.pageInfo || {
     currentPage: 1,
     lastPage: 1,
     hasNextPage: false,
     total: 0,
-  }
+  };
 
   // Generate years for dropdown (5 years back, 2 years forward)
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 
   // Format season for display
-  const formattedSeason = season.charAt(0) + season.slice(1).toLowerCase()
+  const formattedSeason = season.charAt(0) + season.slice(1).toLowerCase();
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="mb-2 text-3xl font-bold">
         {formattedSeason} {year} Anime
       </h1>
-      <p className="mb-8 text-muted-foreground">Found {pageInfo.total || 0} anime this season</p>
+      <p className="mb-8 text-muted-foreground">
+        Found {pageInfo.total || 0} anime this season
+      </p>
 
       <div className="mb-8 flex flex-wrap gap-4">
         <div>
@@ -92,6 +108,5 @@ export default async function SeasonalPage( props: SeasonalPageProps) {
         hasNextPage={pageInfo.hasNextPage}
       />
     </div>
-  )
+  );
 }
-

@@ -1,8 +1,8 @@
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatStatus } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+// import { formatStatus } from "@/lib/utils";
 
 interface AnimeCardProps {
   anime: {
@@ -29,8 +29,8 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
 
   return (
     <Link href={`/anime/${anime.id}`}>
-      <Card className="h-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-md">
-        <div className="relative aspect-[3/3] w-full overflow-hidden ">
+      <Card className="h-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-md bg-transparent">
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
           <Image
             src={anime.coverImage.large || anime.coverImage.medium || ""}
             alt={title}
@@ -44,15 +44,11 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
               {anime.averageScore}%
             </div>
           )}
-          <div className="relative h-full p-3 pt-6 bg-gradient-to-t from-black/80 to-transparent">
-            <div className="absolute bottom-0 left-0 right-0 p-2.5">
-              <h3 className="line-clamp-2 text-sm font-bold text-white">
-                {title}
-              </h3>
-            </div>
-          </div>
         </div>
-        <CardContent className="p-3">
+        <div className="mt-2.5">
+          <h3 className="line-clamp-2 text-sm text-white ">{title}</h3>
+        </div>
+        {/* <CardContent className="p-3 hidden md:flex">
           <div className="flex flex-wrap gap-1">
             {anime.genres?.slice(0, 2).map((genre) => (
               <Badge key={genre} variant="secondary" className="text-xs">
@@ -69,7 +65,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
               </Badge>
             )}
           </div>
-        </CardContent>
+        </CardContent> */}
       </Card>
     </Link>
   );

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getAnimeByGenre } from "@/lib/anilist";
+import AnilistQueries from "@/lib/anilist";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
@@ -21,7 +21,7 @@ export default async function GenrePage(props: GenrePageProps) {
   const page = Number.parseInt(searchParams.page || "1", 10);
   const perPage = 24;
 
-  const data = await getAnimeByGenre(genre, page, perPage);
+  const data = await AnilistQueries.getByGenre({ genre, page, perPage });
   const animeList = data?.data?.Page?.media || [];
 
   if (animeList.length === 0 && page === 1) {
@@ -36,7 +36,7 @@ export default async function GenrePage(props: GenrePageProps) {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="mb-2 text-3xl font-bold">{genre} Anime</h1>
       <p className="mb-8 text-muted-foreground">
         Found {pageInfo.total || 0} anime in this genre

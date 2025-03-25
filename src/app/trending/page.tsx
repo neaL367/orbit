@@ -1,8 +1,8 @@
 import { Suspense } from "react";
-import { getTrendingAnime } from "@/lib/anilist";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
+import AnilistQueries from "@/lib/anilist";
 
 interface TrendingPageProps {
   searchParams: Promise<{
@@ -15,7 +15,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
   const page = Number.parseInt(searchParams.page || "1", 10);
   const perPage = 24;
 
-  const data = await getTrendingAnime(page, perPage);
+  const data = await AnilistQueries.getTrending({ page, perPage });
   const animeList = data?.data?.Page?.media || [];
   const pageInfo = data?.data?.Page?.pageInfo || {
     currentPage: 1,
@@ -24,7 +24,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <h1 className="mb-8 text-3xl font-bold">Trending Anime</h1>
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>

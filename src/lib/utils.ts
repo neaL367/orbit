@@ -20,7 +20,6 @@ export function getDayOfWeek(): string {
   return days[new Date().getDay()]
 }
 
-// Helper function to get current season
 export function getCurrentSeason(): { season: string; year: number } {
   const date = new Date()
   const month = date.getMonth() + 1
@@ -40,7 +39,6 @@ export function getCurrentSeason(): { season: string; year: number } {
   return { season, year }
 }
 
-// Helper function to format anime status
 export function formatStatus(status: string): string {
   switch (status) {
       case "FINISHED":
@@ -56,7 +54,6 @@ export function formatStatus(status: string): string {
   }
 }
 
-// Helper function to format anime format
 export function formatFormat(format: string): string {
   switch (format) {
       case "TV":
