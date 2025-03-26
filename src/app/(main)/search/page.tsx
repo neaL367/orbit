@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import AnilistQueries from "@/lib/anilist";
+import { SearchQueries } from "@/lib/anilist/queries/search";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -18,7 +18,7 @@ export default async function SearchPage(props: SearchPageProps) {
   const perPage = 24;
 
   const data = query
-    ? await AnilistQueries.search({ query, page, perPage })
+    ? await SearchQueries.search({ query, page, perPage })
     : null;
   const animeList = data?.data?.Page?.media || [];
   const pageInfo = data?.data?.Page?.pageInfo || {

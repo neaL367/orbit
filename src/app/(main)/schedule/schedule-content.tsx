@@ -6,10 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Clock, Calendar } from "lucide-react"
 import CountdownBanner from "./countdown-banner"
-import AnilistQueries from "@/lib/anilist"
 import Image from "next/image"
-import type { AiringSchedule, AnimeMedia } from "@/types"
+import type { AiringSchedule, AnimeMedia } from "@/lib/anilist/utils/types"
 import NSFWToggle from "./nsfw-toggle"
+import { ScheduleQueries } from "@/lib/anilist/queries/schedule"
 
 interface ScheduleItem extends AnimeMedia {
   airingAt: number
@@ -78,7 +78,7 @@ export default function ScheduleContent() {
         })
 
         // Fetch airing schedule for the current week
-        const response = await AnilistQueries.getAiringSchedule({
+        const response = await ScheduleQueries.getAiringSchedule({
           perPage: 50,
         })
 
@@ -124,7 +124,7 @@ export default function ScheduleContent() {
         setWeeklySchedule(initialSchedule)
 
         // Fetch upcoming premieres (first episodes airing soon)
-        const premieresResponse = await AnilistQueries.getUpcomingPremieres({
+        const premieresResponse = await ScheduleQueries.getUpcomingPremieres({
           perPage: 10,
         })
 

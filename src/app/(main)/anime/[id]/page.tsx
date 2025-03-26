@@ -14,10 +14,10 @@ import {
   Users,
   PlayCircle,
 } from "lucide-react";
-import { formatFormat, formatStatus } from "@/lib/utils";
-import AnilistQueries from "@/lib/anilist";
+import { GenreQueries } from "@/lib/anilist/queries/genre";
+import { formatFormat, formatStatus } from "@/lib/anilist/utils/formatters";
 
-export const experimental_ppr = true
+export const experimental_ppr = true;
 interface AnimePageProps {
   params: Promise<{
     id: string;
@@ -33,7 +33,7 @@ export default async function AnimePage(props: AnimePageProps) {
     notFound();
   }
 
-  const data = await AnilistQueries.getById(id);
+  const data = await GenreQueries.getById(id);
   const anime = data?.data?.Media;
 
   if (!anime) {

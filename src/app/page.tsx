@@ -4,16 +4,16 @@ import AnimeCard from "@/components/anime-card";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { getCurrentSeason } from "@/lib/utils";
-import AnilistQueries from "@/lib/anilist";
+import { MediaQueries } from "@/lib/anilist/queries/media";
+import { getCurrentSeason } from "@/lib/anilist/utils/formatters";
 
-export const experimental_ppr = true
+export const experimental_ppr = true;
 
 export default async function Home() {
   const [trendingData, popularData, seasonalData] = await Promise.all([
-    AnilistQueries.getTrending({ page: 1, perPage: 12 }),
-    AnilistQueries.getPopular({ page: 1, perPage: 12 }),
-    AnilistQueries.getSeasonal({
+    MediaQueries.getTrending({ page: 1, perPage: 12 }),
+    MediaQueries.getPopular({ page: 1, perPage: 12 }),
+    MediaQueries.getSeasonal({
       season: getCurrentSeason().season,
       year: getCurrentSeason().year,
       page: 1,

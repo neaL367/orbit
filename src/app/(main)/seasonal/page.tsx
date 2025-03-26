@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getCurrentSeason } from "@/lib/utils";
-import AnilistQueries from "@/lib/anilist";
+import { MediaQueries } from "@/lib/anilist/queries/media";
+import { getCurrentSeason } from "@/lib/anilist/utils/formatters";
 
 interface SeasonalPageProps {
   searchParams: Promise<{
@@ -31,7 +31,7 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
   const page = Number.parseInt(searchParams.page || "1", 10);
   const perPage = 24;
 
-  const data = await AnilistQueries.getSeasonal({
+  const data = await MediaQueries.getSeasonal({
     season,
     year,
     page,
