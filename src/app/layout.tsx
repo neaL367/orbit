@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers"; 
 import { Geist } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import "./globals.css";
@@ -25,28 +24,25 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // If you want to persist sidebar open/close state across reloads:
-  const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
-
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning className="dark">
         <body className={geistSans.className}>
-          <SidebarProvider defaultOpen={defaultOpen}>
+          <SidebarProvider>
             {/* Page Layout: sidebar on the left, main content to the right */}
             <div className="flex min-h-screen w-full">
               <AppSidebar />
               {/* Right section: top Header + main content */}
               <div className="flex flex-col w-full">
                 {/* Optional: a button to toggle sidebar (mobile) */}
-                {/* <SidebarTrigger className="p-6" /> */}
 
                 {/* Your existing top search bar / nav */}
                 <Header />
 
                 {/* Main content area */}
-                <main className="mx-8 md:mx-16 px-4 max-w-full">{children}</main>
+                <main className="mx-4 md:mx-16 px-4 max-w-full">
+                  {children}
+                </main>
               </div>
             </div>
           </SidebarProvider>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,7 +21,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full flex justify-center items-center border-b bg-sidebar backdrop-blur supports-[backdrop-filter]:bg-sidebar/90">
-      <div className="container md:mx-16 max-w-8xl flex px-4 h-20 items-center justify-between">
+      <div className="w-full flex px-4 h-20  items-center justify-start">
         {/* <div className="flex items-center gap-6">
           <Button
             variant="ghost"
@@ -66,6 +67,7 @@ export default function Header() {
             </Link>
           </nav>
         </div> */}
+        <SidebarTrigger className="p-7 mr-2.5" />
 
         <div className="flex items-center gap-4">
           <form onSubmit={handleSearch} className="relative">
