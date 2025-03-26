@@ -53,7 +53,7 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
   const formattedSeason = season.charAt(0) + season.slice(1).toLowerCase();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="py-8">
       <h1 className="mb-2 text-3xl font-bold">
         {formattedSeason} {year} Anime
       </h1>

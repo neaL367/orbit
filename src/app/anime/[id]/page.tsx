@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { Link } from "next-view-transitions";
 import { notFound } from "next/navigation";
-import AnilistQueries from "@/lib/anilist";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,13 +15,13 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { formatFormat, formatStatus } from "@/lib/utils";
+import AnilistQueries from "@/lib/anilist";
 
 interface AnimePageProps {
   params: Promise<{
     id: string;
   }>;
 }
-
 
 export default async function AnimePage(props: AnimePageProps) {
   const params = await props.params;
@@ -72,7 +71,7 @@ export default async function AnimePage(props: AnimePageProps) {
 
   return (
     <Suspense fallback={<LoadingAnimeDetails />}>
-      <div className="container mx-auto px-4 pb-8 max-w-7xl">
+      <div className="py-8">
         {/* Banner Image */}
         {anime.bannerImage && (
           <div className="relative w-full h-[150px] sm:h-[200px] overflow-hidden mb-12">

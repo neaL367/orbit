@@ -90,7 +90,7 @@ interface ExternalLink {
     site: string
 }
 
-interface AnimeMedia {
+export interface AnimeMedia {
     id: number
     title: AnimeTitle
     description: string | null
@@ -122,6 +122,7 @@ interface AnimeMedia {
     tags?: Tag[] | null
     trailer?: Trailer | null
     externalLinks?: ExternalLink[] | null
+    isAdult?: boolean;
 }
 
 export interface PageResponse {
@@ -141,4 +142,19 @@ export interface GenreResponse {
 
 export interface AnilistResponse<T> {
     data: T
+}
+
+export interface AiringSchedule {
+    id: number
+    airingAt: number
+    timeUntilAiring: number
+    episode: number
+    media: AnimeMedia
+}
+
+export interface SchedulePageResponse {
+    Page: {
+        pageInfo: PageInfo
+        airingSchedules: AiringSchedule[]
+    }
 }

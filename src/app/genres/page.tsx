@@ -1,14 +1,14 @@
 import { Suspense } from "react"
 import { Link } from "next-view-transitions"
 import { Card, CardContent } from "@/components/ui/card"
-import AnilistQueries from "@/lib/anilist"
+import AnilistQueries from "@/lib/anilist";
 
 export default async function GenresPage() {
   const data = await AnilistQueries.getGenres()
   const genres = data?.data?.GenreCollection || []
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="py-8">
       <h1 className="mb-8 text-3xl font-bold">Anime Genres</h1>
 
       <Suspense fallback={<p>Loading genres...</p>}>

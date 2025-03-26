@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import AnilistQueries from "@/lib/anilist";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
+import AnilistQueries from "@/lib/anilist";
 
 interface GenrePageProps {
   params: Promise<{
@@ -36,7 +36,7 @@ export default async function GenrePage(props: GenrePageProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="py-8">
       <h1 className="mb-2 text-3xl font-bold">{genre} Anime</h1>
       <p className="mb-8 text-muted-foreground">
         Found {pageInfo.total || 0} anime in this genre

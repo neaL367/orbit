@@ -24,7 +24,7 @@ export default async function TrendingPage(props: TrendingPageProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="py-8">
       <h1 className="mb-8 text-3xl font-bold">Trending Anime</h1>
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
