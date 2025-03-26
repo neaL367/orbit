@@ -29,17 +29,10 @@ export default async function RootLayout({
       <html lang="en" suppressHydrationWarning className="dark">
         <body className={geistSans.className}>
           <SidebarProvider>
-            {/* Page Layout: sidebar on the left, main content to the right */}
             <div className="flex min-h-screen w-full">
               <AppSidebar />
-              {/* Right section: top Header + main content */}
               <div className="flex flex-col w-full">
-                {/* Optional: a button to toggle sidebar (mobile) */}
-
-                {/* Your existing top search bar / nav */}
                 <Header />
-
-                {/* Main content area */}
                 <main className="mx-4 md:mx-16 px-4 max-w-full">
                   {children}
                 </main>
