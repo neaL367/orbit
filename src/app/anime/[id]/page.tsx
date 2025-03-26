@@ -17,6 +17,7 @@ import {
 import { formatFormat, formatStatus } from "@/lib/utils";
 import AnilistQueries from "@/lib/anilist";
 
+export const experimental_ppr = true
 interface AnimePageProps {
   params: Promise<{
     id: string;

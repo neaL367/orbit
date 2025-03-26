@@ -5,6 +5,7 @@ import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import AnilistQueries from "@/lib/anilist";
 
+export const experimental_ppr = true
 interface GenrePageProps {
   params: Promise<{
     genre: string;

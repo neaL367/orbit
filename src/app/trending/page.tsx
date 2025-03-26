@@ -4,6 +4,7 @@ import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import AnilistQueries from "@/lib/anilist";
 
+
 interface TrendingPageProps {
   searchParams: Promise<{
     page?: string;

@@ -7,6 +7,8 @@ import { ChevronRight } from "lucide-react";
 import { getCurrentSeason } from "@/lib/utils";
 import AnilistQueries from "@/lib/anilist";
 
+export const experimental_ppr = true
+
 export default async function Home() {
   const [trendingData, popularData, seasonalData] = await Promise.all([
     AnilistQueries.getTrending({ page: 1, perPage: 12 }),
