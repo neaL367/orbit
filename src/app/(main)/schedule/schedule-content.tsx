@@ -257,7 +257,7 @@ export default function ScheduleContent() {
             <TabsTrigger
               key={day.value}
               value={day.value}
-              className={`hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all relative ${
+              className={`hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary border-0 hover:to-purple-400 hover:text-white transition-all relative ${
                 day.isToday ? "font-bold" : ""
               }`}
             >
@@ -313,7 +313,7 @@ export default function ScheduleContent() {
                               <Image
                                 src={anime.coverImage.medium || ""}
                                 alt={anime.title.english || anime.title.romaji}
-                                className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300"
+                                className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 brightness-85"
                                 fill
                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                 priority

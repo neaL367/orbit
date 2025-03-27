@@ -32,7 +32,7 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                     src={character.image.medium || ""}
                     alt={character.name.full}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300 brightness-85"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                 </div>
@@ -61,7 +61,7 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                       src={relation.node.coverImage.medium || ""}
                       alt={relation.node.title.english || relation.node.title.romaji}
                       fill
-                      className="object-cover"
+                      className="object-cover brightness-85"
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                   </div>
@@ -93,7 +93,7 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                       src={rec.mediaRecommendation.coverImage.medium || ""}
                       alt={rec.mediaRecommendation.title.english || rec.mediaRecommendation.title.romaji}
                       fill
-                      className="object-cover"
+                      className="object-cover brightness-85"
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                   </div>

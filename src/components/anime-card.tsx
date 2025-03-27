@@ -44,7 +44,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
+            className="object-cover brightness-85"
             priority
           />
 

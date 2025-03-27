@@ -31,7 +31,7 @@ export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
                 alt={title}
                 fill
                 priority
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className="object-cover group-hover:scale-105 transition-transform duration-300 brightness-85"
                 sizes="(max-width: 640px) 100vw, 300px"
               />
             </div>

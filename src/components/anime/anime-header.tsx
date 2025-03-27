@@ -22,7 +22,7 @@ export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
             <Link key={genre} href={`/genres/${encodeURIComponent(genre)}`}>
               <Badge
                 variant="secondary"
-                className="text-xs rounded-full hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all"
+                className="text-xs rounded-full hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all border-0"
               >
                 {genre}
               </Badge>
