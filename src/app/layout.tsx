@@ -37,7 +37,7 @@ export default async function RootLayout({
             <SidebarProvider defaultOpen={defaultOpen}>
               <div className="flex min-h-screen w-full">
                 <AppSidebar />
-                <div className="flex flex-col w-full  dark:bg-gradient-to-br from-primary/5 to-purple-900/5">
+                <div className="flex flex-col w-full  dark:bg-zinc-950">
                   <Header />
                   <main className="mx-4 md:mx-16 px-4 max-w-full">
                     {children}

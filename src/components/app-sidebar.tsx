@@ -56,12 +56,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className="border-r border-gray-800"
+      className="border-r border-zinc-800"
       collapsible="icon"
-      variant="inset"
+      // variant="inset"
     >
       {/* Sidebar Header */}
-      <SidebarHeader className="py-6 bg-gradient-to-r from-primary/5 to-purple-400/5 transition-all">
+      <SidebarHeader className="py-6 bg-zinc-950 transition-all">
         <div className="flex items-center justify-center gap-2 px-4 overflow-hidden">
           <Orbit className="group-data-[collapsible=icon]:ml-2 h-6 w-6 text-white shrink-0" />
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent truncate group-data-[collapsible=icon]:opacity-0 transition-opacity duration-200">
@@ -71,7 +71,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Sidebar Content */}
-      <SidebarContent className="bg-gradient-to-r from-primary/5 to-purple-400/5">
+      <SidebarContent className="bg-zinc-950">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-gray-400 px-6 mb-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
             Menu
@@ -90,8 +90,8 @@ export function AppSidebar() {
                         href={item.url}
                         className={`group flex items-center gap-3 group-data-[collapsible=icon]:ml-0 ml-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 ${
                           isActive
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-purple-400"
+                            ? "bg-primary/10 text-primary font-medium "
+                            : "text-gray-300  hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-purple-400"
                         }`}
                       >
                         <item.icon
@@ -132,7 +132,7 @@ export function AppSidebar() {
                 <Link
                   key={genre}
                   href={`/genres/${genre}`}
-                  className="px-2.5 py-1 text-xs rounded-full bg-gray-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+                  className="px-2.5 py-1 text-xs rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
                 >
                   {genre}
                 </Link>
@@ -143,7 +143,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Sidebar Footer */}
-      <SidebarFooter className="border-t border-gray-800 bg-gradient-to-r from-primary/5 to-purple-400/5 transition-all">
+      <SidebarFooter className="border-t border-zincbg-zinc-800 bg-zinc-950 transition-all">
         <div className="px-6 py-4 text-xs text-gray-400 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:text-center">
           <p className="truncate group-data-[collapsible=icon]:opacity-0">
             © 2025 Orbit

@@ -9,7 +9,7 @@ export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-all rounded-lg">
       <CardContent className="p-0">
-        <div className="flex group-hover:bg-gradient-to-r group-hover:from-primary/10 group-hover:to-purple-400/10 transition-all">
+        <div className="flex group-hover:bg-gradient-to-r group-hover:from-zinc-900/10 group-hover:to-zinc-400/10 transition-all">
           <div className="w-24 h-32 shrink-0 relative overflow-hidden">
             <Image
               src={anime.coverImage.medium || ""}

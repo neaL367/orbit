@@ -35,7 +35,7 @@ export default function Header() {
   return (
     <header
       id="main-header"
-      className="sticky top-0 z-50 w-full flex justify-center items-center bg-gradient-to-r from-primary/5 to-purple-400/5 backdrop-blur-xl  transition-all duration-300 hover:shadow-md"
+      className="sticky top-0 z-50 w-full flex justify-center items-center bg-zinc-950/50 backdrop-blur-xl  transition-all duration-300 hover:shadow-md"
     >
       <div className="w-full flex px-4 h-20 items-center justify-start">
         <SidebarTrigger className="p-7 mr-2.5 hover:cursor-pointer rounded-lg transition-all" />

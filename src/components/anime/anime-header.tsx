@@ -25,12 +25,12 @@ export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
         >
           {formatStatus(anime.status)}
         </Badge>
-        <Badge variant="outline" className="text-xs rounded-full">
+        <Badge variant="outline" className="text-xs rounded-full bg-zinc-800">
           {formatFormat(anime.format)}
         </Badge>
 
         {anime.season && anime.seasonYear && (
-          <Badge variant="outline" className="text-xs rounded-full">
+          <Badge variant="outline" className="text-xs rounded-full bg-zinc-800">
             {anime.season.charAt(0) + anime.season.slice(1).toLowerCase()}{" "}
             {anime.seasonYear}
           </Badge>
@@ -43,7 +43,7 @@ export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
             <Link key={genre} href={`/genres/${encodeURIComponent(genre)}`}>
               <Badge
                 variant="secondary"
-                className="text-xs rounded-full hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all border-0"
+                className="text-xs rounded-full bg-zinc-800 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all border-0"
               >
                 {genre}
               </Badge>
