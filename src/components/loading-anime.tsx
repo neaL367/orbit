@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function LoadingAnimeCard() {
   return (
@@ -13,22 +13,22 @@ export function LoadingAnimeCard() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export function LoadingAnimeGrid({ count = 12 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {Array.from({ length: count }).map((_, i) => (
         <LoadingAnimeCard key={i} />
       ))}
     </div>
-  )
+  );
 }
 
 export function LoadingAnimeDetails() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mt-24 mb-24">
       <div className="relative h-[300px] w-full overflow-hidden rounded-lg sm:h-[400px]">
         <Skeleton className="h-full w-full" />
       </div>
@@ -59,6 +59,5 @@ export function LoadingAnimeDetails() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

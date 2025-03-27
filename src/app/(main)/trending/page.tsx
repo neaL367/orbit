@@ -25,11 +25,11 @@ export default async function TrendingPage(props: TrendingPageProps) {
   };
 
   return (
-    <div className="py-8">
+    <main className="mt-24 mb-24">
       <h1 className="mb-8 text-3xl font-bold">Trending Anime</h1>
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {animeList.map((anime) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))}
@@ -41,6 +41,6 @@ export default async function TrendingPage(props: TrendingPageProps) {
         totalPages={pageInfo.lastPage}
         hasNextPage={pageInfo.hasNextPage}
       />
-    </div>
+    </main>
   );
 }

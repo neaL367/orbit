@@ -86,7 +86,7 @@ export default function ScheduleBanner({ premieres }: CountdownBannerProps) {
   return (
     <Card className="w-full overflow-hidden border-0 shadow-lg">
       <div
-        className="relative h-64 md:h-80 bg-cover bg-center"
+        className="relative h-64 md:h-80 bg-cover bg-center rounded-xl"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${
             currentPremiere.bannerImage || currentPremiere.coverImage.large

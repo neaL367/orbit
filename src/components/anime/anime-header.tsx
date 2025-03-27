@@ -1,10 +1,10 @@
-import { Link } from "next-view-transitions"
-import { Badge } from "@/components/ui/badge"
-import { formatFormat, formatStatus } from "@/anilist/utils/formatters"
-import { AnimeMedia } from "@/anilist/utils/types"
+import { Link } from "next-view-transitions";
+import { Badge } from "@/components/ui/badge";
+import { formatFormat, formatStatus } from "@/anilist/utils/formatters";
+import { AnimeMedia } from "@/anilist/utils/types";
 
 export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
-  const title = anime.title.english || anime.title.romaji
+  const title = anime.title.english || anime.title.romaji;
 
   return (
     <>
@@ -13,8 +13,29 @@ export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
       </h1>
 
       {anime.title.native && (
-        <h2 className="mb-4 text-lg sm:text-xl text-muted-foreground font-medium">{anime.title.native}</h2>
+        <h2 className="mb-4 text-lg sm:text-xl text-muted-foreground font-medium">
+          {anime.title.native}
+        </h2>
       )}
+
+      <div className="mb-3 flex flex-wrap gap-2">
+        <Badge
+          variant="outline"
+          className="text-xs border-0 bg-gradient-to-r from-primary to-purple-400 rounded-full"
+        >
+          {formatStatus(anime.status)}
+        </Badge>
+        <Badge variant="outline" className="text-xs rounded-full">
+          {formatFormat(anime.format)}
+        </Badge>
+
+        {anime.season && anime.seasonYear && (
+          <Badge variant="outline" className="text-xs rounded-full">
+            {anime.season.charAt(0) + anime.season.slice(1).toLowerCase()}{" "}
+            {anime.seasonYear}
+          </Badge>
+        )}
+      </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
         {anime.genres &&
@@ -28,21 +49,7 @@ export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
               </Badge>
             </Link>
           ))}
-
-        <Badge variant="outline" className="text-xs">
-          {formatStatus(anime.status)}
-        </Badge>
-        <Badge variant="outline" className="text-xs">
-          {formatFormat(anime.format)}
-        </Badge>
-
-        {anime.season && anime.seasonYear && (
-          <Badge variant="outline" className="text-xs">
-            {anime.season.charAt(0) + anime.season.slice(1).toLowerCase()} {anime.seasonYear}
-          </Badge>
-        )}
       </div>
     </>
-  )
+  );
 }
-

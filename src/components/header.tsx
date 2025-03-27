@@ -73,7 +73,7 @@ export default function Header() {
             )}
           </form>
 
-          <div className="hidden md:flex space-x-1">
+          {/* <div className="hidden md:flex space-x-1">
             <Button
               variant="ghost"
               size="sm"
@@ -90,7 +90,7 @@ export default function Header() {
             >
               Seasonal
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

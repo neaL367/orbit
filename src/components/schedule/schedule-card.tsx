@@ -7,14 +7,14 @@ import { ScheduleItem } from "@/anilist/utils/types";
 
 export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
   return (
-    <Card className="overflow-hidden group hover:shadow-lg transition-all">
+    <Card className="overflow-hidden group hover:shadow-lg transition-all rounded-lg">
       <CardContent className="p-0">
         <div className="flex group-hover:bg-gradient-to-r group-hover:from-primary/10 group-hover:to-purple-400/10 transition-all">
           <div className="w-24 h-32 shrink-0 relative overflow-hidden">
             <Image
               src={anime.coverImage.medium || ""}
               alt={anime.title.english || anime.title.romaji}
-              className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 brightness-85"
+              className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 brightness-85 rounded-lg"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority
@@ -40,7 +40,7 @@ export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
               )}
               <div className="flex items-center text-sm text-muted-foreground mt-1">
                 <Clock className="h-3.5 w-3.5 mr-1" />
-                <span>{anime.airingTime}</span>
+                <span>{anime.airingTime} </span>
               </div>
             </div>
             <div className="flex flex-col gap-2">

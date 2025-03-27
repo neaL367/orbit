@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Geist } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 
 import Header from "@/components/header";
@@ -9,8 +9,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ReactLenis } from "lenis/react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+
+const geist_Mono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -32,7 +33,7 @@ export default async function RootLayout({
     <ViewTransitions>
       <ReactLenis root>
         <html lang="en" suppressHydrationWarning className="dark">
-          <body className={geistSans.className}>
+          <body className={geist_Mono.className}>
             <SidebarProvider defaultOpen={defaultOpen}>
               <div className="flex min-h-screen w-full">
                 <AppSidebar />

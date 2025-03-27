@@ -63,7 +63,7 @@ export function AppSidebar() {
       {/* Sidebar Header */}
       <SidebarHeader className="py-6 bg-gradient-to-r from-primary/5 to-purple-400/5 transition-all">
         <div className="flex items-center justify-center gap-2 px-4 overflow-hidden">
-          <Orbit className="group-data-[collapsible=icon]:ml-2 h-6 w-6 text-primary shrink-0" />
+          <Orbit className="group-data-[collapsible=icon]:ml-2 h-6 w-6 text-white shrink-0" />
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent truncate group-data-[collapsible=icon]:opacity-0 transition-opacity duration-200">
             <Link href="/">Orbit</Link>
           </span>

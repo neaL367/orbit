@@ -27,7 +27,7 @@ export default async function Home() {
   const { season, year } = getCurrentSeason();
 
   return (
-    <div className="py-8">
+    <main className="mt-24 mb-24">
       {/* Trending Section - Now Second */}
       <section className="mb-12">
         <div className="mb-6 flex items-center justify-between">
@@ -54,7 +54,7 @@ export default async function Home() {
 
       {/* Popular Section - Now First */}
       <section className="mb-12">
-        <div className="mb-6 mx-3.5 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold">All-Time Popular</h2>
           <Link href="/popular">
             <Button
@@ -68,7 +68,7 @@ export default async function Home() {
         </div>
 
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid mx-3.5 grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {popular.map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
@@ -78,7 +78,7 @@ export default async function Home() {
 
       {/* Seasonal Section - Now Last */}
       <section className="mb-12">
-        <div className="mb-6 mx-3.5 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold">
             {season.charAt(0) + season.slice(1).toLowerCase()} {year} Anime
           </h2>
@@ -94,13 +94,13 @@ export default async function Home() {
         </div>
 
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid mx-3.5 grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {seasonal.map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
           </div>
         </Suspense>
       </section>
-    </div>
+    </main>
   );
 }
