@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import ScheduleSkeleton from "./schedule-skeleton";
-import ScheduleContent from "./schedule-content";
+import ScheduleSkeleton from "../../../components/schedule/schedule-skeleton";
+import ScheduleContent from "@/components/schedule/schedule-content";
 
 export default function SchedulePage() {
   return (

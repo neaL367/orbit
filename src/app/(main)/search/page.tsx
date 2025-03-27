@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import AnimeCard from "@/components/anime-card";
+import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { SearchQueries } from "@/anilist/queries/search";
@@ -15,7 +15,7 @@ export default async function SearchPage(props: SearchPageProps) {
   const searchParams = await props.searchParams;
   const query = searchParams.q || "";
   const page = Number.parseInt(searchParams.page || "1", 10);
-  const perPage = 24;
+  const perPage = 18;
 
   const data = query
     ? await SearchQueries.search({ query, page, perPage })

@@ -180,3 +180,26 @@ export interface PaginationParams extends Partial<GraphQLVariables> {
     page?: number
     perPage?: number
 }
+
+export interface ScheduleItem extends AnimeMedia {
+    airingAt: number;
+    episode: number;
+    airingTime: string;
+}
+
+export interface PremiereItem {
+    id: number;
+    title: {
+        romaji: string;
+        english: string | null;
+        native: string;
+    };
+    coverImage: {
+        large: string | null;
+        medium: string | null;
+    };
+    bannerImage: string | null;
+    premiereDate: Date;
+    episodes: number | string | null;
+    duration: number | string | null;
+}

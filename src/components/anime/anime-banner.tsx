@@ -8,7 +8,7 @@ export function AnimeBanner({ image, title }: { image: string; title: string }) 
         alt={title}
         fill
         priority
-        className="object-cover rounded-lg brightness-85"
+        className="object-cover rounded-lg brightness-85 object-center"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
       />
       <div className="absolute inset-0" />

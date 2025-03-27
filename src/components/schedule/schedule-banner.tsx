@@ -25,7 +25,7 @@ interface CountdownBannerProps {
   premieres: Premiere[];
 }
 
-export default function CountdownBanner({ premieres }: CountdownBannerProps) {
+export default function ScheduleBanner({ premieres }: CountdownBannerProps) {
   const [currentPremiereIndex, setCurrentPremiereIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,

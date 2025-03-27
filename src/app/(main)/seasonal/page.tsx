@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import AnimeCard from "@/components/anime-card";
+import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { MediaQueries } from "@/anilist/queries/media";
 import { getCurrentSeason } from "@/anilist/utils/formatters";
-import SeasonalFilters from "./seasonal-filters";
+import { SeasonalFilters } from "../../../components/seasonal/seasonal-filters";
 
 interface SeasonalPageProps {
   searchParams: Promise<{
@@ -23,7 +23,7 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
     10
   );
   const page = Number.parseInt(searchParams.page || "1", 10);
-  const perPage = 24;
+  const perPage = 18;
 
   const data = await MediaQueries.getSeasonal({
     season,

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import AnimeCard from "@/components/anime-card";
+import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { GenreQueries } from "@/anilist/queries/genre";

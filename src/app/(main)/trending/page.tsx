@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import AnimeCard from "@/components/anime-card";
+import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { MediaQueries } from "@/anilist/queries/media";
 
-
+export const experimental_ppr = true;
 interface TrendingPageProps {
   searchParams: Promise<{
     page?: string;
@@ -14,7 +14,7 @@ interface TrendingPageProps {
 export default async function TrendingPage(props: TrendingPageProps) {
   const searchParams = await props.searchParams;
   const page = Number.parseInt(searchParams.page || "1", 10);
-  const perPage = 24;
+  const perPage = 18;
 
   const data = await MediaQueries.getTrending({ page, perPage });
   const animeList = data?.data?.Page?.media || [];

@@ -57,7 +57,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
 
           {/* Hover Overlay with Details */}
           <div
-            className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end transition-opacity duration-300 ${
+            className={`max-md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end transition-opacity duration-300 ${
               isHovering ? "opacity-100" : "opacity-0"
             }`}
           >
