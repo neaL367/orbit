@@ -35,7 +35,7 @@ export default function Header() {
   return (
     <header
       id="main-header"
-      className="sticky top-0 z-50 w-full flex justify-center items-center border-b bg-sidebar backdrop-blur supports-[backdrop-filter]:bg-sidebar/90 transition-all duration-300 hover:shadow-md"
+      className="sticky top-0 z-50 w-full flex justify-center items-center bg-gradient-to-r from-primary/5 to-purple-400/5 backdrop-blur-xl  transition-all duration-300 hover:shadow-md"
     >
       <div className="w-full flex px-4 h-20 items-center justify-start">
         <SidebarTrigger className="p-7 mr-2.5 hover:cursor-pointer rounded-lg transition-all" />
@@ -77,7 +77,7 @@ export default function Header() {
             <Button
               variant="ghost"
               size="sm"
-              className="hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+              className="hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
               onClick={() => router.push("/trending")}
             >
               Trending
@@ -85,7 +85,7 @@ export default function Header() {
             <Button
               variant="ghost"
               size="sm"
-              className="hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+              className="hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
               onClick={() => router.push("/seasonal")}
             >
               Seasonal

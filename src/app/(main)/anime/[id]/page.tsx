@@ -216,22 +216,22 @@ export default async function AnimePage(props: AnimePageProps) {
             </p>
 
             <Tabs defaultValue="characters" className="mt-8">
-              <TabsList className="w-full mb-6 grid grid-cols-3 h-12">
+              <TabsList className="w-full mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 h-auto">
                 <TabsTrigger
                   value="characters"
-                  className="flex-1 hover:cursor-pointer"
+                  className="w-full text-xs sm:text-sm px-2 py-2 hover:cursor-pointer"
                 >
                   Characters
                 </TabsTrigger>
                 <TabsTrigger
                   value="relations"
-                  className="flex-1 hover:cursor-pointer"
+                  className="w-full text-xs sm:text-sm px-2 py-2 hover:cursor-pointer"
                 >
                   Relations
                 </TabsTrigger>
                 <TabsTrigger
                   value="recommendations"
-                  className="flex-1 hover:cursor-pointer"
+                  className="w-full text-xs sm:text-sm px-2 py-2 hover:cursor-pointer"
                 >
                   Recommendations
                 </TabsTrigger>

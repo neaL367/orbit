@@ -328,7 +328,7 @@ export default function ScheduleContent() {
                             <div className="p-3 flex flex-col justify-between flex-1">
                               <div>
                                 <Link href={`/anime/${anime.id}`}>
-                                  <h3 className="font-medium line-clamp-2 transition-colors">
+                                  <h3 className="font-medium line-clamp-1 transition-colors">
                                     {anime.title.english || anime.title.romaji}
                                   </h3>
                                 </Link>

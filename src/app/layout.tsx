@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 import "./globals.css";
@@ -24,14 +25,18 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "false";
+
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning className="dark">
         <body className={geistSans.className}>
-          <SidebarProvider>
+          <SidebarProvider defaultOpen={defaultOpen}>
             <div className="flex min-h-screen w-full">
               <AppSidebar />
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full  dark:bg-gradient-to-br from-primary/5 to-purple-900/5">
                 <Header />
                 <main className="mx-4 md:mx-16 px-4 max-w-full">
                   {children}
