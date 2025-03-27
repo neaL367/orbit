@@ -2,15 +2,9 @@ import { Suspense } from "react";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { MediaQueries } from "@/lib/anilist/queries/media";
 import { getCurrentSeason } from "@/lib/anilist/utils/formatters";
+import SeasonalFilters from "./seasonal-filters";
 
 interface SeasonalPageProps {
   searchParams: Promise<{
@@ -61,38 +55,11 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
         Found {pageInfo.total || 0} anime this season
       </p>
 
-      <div className="mb-8 flex flex-wrap gap-4">
-        <div>
-          <h3 className="mb-2 text-sm font-medium">Season</h3>
-          <Select defaultValue={season.toLowerCase()}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select season" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="winter">Winter</SelectItem>
-              <SelectItem value="spring">Spring</SelectItem>
-              <SelectItem value="summer">Summer</SelectItem>
-              <SelectItem value="fall">Fall</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <h3 className="mb-2 text-sm font-medium">Year</h3>
-          <Select defaultValue={year.toString()}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((y) => (
-                <SelectItem key={y} value={y.toString()}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <SeasonalFilters
+        currentSeason={season.toLowerCase()}
+        currentYear={year}
+        years={years}
+      />
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">

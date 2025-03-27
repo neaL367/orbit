@@ -97,7 +97,7 @@ export default function CountdownBanner({ premieres }: CountdownBannerProps) {
       >
         <div className="absolute inset-0 flex flex-col justify-center my-4 px-6 md:px-12">
           <div className="max-w-3xl">
-            <div className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-md text-xs font-medium mb-4">
+            <div className="inline-block bg-primary bg-gradient-to-r to-purple-400 text-primary-foreground px-3 py-1 rounded-md text-xs font-medium mb-4">
               UPCOMING PREMIERE
             </div>
 

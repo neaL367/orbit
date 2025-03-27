@@ -1,3 +1,5 @@
+import { GraphQLVariables } from "./api-request";
+
 // Core types
 export interface PageInfo {
     total: number;
@@ -174,8 +176,7 @@ export interface SchedulePageResponse {
 export interface AnilistResponse<T> {
     data: T;
 }
-
-export interface PaginationParams {
-    page?: number;
-    perPage?: number;
+export interface PaginationParams extends Partial<GraphQLVariables> {
+    page?: number
+    perPage?: number
 }

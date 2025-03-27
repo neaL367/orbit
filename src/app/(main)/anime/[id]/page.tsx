@@ -72,7 +72,7 @@ export default async function AnimePage(props: AnimePageProps) {
 
   return (
     <Suspense fallback={<LoadingAnimeDetails />}>
-      <div className="py-8">
+      <div className="container py-8 md:py-12 mx-auto max-w-7xl">
         {/* Banner Image */}
         {anime.bannerImage && (
           <div className="relative w-full h-[150px] sm:h-[200px] overflow-hidden mb-12">
@@ -84,7 +84,7 @@ export default async function AnimePage(props: AnimePageProps) {
               className="object-cover"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
           </div>
         )}
 
@@ -93,20 +93,20 @@ export default async function AnimePage(props: AnimePageProps) {
           <div className="space-y-6">
             {/* Cover Image */}
             <div className="w-full max-w-[300px] mx-auto md:mx-0">
-              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-lg">
+              <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-xl border border-border/50 group hover:shadow-2xl transition-all duration-300">
                 <Image
                   src={anime.coverImage.large || ""}
                   alt={title}
                   fill
                   priority
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 640px) 100vw, 300px"
                 />
               </div>
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-3.5">
+            <div className="flex flex-wrap justify-center md:justify-start gap-3.5 p-4 bg-card rounded-lg border border-border shadow-sm">
               {anime.averageScore && anime.averageScore > 0 && (
                 <div className="flex items-center gap-2 text-sm">
                   <Star className="h-4 w-4 text-yellow-500" />
@@ -147,18 +147,20 @@ export default async function AnimePage(props: AnimePageProps) {
 
             {/* External Links */}
             {anime.externalLinks && anime.externalLinks.length > 0 && (
-              <div className="mt-6 flex flex-col gap-2.5 items-center md:items-start ">
-                <h3 className="mb-2 font-semibold text-sm">External Links</h3>
-                <div className="flex flex-wrap justify-center md:justify-start gap-2">
+              <div className="mt-6 flex flex-col gap-2.5 items-center md:items-start p-4 bg-card rounded-lg border border-border shadow-sm">
+                <h3 className="mb-2 font-semibold text-sm bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                  External Links
+                </h3>
+                <div className="flex flex-wrap justify-center md:justify-start gap-3">
                   {anime.externalLinks.slice(0, 4).map((link) => (
                     <a
                       key={link.id}
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      className="flex items-center gap-1 text-xs px-3 py-1.5 bg-muted rounded-full hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all"
                     >
-                      {link.site} <ExternalLink className="h-3 w-3" />
+                      {link.site} <ExternalLink className="h-3 w-3 ml-1" />
                     </a>
                   ))}
                 </div>
@@ -168,10 +170,12 @@ export default async function AnimePage(props: AnimePageProps) {
 
           {/* Details Column */}
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-purple-400 to-purple-400 bg-clip-text text-transparent">
+              {title}
+            </h1>
 
             {anime.title.native && (
-              <h2 className="mb-4 text-lg sm:text-xl text-muted-foreground">
+              <h2 className="mb-4 text-lg sm:text-xl text-muted-foreground font-medium">
                 {anime.title.native}
               </h2>
             )}
@@ -183,7 +187,10 @@ export default async function AnimePage(props: AnimePageProps) {
                     key={genre}
                     href={`/genres/${encodeURIComponent(genre)}`}
                   >
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 transition-all"
+                    >
                       {genre}
                     </Badge>
                   </Link>
@@ -204,19 +211,28 @@ export default async function AnimePage(props: AnimePageProps) {
               )}
             </div>
 
-            <p className="mb-6 text-sm sm:text-base whitespace-pre-line text-muted-foreground">
+            <p className="mb-6 text-sm sm:text-base whitespace-pre-line text-muted-foreground leading-relaxed p-4 bg-muted/50 rounded-lg border border-border/50">
               {description}
             </p>
 
-            <Tabs defaultValue="characters">
-              <TabsList className="w-full mb-4">
-                <TabsTrigger value="characters" className="flex-1">
+            <Tabs defaultValue="characters" className="mt-8">
+              <TabsList className="w-full mb-6 grid grid-cols-3 h-12">
+                <TabsTrigger
+                  value="characters"
+                  className="flex-1 hover:cursor-pointer"
+                >
                   Characters
                 </TabsTrigger>
-                <TabsTrigger value="relations" className="flex-1">
+                <TabsTrigger
+                  value="relations"
+                  className="flex-1 hover:cursor-pointer"
+                >
                   Relations
                 </TabsTrigger>
-                <TabsTrigger value="recommendations" className="flex-1">
+                <TabsTrigger
+                  value="recommendations"
+                  className="flex-1 hover:cursor-pointer"
+                >
                   Recommendations
                 </TabsTrigger>
               </TabsList>
@@ -227,13 +243,16 @@ export default async function AnimePage(props: AnimePageProps) {
                   anime.characters.nodes &&
                   anime.characters.nodes.length > 0 ? (
                     anime.characters.nodes.map((character) => (
-                      <Card key={character.id} className="w-full">
+                      <Card
+                        key={character.id}
+                        className="w-full overflow-hidden group hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                      >
                         <div className="relative aspect-[2/3] w-full overflow-hidden rounded-t-lg">
                           <Image
                             src={character.image.medium || ""}
                             alt={character.name.full}
                             fill
-                            className="object-cover"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           />
                         </div>
@@ -248,7 +267,7 @@ export default async function AnimePage(props: AnimePageProps) {
                       </Card>
                     ))
                   ) : (
-                    <p className="col-span-full text-center text-muted-foreground">
+                    <p className="col-span-full text-center text-muted-foreground py-8 bg-muted/50 rounded-lg border border-border/50">
                       No character information available
                     </p>
                   )}
@@ -291,7 +310,7 @@ export default async function AnimePage(props: AnimePageProps) {
                       </Link>
                     ))
                   ) : (
-                    <p className="col-span-full text-center text-muted-foreground">
+                    <p className="col-span-full text-center text-muted-foreground py-8 bg-muted/50 rounded-lg border border-border/50">
                       No related anime available
                     </p>
                   )}
@@ -333,7 +352,7 @@ export default async function AnimePage(props: AnimePageProps) {
                       </Link>
                     ))
                   ) : (
-                    <p className="col-span-full text-center text-muted-foreground">
+                    <p className="col-span-full text-center text-muted-foreground py-8 bg-muted/50 rounded-lg border border-border/50">
                       No recommendations available
                     </p>
                   )}
@@ -343,9 +362,11 @@ export default async function AnimePage(props: AnimePageProps) {
 
             {/* Trailer */}
             {anime.trailer && anime.trailer.site === "youtube" && (
-              <div className="relative mt-8">
-                <h3 className="mb-4 text-xl font-semibold">Trailer</h3>
-                <div className="aspect-video w-full">
+              <div className="relative mt-12 p-6 bg-card rounded-lg border border-border shadow-md">
+                <h3 className="mb-6 text-xl font-semibold text-primary">
+                  Trailer
+                </h3>
+                <div className="aspect-video w-full overflow-hidden rounded-lg shadow-lg">
                   <iframe
                     src={`https://www.youtube.com/embed/${anime.trailer.id}`}
                     title={`${title} Trailer`}
