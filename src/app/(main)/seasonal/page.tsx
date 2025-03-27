@@ -47,7 +47,7 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
   const formattedSeason = season.charAt(0) + season.slice(1).toLowerCase();
 
   return (
-    <div className="py-8">
+    <main className="mt-24 mb-24">
       <h1 className="mb-2 text-3xl font-bold">
         {formattedSeason} {year} Anime
       </h1>
@@ -74,6 +74,6 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
         totalPages={pageInfo.lastPage}
         hasNextPage={pageInfo.hasNextPage}
       />
-    </div>
+    </main>
   );
 }

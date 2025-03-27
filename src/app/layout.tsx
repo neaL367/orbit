@@ -1,13 +1,13 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Geist } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
-import "./globals.css";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-
-import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { ReactLenis } from "lenis/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,27 +25,28 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "false";
 
   return (
     <ViewTransitions>
-      <html lang="en" suppressHydrationWarning className="dark">
-        <body className={geistSans.className}>
-          <SidebarProvider defaultOpen={defaultOpen}>
-            <div className="flex min-h-screen w-full">
-              <AppSidebar />
-              <div className="flex flex-col w-full  dark:bg-gradient-to-br from-primary/5 to-purple-900/5">
-                <Header />
-                <main className="mx-4 md:mx-16 px-4 max-w-full">
-                  {children}
-                </main>
+      <ReactLenis root>
+        <html lang="en" suppressHydrationWarning className="dark">
+          <body className={geistSans.className}>
+            <SidebarProvider defaultOpen={defaultOpen}>
+              <div className="flex min-h-screen w-full">
+                <AppSidebar />
+                <div className="flex flex-col w-full  dark:bg-gradient-to-br from-primary/5 to-purple-900/5">
+                  <Header />
+                  <main className="mx-4 md:mx-16 px-4 max-w-full">
+                    {children}
+                  </main>
+                </div>
               </div>
-            </div>
-          </SidebarProvider>
-        </body>
-      </html>
+            </SidebarProvider>
+          </body>
+        </html>
+      </ReactLenis>
     </ViewTransitions>
   );
 }

@@ -1,24 +1,28 @@
-import Image from "next/image"
-import { AnimeBanner } from "./anime-banner"
-import { AnimeHeader } from "./anime-header"
-import { AnimeStats } from "./anime-stats"
-import { AnimeExternalLinks } from "./anime-external-links"
-import { AnimeDescription } from "./anime-desc"
-import { AnimeTabs } from "./anime-tabs"
-import { AnimeTrailer } from "./anime-trailer"
-import { AnimeMedia } from "@/anilist/utils/types"
+import Image from "next/image";
+import { AnimeBanner } from "./anime-banner";
+import { AnimeHeader } from "./anime-header";
+import { AnimeStats } from "./anime-stats";
+import { AnimeExternalLinks } from "./anime-external-links";
+import { AnimeDescription } from "./anime-desc";
+import { AnimeTabs } from "./anime-tabs";
+import { AnimeTrailer } from "./anime-trailer";
+import { AnimeMedia } from "@/anilist/utils/types";
 
 export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
   // Format title for display
-  const title = anime.title.english || anime.title.romaji
+  const title = anime.title.english || anime.title.romaji;
 
   // Format description - remove HTML tags
-  const description = anime.description ? anime.description.replace(/<[^>]*>/g, "") : "No description available."
+  const description = anime.description
+    ? anime.description.replace(/<[^>]*>/g, "")
+    : "No description available.";
 
   return (
-    <div className="container py-8 md:py-12 mx-auto max-w-7xl">
+    <main className="mt-24 mb-24">
       {/* Banner Image */}
-      {anime.bannerImage && <AnimeBanner image={anime.bannerImage} title={title} />}
+      {anime.bannerImage && (
+        <AnimeBanner image={anime.bannerImage} title={title} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
         {/* Cover Image and Stats Column */}
@@ -41,7 +45,9 @@ export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
           <AnimeStats anime={anime} />
 
           {/* External Links */}
-          {anime.externalLinks && anime.externalLinks.length > 0 && <AnimeExternalLinks links={anime.externalLinks} />}
+          {anime.externalLinks && anime.externalLinks.length > 0 && (
+            <AnimeExternalLinks links={anime.externalLinks} />
+          )}
         </div>
 
         {/* Details Column */}
@@ -51,10 +57,11 @@ export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
           <AnimeTabs anime={anime} />
 
           {/* Trailer */}
-          {anime.trailer && anime.trailer.site === "youtube" && <AnimeTrailer trailer={anime.trailer} title={title} />}
+          {anime.trailer && anime.trailer.site === "youtube" && (
+            <AnimeTrailer trailer={anime.trailer} title={title} />
+          )}
         </div>
       </div>
-    </div>
-  )
+    </main>
+  );
 }
-

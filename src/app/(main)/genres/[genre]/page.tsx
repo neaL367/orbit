@@ -5,7 +5,7 @@ import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { GenreQueries } from "@/anilist/queries/genre";
 
-export const experimental_ppr = true
+export const experimental_ppr = true;
 interface GenrePageProps {
   params: Promise<{
     genre: string;
@@ -37,7 +37,7 @@ export default async function GenrePage(props: GenrePageProps) {
   };
 
   return (
-    <div className="py-8">
+    <main className="mt-24 mb-24">
       <h1 className="mb-2 text-3xl font-bold">{genre} Anime</h1>
       <p className="mb-8 text-muted-foreground">
         Found {pageInfo.total || 0} anime in this genre
@@ -56,6 +56,6 @@ export default async function GenrePage(props: GenrePageProps) {
         totalPages={pageInfo.lastPage}
         hasNextPage={pageInfo.hasNextPage}
       />
-    </div>
+    </main>
   );
 }
