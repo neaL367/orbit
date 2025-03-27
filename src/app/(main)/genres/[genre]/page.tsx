@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import { GenreQueries } from "@/lib/anilist/queries/genre";
+import { GenreQueries } from "@/anilist/queries/genre";
 
 export const experimental_ppr = true
 interface GenrePageProps {

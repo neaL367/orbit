@@ -4,15 +4,15 @@ import AnimeCard from "@/components/anime-card";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { MediaQueries } from "@/lib/anilist/queries/media";
-import { getCurrentSeason } from "@/lib/anilist/utils/formatters";
+import { MediaQueries } from "@/anilist/queries/media";
+import { getCurrentSeason } from "@/anilist/utils/formatters";
 
 export const experimental_ppr = true;
 
 export default async function Home() {
-  const [trendingData, popularData, seasonalData] = await Promise.all([
+  const [trendingData, seasonalData] = await Promise.all([
     MediaQueries.getTrending({ page: 1, perPage: 12 }),
-    MediaQueries.getPopular({ page: 1, perPage: 12 }),
+    // MediaQueries.getPopular({ page: 1, perPage: 12 }),
     MediaQueries.getSeasonal({
       season: getCurrentSeason().season,
       year: getCurrentSeason().year,
@@ -22,7 +22,7 @@ export default async function Home() {
   ]);
 
   const trending = trendingData?.data?.Page?.media || [];
-  const popular = popularData?.data?.Page?.media || [];
+  // const popular = popularData?.data?.Page?.media || [];
   const seasonal = seasonalData?.data?.Page?.media || [];
   const { season, year } = getCurrentSeason();
 
@@ -53,7 +53,7 @@ export default async function Home() {
       </section>
 
       {/* Popular Section - Now First */}
-      <section className="mb-12">
+      {/* <section className="mb-12">
         <div className="mb-6 mx-3.5 flex items-center justify-between">
           <h2 className="text-2xl font-bold">All-Time Popular</h2>
           <Link href="/popular">
@@ -74,7 +74,7 @@ export default async function Home() {
             ))}
           </div>
         </Suspense>
-      </section>
+      </section> */}
 
       {/* Seasonal Section - Now Last */}
       <section className="mb-12">

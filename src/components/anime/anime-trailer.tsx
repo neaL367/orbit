@@ -1,4 +1,4 @@
-import { Trailer } from "@/lib/anilist/utils/types";
+import { Trailer } from "@/anilist/utils/types";
 
 export function AnimeTrailer({
   trailer,

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import { SearchQueries } from "@/lib/anilist/queries/search";
+import { SearchQueries } from "@/anilist/queries/search";
 
 interface SearchPageProps {
   searchParams: Promise<{

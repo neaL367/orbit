@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import { MediaQueries } from "@/lib/anilist/queries/media";
+import { MediaQueries } from "@/anilist/queries/media";
 
 
 interface TrendingPageProps {

@@ -7,9 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar, ExternalLink, Play, Tv } from "lucide-react";
 import CountdownBanner from "./countdown-banner";
 import Image from "next/image";
-import type { AiringSchedule, AnimeMedia } from "@/lib/anilist/utils/types";
+import type { AiringSchedule, AnimeMedia } from "@/anilist/utils/types";
 import NSFWToggle from "../../../components/nsfw-toggle";
-import { ScheduleQueries } from "@/lib/anilist/queries/schedule";
+import { ScheduleQueries } from "@/anilist/queries/schedule";
 import {
   Tooltip,
   TooltipContent,

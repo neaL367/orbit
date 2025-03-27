@@ -1,4 +1,4 @@
-import { AnimeMedia } from "@/lib/anilist/utils/types"
+import { AnimeMedia } from "@/anilist/utils/types"
 import { Star, Users, PlayCircle, Clock, Calendar } from "lucide-react"
 
 export function AnimeStats({ anime }: { anime: AnimeMedia }) {

@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Link } from "next-view-transitions"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { AnimeMedia, Character, Recommendation, Relation } from "@/lib/anilist/utils/types"
+import { AnimeMedia, Character, Recommendation, Relation } from "@/anilist/utils/types"
 
 export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
   return (

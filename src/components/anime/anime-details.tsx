@@ -6,7 +6,7 @@ import { AnimeExternalLinks } from "./anime-external-links"
 import { AnimeDescription } from "./anime-desc"
 import { AnimeTabs } from "./anime-tabs"
 import { AnimeTrailer } from "./anime-trailer"
-import { AnimeMedia } from "@/lib/anilist/utils/types"
+import { AnimeMedia } from "@/anilist/utils/types"
 
 export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
   // Format title for display

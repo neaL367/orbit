@@ -1,4 +1,4 @@
-import { AnilistResponse, PageResponse, PaginationParams } from "@/lib/anilist/utils/types"
+import { AnilistResponse, PageResponse, PaginationParams } from "@/anilist/utils/types"
 import { apiRequest } from "../utils/api-request"
 import { BASE_MEDIA_FIELDS } from "../utils/fragments"
 

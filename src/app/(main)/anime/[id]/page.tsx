@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { LoadingAnimeDetails } from "@/components/loading-anime"
 import { AnimeDetails } from "@/components/anime/anime-details"
-import { GenreQueries } from "@/lib/anilist/queries/genre"
+import { GenreQueries } from "@/anilist/queries/genre"
 
 export const experimental_ppr = true
 

@@ -1,4 +1,4 @@
-import { AnilistResponse, PaginationParams, SchedulePageResponse } from "@/lib/anilist/utils/types";
+import { AnilistResponse, PaginationParams, SchedulePageResponse } from "@/anilist/utils/types";
 import { apiRequest } from "../utils/api-request";
 
 export const ScheduleQueries = {

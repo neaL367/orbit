@@ -1,4 +1,4 @@
-import type { AnilistResponse } from "@/lib/anilist/utils/types"
+import type { AnilistResponse } from "@/anilist/utils/types"
 
 const ANILIST_API = "https://graphql.anilist.co" as const
 

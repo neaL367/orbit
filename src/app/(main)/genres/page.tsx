@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { Link } from "next-view-transitions"
 import { Card, CardContent } from "@/components/ui/card"
-import { GenreQueries } from "@/lib/anilist/queries/genre"
+import { GenreQueries } from "@/anilist/queries/genre"
 
 export default async function GenresPage() {
   const data = await GenreQueries.getGenres()

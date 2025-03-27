@@ -5,7 +5,7 @@ import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatStatus } from "@/lib/anilist/utils/formatters";
+import { formatStatus } from "@/anilist/utils/formatters";
 
 interface AnimeCardProps {
   anime: {

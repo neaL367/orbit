@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import AnimeCard from "@/components/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
-import { MediaQueries } from "@/lib/anilist/queries/media";
-import { getCurrentSeason } from "@/lib/anilist/utils/formatters";
+import { MediaQueries } from "@/anilist/queries/media";
+import { getCurrentSeason } from "@/anilist/utils/formatters";
 import SeasonalFilters from "./seasonal-filters";
 
 interface SeasonalPageProps {
