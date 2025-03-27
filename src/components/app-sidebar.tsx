@@ -55,12 +55,16 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r border-gray-800 ">
+    <Sidebar
+      className="border-r border-gray-800"
+      collapsible="icon"
+      variant="inset"
+    >
       {/* Sidebar Header */}
       <SidebarHeader className="py-6 bg-gradient-to-r from-primary/5 to-purple-400/5 transition-all">
-        <div className="flex items-center justify-center gap-2 px-4">
-          <Orbit className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+        <div className="flex items-center justify-center gap-2 px-4 overflow-hidden">
+          <Orbit className="group-data-[collapsible=icon]:ml-2 h-6 w-6 text-primary shrink-0" />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent truncate group-data-[collapsible=icon]:opacity-0 transition-opacity duration-200">
             <Link href="/">Orbit</Link>
           </span>
         </div>
@@ -69,7 +73,7 @@ export function AppSidebar() {
       {/* Sidebar Content */}
       <SidebarContent className="bg-gradient-to-r from-primary/5 to-purple-400/5">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-gray-400 px-6 mb-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-gray-400 px-6 mb-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -81,25 +85,25 @@ export function AppSidebar() {
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild tooltip={item.title}>
                       <Link
                         href={item.url}
-                        className={`group flex items-center gap-3 ml-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 ${
+                        className={`group flex items-center gap-3 group-data-[collapsible=icon]:ml-0 ml-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 ${
                           isActive
                             ? "bg-primary/10 text-primary font-medium"
                             : "text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-purple-400"
                         }`}
                       >
                         <item.icon
-                          className={`h-4.5 w-4.5 ${
+                          className={`h-4.5 w-4.5 shrink-0 ${
                             isActive
                               ? "text-primary"
                               : "group-hover:text-white transition-all"
                           }`}
                         />
-                        <span>{item.title}</span>
+                        <span className="truncate">{item.title}</span>
                         {isActive && (
-                          <div className="absolute -left-1 w-1 h-5 bg-gradient-to-b from-primary to-purple-400 rounded-r-full"></div>
+                          <div className="group-data-[collapsible=icon]:hidden absolute -left-1 w-1 h-5 bg-gradient-to-b from-primary to-purple-400 rounded-r-full"></div>
                         )}
                       </Link>
                     </SidebarMenuButton>
@@ -110,8 +114,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Additional Categories Section */}
-        <SidebarGroup className="mt-6">
+        {/* Additional Categories Section - Hide completely in icon mode */}
+        <SidebarGroup className="mt-6 group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel className="text-xs font-semibold text-gray-400 px-6 mb-2">
             Popular Categories
           </SidebarGroupLabel>
@@ -140,9 +144,11 @@ export function AppSidebar() {
 
       {/* Sidebar Footer */}
       <SidebarFooter className="border-t border-gray-800 bg-gradient-to-r from-primary/5 to-purple-400/5 transition-all">
-        <div className="px-6 py-4 text-xs text-gray-400">
-          <p>© 2025 Orbit</p>
-          <p className="mt-1 text-gray-500">
+        <div className="px-6 py-4 text-xs text-gray-400 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:text-center">
+          <p className="truncate group-data-[collapsible=icon]:opacity-0">
+            © 2025 Orbit
+          </p>
+          <p className="mt-1 text-gray-500 group-data-[collapsible=icon]:hidden">
             Powered by{" "}
             <a
               href="https://anilist.co"

@@ -28,30 +28,6 @@ export default async function Home() {
 
   return (
     <div className="py-8">
-      {/* Popular Section - Now First */}
-      <section className="mb-12">
-        <div className="mb-6 mx-3.5 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">All-Time Popular</h2>
-          <Link href="/popular">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 hover:cursor-pointer"
-            >
-              View All <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid mx-3.5 grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {popular.map((anime) => (
-              <AnimeCard key={anime.id} anime={anime} />
-            ))}
-          </div>
-        </Suspense>
-      </section>
-
       {/* Trending Section - Now Second */}
       <section className="mb-12">
         <div className="mb-6 flex items-center justify-between">
@@ -70,6 +46,30 @@ export default async function Home() {
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
           <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {trending.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
+
+      {/* Popular Section - Now First */}
+      <section className="mb-12">
+        <div className="mb-6 mx-3.5 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">All-Time Popular</h2>
+          <Link href="/popular">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 hover:cursor-pointer"
+            >
+              View All <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
+          <div className="grid mx-3.5 grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {popular.map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
           </div>
