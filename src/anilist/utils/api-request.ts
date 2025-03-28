@@ -1,14 +1,7 @@
-import type { AnilistResponse } from "@/anilist/utils/types"
+import { AnilistResponse, GraphQLVariables } from "../modal/common";
 
 const ANILIST_API = "https://graphql.anilist.co" as const
 
-// Define a recursive type for GraphQL variables
-export type GraphQLScalarValue = string | number | boolean | null | undefined
-export type GraphQLObjectValue = { [key: string]: GraphQLValue }
-export type GraphQLValue = GraphQLScalarValue | GraphQLObjectValue | GraphQLValue[]
-
-// Define the final GraphQL variables type with index signature
-export type GraphQLVariables = Record<string, GraphQLValue>
 
 export async function apiRequest<T>(
   query: string,

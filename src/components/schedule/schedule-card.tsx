@@ -3,7 +3,7 @@ import { Link } from "next-view-transitions";
 import { Play, Clock, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { StreamingPlatforms } from "../streaming-platforms";
-import { ScheduleItem } from "@/anilist/utils/types";
+import { ScheduleItem } from "@/anilist/modal/response";
 
 export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
   return (

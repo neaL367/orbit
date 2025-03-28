@@ -3,8 +3,7 @@ import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { MediaQueries } from "@/anilist/queries/media";
-
-export const experimental_ppr = true;
+import { AnimeMedia } from "@/anilist/modal/media";
 interface TrendingPageProps {
   searchParams: Promise<{
     page?: string;
@@ -25,12 +24,12 @@ export default async function TrendingPage(props: TrendingPageProps) {
   };
 
   return (
-    <main className="mt-24 mb-24">
+    <div className="">
       <h1 className="mb-8 text-3xl font-bold">Trending Anime</h1>
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
         <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {animeList.map((anime) => (
+          {animeList.map((anime: AnimeMedia) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))}
         </div>
@@ -41,6 +40,6 @@ export default async function TrendingPage(props: TrendingPageProps) {
         totalPages={pageInfo.lastPage}
         hasNextPage={pageInfo.hasNextPage}
       />
-    </main>
+    </div>
   );
 }

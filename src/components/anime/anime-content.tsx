@@ -6,9 +6,9 @@ import { AnimeExternalLinks } from "./anime-external-links";
 import { AnimeDescription } from "./anime-desc";
 import { AnimeTabs } from "./anime-tabs";
 import { AnimeTrailer } from "./anime-trailer";
-import { AnimeMedia } from "@/anilist/utils/types";
+import { AnimeMedia } from "@/anilist/modal/media";
 
-export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
+export function AnimeContent({ anime }: { anime: AnimeMedia }) {
   // Format title for display
   const title = anime.title.english || anime.title.romaji;
 
@@ -31,7 +31,9 @@ export function AnimeDetails({ anime }: { anime: AnimeMedia }) {
           <div className="w-full max-w-[300px] mx-auto md:mx-0">
             <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-xl border border-border/50 group hover:shadow-2xl transition-all duration-300">
               <Image
-                src={anime.coverImage.large || ""}
+                src={
+                  anime.coverImage.extraLarge || anime.coverImage.color || ""
+                }
                 alt={title}
                 fill
                 priority

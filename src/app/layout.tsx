@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ReactLenis } from "lenis/react";
 
+export const experimental_ppr = true;
 
 const geist_Mono = Geist_Mono({
   variable: "--font-geist-mono",

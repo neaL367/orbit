@@ -4,17 +4,22 @@ import { useState } from "react";
 import { format, addDays, startOfWeek } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScheduleItem } from "@/anilist/utils/types";
 import ScheduleCard from "./schedule-card";
+import NSFWToggle from "../nsfw-toggle";
+import { ScheduleItem } from "@/anilist/modal/response";
 
 interface ScheduleTabsProps {
   weeklySchedule: Record<string, ScheduleItem[]>;
   isLoading: boolean;
+  showNSFW: boolean;
+  onNSFWChange: (show: boolean) => void;
 }
 
-export default function ScheduleTabs({ 
-  weeklySchedule, 
-  isLoading 
+export default function ScheduleTabs({
+  weeklySchedule,
+  isLoading,
+  showNSFW,
+  onNSFWChange,
 }: ScheduleTabsProps) {
   const today = new Date();
   const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
@@ -75,12 +80,16 @@ export default function ScheduleTabs({
       ) : (
         weekDays.map((day) => (
           <TabsContent key={day.value} value={day.value} className="mt-6">
-            <h2 className="text-xl font-semibold mb-4 ">
-              {day.name}{" "}
-              <span className="text-muted-foreground font-normal">
-                ({format(day.date, "MMM d")})
-              </span>
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">
+                {day.name}{" "}
+                <span className="text-muted-foreground font-normal">
+                  ({format(day.date, "MMM d")})
+                </span>
+              </h2>
+
+              <NSFWToggle value={showNSFW} onChange={onNSFWChange} />
+            </div>
 
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

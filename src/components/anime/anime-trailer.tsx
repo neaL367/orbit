@@ -1,4 +1,4 @@
-import { Trailer } from "@/anilist/utils/types";
+import { Trailer } from "@/anilist/modal/media";
 
 export function AnimeTrailer({
   trailer,

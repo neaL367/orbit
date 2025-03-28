@@ -1,113 +1,39 @@
-import { AnilistResponse, GenreResponse, MediaResponse, PageResponse, PaginationParams } from "@/anilist/utils/types"
+
+import { AnilistResponse } from "../modal/common"
+import { GenreResponse, MediaResponse, PageResponse, PaginationParams } from "../modal/response"
 import { apiRequest } from "../utils/api-request"
-import { BASE_MEDIA_FIELDS } from "../utils/fragments"
+import { BASE_MEDIA_FIELDS, MEDIA_DETAILS_FIELDS } from "../utils/fragments"
 
 export const GenreQueries = {
-
-    async getGenres(): Promise<AnilistResponse<GenreResponse>> {
-        const query = `
+  async getGenres(): Promise<AnilistResponse<GenreResponse>> {
+    const query = `
       query {
         GenreCollection
       }
     `
-        return apiRequest<GenreResponse>(query)
-    },
+    return apiRequest<GenreResponse>(query)
+  },
 
-    async getById(id: number): Promise<AnilistResponse<MediaResponse>> {
-        const query = `
+  async getById(id: number): Promise<AnilistResponse<MediaResponse>> {
+    const query = `
           query ($id: Int) {
             Media(id: $id, type: ANIME) {
-              ${BASE_MEDIA_FIELDS}
-              tags {
-                id
-                name
-                category
-              }
-              startDate {
-                year
-                month
-                day
-              }
-              endDate {
-                year
-                month
-                day
-              }
-              studios {
-                nodes {
-                  id
-                  name
-                }
-              }
-              characters(sort: ROLE, role: MAIN, page: 1, perPage: 8) {
-                nodes {
-                  id
-                  name {
-                    full
-                  }
-                  image {
-                    medium
-                    large
-                  }
-                  gender
-                  age
-                }
-              }
-              relations {
-                edges {
-                  relationType
-                  node {
-                    id
-                    title {
-                      romaji
-                      english
-                    }
-                    format
-                    coverImage {
-                      medium
-                    }
-                  }
-                }
-              }
-              recommendations(page: 1, perPage: 8) {
-                nodes {
-                  mediaRecommendation {
-                    id
-                    title {
-                      romaji
-                      english
-                    }
-                    coverImage {
-                      medium
-                    }
-                  }
-                }
-              }
-              trailer {
-                id
-                site
-                thumbnail
-              }
-              externalLinks {
-                id
-                url
-                site
-              }
+              ${MEDIA_DETAILS_FIELDS}
             }
           }
         `
-        return apiRequest<MediaResponse>(query, { id })
-    },
+    return apiRequest<MediaResponse>(query, { id })
+  },
 
-    // Genre-based anime fetching
-    async getByGenre({
-        genre,
-        page = 1,
-        perPage = 20,
-    }: {
-        genre: string
-    } & PaginationParams): Promise<AnilistResponse<PageResponse>> {
-        const query = `
+  // Genre-based anime fetching
+  async getByGenre({
+    genre,
+    page = 1,
+    perPage = 20,
+  }: {
+    genre: string
+  } & PaginationParams): Promise<AnilistResponse<PageResponse>> {
+    const query = `
           query ($page: Int, $perPage: Int, $genre: String) {
             Page(page: $page, perPage: $perPage) {
               pageInfo {
@@ -123,6 +49,7 @@ export const GenreQueries = {
             }
           }
         `
-        return apiRequest<PageResponse>(query, { page, perPage, genre })
-    },
+    return apiRequest<PageResponse>(query, { page, perPage, genre })
+  },
 }
+

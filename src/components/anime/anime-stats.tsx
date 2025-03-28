@@ -1,23 +1,33 @@
-import { AnimeMedia } from "@/anilist/utils/types"
-import { Star, Users, PlayCircle, Clock, Calendar } from "lucide-react"
+import { AnimeMedia } from "@/anilist/modal/media";
+import { Star, Users, PlayCircle, Clock, Calendar } from "lucide-react";
 
 export function AnimeStats({ anime }: { anime: AnimeMedia }) {
   // Format date
   const formatDate = (date?: {
-    year?: number | null
-    month?: number | null
-    day?: number | null
+    year?: number | null;
+    month?: number | null;
+    day?: number | null;
   }) => {
-    if (!date || !date.year) return "TBA"
-    return new Date(date.year, (date.month || 1) - 1, date.day || 1).toLocaleDateString("en-US", {
+    if (!date || !date.year) return "TBA";
+    return new Date(
+      date.year,
+      (date.month || 1) - 1,
+      date.day || 1
+    ).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
-  const startDate = formatDate(anime.startDate)
-  const endDate = anime.status === "FINISHED" ? formatDate(anime.endDate) : "Ongoing"
+  const startDate = formatDate(anime.startDate);
+  const endDate =
+    anime.status === "FINISHED" ? formatDate(anime.endDate) : "Ongoing";
+
+  // Format studios: join names if studios are available.
+  const studios = anime.studios?.nodes?.length
+    ? anime.studios.nodes.map((studio) => studio.name).join(", ")
+    : null;
 
   return (
     <div className="flex flex-wrap justify-center md:justify-start gap-3.5 p-4 bg-card rounded-lg border border-border shadow-sm">
@@ -50,14 +60,27 @@ export function AnimeStats({ anime }: { anime: AnimeMedia }) {
       )}
 
       {anime.startDate?.year && (
-        <div className="flex items-center gap-2 text-sm col-span-2 sm:col-span-1">
+        <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4" />
           <span>
             {startDate} - {endDate}
           </span>
         </div>
       )}
-    </div>
-  )
-}
 
+      {studios && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-bold">Studios:</span>
+          <span>{studios}</span>
+        </div>
+      )}
+
+      {anime.source && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-bold">Source:</span>
+          <span>{anime.source}</span>
+        </div>
+      )}
+    </div>
+  );
+}

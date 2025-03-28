@@ -6,28 +6,9 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatStatus } from "@/anilist/utils/formatters";
+import { AnimeMedia } from "@/anilist/modal/media";
 
-interface AnimeCardProps {
-  anime: {
-    id: number;
-    title: {
-      romaji: string;
-      english: string | null;
-      native: string;
-    };
-    coverImage: {
-      large: string | null;
-      medium: string | null;
-    };
-    genres: string[];
-    averageScore: number | null;
-    status: string;
-    season?: string | null;
-    seasonYear?: number | null;
-  };
-}
-
-export default function AnimeCard({ anime }: AnimeCardProps) {
+export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const [isHovering, setIsHovering] = useState(false);
   const title = anime.title.english || anime.title.romaji;
 
@@ -40,7 +21,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
           <Image
-            src={anime.coverImage.large || anime.coverImage.medium || ""}
+            src={anime.coverImage.large || anime.coverImage.color || ""}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -50,7 +31,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
 
           {/* Score Badge */}
           {anime.averageScore && anime.averageScore > 0 && (
-            <div className="absolute right-2 top-2 rounded-full px-2 py-1 text-xs font-bold bg-gradient-to-r from-primary to-purple-400 transition-all z-10">
+            <div className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-white text-zinc-950 z-10">
               {anime.averageScore}%
             </div>
           )}

@@ -1,34 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 interface NSFWToggleProps {
-  onChange: (showNSFW: boolean) => void;
+  value?: boolean;
+  onChange: (value: boolean) => void;
 }
 
-export default function NSFWToggle({ onChange }: NSFWToggleProps) {
-  const [showNSFW, setShowNSFW] = useState(false);
-
-  const handleToggleChange = (checked: boolean) => {
-    setShowNSFW(checked);
-    onChange(checked);
-  };
-
+export default function NSFWToggle({ value = false, onChange }: NSFWToggleProps) {
   return (
-    <div className="flex items-center space-x-2 p-2 rounded-md">
-      <AlertCircle className="h-4 w-4 text-muted-foreground" />
-      <Label htmlFor="nsfw-toggle" className="text-sm cursor-pointer">
-        Show NSFW/R18 Content
-      </Label>
-      <Switch
-        id="nsfw-toggle"
-        checked={showNSFW}
-        onCheckedChange={handleToggleChange}
-        aria-label="Toggle NSFW content"
-      />
-    </div>
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors hover:cursor-pointer"
+    >
+      {value ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+      <span>{value ? "Hide NSFW" : "Show NSFW"}</span>
+    </button>
   );
 }

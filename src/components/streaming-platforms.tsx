@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ScheduleItem } from "@/anilist/utils/types";
+import { ScheduleItem } from "@/anilist/modal/response";
 
 // Streaming platforms mapping
 const STREAMING_PLATFORMS = {

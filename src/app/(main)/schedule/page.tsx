@@ -4,10 +4,10 @@ import ScheduleContent from "@/components/schedule/schedule-content";
 
 export default function SchedulePage() {
   return (
-    <main className="mt-24 mb-24">
+    <div className="">
       <Suspense fallback={<ScheduleSkeleton />}>
         <ScheduleContent />
       </Suspense>
-    </main>
+    </div>
   );
 }

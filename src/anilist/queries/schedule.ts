@@ -1,16 +1,18 @@
-import { AnilistResponse, PaginationParams, SchedulePageResponse } from "@/anilist/utils/types";
-import { apiRequest } from "../utils/api-request";
+import { AnilistResponse } from "../modal/common"
+import { PaginationParams, SchedulePageResponse } from "../modal/response"
+import { apiRequest } from "../utils/api-request"
+import { SCHEDULE_FIELDS } from "../utils/fragments"
 
 export const ScheduleQueries = {
-    async getAiringSchedule({
-        page = 1,
-        perPage = 50,
-    }: PaginationParams = {}): Promise<AnilistResponse<SchedulePageResponse>> {
-        // Get current timestamp and timestamp for 7 days later
-        const now = Math.floor(Date.now() / 1000)
-        const oneWeekLater = now + 604800
+  async getAiringSchedule({
+    page = 1,
+    perPage = 50,
+  }: PaginationParams = {}): Promise<AnilistResponse<SchedulePageResponse>> {
+    // Get current timestamp and timestamp for 7 days later
+    const now = Math.floor(Date.now() / 1000)
+    const oneWeekLater = now + 604800
 
-        const query = `
+    const query = `
         query ($page: Int, $perPage: Int, $airingAtGreater: Int, $airingAtLesser: Int) {
           Page(page: $page, perPage: $perPage) {
             pageInfo {
@@ -21,85 +23,45 @@ export const ScheduleQueries = {
               perPage
             }
             airingSchedules(airingAt_greater: $airingAtGreater, airingAt_lesser: $airingAtLesser, sort: TIME) {
-              id
-              airingAt
-              timeUntilAiring
-              episode
-              media {
-                id
-                title {
-                  romaji
-                  english
-                  native
-                }
-                coverImage {
-                  large
-                  medium
-                }
-                duration
-                episodes
-                format
-                status
-                isAdult
-              }
+              ${SCHEDULE_FIELDS}
             }
           }
         }
       `
 
-        return apiRequest<SchedulePageResponse>(query, {
-            page,
-            perPage,
-            airingAtGreater: now,
-            airingAtLesser: oneWeekLater,
-        })
-    },
+    return apiRequest<SchedulePageResponse>(query, {
+      page,
+      perPage,
+      airingAtGreater: now,
+      airingAtLesser: oneWeekLater,
+    })
+  },
 
-    // Get upcoming premieres (first episodes)
-    async getUpcomingPremieres({
-        page = 1,
-        perPage = 10,
-    }: PaginationParams = {}): Promise<AnilistResponse<SchedulePageResponse>> {
-        // Get current timestamp and timestamp for 30 days later
-        const now = Math.floor(Date.now() / 1000)
-        const oneMonthLater = now + 2592000
+  // Get upcoming premieres (first episodes)
+  async getUpcomingPremieres({
+    page = 1,
+    perPage = 10,
+  }: PaginationParams = {}): Promise<AnilistResponse<SchedulePageResponse>> {
+    // Get current timestamp and timestamp for 30 days later
+    const now = Math.floor(Date.now() / 1000)
+    const oneMonthLater = now + 2592000
 
-        const query = `
+    const query = `
         query ($page: Int, $perPage: Int, $airingAtGreater: Int, $airingAtLesser: Int) {
           Page(page: $page, perPage: $perPage) {
             airingSchedules(episode: 1, airingAt_greater: $airingAtGreater, airingAt_lesser: $airingAtLesser, sort: TIME) {
-              id
-              airingAt
-              timeUntilAiring
-              episode
-              media {
-                id
-                title {
-                  romaji
-                  english
-                  native
-                }
-                coverImage {
-                  large
-                  medium
-                }
-                bannerImage
-                duration
-                episodes
-                format
-                status
-                isAdult
-              }
+              ${SCHEDULE_FIELDS}
             }
           }
         }
       `
 
-        return apiRequest<SchedulePageResponse>(query, {
-            page,
-            perPage,
-            airingAtGreater: now,
-            airingAtLesser: oneMonthLater,
-        })
-    },
-};
+    return apiRequest<SchedulePageResponse>(query, {
+      page,
+      perPage,
+      airingAtGreater: now,
+      airingAtLesser: oneMonthLater,
+    })
+  },
+}
+

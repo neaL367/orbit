@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LoadingAnimeDetails } from "@/components/loading-anime";
-import { AnimeDetails } from "@/components/anime/anime-details";
+import { AnimeContent } from "@/components/anime/anime-content";
 import { GenreQueries } from "@/anilist/queries/genre";
-
-export const experimental_ppr = true;
 
 interface AnimePageProps {
   params: Promise<{
@@ -28,10 +26,10 @@ export default async function AnimePage(props: AnimePageProps) {
   }
 
   return (
-    <main>
+    <div>
       <Suspense fallback={<LoadingAnimeDetails />}>
-        <AnimeDetails anime={anime} />
+        <AnimeContent anime={anime} />
       </Suspense>
-    </main>
+    </div>
   );
 }

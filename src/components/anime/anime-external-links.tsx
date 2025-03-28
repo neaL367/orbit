@@ -1,4 +1,4 @@
-import { ExternalLink } from "@/anilist/utils/types"
+import { ExternalLink } from "@/anilist/modal/media"
 import { Link } from "lucide-react"
 
 export function AnimeExternalLinks({ links }: { links: ExternalLink[] }) {

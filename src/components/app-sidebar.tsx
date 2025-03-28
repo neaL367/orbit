@@ -9,6 +9,8 @@ import {
   CalendarDays,
   Clock,
   Orbit,
+  Trophy,
+  Star,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,6 +37,16 @@ const menuItems = [
     icon: TrendingUp,
   },
   {
+    title: "All Time Popular",
+    url: "/all-time-popular",
+    icon: Star,
+  },
+  {
+    title: "Top 100",
+    url: "/top-rated",
+    icon: Trophy,
+  },
+  {
     title: "Genres",
     url: "/genres",
     icon: List,
@@ -55,11 +67,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar
-      className="border-r border-zinc-800"
-      collapsible="icon"
-      // variant="inset"
-    >
+    <Sidebar className="border-r border-zinc-800" collapsible="icon">
       {/* Sidebar Header */}
       <SidebarHeader className="py-6 bg-zinc-950 transition-all">
         <div className="flex items-center justify-center gap-2 px-4 overflow-hidden">
@@ -90,17 +98,11 @@ export function AppSidebar() {
                         href={item.url}
                         className={`group flex items-center gap-3 group-data-[collapsible=icon]:ml-0 ml-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 ${
                           isActive
-                            ? "bg-primary/10 text-primary font-medium "
-                            : "text-gray-300  hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-purple-400"
+                            ? "bg-gradient-to-r from-primary/30 to-purple-400/30 text-white font-medium"
+                            : "text-gray-400 hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 duration-300 transition-all"
                         }`}
                       >
-                        <item.icon
-                          className={`h-4.5 w-4.5 shrink-0 ${
-                            isActive
-                              ? "text-primary"
-                              : "group-hover:text-white transition-all"
-                          }`}
-                        />
+                        <item.icon className="h-4.5 w-4.5 shrink-0 stroke-current duration-300transition-all" />
                         <span className="truncate">{item.title}</span>
                         {isActive && (
                           <div className="group-data-[collapsible=icon]:hidden absolute -left-1 w-1 h-5 bg-gradient-to-b from-primary to-purple-400 rounded-r-full"></div>

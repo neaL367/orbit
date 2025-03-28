@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { ScheduleQueries } from "@/anilist/queries/schedule";
-import { PremiereItem, ScheduleItem } from "@/anilist/utils/types";
 import { format } from "date-fns";
 import CountdownBanner from "@/components/schedule/schedule-banner";
-import NSFWToggle from "../nsfw-toggle";
 import ScheduleTabs from "./schedule-tabs";
-
-
+import { PremiereItem } from "@/anilist/modal/media";
+import { ScheduleItem } from "@/anilist/modal/response";
 
 export default function ScheduleContent() {
   const [weeklySchedule, setWeeklySchedule] = useState<
@@ -26,8 +24,13 @@ export default function ScheduleContent() {
       try {
         // Initialize empty schedule for all days
         const initialSchedule: Record<string, ScheduleItem[]> = {
-          sunday: [], monday: [], tuesday: [], wednesday: [], 
-          thursday: [], friday: [], saturday: []
+          sunday: [],
+          monday: [],
+          tuesday: [],
+          wednesday: [],
+          thursday: [],
+          friday: [],
+          saturday: [],
         };
 
         // Fetch airing schedule for the current week
@@ -52,8 +55,13 @@ export default function ScheduleContent() {
 
           // Map to weekday names
           const weekdayMap = {
-            0: "sunday", 1: "monday", 2: "tuesday", 3: "wednesday", 
-            4: "thursday", 5: "friday", 6: "saturday"
+            0: "sunday",
+            1: "monday",
+            2: "tuesday",
+            3: "wednesday",
+            4: "thursday",
+            5: "friday",
+            6: "saturday",
           };
 
           const weekday = weekdayMap[dayIndex as keyof typeof weekdayMap];
@@ -76,11 +84,9 @@ export default function ScheduleContent() {
 
         const premieres = premieresResponse.data.Page.airingSchedules
           .filter((schedule) => schedule.episode === 1)
-          .filter(
-            (schedule) => showNSFW || !schedule.media.isAdult
-          )
+          .filter((schedule) => showNSFW || !schedule.media.isAdult)
           .map((schedule) => ({
-            id: schedule.media.id,
+            id: schedule.id,
             title: schedule.media.title,
             coverImage: schedule.media.coverImage,
             bannerImage: schedule.media.bannerImage,
@@ -108,13 +114,12 @@ export default function ScheduleContent() {
         <CountdownBanner premieres={upcomingPremieres} />
       )}
 
-      {/* NSFW Toggle */}
-      <NSFWToggle onChange={setShowNSFW} />
-
       {/* Weekly Schedule Tabs */}
-      <ScheduleTabs 
-        weeklySchedule={weeklySchedule} 
-        isLoading={isLoading} 
+      <ScheduleTabs
+        weeklySchedule={weeklySchedule}
+        isLoading={isLoading}
+        showNSFW={showNSFW}
+        onNSFWChange={setShowNSFW}
       />
     </div>
   );

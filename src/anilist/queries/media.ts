@@ -1,6 +1,7 @@
-import { AnilistResponse, PageResponse, PaginationParams } from "@/anilist/utils/types";
 import { BASE_MEDIA_FIELDS } from "../utils/fragments";
 import { apiRequest } from "../utils/api-request";
+import { PageResponse, PaginationParams } from "../modal/response";
+import { AnilistResponse } from "../modal/common";
 
 
 export const MediaQueries = {
@@ -78,5 +79,26 @@ export const MediaQueries = {
       season: season.toUpperCase(),
       seasonYear: year,
     })
+  },
+
+  // Top rated anime sorted by score
+  async getTopRated({ page = 1, perPage = 20 }: PaginationParams = {}): Promise<AnilistResponse<PageResponse>> {
+    const query = `
+        query ($page: Int, $perPage: Int) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo {
+              total
+              currentPage
+              lastPage
+              hasNextPage
+              perPage
+            }
+            media(sort: SCORE_DESC, type: ANIME) {
+              ${BASE_MEDIA_FIELDS}
+            }
+          }
+        }
+      `
+    return apiRequest<PageResponse>(query, { page, perPage })
   },
 };

@@ -3,6 +3,7 @@ import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { SearchQueries } from "@/anilist/queries/search";
+import { AnimeMedia } from "@/anilist/modal/media";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -29,7 +30,7 @@ export default async function SearchPage(props: SearchPageProps) {
   };
 
   return (
-    <main className="mt-24 mb-24">
+    <div className="">
       <h1 className="mb-2 text-3xl font-bold">Search Results</h1>
 
       {query ? (
@@ -41,7 +42,7 @@ export default async function SearchPage(props: SearchPageProps) {
           <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
             {animeList.length > 0 ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {animeList.map((anime) => (
+                {animeList.map((anime: AnimeMedia) => (
                   <AnimeCard key={anime.id} anime={anime} />
                 ))}
               </div>
@@ -71,6 +72,6 @@ export default async function SearchPage(props: SearchPageProps) {
           </p>
         </div>
       )}
-    </main>
+    </div>
   );
 }

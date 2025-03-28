@@ -1,7 +1,7 @@
 import { Link } from "next-view-transitions";
 import { Badge } from "@/components/ui/badge";
 import { formatFormat, formatStatus } from "@/anilist/utils/formatters";
-import { AnimeMedia } from "@/anilist/utils/types";
+import { AnimeMedia } from "@/anilist/modal/media";
 
 export function AnimeHeader({ anime }: { anime: AnimeMedia }) {
   const title = anime.title.english || anime.title.romaji;
