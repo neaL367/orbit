@@ -13,7 +13,7 @@ export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const title = anime.title.english || anime.title.romaji;
 
   return (
-    <Link href={`/anime/${anime.id}`} prefetch={false}>
+    <Link href={`/anime/${anime.id}`}>
       <Card
         className="h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
