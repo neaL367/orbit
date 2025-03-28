@@ -83,7 +83,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       {/* Sidebar Content */}
-      <SidebarContent className="bg-zinc-950 sm:overflow-y-scroll">
+      <SidebarContent className="bg-zinc-950 max-sm:overflow-y-scroll">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-gray-400 px-7 mb-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
             Menu
