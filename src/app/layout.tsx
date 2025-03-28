@@ -40,7 +40,7 @@ export default async function RootLayout({
                 <AppSidebar />
                 <div className="flex flex-col w-full  dark:bg-zinc-950">
                   <Header />
-                  <main className="mx-4 md:mx-16 px-4 max-w-full">
+                  <main className="mx-4 md:mx-16 sm:px-4 max-w-full">
                     {children}
                   </main>
                 </div>

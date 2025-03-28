@@ -95,13 +95,13 @@ export default function ScheduleBanner({ premieres }: CountdownBannerProps) {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 flex flex-col justify-center my-4 px-6 md:px-12">
+        <div className="absolute inset-0 flex flex-col justify-center py-4 px-6 md:px-12">
           <div className="max-w-3xl">
             <div className="inline-block bg-primary bg-gradient-to-r to-purple-400 text-primary-foreground px-3 py-1 rounded-md text-xs font-medium mb-4">
               UPCOMING PREMIERE
             </div>
 
-            <h2 className="text-white text-sm md:text-2xl font-bold mb-2">
+            <h2 className="text-white text-sm md:text-2xl font-bold mb-2 line-clamp-1">
               {currentPremiere.title.english || currentPremiere.title.romaji}
             </h2>
 

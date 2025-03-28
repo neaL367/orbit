@@ -43,14 +43,13 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
               >
                 <div className="relative aspect-[3/4] w-full overflow-hidden">
                   <Image
-                    src={
-                      character.node.image.large || "/placeholder-character.png"
-                    }
+                    src={character.node.image.large || ""}
                     alt={character.node.name.full}
                     fill
                     className="object-cover transition-transform duration-300 
                 group-hover:scale-110 brightness-[0.9] group-hover:brightness-100"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    priority
                   />
                 </div>
                 <CardContent className="p-3 flex flex-col items-center justify-between flex-grow">
@@ -67,6 +66,8 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                             fill
                             className="object-cover rounded-full border-2 border-primary/20 
                       transition-transform duration-300 group-hover:scale-105"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            priority
                           />
                         </div>
                         <span className="text-xs text-muted-foreground text-center line-clamp-1">
@@ -105,7 +106,8 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                       }
                       fill
                       className="object-cover brightness-85"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      priority
                     />
                   </div>
                   <CardContent className="p-3">

@@ -29,7 +29,7 @@ export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
           <div className="p-3 flex flex-col justify-between flex-1">
             <div>
               <Link href={`/anime/${anime.id}`}>
-                <h3 className="font-medium line-clamp-1 transition-colors">
+                <h3 className="sm:font-medium text-sm sm:text-base line-clamp-1 transition-colors">
                   {anime.title.english || anime.title.romaji}
                 </h3>
               </Link>
@@ -38,13 +38,13 @@ export default function ScheduleCard({ anime }: { anime: ScheduleItem }) {
                   NSFW
                 </span>
               )}
-              <div className="flex items-center text-sm text-muted-foreground mt-1">
+              <div className="flex items-center sm:text-sm text-xs text-muted-foreground mt-1">
                 <Clock className="h-3.5 w-3.5 mr-1" />
                 <span>{anime.airingTime} </span>
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center text-sm">
+              <div className="flex items-center sm:text-sm text-xs ">
                 <div className="flex items-center mr-3">
                   <Clock className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                   <span>{anime.duration} min</span>

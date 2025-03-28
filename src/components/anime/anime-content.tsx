@@ -38,7 +38,7 @@ export function AnimeContent({ anime }: { anime: AnimeMedia }) {
                 fill
                 priority
                 className="object-cover group-hover:scale-105 transition-transform duration-300 brightness-85"
-                sizes="(max-width: 640px) 100vw, 300px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             </div>
           </div>
