@@ -4,6 +4,7 @@ import AnimeCard from "@/components/anime/anime-card";
 import Pagination from "@/components/pagination";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { GenreQueries } from "@/anilist/queries/genre";
+import { Navigation } from "@/components/navigation";
 
 interface GenrePageProps {
   params: Promise<{
@@ -37,6 +38,8 @@ export default async function GenrePage(props: GenrePageProps) {
 
   return (
     <div className="">
+      <Navigation />
+
       <h1 className="mb-2 text-3xl font-bold">{genre} Anime</h1>
       <p className="mb-8 text-muted-foreground">
         Found {pageInfo.total || 0} anime in this genre

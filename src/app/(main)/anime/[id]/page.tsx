@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LoadingAnimeDetails } from "@/components/loading-anime";
 import { AnimeContent } from "@/components/anime/anime-content";
 import { GenreQueries } from "@/anilist/queries/genre";
+import { Navigation } from "@/components/navigation";
 
 interface AnimePageProps {
   params: Promise<{
@@ -27,6 +28,8 @@ export default async function AnimePage(props: AnimePageProps) {
 
   return (
     <div>
+      <Navigation />
+
       <Suspense fallback={<LoadingAnimeDetails />}>
         <AnimeContent anime={anime} />
       </Suspense>
