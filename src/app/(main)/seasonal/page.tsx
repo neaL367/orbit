@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import AnimeCard from "@/components/anime/anime-card";
-import Pagination from "@/components/pagination";
+import { InfiniteAnimeGrid } from "@/components/infinite-anime-grid";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { MediaQueries } from "@/anilist/queries/media";
 import { getCurrentSeason } from "@/anilist/utils/formatters";
-import { SeasonalFilters } from "../../../components/seasonal/seasonal-filters";
+import { SeasonalFilters } from "@/components/seasonal/seasonal-filters";
+import { fetchMoreSeasonalAnime } from "@/anilist/actions/anime-actions";
 
 interface SeasonalPageProps {
   searchParams: Promise<{
@@ -46,6 +46,12 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
   // Format season for display
   const formattedSeason = season.charAt(0) + season.slice(1).toLowerCase();
 
+  // Create a server action wrapper that captures the season and year
+  async function loadMoreAnimeForSeason(page: number) {
+    "use server";
+    return fetchMoreSeasonalAnime(season, year, page);
+  }
+
   return (
     <div className="">
       <h1 className="mb-2 text-3xl font-bold">
@@ -62,18 +68,13 @@ export default async function SeasonalPage(props: SeasonalPageProps) {
       />
 
       <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {animeList.map((anime) => (
-            <AnimeCard key={anime.id} anime={anime} />
-          ))}
-        </div>
+        <InfiniteAnimeGrid
+          initialAnime={animeList}
+          initialHasNextPage={pageInfo.hasNextPage}
+          loadMoreFunction={loadMoreAnimeForSeason}
+          initialPage={page}
+        />
       </Suspense>
-
-      <Pagination
-        currentPage={pageInfo.currentPage}
-        totalPages={pageInfo.lastPage}
-        hasNextPage={pageInfo.hasNextPage}
-      />
     </div>
   );
 }

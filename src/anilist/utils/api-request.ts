@@ -19,7 +19,7 @@ export async function apiRequest<T>(
       },
       body: JSON.stringify({ query, variables }),
       // Next.js specific revalidation configuration
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 }, // 24 Hour
       ...options,
     });
 
