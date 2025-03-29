@@ -66,6 +66,15 @@ export function InfiniteAnimeGrid({
           ? `Failed to load more anime: ${error.message}`
           : "Failed to load more anime. Please try again later."
       );
+      // Ensure hasNextPage is set to false if we hit a rate limit
+      if (
+        error instanceof Error &&
+        (error.message.includes("rate limit") ||
+          error.message.includes("429") ||
+          error.message.includes("too many requests"))
+      ) {
+        setHasNextPage(false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +90,8 @@ export function InfiniteAnimeGrid({
           entries[0].isIntersecting &&
           hasNextPage &&
           !isLoading &&
-          totalLoadedRef.current < maxItems
+          totalLoadedRef.current < maxItems &&
+          !error // Don't try to load more if there's an error
         ) {
           loadMoreAnime();
         }
@@ -103,7 +113,7 @@ export function InfiniteAnimeGrid({
       }
       observer.disconnect();
     };
-  }, [hasNextPage, isLoading, loadMoreAnime, maxItems]);
+  }, [hasNextPage, isLoading, loadMoreAnime, maxItems, error]);
 
   return (
     <>
@@ -127,7 +137,7 @@ export function InfiniteAnimeGrid({
 
       {/* Loading indicator and intersection observer target */}
       <div ref={loadMoreRef} className="mt-8 flex justify-center">
-        {isLoading && (
+        {isLoading && !error && (
           <div className="flex items-center justify-center p-4">
             <LoadingSpinner />
             <span className="ml-2 text-sm text-muted-foreground">
@@ -148,18 +158,13 @@ export function InfiniteAnimeGrid({
         )}
         {!isLoading && !error && (
           <>
-            {!hasNextPage && totalLoadedRef.current >= maxItems && (
+            {(!hasNextPage || totalLoadedRef.current >= maxItems) && (
               <p className="text-center text-muted-foreground py-4">
-                You&apos;ve reached the maximum number of items we can display!
+                {totalLoadedRef.current >= maxItems
+                  ? "You've reached the maximum number of items we can display!"
+                  : "You've reached the end of the list!"}
               </p>
             )}
-            {!hasNextPage &&
-              totalLoadedRef.current < maxItems &&
-              anime.length > 0 && (
-                <p className="text-center text-muted-foreground py-4">
-                  You&apos;ve reached the end of the list!
-                </p>
-              )}
           </>
         )}
       </div>
