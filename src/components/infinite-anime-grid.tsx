@@ -59,7 +59,6 @@ export function InfiniteAnimeGrid({
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
-      // Check if the error indicates a rate limit issue
       if (
         error instanceof Error &&
         (error.message.includes("rate limit") ||
@@ -70,8 +69,12 @@ export function InfiniteAnimeGrid({
         setRetryDelay(delaySeconds);
         setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);
       } else if (error instanceof Error && error.message.includes("500")) {
-        // Handle the 500 error specifically.
         setError("Internal server error (500): Please try again later.");
+      } else if (error instanceof Error && error.message.includes("402")) {
+        // Handle 402 error specifically.
+        setError(
+          "Payment required (402): Please check your subscription or plan."
+        );
       } else {
         setError(
           error instanceof Error
