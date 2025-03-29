@@ -23,10 +23,10 @@ export function InfiniteAnimeGrid({
   loadMoreFunction,
   showRank = false,
   maxItems = 500, // Default max items to prevent excessive loading
-  initialPage = 1,  // <--- destructure with default
+  initialPage = 1,
 }: InfiniteAnimeGridProps) {
   const [anime, setAnime] = useState<AnimeMedia[]>(initialAnime);
-  const [page, setPage] = useState(initialPage); 
+  const [page, setPage] = useState(initialPage);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,17 +44,28 @@ export function InfiniteAnimeGrid({
       const nextPage = page + 1;
       const result = await loadMoreFunction(nextPage);
 
-      if (result.anime.length > 0) {
-        setAnime((prev) => [...prev, ...result.anime]);
+      // Validate the result to ensure it has the expected structure
+      if (!result || typeof result !== "object") {
+        throw new Error("Invalid response format");
+      }
+
+      const resultAnime = result.anime || [];
+
+      if (resultAnime.length > 0) {
+        setAnime((prev) => [...prev, ...resultAnime]);
         setPage(nextPage);
-        setHasNextPage(result.hasNextPage);
-        totalLoadedRef.current += result.anime.length;
+        setHasNextPage(!!result.hasNextPage);
+        totalLoadedRef.current += resultAnime.length;
       } else {
         setHasNextPage(false);
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
-      setError("Failed to load more anime. Please try again later.");
+      setError(
+        error instanceof Error
+          ? `Failed to load more anime: ${error.message}`
+          : "Failed to load more anime. Please try again later."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -62,17 +73,20 @@ export function InfiniteAnimeGrid({
 
   // Set up intersection observer to detect when user scrolls to the bottom
   useEffect(() => {
+    if (!hasNextPage || totalLoadedRef.current >= maxItems) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (
           entries[0].isIntersecting &&
           hasNextPage &&
+          !isLoading &&
           totalLoadedRef.current < maxItems
         ) {
           loadMoreAnime();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: "100px" }
     );
 
     // Store the current value of the ref
@@ -87,8 +101,9 @@ export function InfiniteAnimeGrid({
       if (currentLoadMoreElement) {
         observer.unobserve(currentLoadMoreElement);
       }
+      observer.disconnect();
     };
-  }, [hasNextPage, loadMoreAnime, maxItems]);
+  }, [hasNextPage, isLoading, loadMoreAnime, maxItems]);
 
   return (
     <>
@@ -125,21 +140,27 @@ export function InfiniteAnimeGrid({
             <p>{error}</p>
             <button
               onClick={() => loadMoreAnime()}
-              className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md"
+              className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               Try Again
             </button>
           </div>
         )}
-        {!hasNextPage && totalLoadedRef.current >= maxItems && (
-          <p className="text-center text-muted-foreground py-4">
-            You&apos;ve reached the maximum number of items we can display!
-          </p>
-        )}
-        {!hasNextPage && totalLoadedRef.current < maxItems && (
-          <p className="text-center text-muted-foreground py-4">
-            You&apos;ve reached the end of the list!
-          </p>
+        {!isLoading && !error && (
+          <>
+            {!hasNextPage && totalLoadedRef.current >= maxItems && (
+              <p className="text-center text-muted-foreground py-4">
+                You&apos;ve reached the maximum number of items we can display!
+              </p>
+            )}
+            {!hasNextPage &&
+              totalLoadedRef.current < maxItems &&
+              anime.length > 0 && (
+                <p className="text-center text-muted-foreground py-4">
+                  You&apos;ve reached the end of the list!
+                </p>
+              )}
+          </>
         )}
       </div>
     </>

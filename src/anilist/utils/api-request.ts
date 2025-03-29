@@ -1,14 +1,13 @@
-import { AnilistResponse, GraphQLVariables } from "../modal/common";
+import type { AnilistResponse, GraphQLVariables } from "../modal/common"
 
 const ANILIST_API = "https://graphql.anilist.co" as const
-
 
 export async function apiRequest<T>(
   query: string,
   variables: GraphQLVariables = {},
   options: RequestInit = {},
-  retries: number = 3,
-  backoff: number = 500 // starting backoff in ms
+  retries = 3,
+  backoff = 500, // starting backoff in ms
 ): Promise<AnilistResponse<T>> {
   try {
     const response = await fetch(ANILIST_API, {
@@ -21,26 +20,35 @@ export async function apiRequest<T>(
       // Next.js specific revalidation configuration
       next: { revalidate: 86400 }, // 24 Hour
       ...options,
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`AniList API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text()
+      throw new Error(`AniList API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
-    const data = (await response.json()) as AnilistResponse<T>;
+    const data = (await response.json()) as AnilistResponse<T>
+
+    // Check for GraphQL errors
+    if (data.errors && data.errors.length > 0) {
+      const errorMessage = data.errors.map((e) => e.message).join(", ")
+      throw new Error(`GraphQL errors: ${errorMessage}`)
+    }
+
     if (!data?.data) {
-      throw new Error("Invalid API response");
+      throw new Error("Invalid API response: No data returned")
     }
 
-    return data;
+    return data
   } catch (error) {
     if (retries > 0) {
-      console.warn(`Request failed. Retrying in ${backoff}ms... (${retries} retries left)`);
-      await new Promise((resolve) => setTimeout(resolve, backoff));
+      console.warn(`Request failed. Retrying in ${backoff}ms... (${retries} retries left)`)
+      await new Promise((resolve) => setTimeout(resolve, backoff))
       // Increase backoff delay for next retry
-      return apiRequest(query, variables, options, retries - 1, backoff * 2);
+      return apiRequest(query, variables, options, retries - 1, backoff * 2)
     }
-    console.error("AniList API request failed:", error);
-    throw error;
+    console.error("AniList API request failed:", error)
+    throw error
   }
 }
+

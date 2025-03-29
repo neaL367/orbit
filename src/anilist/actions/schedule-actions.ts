@@ -23,10 +23,10 @@ export async function fetchWeeklySchedule(showNSFW: boolean = false) {
             perPage: 50,
         });
 
-        const airingSchedules = response.data.Page.airingSchedules;
+        const airingSchedules = response.data?.Page.airingSchedules;
 
         // Process each airing schedule
-        airingSchedules.forEach((schedule) => {
+        airingSchedules?.forEach((schedule) => {
             // Skip adult content if filter is disabled
             if (!showNSFW && schedule.media.isAdult) {
                 return;
@@ -75,7 +75,7 @@ export async function fetchUpcomingPremieres(showNSFW: boolean = false) {
             perPage: 10,
         });
 
-        const premieres = premieresResponse.data.Page.airingSchedules
+        const premieres = premieresResponse.data?.Page.airingSchedules
             .filter((schedule) => schedule.episode === 1)
             .filter((schedule) => showNSFW || !schedule.media.isAdult)
             .map((schedule) => ({
