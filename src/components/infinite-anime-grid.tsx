@@ -30,7 +30,18 @@ export function InfiniteAnimeGrid({
   const [error, setError] = useState<string | null>(null);
   // State for managing the retry delay (in seconds)
   const [retryDelay, setRetryDelay] = useState<number | null>(null);
+  // Track retry attempts for different error types
+  const [retryAttempts, setRetryAttempts] = useState<{ [key: string]: number }>(
+    {
+      rateLimit: 0,
+      serverError: 0,
+      other: 0,
+    }
+  );
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Maximum number of retries for different error types
+  const MAX_SERVER_ERROR_RETRIES = 3;
 
   const loadMoreAnime = useCallback(async () => {
     // Only proceed if we're not loading, there is a next page, and we're not in a retry delay.
@@ -54,28 +65,59 @@ export function InfiniteAnimeGrid({
         setAnime((prev) => [...prev, ...resultAnime]);
         setPage(nextPage);
         setHasNextPage(!!result.hasNextPage);
+
+        // Reset retry attempts on successful load
+        setRetryAttempts({
+          rateLimit: 0,
+          serverError: 0,
+          other: 0,
+        });
       } else {
         setHasNextPage(false);
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
+
       if (
         error instanceof Error &&
         (error.message.includes("rate limit") ||
           error.message.includes("429") ||
           error.message.includes("too many requests"))
       ) {
+        // Rate limit error handling
         const delaySeconds = 30;
         setRetryDelay(delaySeconds);
         setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);
+        setRetryAttempts((prev) => ({
+          ...prev,
+          rateLimit: prev.rateLimit + 1,
+        }));
       } else if (error instanceof Error && error.message.includes("500")) {
-        setError("Internal server error (500): Please try again later.");
-      } else if (error instanceof Error && error.message.includes("402")) {
-        // Handle 402 error specifically.
-        setError(
-          "Payment required (402): Please check your subscription or plan."
-        );
+        // Server error handling with exponential backoff
+        const attempts = retryAttempts.serverError + 1;
+        setRetryAttempts((prev) => ({
+          ...prev,
+          serverError: attempts,
+        }));
+
+        if (attempts <= MAX_SERVER_ERROR_RETRIES) {
+          // Calculate exponential backoff: 2^attempts seconds (2, 4, 8, etc.)
+          const backoffSeconds = Math.min(Math.pow(2, attempts), 60); // Cap at 60 seconds
+          setRetryDelay(backoffSeconds);
+          setError(
+            `Server error (500). Automatic retry ${attempts}/${MAX_SERVER_ERROR_RETRIES} in ${backoffSeconds} seconds...`
+          );
+        } else {
+          setError(
+            "Server error (500): Maximum retry attempts reached. Please try again later or refresh the page."
+          );
+        }
       } else {
+        // Other errors
+        setRetryAttempts((prev) => ({
+          ...prev,
+          other: prev.other + 1,
+        }));
         setError(
           error instanceof Error
             ? `Failed to load more anime: ${error.message}`
@@ -85,7 +127,14 @@ export function InfiniteAnimeGrid({
     } finally {
       setIsLoading(false);
     }
-  }, [hasNextPage, isLoading, loadMoreFunction, page, retryDelay]);
+  }, [
+    hasNextPage,
+    isLoading,
+    loadMoreFunction,
+    page,
+    retryDelay,
+    retryAttempts,
+  ]);
 
   // Effect to handle retry countdown
   useEffect(() => {
@@ -127,6 +176,11 @@ export function InfiniteAnimeGrid({
     };
   }, [hasNextPage, isLoading, loadMoreAnime, error]);
 
+  // Function to handle manual refresh of the entire component
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <>
       <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -163,20 +217,33 @@ export function InfiniteAnimeGrid({
         {retryDelay !== null && (
           <div className="text-center text-orange-500 py-4">
             <p>
-              Rate limited. Retrying in {retryDelay} second
-              {retryDelay > 1 ? "s" : ""}...
+              {error ||
+                `Retrying in ${retryDelay} second${
+                  retryDelay > 1 ? "s" : ""
+                }...`}
             </p>
           </div>
         )}
         {error && retryDelay === null && (
           <div className="text-center text-red-500 py-4">
             <p>{error}</p>
-            <button
-              onClick={() => loadMoreAnime()}
-              className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Try Again
-            </button>
+            <div className="flex gap-2 justify-center mt-2">
+              <button
+                onClick={() => loadMoreAnime()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Try Again
+              </button>
+              {error.includes("500") &&
+                retryAttempts.serverError >= MAX_SERVER_ERROR_RETRIES && (
+                  <button
+                    onClick={handleRefresh}
+                    className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
+                  >
+                    Refresh Page
+                  </button>
+                )}
+            </div>
           </div>
         )}
       </div>
