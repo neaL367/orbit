@@ -22,7 +22,7 @@ export function InfiniteAnimeGrid({
   initialHasNextPage,
   loadMoreFunction,
   showRank = false,
-  maxItems = 500, // Default max items to prevent excessive loading
+  maxItems = 500,
   initialPage = 1,
 }: InfiniteAnimeGridProps) {
   const [anime, setAnime] = useState<AnimeMedia[]>(initialAnime);
@@ -33,7 +33,6 @@ export function InfiniteAnimeGrid({
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const totalLoadedRef = useRef<number>(initialAnime.length);
 
-  // Load more anime when the user scrolls to the bottom
   const loadMoreAnime = useCallback(async () => {
     if (isLoading || !hasNextPage || totalLoadedRef.current >= maxItems) return;
 
@@ -61,20 +60,13 @@ export function InfiniteAnimeGrid({
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
+      // Instead of permanently disabling further requests on rate limits,
+      // you could simply show an error and let the user trigger a retry.
       setError(
         error instanceof Error
           ? `Failed to load more anime: ${error.message}`
           : "Failed to load more anime. Please try again later."
       );
-      // Ensure hasNextPage is set to false if we hit a rate limit
-      if (
-        error instanceof Error &&
-        (error.message.includes("rate limit") ||
-          error.message.includes("429") ||
-          error.message.includes("too many requests"))
-      ) {
-        setHasNextPage(false);
-      }
     } finally {
       setIsLoading(false);
     }
