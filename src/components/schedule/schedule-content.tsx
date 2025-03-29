@@ -35,7 +35,7 @@ export default function ScheduleContent() {
         ]);
 
         setWeeklySchedule(scheduleData);
-        setUpcomingPremieres(premieresData);
+        setUpcomingPremieres(premieresData || []);
       } catch (err) {
         console.error("Error loading schedule data:", err);
         setError("Failed to load schedule data. Please try again later.");
