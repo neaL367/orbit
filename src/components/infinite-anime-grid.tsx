@@ -13,7 +13,6 @@ interface InfiniteAnimeGridProps {
     hasNextPage: boolean;
   }>;
   showRank?: boolean;
-  maxItems?: number;
   initialPage?: number;
 }
 
@@ -70,6 +69,9 @@ export function InfiniteAnimeGrid({
         const delaySeconds = 30;
         setRetryDelay(delaySeconds);
         setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);
+      } else if (error instanceof Error && error.message.includes("500")) {
+        // Handle the 500 error specifically.
+        setError("Internal server error (500): Please try again later.");
       } else {
         setError(
           error instanceof Error

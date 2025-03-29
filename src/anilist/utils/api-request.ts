@@ -33,7 +33,13 @@ export async function apiRequest<T>(
     }
 
     if (!response.ok) {
-      throw new Error(`AniList API error: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        if (response.status === 500) {
+          throw new Error("Internal Server Error (500): Please try again later.");
+        }
+        throw new Error(`AniList API error: ${response.status} ${response.statusText}`);
+      }
+
     }
 
     const data = (await response.json()) as AnilistResponse<T>;
