@@ -22,7 +22,6 @@ export function InfiniteAnimeGrid({
   initialHasNextPage,
   loadMoreFunction,
   showRank = false,
-  maxItems = 500,
   initialPage = 1,
 }: InfiniteAnimeGridProps) {
   const [anime, setAnime] = useState<AnimeMedia[]>(initialAnime);
@@ -37,12 +36,7 @@ export function InfiniteAnimeGrid({
 
   const loadMoreAnime = useCallback(async () => {
     // If we're already waiting for a retry, don't attempt another load.
-    if (
-      isLoading ||
-      !hasNextPage ||
-      totalLoadedRef.current >= maxItems ||
-      retryDelay
-    )
+    if (isLoading || !hasNextPage || totalLoadedRef.current || retryDelay)
       return;
 
     setIsLoading(true);
@@ -91,7 +85,7 @@ export function InfiniteAnimeGrid({
     } finally {
       setIsLoading(false);
     }
-  }, [hasNextPage, isLoading, loadMoreFunction, maxItems, page, retryDelay]);
+  }, [hasNextPage, isLoading, loadMoreFunction, page, retryDelay]);
 
   // Effect to handle retry countdown
   useEffect(() => {
@@ -110,7 +104,7 @@ export function InfiniteAnimeGrid({
 
   // Set up intersection observer to detect when user scrolls to the bottom
   useEffect(() => {
-    if (!hasNextPage || totalLoadedRef.current >= maxItems) return;
+    if (!hasNextPage || totalLoadedRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -118,7 +112,7 @@ export function InfiniteAnimeGrid({
           entries[0].isIntersecting &&
           hasNextPage &&
           !isLoading &&
-          totalLoadedRef.current < maxItems &&
+          totalLoadedRef.current &&
           !error // Don't try to load more if there's an error
         ) {
           loadMoreAnime();
@@ -139,7 +133,7 @@ export function InfiniteAnimeGrid({
       }
       observer.disconnect();
     };
-  }, [hasNextPage, isLoading, loadMoreAnime, maxItems, error]);
+  }, [hasNextPage, isLoading, loadMoreAnime, error]);
 
   return (
     <>
@@ -192,17 +186,6 @@ export function InfiniteAnimeGrid({
               Try Again
             </button>
           </div>
-        )}
-        {!isLoading && !error && retryDelay === null && (
-          <>
-            {(!hasNextPage || totalLoadedRef.current >= maxItems) && (
-              <p className="text-center text-muted-foreground py-4">
-                {totalLoadedRef.current >= maxItems
-                  ? "You've reached the maximum number of items we can display!"
-                  : "You've reached the end of the list!"}
-              </p>
-            )}
-          </>
         )}
       </div>
     </>
