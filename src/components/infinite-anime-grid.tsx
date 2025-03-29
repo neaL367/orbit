@@ -30,11 +30,20 @@ export function InfiniteAnimeGrid({
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // New state for managing the retry delay (in seconds)
+  const [retryDelay, setRetryDelay] = useState<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const totalLoadedRef = useRef<number>(initialAnime.length);
 
   const loadMoreAnime = useCallback(async () => {
-    if (isLoading || !hasNextPage || totalLoadedRef.current >= maxItems) return;
+    // If we're already waiting for a retry, don't attempt another load.
+    if (
+      isLoading ||
+      !hasNextPage ||
+      totalLoadedRef.current >= maxItems ||
+      retryDelay
+    )
+      return;
 
     setIsLoading(true);
     setError(null);
@@ -60,17 +69,44 @@ export function InfiniteAnimeGrid({
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
-      // Instead of permanently disabling further requests on rate limits,
-      // you could simply show an error and let the user trigger a retry.
-      setError(
-        error instanceof Error
-          ? `Failed to load more anime: ${error.message}`
-          : "Failed to load more anime. Please try again later."
-      );
+      // Check if the error message indicates a rate limit issue
+      if (
+        error instanceof Error &&
+        (error.message.includes("rate limit") ||
+          error.message.includes("429") ||
+          error.message.includes("too many requests"))
+      ) {
+        // Ideally, your API helper would provide the delay in the error object.
+        // Here we default to 30 seconds if no specific delay is provided.
+        const delaySeconds = 30;
+        setRetryDelay(delaySeconds);
+        setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);
+      } else {
+        setError(
+          error instanceof Error
+            ? `Failed to load more anime: ${error.message}`
+            : "Failed to load more anime. Please try again later."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [hasNextPage, isLoading, loadMoreFunction, maxItems, page]);
+  }, [hasNextPage, isLoading, loadMoreFunction, maxItems, page, retryDelay]);
+
+  // Effect to handle retry countdown
+  useEffect(() => {
+    if (retryDelay === null) return;
+    if (retryDelay <= 0) {
+      setRetryDelay(null);
+      loadMoreAnime();
+      return;
+    }
+    const timer = setTimeout(
+      () => setRetryDelay((prev) => (prev !== null ? prev - 1 : null)),
+      1000
+    );
+    return () => clearTimeout(timer);
+  }, [retryDelay, loadMoreAnime]);
 
   // Set up intersection observer to detect when user scrolls to the bottom
   useEffect(() => {
@@ -91,7 +127,6 @@ export function InfiniteAnimeGrid({
       { threshold: 0.1, rootMargin: "100px" }
     );
 
-    // Store the current value of the ref
     const currentLoadMoreElement = loadMoreRef.current;
 
     if (currentLoadMoreElement) {
@@ -99,7 +134,6 @@ export function InfiniteAnimeGrid({
     }
 
     return () => {
-      // Use the stored value in the cleanup function
       if (currentLoadMoreElement) {
         observer.unobserve(currentLoadMoreElement);
       }
@@ -127,8 +161,11 @@ export function InfiniteAnimeGrid({
         ))}
       </div>
 
-      {/* Loading indicator and intersection observer target */}
-      <div ref={loadMoreRef} className="mt-8 flex justify-center">
+      {/* Loading indicator, retry message and intersection observer target */}
+      <div
+        ref={loadMoreRef}
+        className="mt-8 flex flex-col items-center justify-center"
+      >
         {isLoading && !error && (
           <div className="flex items-center justify-center p-4">
             <LoadingSpinner />
@@ -137,7 +174,15 @@ export function InfiniteAnimeGrid({
             </span>
           </div>
         )}
-        {error && (
+        {retryDelay !== null && (
+          <div className="text-center text-orange-500 py-4">
+            <p>
+              Rate limited. Retrying in {retryDelay} second
+              {retryDelay > 1 ? "s" : ""}...
+            </p>
+          </div>
+        )}
+        {error && retryDelay === null && (
           <div className="text-center text-red-500 py-4">
             <p>{error}</p>
             <button
@@ -148,7 +193,7 @@ export function InfiniteAnimeGrid({
             </button>
           </div>
         )}
-        {!isLoading && !error && (
+        {!isLoading && !error && retryDelay === null && (
           <>
             {(!hasNextPage || totalLoadedRef.current >= maxItems) && (
               <p className="text-center text-muted-foreground py-4">
