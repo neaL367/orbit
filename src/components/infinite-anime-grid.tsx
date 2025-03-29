@@ -29,15 +29,13 @@ export function InfiniteAnimeGrid({
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // New state for managing the retry delay (in seconds)
+  // State for managing the retry delay (in seconds)
   const [retryDelay, setRetryDelay] = useState<number | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const totalLoadedRef = useRef<number>(initialAnime.length);
 
   const loadMoreAnime = useCallback(async () => {
-    // If we're already waiting for a retry, don't attempt another load.
-    if (isLoading || !hasNextPage || totalLoadedRef.current || retryDelay)
-      return;
+    // Only proceed if we're not loading, there is a next page, and we're not in a retry delay.
+    if (isLoading || !hasNextPage || retryDelay) return;
 
     setIsLoading(true);
     setError(null);
@@ -57,21 +55,18 @@ export function InfiniteAnimeGrid({
         setAnime((prev) => [...prev, ...resultAnime]);
         setPage(nextPage);
         setHasNextPage(!!result.hasNextPage);
-        totalLoadedRef.current += resultAnime.length;
       } else {
         setHasNextPage(false);
       }
     } catch (error) {
       console.error("Failed to load more anime:", error);
-      // Check if the error message indicates a rate limit issue
+      // Check if the error indicates a rate limit issue
       if (
         error instanceof Error &&
         (error.message.includes("rate limit") ||
           error.message.includes("429") ||
           error.message.includes("too many requests"))
       ) {
-        // Ideally, your API helper would provide the delay in the error object.
-        // Here we default to 30 seconds if no specific delay is provided.
         const delaySeconds = 30;
         setRetryDelay(delaySeconds);
         setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);
@@ -95,26 +90,19 @@ export function InfiniteAnimeGrid({
       loadMoreAnime();
       return;
     }
-    const timer = setTimeout(
-      () => setRetryDelay((prev) => (prev !== null ? prev - 1 : null)),
-      1000
-    );
+    const timer = setTimeout(() => {
+      setRetryDelay((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
     return () => clearTimeout(timer);
   }, [retryDelay, loadMoreAnime]);
 
   // Set up intersection observer to detect when user scrolls to the bottom
   useEffect(() => {
-    if (!hasNextPage || totalLoadedRef.current) return;
+    if (!hasNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasNextPage &&
-          !isLoading &&
-          totalLoadedRef.current &&
-          !error // Don't try to load more if there's an error
-        ) {
+        if (entries[0].isIntersecting && !isLoading && !error) {
           loadMoreAnime();
         }
       },
@@ -122,7 +110,6 @@ export function InfiniteAnimeGrid({
     );
 
     const currentLoadMoreElement = loadMoreRef.current;
-
     if (currentLoadMoreElement) {
       observer.observe(currentLoadMoreElement);
     }
