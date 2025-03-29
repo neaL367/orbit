@@ -50,7 +50,7 @@ export default async function HomePage() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Most Popular</h2>
-          <Link href="/popular">
+          <Link href="/all-time-popular">
             <Button variant="ghost" className="gap-1">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
