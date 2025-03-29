@@ -19,28 +19,28 @@ export async function apiRequest<T>(
       },
       body: JSON.stringify({ query, variables }),
       // Next.js specific revalidation configuration
-      next: { revalidate: 86400 }, // 24 Hour
+      next: { revalidate: 3600 },
       ...options,
     });
 
-    if (!response.ok) {
-      throw new Error(`AniList API error: ${response.status} ${response.statusText}`);
-    }
+    // if (!response.ok) {
+    //   throw new Error(`AniList API error: ${response.status} ${response.statusText}`);
+    // }
 
     const data = (await response.json()) as AnilistResponse<T>;
-    if (!data?.data) {
-      throw new Error("Invalid API response");
-    }
+    // if (!data?.data) {
+    //   throw new Error("Invalid API response");
+    // }
 
     return data;
   } catch (error) {
     if (retries > 0) {
-      console.warn(`Request failed. Retrying in ${backoff}ms... (${retries} retries left)`);
+      // console.warn(`Request failed. Retrying in ${backoff}ms... (${retries} retries left)`);
       await new Promise((resolve) => setTimeout(resolve, backoff));
       // Increase backoff delay for next retry
       return apiRequest(query, variables, options, retries - 1, backoff * 2);
     }
-    console.error("AniList API request failed:", error);
+    // console.error("AniList API request failed:", error);
     throw error;
   }
 }
