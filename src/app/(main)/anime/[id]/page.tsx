@@ -19,20 +19,25 @@ export default async function AnimePage(props: AnimePageProps) {
     notFound();
   }
 
-  const data = await GenreQueries.getById(id);
-  const anime = data?.data?.Media;
+  try {
+    const data = await GenreQueries.getById(id);
+    const anime = data?.data?.Media;
 
-  if (!anime) {
+    if (!anime) {
+      notFound();
+    }
+
+    return (
+      <div className="relative">
+        <Navigation />
+
+        <Suspense fallback={<LoadingAnimeDetails />}>
+          <AnimeContent anime={anime} />
+        </Suspense>
+      </div>
+    );
+  } catch (error) {
+    console.error("Error fetching anime:", error);
     notFound();
   }
-
-  return (
-    <div>
-      <Navigation />
-
-      <Suspense fallback={<LoadingAnimeDetails />}>
-        <AnimeContent anime={anime} />
-      </Suspense>
-    </div>
-  );
 }

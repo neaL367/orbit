@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import AnimeCard from "@/components/anime/anime-card";
-import Pagination from "@/components/pagination";
+import { InfiniteAnimeGrid } from "@/components/infinite-anime-grid";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
 import { SearchQueries } from "@/anilist/queries/search";
-import { AnimeMedia } from "@/anilist/modal/media";
+import { fetchMoreSearchResults } from "@/anilist/actions/anime-actions";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -29,6 +28,12 @@ export default async function SearchPage(props: SearchPageProps) {
     total: 0,
   };
 
+  // Create a server action wrapper that captures the query
+  async function loadMoreAnimeForSearch(page: number) {
+    "use server";
+    return fetchMoreSearchResults(query, page);
+  }
+
   return (
     <div className="">
       <h1 className="mb-2 text-3xl font-bold">Search Results</h1>
@@ -41,11 +46,12 @@ export default async function SearchPage(props: SearchPageProps) {
 
           <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
             {animeList.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {animeList.map((anime: AnimeMedia) => (
-                  <AnimeCard key={anime.id} anime={anime} />
-                ))}
-              </div>
+              <InfiniteAnimeGrid
+                initialAnime={animeList}
+                initialHasNextPage={pageInfo.hasNextPage}
+                loadMoreFunction={loadMoreAnimeForSearch}
+                initialPage={page}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center py-12">
                 <h2 className="text-xl font-semibold">No results found</h2>
@@ -55,14 +61,6 @@ export default async function SearchPage(props: SearchPageProps) {
               </div>
             )}
           </Suspense>
-
-          {animeList.length > 0 && (
-            <Pagination
-              currentPage={pageInfo.currentPage}
-              totalPages={pageInfo.lastPage}
-              hasNextPage={pageInfo.hasNextPage}
-            />
-          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-12">

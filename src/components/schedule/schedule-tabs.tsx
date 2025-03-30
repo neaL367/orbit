@@ -101,8 +101,11 @@ export default function ScheduleTabs({
               </div>
             ) : weeklySchedule[day.value]?.length ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {weeklySchedule[day.value]?.map((anime) => (
-                  <ScheduleCard key={anime.id} anime={anime} />
+                {weeklySchedule[day.value]?.map((anime, index) => (
+                  <ScheduleCard
+                    key={`${day.value}-${anime.id}-${index}`}
+                    anime={anime}
+                  />
                 ))}
               </div>
             ) : (

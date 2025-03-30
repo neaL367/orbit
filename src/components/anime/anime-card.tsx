@@ -6,11 +6,37 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatStatus } from "@/anilist/utils/formatters";
-import { AnimeMedia } from "@/anilist/modal/media";
+import type { AnimeMedia } from "@/anilist/modal/media";
 
-export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
+export default function AnimeCard({
+  anime,
+  airingAt,
+}: {
+  anime: AnimeMedia;
+  airingAt?: number;
+}) {
   const [isHovering, setIsHovering] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const title = anime.title.english || anime.title.romaji;
+
+  // Get the original image URL
+  const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
+
+  // Format the airing date if it exists
+  const formattedDate = airingAt
+    ? new Date(airingAt * 1000).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
+  const formattedTime = airingAt
+    ? new Date(airingAt * 1000).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
     <Link href={`/anime/${anime.id}`}>
@@ -20,19 +46,38 @@ export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
         onMouseLeave={() => setIsHovering(false)}
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
-          <Image
-            src={anime.coverImage.large || anime.coverImage.color || ""}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover brightness-85"
-            priority
-          />
+          {!imageError && imageUrl ? (
+            <Image
+              src={imageUrl || ""}
+              alt={title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover brightness-85"
+              priority
+              unoptimized={process.env.NODE_ENV === "production"}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            // Fallback to a placeholder
+            <div
+              className="w-full h-full bg-gray-800 flex items-center justify-center"
+              style={{ aspectRatio: "4/5" }}
+            >
+              <span className="text-gray-400 text-sm">Image not available</span>
+            </div>
+          )}
 
           {/* Score Badge */}
           {anime.averageScore && anime.averageScore > 0 && (
             <div className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-white text-zinc-950 z-10">
               {anime.averageScore}%
+            </div>
+          )}
+
+          {/* Airing Date Badge */}
+          {formattedDate && (
+            <div className="absolute left-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-black/70 text-white z-10">
+              {formattedDate} • {formattedTime}
             </div>
           )}
 

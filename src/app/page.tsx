@@ -1,78 +1,85 @@
 import { Suspense } from "react";
-import { Link } from "next-view-transitions";
-import AnimeCard from "@/components/anime/anime-card";
+import Link from "next/link";
+import { CombinedQueries } from "@/anilist/queries/combined";
 import { LoadingAnimeGrid } from "@/components/loading-anime";
+import AnimeCard from "@/components/anime/anime-card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { MediaQueries } from "@/anilist/queries/media";
-import { getCurrentSeason } from "@/anilist/utils/formatters";
-import { AnimeMedia } from "@/anilist/modal/media";
 
+export default async function HomePage() {
+  // Fetch all homepage data in a single GraphQL query
+  const data = await CombinedQueries.getHomepageData(6);
 
-export default async function Home() {
-  const [trendingData, popularData, seasonalData, topRatedData] =
-    await Promise.all([
-      MediaQueries.getTrending({ page: 1, perPage: 6 }),
-      MediaQueries.getPopular({ page: 1, perPage: 6 }),
-      MediaQueries.getSeasonal({
-        season: getCurrentSeason().season,
-        year: getCurrentSeason().year,
-        page: 1,
-        perPage: 6,
-      }),
-      MediaQueries.getTopRated({ page: 1, perPage: 6 }),
-    ]);
-
-  const trending = trendingData?.data?.Page?.media || [];
-  const popular = popularData?.data?.Page?.media || [];
-  const seasonal = seasonalData?.data?.Page?.media || [];
-  const topRated = topRatedData?.data?.Page?.media || [];
-  const { season, year } = getCurrentSeason();
+  const trendingAnime = data?.data?.trending?.media || [];
+  const popularAnime = data?.data?.popular?.media || [];
+  const topRatedAnime = data?.data?.topRated?.media || [];
+  const upcomingPremieres = data?.data?.upcoming?.airingSchedules || [];
 
   return (
-    <main className="mt-24 mb-24">
-      {/* Trending Section - Second */}
-      <section className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-12">
+      {/* Hero Section */}
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">Discover Anime</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Explore the latest trending, popular, and top-rated anime all in one
+          place.
+        </p>
+      </section>
+
+      {/* Trending Section */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Trending Now</h2>
           <Link href="/trending">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 hover:cursor-pointer"
-            >
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {trending.map((anime: AnimeMedia) => (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {trendingAnime.map((anime) => (
               <AnimeCard key={anime.id} anime={anime} />
             ))}
           </div>
         </Suspense>
       </section>
 
-      {/* Top 100 Anime Section - New */}
-      <section className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Top 100 Anime</h2>
-          <Link href="/top-rated">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 hover:cursor-pointer"
-            >
+      {/* Popular Section */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Most Popular</h2>
+          <Link href="/all-time-popular">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {topRated.map((anime: AnimeMedia, index: number) => (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {popularAnime.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </Suspense>
+      </section>
+
+      {/* Top Rated Section */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Top Rated</h2>
+          <Link href="/top-rated">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
+              View All <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {topRatedAnime.map((anime, index) => (
               <div key={anime.id} className="relative">
                 <div
                   className="absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-white shadow"
@@ -82,62 +89,32 @@ export default async function Home() {
                 >
                   {index + 1}
                 </div>
-                <AnimeCard key={anime.id} anime={anime} />
+                <AnimeCard anime={anime} />
               </div>
             ))}
           </div>
         </Suspense>
       </section>
 
-      {/* Popular Section - First */}
-      <section className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">All-Time Popular</h2>
-          <Link href="/all-time-popular">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 hover:cursor-pointer"
-            >
-              View All <ChevronRight className="h-4 w-4" />
+      {/* Upcoming Premieres */}
+      <section className="pb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Upcoming Premieres</h2>
+          <Link href="/schedule">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
+              View Schedule <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {popular.map((anime: AnimeMedia) => (
-              <AnimeCard key={anime.id} anime={anime} />
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {upcomingPremieres.map((schedule) => (
+              <AnimeCard key={schedule.id} anime={schedule.media} airingAt={schedule.airingAt} />
             ))}
           </div>
         </Suspense>
       </section>
-
-      {/* Seasonal Section - Last */}
-      <section className="mb-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
-            {season.charAt(0) + season.slice(1).toLowerCase()} {year} Anime
-          </h2>
-          <Link href={`/seasonal?season=${season.toLowerCase()}&year=${year}`}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 hover:cursor-pointer"
-            >
-              View All <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        <Suspense fallback={<LoadingAnimeGrid count={6} />}>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {seasonal.map((anime: AnimeMedia) => (
-              <AnimeCard key={anime.id} anime={anime} />
-            ))}
-          </div>
-        </Suspense>
-      </section>
-    </main>
+    </div>
   );
 }
