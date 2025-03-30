@@ -10,7 +10,7 @@ import type { AnimeMedia } from "@/anilist/modal/media";
 
 export default function AnimeCard({
   anime,
-  showAiringBadge = false, // default to false
+  showAiringBadge = false,
 }: {
   anime: AnimeMedia;
   showAiringBadge?: boolean;
@@ -18,21 +18,24 @@ export default function AnimeCard({
   const [isHovering, setIsHovering] = useState(false);
   const [imageError, setImageError] = useState(false);
   const title = anime.title.english || anime.title.romaji;
-
-  // Get the original image URL
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
-
   const timeUntilAiring = anime.nextAiringEpisode?.timeUntilAiring;
-
   const timeUntil = timeUntilAiring ? formatCountdown(timeUntilAiring) : null;
 
   return (
-    <Link href={`/anime/${anime.id}`}>
+    <Link
+      href={`/anime/${anime.id}`}
+      // scroll={false}
+      // onClick={() => {
+      //   setTimeout(() => window.scrollTo(0, 0), 100);
+      // }}
+    >
       <Card
         className="h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
+        {/* Rest of your component remains the same */}
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
           {!imageError && imageUrl ? (
             <Image
@@ -46,7 +49,6 @@ export default function AnimeCard({
               onError={() => setImageError(true)}
             />
           ) : (
-            // Fallback to a placeholder
             <div
               className="w-full h-full bg-gray-800 flex items-center justify-center"
               style={{ aspectRatio: "4/5" }}

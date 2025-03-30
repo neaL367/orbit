@@ -99,7 +99,7 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                 <Card className="h-full transition-all hover:scale-[1.02] hover:shadow-md">
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-lg">
                     <Image
-                      src={relation.node.coverImage.large || ""}
+                      src={relation.node.coverImage?.large || ""}
                       alt={
                         relation.node.title.english ||
                         relation.node.title.romaji
@@ -137,16 +137,17 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
           anime.recommendations.nodes.length > 0 ? (
             anime.recommendations.nodes.map((rec: Recommendation) => (
               <Link
-                key={rec.mediaRecommendation.id}
-                href={`/anime/${rec.mediaRecommendation.id}`}
+                key={rec.mediaRecommendation?.id}
+                href={`/anime/${rec.mediaRecommendation?.id}`}
               >
                 <Card className="h-full transition-all hover:scale-[1.02] hover:shadow-md">
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-lg">
                     <Image
-                      src={rec.mediaRecommendation.coverImage.large || ""}
+                      src={rec.mediaRecommendation?.coverImage.large || ""}
                       alt={
-                        rec.mediaRecommendation.title.english ||
-                        rec.mediaRecommendation.title.romaji
+                        rec.mediaRecommendation?.title.english ||
+                        rec.mediaRecommendation?.title.romaji ||
+                        ""
                       }
                       fill
                       className="object-cover brightness-85"
@@ -155,8 +156,8 @@ export function AnimeTabs({ anime }: { anime: AnimeMedia }) {
                   </div>
                   <CardContent className="p-3">
                     <h3 className="line-clamp-2 font-semibold text-sm">
-                      {rec.mediaRecommendation.title.english ||
-                        rec.mediaRecommendation.title.romaji}
+                      {rec.mediaRecommendation?.title.english ||
+                        rec.mediaRecommendation?.title.romaji}
                     </h3>
                   </CardContent>
                 </Card>

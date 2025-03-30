@@ -10,7 +10,7 @@ export interface RelatedAnime {
     status: string;
     coverImage: {
         large: string | null;
-    };
+    } | null
 }
 
 export interface RelationEdge {
@@ -37,7 +37,7 @@ export interface Recommendation {
         };
         format: string;
         episodes: number | null;
-    };
+    } | null
 }
 
 export interface RecommendationConnection {
