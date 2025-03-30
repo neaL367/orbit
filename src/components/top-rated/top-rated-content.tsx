@@ -82,7 +82,7 @@ export function TopRatedContent({
         {anime.map((anime, index) => (
           <div key={anime.id} className="relative">
             <div
-              className="absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-white shadow"
+              className="absolute z-10 -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
               style={{
                 backgroundColor: anime.coverImage?.color ?? "#3b82f6",
               }}
