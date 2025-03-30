@@ -6,11 +6,14 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatStatus } from "@/anilist/utils/formatters";
-import { AnimeMedia } from "@/anilist/modal/media";
+import type { AnimeMedia } from "@/anilist/modal/media";
 
 export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const [isHovering, setIsHovering] = useState(false);
   const title = anime.title.english || anime.title.romaji;
+
+  // Use a fallback image if the cover image is not available
+  const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
 
   return (
     <Link href={`/anime/${anime.id}`}>
@@ -20,13 +23,19 @@ export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
         onMouseLeave={() => setIsHovering(false)}
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
+          {/* Add error handling for images */}
           <Image
-            src={anime.coverImage.large || anime.coverImage.color || ""}
+            src={imageUrl || ""}
             alt={title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover brightness-85"
             priority
+            unoptimized={process.env.NODE_ENV === "production"}
+            onError={(e) => {
+              // Fallback to a placeholder if image fails to load
+              (e.target as HTMLImageElement).src = `${anime.coverImage.medium}`;
+            }}
           />
 
           {/* Score Badge */}
