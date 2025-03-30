@@ -17,7 +17,7 @@ export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
 
   return (
-    <Link href={`/anime/${anime.id}`}>
+    <Link href={`/anime/${anime.id}`} prefetch={false}>
       <Card
         className="h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
