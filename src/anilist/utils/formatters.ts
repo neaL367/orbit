@@ -57,3 +57,18 @@ export function formatFormat(format: string): string {
             return format
     }
 }
+
+export function formatCountdown(seconds: number): string {
+    const d = Math.floor(seconds / (60 * 60 * 24));
+    const h = Math.floor((seconds % (60 * 60 * 24)) / (60 * 60));
+    const m = Math.floor((seconds % (60 * 60)) / 60);
+
+    return [
+        d > 0 ? `${d}d` : null,
+        h > 0 ? `${h}h` : null,
+        m > 0 ? `${m}m` : null,
+    ]
+        .filter(Boolean)
+        .join(" ");
+}
+

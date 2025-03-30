@@ -5,16 +5,15 @@ import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatStatus } from "@/anilist/utils/formatters";
+import { formatCountdown, formatStatus } from "@/anilist/utils/formatters";
 import type { AnimeMedia } from "@/anilist/modal/media";
-import { format } from "date-fns";
 
 export default function AnimeCard({
   anime,
-  airingAt,
+  showAiringBadge = false, // default to false
 }: {
   anime: AnimeMedia;
-  airingAt?: number;
+  showAiringBadge?: boolean;
 }) {
   const [isHovering, setIsHovering] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -23,10 +22,9 @@ export default function AnimeCard({
   // Get the original image URL
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
 
-  const airingDate = airingAt ? new Date(airingAt * 1000) : null;
+  const timeUntilAiring = anime.nextAiringEpisode?.timeUntilAiring;
 
-  const formattedDate = airingDate ? format(airingDate, "MMM d, yyyy") : null;
-  const formattedTime = airingDate ? format(airingDate, "hh:mm a") : null;
+  const timeUntil = timeUntilAiring ? formatCountdown(timeUntilAiring) : null;
 
   return (
     <Link href={`/anime/${anime.id}`}>
@@ -64,12 +62,9 @@ export default function AnimeCard({
             </div>
           )}
 
-          {/* Airing Date Badge */}
-          {formattedDate && (
+          {showAiringBadge && anime.nextAiringEpisode && (
             <div className="absolute w-max left-2 top-2 rounded-md px-2 py-1 text-[10px] sm:text-xs font-normal bg-black/70 text-white z-10">
-              <span className="block sm:inline">{formattedDate}</span>
-              <span className="hidden sm:inline"> • </span>
-              <span className="block sm:inline">{formattedTime}</span>
+              <span className="block sm:inline">{timeUntil}</span>
             </div>
           )}
 

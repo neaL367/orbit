@@ -110,7 +110,11 @@ export default async function HomePage() {
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {upcomingPremieres.map((schedule) => (
-              <AnimeCard key={schedule.id} anime={schedule.media} airingAt={schedule.airingAt} />
+              <AnimeCard
+                key={schedule.id}
+                anime={schedule.media}
+                showAiringBadge={true}
+              />
             ))}
           </div>
         </Suspense>
