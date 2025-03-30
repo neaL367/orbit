@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatStatus } from "@/anilist/utils/formatters";
 import type { AnimeMedia } from "@/anilist/modal/media";
+import { format } from "date-fns";
 
 export default function AnimeCard({
   anime,
@@ -22,21 +23,10 @@ export default function AnimeCard({
   // Get the original image URL
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
 
-  // Format the airing date if it exists
-  const formattedDate = airingAt
-    ? new Date(airingAt * 1000).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
+  const airingDate = airingAt ? new Date(airingAt * 1000) : null;
 
-  const formattedTime = airingAt
-    ? new Date(airingAt * 1000).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
+  const formattedDate = airingDate ? format(airingDate, "MMM d, yyyy") : null;
+  const formattedTime = airingDate ? format(airingDate, "hh:mm a") : null;
 
   return (
     <Link href={`/anime/${anime.id}`}>
@@ -76,8 +66,10 @@ export default function AnimeCard({
 
           {/* Airing Date Badge */}
           {formattedDate && (
-            <div className="absolute left-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-black/70 text-white z-10">
-              {formattedDate} • {formattedTime}
+            <div className="absolute w-max left-2 top-2 rounded-md px-2 py-1 text-[10px] sm:text-xs font-normal bg-black/70 text-white z-10">
+              <span className="block sm:inline">{formattedDate}</span>
+              <span className="hidden sm:inline"> • </span>
+              <span className="block sm:inline">{formattedTime}</span>
             </div>
           )}
 
