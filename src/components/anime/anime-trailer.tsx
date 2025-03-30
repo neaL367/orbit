@@ -12,7 +12,7 @@ export function AnimeTrailer({
       <h3 className="mb-6 text-xl font-semibold text-white">Trailer</h3>
       <div className="aspect-video w-full overflow-hidden rounded-lg shadow-lg">
         <iframe
-          src={`https://www.youtube.com/embed/${trailer.id}`}
+          src={`https://www.youtube-nocookie.com/embed/${trailer.id}`}
           title={`${title} Trailer`}
           allowFullScreen
           className="w-full h-full rounded-lg brightness-85"
