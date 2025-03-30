@@ -10,9 +10,10 @@ import type { AnimeMedia } from "@/anilist/modal/media";
 
 export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const [isHovering, setIsHovering] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const title = anime.title.english || anime.title.romaji;
 
-  // Use a fallback image if the cover image is not available
+  // Get the original image URL
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
 
   return (
@@ -23,20 +24,26 @@ export default function AnimeCard({ anime }: { anime: AnimeMedia }) {
         onMouseLeave={() => setIsHovering(false)}
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
-          {/* Add error handling for images */}
-          <Image
-            src={imageUrl || ""}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover brightness-85"
-            priority
-            unoptimized={process.env.NODE_ENV === "production"}
-            onError={(e) => {
-              // Fallback to a placeholder if image fails to load
-              (e.target as HTMLImageElement).src = `${anime.coverImage.medium}`;
-            }}
-          />
+          {!imageError && imageUrl ? (
+            <Image
+              src={imageUrl || ""}
+              alt={title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover brightness-85"
+              priority={false}
+              unoptimized={process.env.NODE_ENV === "production"}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            // Fallback to a placeholder
+            <div
+              className="w-full h-full bg-gray-800 flex items-center justify-center"
+              style={{ aspectRatio: "4/5" }}
+            >
+              <span className="text-gray-400 text-sm">Image not available</span>
+            </div>
+          )}
 
           {/* Score Badge */}
           {anime.averageScore && anime.averageScore > 0 && (
