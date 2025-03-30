@@ -1,71 +1,50 @@
-"use server"
+"use server";
 
-import { MediaQueries } from "@/anilist/queries/media"
-import { SearchQueries } from "@/anilist/queries/search"
-import { GenreQueries } from "@/anilist/queries/genre"
+import { MediaQueries } from "@/anilist/queries/media";
+import { SearchQueries } from "@/anilist/queries/search";
+import { GenreQueries } from "@/anilist/queries/genre";
+import { AnilistResponse } from "../modal/common";
+import { AnimeMedia } from "../modal/media";
+import { PageResponse } from "../modal/response";
 
-// Trending anime server action
+const perPage = 18;
+
+async function handleAnimePagination<T>(
+    fetchFn: () => Promise<AnilistResponse<T>>
+): Promise<{ anime: AnimeMedia[]; hasNextPage: boolean }> {
+    const data = await fetchFn();
+    const anime = (data?.data as PageResponse)?.Page?.media || [];
+    const hasNextPage = (data?.data as PageResponse)?.Page?.pageInfo?.hasNextPage || false;
+    return { anime, hasNextPage };
+}
+
+
 export async function fetchMoreTrendingAnime(page: number) {
-    const perPage = 18
-    const data = await MediaQueries.getTrending({ page, perPage })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() => MediaQueries.getTrending({ page, perPage }));
 }
 
-// Popular anime server action
 export async function fetchMorePopularAnime(page: number) {
-    const perPage = 18
-    const data = await MediaQueries.getPopular({ page, perPage })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() => MediaQueries.getPopular({ page, perPage }));
 }
 
-// Top rated anime server action
 export async function fetchMoreTopRatedAnime(page: number) {
-    const perPage = 18
-    const data = await MediaQueries.getTopRated({ page, perPage })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() => MediaQueries.getTopRated({ page, perPage }));
 }
 
-// Search anime server action
 export async function fetchMoreSearchResults(query: string, page: number) {
-    const perPage = 18
-    const data = await SearchQueries.search({ query, page, perPage })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() =>
+        SearchQueries.search({ query, page, perPage })
+    );
 }
 
-// Genre anime server action
 export async function fetchMoreGenreAnime(genre: string, page: number) {
-    const perPage = 18
-    const data = await GenreQueries.getByGenre({ genre, page, perPage })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() =>
+        GenreQueries.getByGenre({ genre, page, perPage })
+    );
 }
 
-// Seasonal anime server action
 export async function fetchMoreSeasonalAnime(season: string, year: number, page: number) {
-    const perPage = 18
-    const data = await MediaQueries.getSeasonal({
-        season,
-        year,
-        page,
-        perPage,
-    })
-    const anime = data?.data?.Page?.media || []
-    const hasNextPage = data?.data?.Page?.pageInfo?.hasNextPage || false
-
-    return { anime, hasNextPage }
+    return handleAnimePagination(() =>
+        MediaQueries.getSeasonal({ season, year, page, perPage })
+    );
 }
-
