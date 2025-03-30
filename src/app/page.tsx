@@ -31,7 +31,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Trending Now</h2>
           <Link href="/trending">
-            <Button variant="ghost" className="gap-1">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -51,7 +51,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Most Popular</h2>
           <Link href="/all-time-popular">
-            <Button variant="ghost" className="gap-1">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -71,7 +71,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Top Rated</h2>
           <Link href="/top-rated">
-            <Button variant="ghost" className="gap-1">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View All <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -101,7 +101,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Upcoming Premieres</h2>
           <Link href="/schedule">
-            <Button variant="ghost" className="gap-1">
+            <Button variant="ghost" className="gap-1 hover:cursor-pointer">
               View Schedule <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -110,7 +110,7 @@ export default async function HomePage() {
         <Suspense fallback={<LoadingAnimeGrid count={6} />}>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {upcomingPremieres.map((schedule) => (
-              <AnimeCard key={schedule.id} anime={schedule.media} />
+              <AnimeCard key={schedule.id} anime={schedule.media} airingAt={schedule.airingAt} />
             ))}
           </div>
         </Suspense>

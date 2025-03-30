@@ -28,7 +28,7 @@ export default async function AnimePage(props: AnimePageProps) {
     }
 
     return (
-      <div className="relative pt-20">
+      <div className="relative">
         <Navigation />
 
         <Suspense fallback={<LoadingAnimeDetails />}>
