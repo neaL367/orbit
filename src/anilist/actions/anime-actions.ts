@@ -12,10 +12,23 @@ const perPage = 18;
 async function handleAnimePagination<T>(
     fetchFn: () => Promise<AnilistResponse<T>>
 ): Promise<{ anime: AnimeMedia[]; hasNextPage: boolean }> {
-    const data = await fetchFn();
-    const anime = (data?.data as PageResponse)?.Page?.media || [];
-    const hasNextPage = (data?.data as PageResponse)?.Page?.pageInfo?.hasNextPage || false;
-    return { anime, hasNextPage };
+    try {
+        const data = await fetchFn();
+
+        const pageData = (data?.data as PageResponse)?.Page;
+        if (!pageData) {
+            console.error("Invalid Page response from AniList:", data);
+            throw new Error("AniList response format invalid.");
+        }
+
+        const anime = pageData.media || [];
+        const hasNextPage = pageData.pageInfo?.hasNextPage || false;
+
+        return { anime, hasNextPage };
+    } catch (error) {
+        console.error("🔥 Error in handleAnimePagination:", error);
+        throw new Error("Failed to fetch anime data from AniList.");
+    }
 }
 
 

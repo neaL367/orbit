@@ -150,7 +150,7 @@ export function InfiniteAnimeGrid({
           <div key={`${animeItem.id}-${index}`} className="relative">
             {showRank && (
               <div
-                className="absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
+                className="z-50 absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
                 style={{
                   backgroundColor: animeItem.coverImage?.color ?? "#3b82f6",
                 }}
