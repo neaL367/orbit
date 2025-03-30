@@ -3,17 +3,33 @@
 import { useTransitionRouter } from "next-view-transitions";
 import { Button } from "./ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useEffect, useCallback } from "react";
 
 export function Navigation() {
   const router = useTransitionRouter();
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (window.history.length > 1) {
-      router.back();
+      // Add a small delay to allow any pending operations to complete
+      setTimeout(() => {
+        router.back();
+      }, 10);
     } else {
       router.push("/"); // fallback route (home page)
     }
-  };
+  }, [router]);
+
+  // Register a cleanup function to handle any pending navigation
+  useEffect(() => {
+    return () => {
+      // This helps ensure any pending navigation operations are properly cleaned up
+      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "CLEAR_PENDING_NAVIGATION",
+        });
+      }
+    };
+  }, []);
 
   return (
     <Button
