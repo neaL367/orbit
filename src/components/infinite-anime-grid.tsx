@@ -69,8 +69,11 @@ export function InfiniteAnimeGrid({
         error instanceof Error &&
         (error.message.includes("rate limit") ||
           error.message.includes("429") ||
-          error.message.includes("too many requests"))
+          error.message.includes("too many requests") ||
+          error.message.includes("HTTP error: 429") ||
+          error.message.includes("Rate limit hit"))
       ) {
+        // Use a fixed delay or adjust based on your apiRequest wrapper logic
         const delaySeconds = 30;
         setRetryDelay(delaySeconds);
         setError(`Rate limited. Retrying in ${delaySeconds} seconds...`);

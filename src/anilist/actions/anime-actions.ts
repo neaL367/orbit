@@ -1,3 +1,4 @@
+// app/actions/anime-actions.ts
 "use server";
 
 import { MediaQueries } from "@/anilist/queries/media";
@@ -14,22 +15,20 @@ async function handleAnimePagination<T>(
 ): Promise<{ anime: AnimeMedia[]; hasNextPage: boolean }> {
     try {
         const data = await fetchFn();
-
         const pageData = (data?.data as PageResponse)?.Page;
         if (!pageData) {
             console.error("Invalid Page response from AniList:", data);
             throw new Error("AniList response format invalid.");
         }
-
         const anime = pageData.media || [];
         const hasNextPage = pageData.pageInfo?.hasNextPage || false;
-
         return { anime, hasNextPage };
     } catch (error) {
         console.error("🔥 Error in handleAnimePagination:", error);
         throw new Error("Failed to fetch anime data from AniList.");
     }
 }
+
 
 
 export async function fetchMoreTrendingAnime(page: number) {

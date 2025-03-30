@@ -5,20 +5,24 @@ export type GraphQLValue = GraphQLScalarValue | GraphQLObjectValue | GraphQLValu
 export type GraphQLVariables = Record<string, GraphQLValue>
 
 export interface AnilistResponse<T> {
-    data: T;
-  }
-  
+  data: T;
+  errors?: {
+    message: string;
+    status: number;
+  }[];
+}
+
 
 export interface PageInfo {
-    total: number;
-    currentPage: number;
-    lastPage: number;
-    hasNextPage: boolean;
-    perPage: number;
-  }
-  
-  export interface DateInfo {
-    year: number | null;
-    month: number | null;
-    day: number | null;
-  }
+  total: number;
+  currentPage: number;
+  lastPage: number;
+  hasNextPage: boolean;
+  perPage: number;
+}
+
+export interface DateInfo {
+  year: number | null;
+  month: number | null;
+  day: number | null;
+}
