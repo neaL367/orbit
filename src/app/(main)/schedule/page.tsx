@@ -68,7 +68,7 @@ interface TimeRemaining {
   seconds: number;
 }
 
-interface PremiereAnime {
+export interface PremiereAnime {
   id: number;
   title: {
     romaji?: string;
@@ -356,7 +356,7 @@ export default function SchedulePage() {
             <TabsTrigger
               key={day.value}
               value={day.value}
-              className={`hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border-0 transition-all relative ${
+              className={`hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 transition-all relative ${
                 day.isToday ? "font-bold" : ""
               }`}
             >

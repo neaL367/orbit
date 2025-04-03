@@ -1,36 +1,37 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Search, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { SidebarTrigger } from "./ui/sidebar"
-import { Button } from "@/components/ui/button"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { SidebarTrigger } from "./ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isFocused, setIsFocused] = useState(false)
-  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+
+  const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
-  }
+  };
 
   const clearSearch = () => {
-    setSearchQuery("")
-  }
+    setSearchQuery("");
+  };
 
   // Add a subtle animation effect when the component mounts
   useEffect(() => {
-    const header = document.getElementById("main-header")
+    const header = document.getElementById("main-header");
     if (header) {
-      header.classList.add("animate-fadeIn")
+      header.classList.add("animate-fadeIn");
     }
-  }, [])
+  }, []);
 
   return (
     <header
@@ -41,9 +42,14 @@ export default function Header() {
         <SidebarTrigger className="p-7 mr-2.5 hover:cursor-pointer rounded-lg transition-all" />
 
         <div className="flex items-center gap-4 flex-1">
-          <form onSubmit={handleSearch} className="relative w-full max-w-[500px]">
+          <form
+            onSubmit={handleSearch}
+            className="relative w-full max-w-[500px]"
+          >
             <div
-              className={`absolute left-0 top-0 bottom-0 flex items-center justify-center w-10 transition-colors ${isFocused ? "text-primary" : "text-muted-foreground"}`}
+              className={`absolute left-0 top-0 bottom-0 flex items-center justify-center w-10 transition-colors ${
+                isFocused ? "text-primary" : "text-muted-foreground"
+              }`}
             >
               <Search className="h-4 w-4" />
             </div>
@@ -72,28 +78,8 @@ export default function Header() {
               </Button>
             )}
           </form>
-
-          {/* <div className="hidden md:flex space-x-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
-              onClick={() => router.push("/trending")}
-            >
-              Trending
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
-              onClick={() => router.push("/seasonal")}
-            >
-              Seasonal
-            </Button>
-          </div> */}
         </div>
       </div>
     </header>
-  )
+  );
 }
-

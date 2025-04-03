@@ -41,7 +41,7 @@ export async function AnimeDetails({ id }: { id: string }) {
             className="object-cover rounded-t-lg object-center"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zincfrom-zinc-950/50 to-transparent" />
         </div>
       ) : null}
       <div className="w-full">
@@ -131,7 +131,7 @@ export async function AnimeDetails({ id }: { id: string }) {
                       <Link
                         key={`${genre}-${index}`}
                         href={`/genres/${genre}`}
-                        className="px-2.5 py-1 text-xs border rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+                        className="px-2.5 py-1 text-xs border hover:border-0 rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
                       >
                         {genre}
                       </Link>

@@ -29,8 +29,8 @@ export default async function HomePage() {
         <section className="py-12">
           <h1 className="text-4xl font-bold mb-4">Discover Anime</h1>
           <p className="text-muted-foreground text-lg mb-6">
-            Explore the latest trending, popular, and top-rated anime all in one
-            place
+            Explore the latest trending, popular, and top-rated animFe all in
+            one place
           </p>
         </section>
 
@@ -111,7 +111,7 @@ export default async function HomePage() {
 
           {upcomingPremieres.length > 0 ? (
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {upcomingPremieres.map((schedule) => (
+              {upcomingPremieres.map((schedule: AiringSchedule) => (
                 <AnimeCard key={schedule.id} anime={schedule.media} />
               ))}
             </div>

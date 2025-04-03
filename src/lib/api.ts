@@ -162,95 +162,95 @@ export const fetchTrendingAnime = cache(async (page = 1, perPage = 20, isAdult =
   }
 })
 
-export const fetchPopularAnime = cache(async (page = 1, perPage = 20) => {
+export const fetchPopularAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($page: Int, $perPage: Int) {
+    query ($page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(type: ANIME, sort: POPULARITY_DESC) {
+        media(type: ANIME, sort: POPULARITY_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
   `
 
-  const data = await executeGraphQLQuery(query, { page, perPage })
+  const data = await executeGraphQLQuery(query, { page, perPage, isAdult })
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
   }
 })
 
-export const fetchAllTimePopularAnime = cache(async (page = 1, perPage = 20) => {
+export const fetchAllTimePopularAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($page: Int, $perPage: Int) {
+    query ($page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(type: ANIME, sort: POPULARITY_DESC) {
+        media(type: ANIME, sort: POPULARITY_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
   `
 
-  const data = await executeGraphQLQuery(query, { page, perPage })
+  const data = await executeGraphQLQuery(query, { page, perPage, isAdult })
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
   }
 })
 
-export const fetchTopRatedAnime = cache(async (page = 1, perPage = 20) => {
+export const fetchTopRatedAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($page: Int, $perPage: Int) {
+    query ($page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(type: ANIME, sort: SCORE_DESC) {
+        media(type: ANIME, sort: SCORE_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
   `
 
-  const data = await executeGraphQLQuery(query, { page, perPage })
+  const data = await executeGraphQLQuery(query, { page, perPage, isAdult })
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
   }
 })
 
-export const fetchRecentlyUpdated = cache(async (page = 1, perPage = 20) => {
+export const fetchRecentlyUpdated = cache(async (page = 1, perPage = 20, isAdult = false) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($page: Int, $perPage: Int) {
+    query ($page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
         }
-        media(type: ANIME, status: RELEASING, sort: UPDATED_AT_DESC) {
+        media(type: ANIME, status: RELEASING, sort: UPDATED_AT_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
   `
 
-  const data = await executeGraphQLQuery(query, { page, perPage })
+  const data = await executeGraphQLQuery(query, { page, perPage, isAdult })
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
@@ -263,17 +263,18 @@ export const fetchSeasonalAnime = cache(
     year: number = getCurrentSeason().year,
     page = 1,
     perPage = 20,
+    isAdult = false
   ) => {
     const query = `
     ${MEDIA_FRAGMENT}
-    query ($season: MediaSeason, $year: Int, $page: Int, $perPage: Int) {
+    query ($season: MediaSeason, $year: Int, $page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(type: ANIME, season: $season, seasonYear: $year, sort: POPULARITY_DESC) {
+        media(type: ANIME, season: $season, seasonYear: $year, sort: POPULARITY_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
@@ -285,6 +286,7 @@ export const fetchSeasonalAnime = cache(
       year,
       page,
       perPage,
+      isAdult
     })
 
     return {
@@ -298,9 +300,14 @@ export const fetchSeasonalAnime = cache(
   },
 )
 
-export const fetchAiringSchedule = cache(async (page = 1, perPage = 20, notYetAired = true) => {
+export const fetchAiringSchedule = cache(async (
+  page = 1,
+  perPage = 20,
+  notYetAired = true,
+  isAdult = false // still keep this if you plan to filter client-side
+) => {
   // Get current timestamp in seconds
-  const now = Math.floor(Date.now() / 1000)
+  const now = Math.floor(Date.now() / 1000);
 
   const query = `
     ${MEDIA_FRAGMENT}
@@ -326,41 +333,48 @@ export const fetchAiringSchedule = cache(async (page = 1, perPage = 20, notYetAi
         }
       }
     }
-  `
+  `;
 
   // For upcoming schedule (next 7 days)
-  const weekFromNow = now + 7 * 24 * 60 * 60
+  const weekFromNow = now + 7 * 24 * 60 * 60;
 
   const variables = notYetAired
     ? { page, perPage, airingAtGreater: now, airingAtLesser: weekFromNow }
-    : { page, perPage, airingAtGreater: now - 7 * 24 * 60 * 60, airingAtLesser: now }
+    : { page, perPage, airingAtGreater: now - 7 * 24 * 60 * 60, airingAtLesser: now };
 
-  const data = await executeGraphQLQuery(query, variables)
+  const data = await executeGraphQLQuery(query, variables);
+
+  // Optionally filter client-side based on isAdult:
+  const schedules = isAdult
+    ? data.Page.airingSchedules
+    : data.Page.airingSchedules.filter((schedule: AiringSchedule) => !schedule.media.isAdult);
 
   return {
-    schedules: data.Page.airingSchedules as AiringSchedule[],
+    schedules,
     pageInfo: data.Page.pageInfo as PageInfo,
-  }
-})
+  };
+});
 
-export const searchAnime = cache(async (searchTerm: string, page = 1, perPage = 20) => {
+
+
+export const searchAnime = cache(async (searchTerm: string, page = 1, perPage = 20, isAdult = false) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($search: String, $page: Int, $perPage: Int) {
+    query ($search: String, $page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(search: $search, type: ANIME) {
+        media(search: $search, type: ANIME, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
   `
 
-  const data = await executeGraphQLQuery(query, { search: searchTerm, page, perPage })
+  const data = await executeGraphQLQuery(query, { search: searchTerm, page, perPage, isAdult })
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
@@ -769,47 +783,58 @@ export function getTimeUntilAiring(timestamp: number): string {
   }
 }
 
-export const fetchGenres = cache(async () => {
+export const fetchGenres = cache(async (includeAdult = false) => {
   const query = `
     query {
       GenreCollection
     }
-  `
+  `;
 
-  const data = await executeGraphQLQuery(query)
-  return data.GenreCollection as string[]
-})
+  const data = await executeGraphQLQuery(query);
+  const nsfwGenres = ["Ecchi", "Hentai"];
 
-export const fetchAnimeByGenre = cache(async (genre: string, page = 1, perPage = 20) => {
+  return data.GenreCollection.filter(
+    (genre: string) => includeAdult || !nsfwGenres.includes(genre)
+  ) as string[];
+});
+
+
+export const fetchAnimeByGenre = cache(async (
+  genre: string,
+  page = 1,
+  perPage = 20,
+  isAdult = false
+) => {
   const query = `
     ${MEDIA_FRAGMENT}
-    query ($genre: String, $page: Int, $perPage: Int) {
+    query ($genre: String, $page: Int, $perPage: Int, $isAdult: Boolean) {
       Page(page: $page, perPage: $perPage) {
         pageInfo {
           hasNextPage
           currentPage
           total
         }
-        media(genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
+        media(genre: $genre, type: ANIME, sort: POPULARITY_DESC, isAdult: $isAdult) {
           ...MediaFragment
         }
       }
     }
-  `
+  `;
 
-  const data = await executeGraphQLQuery(query, { genre, page, perPage })
+  const data = await executeGraphQLQuery(query, { genre, page, perPage, isAdult });
   return {
     media: data.Page.media as AnimeMedia[],
     pageInfo: data.Page.pageInfo as PageInfo,
-  }
-})
+  };
+});
 
-export const fetchWeeklySchedule = cache(async () => {
+
+export const fetchWeeklySchedule = cache(async (isAdult = false) => {
   // Get current timestamp in seconds
-  const now = Math.floor(Date.now() / 1000)
+  const now = Math.floor(Date.now() / 1000);
 
   // Get timestamp for 7 days from now
-  const weekFromNow = now + 7 * 24 * 60 * 60
+  const weekFromNow = now + 7 * 24 * 60 * 60;
 
   const query = `
     ${MEDIA_FRAGMENT}
@@ -830,16 +855,16 @@ export const fetchWeeklySchedule = cache(async () => {
         }
       }
     }
-  `
+  `;
 
   const data = await executeGraphQLQuery(query, {
     airingAtGreater: now,
     airingAtLesser: weekFromNow,
     page: 1,
     perPage: 100,
-  })
+  });
 
-  // Group schedules by day of week
+  // Group schedules by day of week and filter based on isAdult if needed
   const schedulesByDay: Record<string, AiringSchedule[]> = {
     Sunday: [],
     Monday: [],
@@ -848,15 +873,19 @@ export const fetchWeeklySchedule = cache(async () => {
     Thursday: [],
     Friday: [],
     Saturday: [],
-  }
+  };
 
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   data.Page.airingSchedules.forEach((schedule: AiringSchedule) => {
-    const date = new Date(schedule.airingAt * 1000)
-    const dayOfWeek = days[date.getDay()]
-    schedulesByDay[dayOfWeek].push(schedule)
-  })
+    // Filter out NSFW if isAdult is false
+    if (!isAdult && schedule.media.isAdult) return;
+    const date = new Date(schedule.airingAt * 1000);
+    const dayOfWeek = days[date.getDay()];
+    schedulesByDay[dayOfWeek].push(schedule);
+  });
 
-  return schedulesByDay
-})
+  return schedulesByDay;
+});
+
+

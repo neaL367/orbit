@@ -44,9 +44,9 @@ export function AnimeCard({
             {index + 1}
           </div>
         )}
-        
+
         {/* Rest of your component remains the same */}
-        <div className="relative  aspect-[4/5] overflow-hidden w-full rounded-sm">
+        <div className=" relative  aspect-[4/5] overflow-hidden w-full rounded-sm">
           <Image
             src={imageUrl || ""}
             alt={title || ""}

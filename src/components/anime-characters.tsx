@@ -23,8 +23,8 @@ export async function AnimeCharacters({ id }: { id: string }) {
               src={character.image.large || ""}
               alt={character.name.full}
               className="h-full w-full object-cover"
-              width={300} 
-              height={450} 
+              width={300}
+              height={450}
             />
           </div>
           <CardContent className="p-3">

@@ -181,9 +181,9 @@ export default function SeasonalPage() {
           value={selectedSeason}
           onValueChange={(value) => setSelectedSeason(value as Season)}
         >
-          <TabsList className="grid grid-cols-4 w-full h-8">
+          <TabsList className="grid grid-cols-4 w-full h-12">
             {SEASONS.map((season) => (
-              <TabsTrigger key={season} value={season} className="text-xs px-1">
+              <TabsTrigger key={season} value={season} className="text-xs px-1 hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 ">
                 {formatSeasonName(season)}
               </TabsTrigger>
             ))}

@@ -1,13 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { ReactLenis } from "lenis/react";
 import { Geist_Mono } from "next/font/google";
 import { ViewTransitions } from "next-view-transitions";
 
 import Header from "@/components/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ReactLenis } from "lenis/react";
 
 export const experimental_ppr = true;
 
