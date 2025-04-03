@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     ppr: 'incremental',
+    viewTransition: true,
   },
   compiler: {
     removeConsole:

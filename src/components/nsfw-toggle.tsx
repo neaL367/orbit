@@ -1,5 +1,3 @@
-"use client";
-
 import { Eye, EyeOff } from "lucide-react";
 
 interface NSFWToggleProps {

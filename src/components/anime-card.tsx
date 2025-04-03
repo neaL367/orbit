@@ -1,35 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import { Link } from "next-view-transitions";
 import Image from "next/image";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatCountdown, formatStatus } from "@/anilist/utils/formatters";
-import type { AnimeMedia } from "@/anilist/modal/media";
 
-export default function AnimeCard({
-  anime,
-  showAiringBadge = false,
-}: {
-  anime: AnimeMedia;
-  showAiringBadge?: boolean;
-}) {
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import type { AnimeMedia } from "@/lib/types";
+import { useState } from "react";
+import { Star } from "lucide-react";
+
+export function AnimeCard({ anime }: { anime: AnimeMedia }) {
   const [isHovering, setIsHovering] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const title = anime.title.english || anime.title.romaji;
+
+  const title =
+    anime.title.userPreferred ||
+    anime.title.english ||
+    anime.title.romaji ||
+    "";
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
-  const timeUntilAiring = anime.nextAiringEpisode?.timeUntilAiring;
-  const timeUntil = timeUntilAiring ? formatCountdown(timeUntilAiring) : null;
+  const score = anime.averageScore ? anime.averageScore / 10 : undefined;
 
   return (
-    <Link
-      href={`/anime/${anime.id}`}
-      // scroll={false}
-      // onClick={() => {
-      //   setTimeout(() => window.scrollTo(0, 0), 100);
-      // }}
-    >
+    <Link href={`/anime/${anime.id}`}>
       <Card
         className="h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
@@ -37,38 +29,34 @@ export default function AnimeCard({
       >
         {/* Rest of your component remains the same */}
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
-          {!imageError && imageUrl ? (
-            <Image
-              src={imageUrl || ""}
-              alt={title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover brightness-85"
-              priority
-              unoptimized={process.env.NODE_ENV === "production"}
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div
-              className="w-full h-full bg-gray-800 flex items-center justify-center"
-              style={{ aspectRatio: "4/5" }}
-            >
-              <span className="text-gray-400 text-sm">Image not available</span>
+          <Image
+            src={imageUrl || ""}
+            alt={title || ""}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover brightness-85"
+            priority
+          />
+
+          {score && (
+            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span>{score}</span>
             </div>
           )}
 
-          {/* Score Badge */}
+          {/* Score Badge
           {anime.averageScore && anime.averageScore > 0 && (
             <div className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-white text-zinc-950 z-10">
               {anime.averageScore}%
             </div>
-          )}
+          )} */}
 
-          {showAiringBadge && anime.nextAiringEpisode && (
+          {/* {showAiringBadge && anime.nextAiringEpisode && (
             <div className="absolute w-max left-2 top-2 rounded-md px-2 py-1 text-[10px] sm:text-xs font-normal bg-black/70 text-white z-10">
               <span className="block sm:inline">{timeUntil}</span>
             </div>
-          )}
+          )} */}
 
           {/* Hover Overlay with Details */}
           <div
@@ -89,7 +77,7 @@ export default function AnimeCard({
                 variant="outline"
                 className="text-xs bg-black/50 border-gray-700"
               >
-                {formatStatus(anime.status)}
+                {formatStatus(anime.status || "")}
               </Badge>
               {anime.season && anime.seasonYear && (
                 <Badge
@@ -111,4 +99,19 @@ export default function AnimeCard({
       </Card>
     </Link>
   );
+}
+
+function formatStatus(status: string): string {
+  switch (status) {
+    case "FINISHED":
+      return "Finished";
+    case "RELEASING":
+      return "Airing";
+    case "NOT_YET_RELEASED":
+      return "Coming Soon";
+    case "CANCELLED":
+      return "Cancelled";
+    default:
+      return status;
+  }
 }
