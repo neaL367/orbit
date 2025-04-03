@@ -19,7 +19,7 @@ export function Navigation() {
     <Button
       size="sm"
       onClick={handleBack}
-      className="gap-1 hover:cursor-pointer absolute border-0 -top-16 left-0 bg-zinc-900 hover:bg-zinc-800"
+      className="gap-1 hover:cursor-pointer border -top-16 left-0 bg-zinc-900 hover:bg-zinc-800"
     >
       <ChevronLeft className="h-4 w-4" /> Back
     </Button>

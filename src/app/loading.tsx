@@ -2,10 +2,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomeLoading() {
   return (
-    <div className="container">
-      <div className="space-y-12">
+    <div className="">
+      <div className="space-y-8">
         {/* Hero Section Skeleton */}
-        <section className="py-8">
+        <section className="py-12">
           <Skeleton className="h-10 w-64 mb-4" />
           <Skeleton className="h-6 w-full max-w-2xl mb-6" />
         </section>

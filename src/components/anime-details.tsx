@@ -38,7 +38,7 @@ export async function AnimeDetails({ id }: { id: string }) {
             alt={title}
             fill
             priority
-            className="object-cover rounded-t-lg brightness-85 object-center"
+            className="object-cover rounded-t-lg object-center"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
@@ -128,9 +128,13 @@ export async function AnimeDetails({ id }: { id: string }) {
                   <h3 className="font-semibold text-sm mb-3">Genres</h3>
                   <div className="flex flex-wrap gap-2">
                     {anime.genres.map((genre, index) => (
-                      <Badge key={`${genre}-${index}`} variant="secondary">
+                      <Link
+                        key={`${genre}-${index}`}
+                        href={`/genres/${genre}`}
+                        className="px-2.5 py-1 text-xs border rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+                      >
                         {genre}
-                      </Badge>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -228,7 +232,7 @@ export async function AnimeDetails({ id }: { id: string }) {
 
                 {/* Next Episode Info */}
                 {anime.nextAiringEpisode && (
-                  <div className="mt-3 py-1 w-fit rounded-full bg-card flex items-center">
+                  <div className="mt-3 py-1 w-fit rounded-full bg-card border flex items-center">
                     <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary via-purple-400 to-purple-400 bg-clip-text text-transparent px-3 py-1.5 rounded-full">
                       <Info className="h-4 w-4 stroke-white" />
                       <span className="font-medium text-sm">

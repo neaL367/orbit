@@ -4,7 +4,7 @@ export default function PagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="mt-24 mb-24 relative">
+    <main className="mt-5 mb-24 relative">
       {children}
     </main>
   );

@@ -22,7 +22,7 @@ export default async function AnimePage({
   const { id } = await params;
 
   return (
-    <div className="">
+    <div className="space-y-12">
       <Navigation />
 
       <AnimeDetails id={id} />

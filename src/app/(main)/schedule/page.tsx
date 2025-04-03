@@ -243,9 +243,12 @@ export default function SchedulePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="mb-8 flex items-center gap-4">
-        <h1 className="text-2xl font-bold">Anime Schedule</h1>
-      </div>
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">Anime Schedule</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Discover anime schedule
+        </p>
+      </section>
 
       {/* Upcoming Premiere Card */}
       {premieres.length > 0 && (

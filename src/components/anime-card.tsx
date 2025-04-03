@@ -9,7 +9,13 @@ import type { AnimeMedia } from "@/lib/types";
 import { useState } from "react";
 import { Star } from "lucide-react";
 
-export function AnimeCard({ anime }: { anime: AnimeMedia }) {
+export function AnimeCard({
+  anime,
+  index,
+}: {
+  anime: AnimeMedia;
+  index?: number;
+}) {
   const [isHovering, setIsHovering] = useState(false);
 
   const title =
@@ -23,12 +29,24 @@ export function AnimeCard({ anime }: { anime: AnimeMedia }) {
   return (
     <Link href={`/anime/${anime.id}`}>
       <Card
-        className="h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
+        className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
+        {/* Rank Number Badge */}
+        {typeof index === "number" && (
+          <div
+            className="z-20 absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
+            style={{
+              backgroundColor: anime.coverImage?.color ?? "#3b82f6",
+            }}
+          >
+            {index + 1}
+          </div>
+        )}
+        
         {/* Rest of your component remains the same */}
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm">
+        <div className="relative  aspect-[4/5] overflow-hidden w-full rounded-sm">
           <Image
             src={imageUrl || ""}
             alt={title || ""}
@@ -39,24 +57,11 @@ export function AnimeCard({ anime }: { anime: AnimeMedia }) {
           />
 
           {score && (
-            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
+            <div className="absolute  right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               <span>{score}</span>
             </div>
           )}
-
-          {/* Score Badge
-          {anime.averageScore && anime.averageScore > 0 && (
-            <div className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs font-normal bg-white text-zinc-950 z-10">
-              {anime.averageScore}%
-            </div>
-          )} */}
-
-          {/* {showAiringBadge && anime.nextAiringEpisode && (
-            <div className="absolute w-max left-2 top-2 rounded-md px-2 py-1 text-[10px] sm:text-xs font-normal bg-black/70 text-white z-10">
-              <span className="block sm:inline">{timeUntil}</span>
-            </div>
-          )} */}
 
           {/* Hover Overlay with Details */}
           <div

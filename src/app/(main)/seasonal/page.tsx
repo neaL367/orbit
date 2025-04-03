@@ -103,9 +103,12 @@ export default function SeasonalPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center gap-2">
-        <h1 className="text-xl sm:text-2xl font-bold">Seasonal Anime</h1>
-      </div>
+      <section className="py-8 flex flex-col justify-center items-center">
+        <h1 className="text-4xl font-bold mb-4">Season Anime</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Discover seasonal anime
+        </p>
+      </section>
 
       {/* Season Navigation */}
       <div className="mb-6">

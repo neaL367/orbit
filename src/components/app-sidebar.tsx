@@ -44,7 +44,7 @@ const menuItems = [
   },
   {
     title: "Top 100",
-    url: "/top-rated",
+    url: "/top-100-anime",
     icon: Trophy,
   },
   {

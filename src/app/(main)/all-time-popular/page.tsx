@@ -13,7 +13,12 @@ export default async function PopularPage() {
 
   return (
     <div className="">
-      <h1 className="mb-8 text-3xl font-bold">All-Time Popular Anime</h1>
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">All Time Popular</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Discover the most popular anime of all time
+        </p>
+      </section>
 
       <Suspense fallback={<PopularSkeleton />}>
         <InfiniteScrollList

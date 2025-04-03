@@ -13,7 +13,12 @@ export default async function TopRatedPage() {
 
   return (
     <div className="">
-      <h1 className="mb-8 text-3xl font-bold">Top Rated Anime</h1>
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">Top 100 Anime</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Discover the highest rated anime
+        </p>
+      </section>
 
       <Suspense fallback={<TopRatedSkeleton />}>
         <InfiniteScrollList
@@ -24,6 +29,7 @@ export default async function TopRatedPage() {
             return media;
           }}
           emptyMessage="No top rated anime found"
+          showRanking={true}
         />
       </Suspense>
     </div>

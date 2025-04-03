@@ -13,9 +13,12 @@ export default async function GenresPage() {
 
   return (
     <div className="">
-      <div className="mb-8 flex items-center gap-4">
-        <h1 className="text-2xl font-bold">Anime Genres</h1>
-      </div>
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">Anime Genres</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Browse anime by genre
+        </p>
+      </section>
 
       <Suspense fallback={<GenresSkeleton />}>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

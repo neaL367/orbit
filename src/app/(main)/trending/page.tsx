@@ -13,7 +13,12 @@ export default async function TrendingPage() {
 
   return (
     <div className="">
-      <h1 className="mb-8 text-3xl font-bold">Trending Anime</h1>
+      <section className="py-8">
+        <h1 className="text-4xl font-bold mb-4">Trending Anime</h1>
+        <p className="text-muted-foreground text-lg mb-6">
+          Discover trending anime
+        </p>
+      </section>
 
       <Suspense fallback={<TrendingSkeleton />}>
         <InfiniteScrollList

@@ -23,14 +23,14 @@ export default async function HomePage() {
     .slice(0, 6);
 
   return (
-    <div className="container ">
+    <div className=" ">
       <div className="space-y-12">
         {/* Hero Section */}
-        <section className="py-8">
+        <section className="py-12">
           <h1 className="text-4xl font-bold mb-4">Discover Anime</h1>
           <p className="text-muted-foreground text-lg mb-6">
             Explore the latest trending, popular, and top-rated anime all in one
-            place.
+            place
           </p>
         </section>
 
@@ -74,7 +74,7 @@ export default async function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Top 100</h2>
-            <Link href="/top-rated">
+            <Link href="/top-100-anime">
               <Button variant="ghost" className="gap-1 hover:cursor-pointer">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
