@@ -1,63 +1,65 @@
-import { Suspense } from "react"
-import { notFound } from "next/navigation"
-import { InfiniteAnimeGrid } from "@/components/infinite-anime-grid"
-import { LoadingAnimeGrid } from "@/components/loading-anime"
-import { GenreQueries } from "@/anilist/queries/genre"
-import { Navigation } from "@/components/navigation"
-import { fetchMoreGenreAnime } from "@/anilist/actions/anime-actions"
+import { Suspense } from "react";
+import { Tag } from "lucide-react";
 
-interface GenrePageProps {
-  params: Promise<{
-    genre: string
-  }>
-  searchParams: Promise<{
-    page?: string
-  }>
+import { fetchAnimeByGenre } from "@/lib/api";
+import { InfiniteScrollList } from "@/components/infinite-scroll-list";
+import { Navigation } from "@/components/navigation";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ genre: string }>;
+}) {
+  const { genre } = await params;
+  return {
+    title: `${genre} Anime | Orbit`,
+    description: `Browse ${genre} anime on Orbit`,
+  };
 }
 
-export default async function GenrePage(props: GenrePageProps) {
-  const searchParams = await props.searchParams
-  const params = await props.params
-  const genre = decodeURIComponent(params.genre)
-  const page = Number.parseInt(searchParams.page || "1", 10)
-  const perPage = 18
-
-  const data = await GenreQueries.getByGenre({ genre, page, perPage })
-  const animeList = data?.data?.Page?.media || []
-
-  if (animeList.length === 0 && page === 1) {
-    notFound()
-  }
-
-  const pageInfo = data?.data?.Page?.pageInfo || {
-    currentPage: 1,
-    lastPage: 1,
-    hasNextPage: false,
-    total: 0,
-  }
-
-  // Create a server action wrapper that captures the genre
-  async function loadMoreAnimeForGenre(page: number) {
-    "use server"
-    return fetchMoreGenreAnime(genre, page)
-  }
+export default async function GenrePage({
+  params,
+}: {
+  params: Promise<{ genre: string }>;
+}) {
+  const { genre } = await params;
+  const { media: initialData } = await fetchAnimeByGenre(genre);
 
   return (
     <div className="">
-      <Navigation />
+      <div className="mb-8 flex items-center gap-4">
+        <Navigation />
+        <div className="flex items-center gap-2">
+          <Tag className="h-5 w-5" />
+          <h1 className="text-2xl font-bold">{genre} Anime</h1>
+        </div>
+      </div>
 
-      <h1 className="mb-2 text-3xl font-bold">{genre} Anime</h1>
-      <p className="mb-8 text-muted-foreground">Found {pageInfo.total || 0} anime in this genre</p>
-
-      <Suspense fallback={<LoadingAnimeGrid count={perPage} />}>
-        <InfiniteAnimeGrid
-          initialAnime={animeList}
-          initialHasNextPage={pageInfo.hasNextPage}
-          loadMoreFunction={loadMoreAnimeForGenre}
-          initialPage={page}
+      <Suspense fallback={<GenreSkeleton />}>
+        <InfiniteScrollList
+          initialData={initialData}
+          fetchNextPage={async (page) => {
+            "use server";
+            const { media } = await fetchAnimeByGenre(genre, page);
+            return media;
+          }}
+          emptyMessage={`No anime found for ${genre} genre`}
         />
       </Suspense>
     </div>
-  )
+  );
 }
 
+function GenreSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div key={i} className="flex flex-col gap-2">
+          <div className="aspect-[2/3] w-full animate-pulse rounded-md bg-muted"></div>
+          <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
+          <div className="h-3 w-1/2 animate-pulse rounded bg-muted"></div>
+        </div>
+      ))}
+    </div>
+  );
+}

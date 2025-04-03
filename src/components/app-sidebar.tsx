@@ -44,7 +44,7 @@ const menuItems = [
   },
   {
     title: "Top 100",
-    url: "/top-rated",
+    url: "/top-100-anime",
     icon: Trophy,
   },
   {
@@ -139,7 +139,7 @@ export function AppSidebar() {
                 <Link
                   key={genre}
                   href={`/genres/${genre}`}
-                  className="px-2.5 py-1 text-xs rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
+                  className="px-2.5 py-1 text-xs border hover:border-0 rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
                 >
                   {genre}
                 </Link>

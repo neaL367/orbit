@@ -1,41 +1,42 @@
 import { Suspense } from "react";
 
-import { fetchAllTimePopularAnime } from "@/lib/api";
+import { fetchTopRatedAnime } from "@/lib/api";
 import { InfiniteScrollList } from "@/components/infinite-scroll-list";
 
 export const metadata = {
-  title: "All-Time Popular Anime | Orbit",
-  description: "Discover the most popular anime of all time on Orbit",
+  title: "Top Rated Anime | Orbit",
+  description: "Discover the highest rated anime on Orbit",
 };
 
-export default async function PopularPage() {
-  const { media: initialData } = await fetchAllTimePopularAnime();
+export default async function TopRatedPage() {
+  const { media: initialData } = await fetchTopRatedAnime();
 
   return (
     <div className="">
       <section className="py-8">
-        <h1 className="text-4xl font-bold mb-4">All Time Popular</h1>
+        <h1 className="text-4xl font-bold mb-4">Top 100 Anime</h1>
         <p className="text-muted-foreground text-lg mb-6">
-          Discover the most popular anime of all time
+          Discover the highest rated anime
         </p>
       </section>
 
-      <Suspense fallback={<PopularSkeleton />}>
+      <Suspense fallback={<TopRatedSkeleton />}>
         <InfiniteScrollList
           initialData={initialData}
           fetchNextPage={async (page) => {
             "use server";
-            const { media } = await fetchAllTimePopularAnime(page);
+            const { media } = await fetchTopRatedAnime(page);
             return media;
           }}
-          emptyMessage="No popular anime found"
+          emptyMessage="No top rated anime found"
+          showRanking={true}
         />
       </Suspense>
     </div>
   );
 }
 
-function PopularSkeleton() {
+function TopRatedSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: 20 }).map((_, i) => (

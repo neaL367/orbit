@@ -1,38 +1,31 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { LoadingAnimeDetails } from "@/components/loading-anime";
-import { AnimeContent } from "@/components/anime/anime-content";
-import { GenreQueries } from "@/anilist/queries/genre";
+import { AnimeDetails } from "@/components/anime-details";
 import { Navigation } from "@/components/navigation";
 
-interface AnimePageProps {
-  params: Promise<{
-    id: string;
-  }>;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return {
+    title: `Anime #${id} | Orbit`,
+    description: `Discover details about Anime #${id} on Orbit.`,
+  };
 }
 
-export default async function AnimePage(props: AnimePageProps) {
-  const params = await props.params;
-  const id = Number.parseInt(params.id, 10);
-
-  if (isNaN(id)) {
-    notFound();
-  }
-
-  const data = await GenreQueries.getById(id);
-  const anime = data?.data?.Media;
-
-  if (!anime) {
-    notFound();
-  }
+export default async function AnimePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
   return (
-    <div>
+    <div className="space-y-12">
       <Navigation />
 
-      <Suspense fallback={<LoadingAnimeDetails />}>
-        <AnimeContent anime={anime} />
-      </Suspense>
+      <AnimeDetails id={id} />
     </div>
   );
 }
