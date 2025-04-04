@@ -13,40 +13,69 @@ import type {
 
 const ANILIST_API_URL = "https://graphql.anilist.co"
 
-// Helper function to execute GraphQL queries
-async function executeGraphQLQuery(query: string, variables = {}) {
-  try {
-    const response = await fetch(ANILIST_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      next: {
-        // Cache for 1 hour
-        revalidate: 3600,
-      },
-    })
+async function executeGraphQLQuery(query: string, variables = {}, retries = 3) {
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-    if (!response.ok) {
-      throw new Error(`Network response was not ok: ${response.status}`)
+  let lastError
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // Add a small delay between requests to avoid rate limiting
+      if (attempt > 0) {
+        // Exponential backoff: 1s, 2s, 4s, etc.
+        const backoffTime = Math.pow(2, attempt - 1) * 1000
+        console.log(`Retrying request (attempt ${attempt}/${retries}) after ${backoffTime}ms delay...`)
+        await delay(backoffTime)
+      }
+
+      const response = await fetch(ANILIST_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+        next: {
+          // Cache for 1 hour
+          revalidate: 3600,
+        },
+      })
+
+      if (response.status === 429) {
+        // Get retry-after header if available
+        const retryAfter = response.headers.get("Retry-After")
+        const retryDelay = retryAfter ? Number.parseInt(retryAfter) * 1000 : 5000
+        console.log(`Rate limited. Waiting for ${retryDelay}ms before retrying...`)
+        await delay(retryDelay)
+        continue // Skip to next retry attempt
+      }
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.errors) {
+        throw new Error(data.errors.map((e: GraphQLError) => e.message).join(", "))
+      }
+
+      return data.data
+    } catch (error) {
+      lastError = error
+
+      // If this is the last attempt, throw the error
+      if (attempt === retries) {
+        console.error("Error fetching data from AniList after multiple retries:", error)
+        throw error
+      }
     }
-
-    const data = await response.json()
-
-    if (data.errors) {
-      throw new Error(data.errors.map((e: GraphQLError) => e.message).join(", "))
-    }
-
-    return data.data
-  } catch (error) {
-    console.error("Error fetching data from AniList:", error)
-    throw error
   }
+
+  throw lastError
 }
 
 // Enhanced media fragment with all the requested fields

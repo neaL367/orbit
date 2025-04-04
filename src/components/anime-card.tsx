@@ -99,7 +99,7 @@ export function AnimeCard({
 
         {/* Title */}
         <div className="mt-2.5">
-          <h3 className="line-clamp-2 text-sm text-white">{title}</h3>
+          <h3 className="line-clamp-2 text-xs md:text-sm text-white">{title}</h3>
         </div>
       </Card>
     </Link>
