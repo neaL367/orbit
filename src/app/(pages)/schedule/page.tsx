@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link } from "next-view-transitions";
 import { format, addDays, startOfWeek } from "date-fns";
+import Link from "next/link";
 import { Clock, Calendar, Tv, ExternalLink, Play } from "lucide-react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -537,9 +538,10 @@ function LoadingSkeleton({
 }) {
   return (
     <div className="min-h-screen">
-      <div className="mb-8 flex items-center gap-4">
-        <Skeleton className="h-8 w-48" />
-      </div>
+       <section className="py-8">
+        <div className="h-10 w-64 animate-pulse rounded-md bg-muted mb-4"></div>
+        <div className="h-6 w-96 animate-pulse rounded-md bg-muted mb-6"></div>
+      </section>
 
       {/* Upcoming Premiere Card Skeleton */}
       <div className="mb-8">
@@ -597,50 +599,7 @@ function LoadingSkeleton({
             </div>
           ))}
         </div>
-
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <Skeleton className="h-7 w-48" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <ScheduleCardSkeleton key={index} />
-            ))}
-          </div>
-        </div>
       </div>
     </div>
-  );
-}
-
-function ScheduleCardSkeleton() {
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex items-center">
-          <div className="w-24 h-32 shrink-0 relative overflow-hidden">
-            <Skeleton className="w-full h-full rounded-lg" />
-          </div>
-          <div className="flex flex-col w-full px-3.5 gap-1.5">
-            <Skeleton className="h-4 w-3/4" />
-            <div className="flex items-center mt-1">
-              <Skeleton className="h-3 w-24" />
-            </div>
-            <div className="flex items-center mt-1">
-              <Skeleton className="h-3 w-20" />
-            </div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Skeleton className="h-3.5 w-3.5 rounded-full" />
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-5 w-5 rounded-full" />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

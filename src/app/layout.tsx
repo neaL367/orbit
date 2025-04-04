@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { ReactLenis } from "lenis/react";
 import { Geist_Mono } from "next/font/google";
-import { ViewTransitions } from "next-view-transitions";
 
 import Header from "@/components/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -31,24 +30,22 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "false";
 
   return (
-    <ViewTransitions>
-      <ReactLenis root>
-        <html lang="en" suppressHydrationWarning className="dark">
-          <body className={geist_Mono.className}>
-            <SidebarProvider defaultOpen={defaultOpen}>
-              <div className="flex min-h-screen w-full">
-                <AppSidebar />
-                <div className="flex flex-col w-full  dark:bg-zinc-950">
-                  <Header />
-                  <main className="mx-4 md:mx-16 sm:px-4 max-w-full">
-                    {children}
-                  </main>
-                </div>
+    <ReactLenis root>
+      <html lang="en" suppressHydrationWarning className="dark">
+        <body className={geist_Mono.className}>
+          <SidebarProvider defaultOpen={defaultOpen}>
+            <div className="flex min-h-screen w-full">
+              <AppSidebar />
+              <div className="flex flex-col w-full  dark:bg-zinc-950">
+                <Header />
+                <main className="mx-4 md:mx-16 sm:px-4 max-w-full">
+                  {children}
+                </main>
               </div>
-            </SidebarProvider>
-          </body>
-        </html>
-      </ReactLenis>
-    </ViewTransitions>
+            </div>
+          </SidebarProvider>
+        </body>
+      </html>
+    </ReactLenis>
   );
 }

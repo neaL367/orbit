@@ -1,13 +1,13 @@
 "use client";
 
-import { Link } from "next-view-transitions";
+import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { AnimeMedia } from "@/lib/types";
-import { useState } from "react";
-import { Star } from "lucide-react";
 
 export function AnimeCard({
   anime,
@@ -36,7 +36,7 @@ export function AnimeCard({
         {/* Rank Number Badge */}
         {typeof index === "number" && (
           <div
-            className="z-20 absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
+            className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
             style={{
               backgroundColor: anime.coverImage?.color ?? "#3b82f6",
             }}

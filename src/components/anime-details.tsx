@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchAnimeDetails, getTimeUntilAiring } from "@/lib/api";
 import Image from "next/image";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 
 export async function AnimeDetails({ id }: { id: string }) {
   const anime = await fetchAnimeDetails(id);

@@ -1,11 +1,11 @@
 "use client";
 
-import { useTransitionRouter } from "next-view-transitions";
+import { useRouter } from 'next/navigation'
 import { Button } from "./ui/button";
 import { ChevronLeft } from "lucide-react";
 
 export function Navigation() {
-  const router = useTransitionRouter();
+  const router = useRouter();
 
   const handleBack = () => {
     if (window.history.length > 1) {

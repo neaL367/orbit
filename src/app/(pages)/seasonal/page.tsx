@@ -183,7 +183,11 @@ export default function SeasonalPage() {
         >
           <TabsList className="grid grid-cols-4 w-full h-12">
             {SEASONS.map((season) => (
-              <TabsTrigger key={season} value={season} className="text-xs px-1 hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 ">
+              <TabsTrigger
+                key={season}
+                value={season}
+                className="text-xs px-1 hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 "
+              >
                 {formatSeasonName(season)}
               </TabsTrigger>
             ))}
@@ -193,10 +197,10 @@ export default function SeasonalPage() {
 
       {/* Anime Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
-              <div className="aspect-[2/3] w-full bg-muted"></div>
+              <div className="aspect-[3/4] w-full bg-muted"></div>
               <CardContent className="p-2">
                 <div className="h-3 w-3/4 bg-muted rounded mt-1"></div>
                 <div className="h-2 w-1/2 bg-muted rounded mt-1"></div>
@@ -205,7 +209,7 @@ export default function SeasonalPage() {
           ))}
         </div>
       ) : animeList.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {animeList.map((anime) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))}

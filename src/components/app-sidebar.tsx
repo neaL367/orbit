@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import {
   Home,
   TrendingUp,
@@ -99,7 +99,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title}>
                       <Link
-                        prefetch={false}
+                        prefetch
                         href={item.url}
                         className={`h-12 group flex items-center gap-3 group-data-[collapsible=icon]:ml-0 ml-3.5 px-3.5 py-2.5 rounded-lg text-sm transition-all duration-300 ${
                           isActive

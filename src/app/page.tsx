@@ -1,7 +1,8 @@
-import { Link } from "next-view-transitions";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+
 import { AnimeCard } from "@/components/anime-card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
 import {
   fetchTrendingAnime,
   fetchAllTimePopularAnime,
@@ -85,7 +86,7 @@ export default async function HomePage() {
             {topRatedAnime.map((anime, index) => (
               <div key={anime.id} className="relative">
                 <div
-                  className="absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-white shadow"
+                  className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
                   style={{
                     backgroundColor: anime.coverImage?.color ?? "#3b82f6",
                   }}
