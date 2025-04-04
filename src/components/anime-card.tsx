@@ -27,7 +27,7 @@ export function AnimeCard({
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
 
   return (
-    <Link href={`/anime/${anime.id}`}>
+    <Link prefetch={true} href={`/anime/${anime.id}`}>
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}

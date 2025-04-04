@@ -39,7 +39,7 @@ export default async function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Trending Now</h2>
-            <Link href="/trending">
+            <Link prefetch={true} href="/trending">
               <Button variant="ghost" className="gap-1 hover:cursor-pointer">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
@@ -57,7 +57,7 @@ export default async function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">All Time Popular</h2>
-            <Link href="/all-time-popular">
+            <Link prefetch={true} href="/all-time-popular">
               <Button variant="ghost" className="gap-1 hover:cursor-pointer">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
@@ -75,7 +75,7 @@ export default async function HomePage() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Top 100</h2>
-            <Link href="/top-100-anime">
+            <Link prefetch={true} href="/top-100-anime">
               <Button variant="ghost" className="gap-1 hover:cursor-pointer">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
@@ -103,7 +103,7 @@ export default async function HomePage() {
         <section className="pb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Upcoming Premieres</h2>
-            <Link href="/schedule">
+            <Link prefetch={true} href="/schedule">
               <Button variant="ghost" className="gap-1 hover:cursor-pointer">
                 View Schedule <ChevronRight className="h-4 w-4" />
               </Button>

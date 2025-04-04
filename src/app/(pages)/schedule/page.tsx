@@ -443,6 +443,7 @@ function ScheduleCard({ anime }: ScheduleCardProps) {
               priority
             />
             <Link
+              prefetch={true}
               href={`/anime/${anime.id}`}
               className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
             >
@@ -475,6 +476,7 @@ function ScheduleCard({ anime }: ScheduleCardProps) {
                     <Tooltip key={platform}>
                       <TooltipTrigger asChild>
                         <Link
+                          prefetch={true}
                           href={`${
                             STREAMING_PLATFORMS[
                               platform as keyof typeof STREAMING_PLATFORMS
@@ -504,6 +506,7 @@ function ScheduleCard({ anime }: ScheduleCardProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link
+                        prefetch={true}
                         href={`https://www.google.com/search?q=watch+${encodeURIComponent(
                           anime.title.english || anime.title.romaji || ""
                         )}+online`}
@@ -538,7 +541,7 @@ function LoadingSkeleton({
 }) {
   return (
     <div className="min-h-screen">
-       <section className="py-8">
+      <section className="py-8">
         <div className="h-10 w-64 animate-pulse rounded-md bg-muted mb-4"></div>
         <div className="h-6 w-96 animate-pulse rounded-md bg-muted mb-6"></div>
       </section>

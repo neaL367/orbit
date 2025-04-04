@@ -129,6 +129,7 @@ export async function AnimeDetails({ id }: { id: string }) {
                   <div className="flex flex-wrap gap-2">
                     {anime.genres.map((genre, index) => (
                       <Link
+                        prefetch={true}
                         key={`${genre}-${index}`}
                         href={`/genres/${genre}`}
                         className="px-2.5 py-1 text-xs border hover:border-0 rounded-full bg-zinc-800 text-gray-300 hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white transition-all"
@@ -395,6 +396,7 @@ export async function AnimeDetails({ id }: { id: string }) {
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                         {anime.recommendations.nodes.map((nodes) => (
                           <Link
+                            prefetch={true}
                             key={nodes.mediaRecommendation?.id}
                             href={`/anime/${nodes.mediaRecommendation?.id}`}
                             className="overflow-hidden rounded-lg border hover:shadow-md transition-all"
