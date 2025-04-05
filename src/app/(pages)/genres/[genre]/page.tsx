@@ -31,7 +31,9 @@ export default async function GenrePage({
         <div className="flex items-center gap-2">
           <Tag className="h-5 w-5" />
           <h1 className="text-2xl font-bold">
-            <span className="bg-gradient-to-r from-primary via-purple-400 to-purple-400 bg-clip-text text-transparent">{genre} </span>
+            <span className="bg-gradient-to-r from-primary via-purple-400 to-purple-400 bg-clip-text text-transparent">
+              {genre}{" "}
+            </span>
             | Anime
           </h1>
         </div>

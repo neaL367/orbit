@@ -6,6 +6,9 @@ export const metadata = {
   description: "Discover trending anime on Orbit",
 };
 
+export const revalidate = 3600;
+export const dynamicParams = true;
+
 export default async function TrendingPage() {
   const { media: initialData } = await fetchTrendingAnime();
 

@@ -15,7 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { fetchWeeklySchedule } from "@/lib/api";
-// import { useNSFW } from "@/contexts/nsfw-context";.
 import type { AiringSchedule } from "@/lib/types";
 import Image from "next/image";
 
@@ -111,7 +110,6 @@ interface WeeklyScheduleData {
 }
 
 export default function SchedulePage() {
-  // const { showNSFW } = useNSFW();
   const [isLoading, setIsLoading] = useState(true);
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklyScheduleData>({});
   const [premieres, setPremieres] = useState<PremiereAnime[]>([]);

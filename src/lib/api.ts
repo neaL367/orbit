@@ -6,50 +6,81 @@ import type {
   PageInfo,
   CharacterEdge,
   RecommendationNode,
-  GraphQLError,
   MediaRelationEdge,
   StaffEdge,
+  GraphQLError,
 } from "@/lib/types"
 
 const ANILIST_API_URL = "https://graphql.anilist.co"
 
-// Helper function to execute GraphQL queries
 async function executeGraphQLQuery(query: string, variables = {}) {
-  try {
-    const response = await fetch(ANILIST_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      next: {
-        // Cache for 1 hour
-        revalidate: 3600,
-      },
-    })
+  const MAX_RETRIES = 3
+  const BASE_DELAY = 1000 // Start with a 1 second delay
 
-    if (!response.ok) {
-      throw new Error(`Network response was not ok: ${response.status}`)
+  let retries = 0
+
+  while (retries <= MAX_RETRIES) {
+    try {
+      const response = await fetch(ANILIST_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+        next: {
+          // Cache for 1 hour
+          revalidate: 3600,
+        },
+      })
+
+      // Handle rate limiting (429)
+      if (response.status === 429) {
+        // Get retry-after header if available or use exponential backoff
+        const retryAfter = response.headers.get("Retry-After")
+        const delayMs = retryAfter ? Number.parseInt(retryAfter) * 1000 : BASE_DELAY * Math.pow(2, retries)
+
+        console.log(`Rate limited. Retrying in ${delayMs / 1000} seconds...`)
+
+        // Wait for the specified delay
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+
+        // Increment retry counter and try again
+        retries++
+        continue
+      }
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.errors) {
+        throw new Error(data.errors.map((e: GraphQLError) => e.message).join(", "))
+      }
+
+      return data.data
+    } catch (error) {
+      // If we've reached max retries, throw the error
+      if (retries === MAX_RETRIES) {
+        console.error("Error fetching data from AniList after multiple retries:", error)
+        throw error
+      }
+
+      // For other errors, also implement retry with backoff
+      const delayMs = BASE_DELAY * Math.pow(2, retries)
+      console.log(`Error occurred. Retrying in ${delayMs / 1000} seconds...`)
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+
+      retries++
     }
-
-    const data = await response.json()
-
-    if (data.errors) {
-      throw new Error(data.errors.map((e: GraphQLError) => e.message).join(", "))
-    }
-
-    return data.data
-  } catch (error) {
-    console.error("Error fetching data from AniList:", error)
-    throw error
   }
 }
 
-// Enhanced media fragment with all the requested fields
 const MEDIA_FRAGMENT = `
   fragment MediaFragment on Media {
     id

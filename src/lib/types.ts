@@ -268,8 +268,7 @@ export interface PageInfo {
 }
 
 export interface GraphQLError {
-    message: string
-    locations?: { line: number; column: number }[]
-    path?: string[]
-    extensions?: Record<string, unknown>
+    message: string;
+    status?: number;
+    validation?: Record<string, string[]>;
 }

@@ -24,7 +24,7 @@ export default async function GenresPage() {
           <Link
             prefetch={true}
             key={genre}
-            href={`/genres/${encodeURIComponent(genre)}`}
+            href={`/genres/${decodeURIComponent(genre)}`}
           >
             <Card className="transition-all hover:scale-[1.02] hover:shadow-md overflow-hidden group border border-border/50 relative">
               <CardContent className="flex h-24 items-center justify-center p-4 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-purple-400 transition-all">
