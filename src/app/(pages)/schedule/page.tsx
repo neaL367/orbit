@@ -1,57 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format, addDays, startOfWeek } from "date-fns";
 import Link from "next/link";
-import { Clock, Calendar, Tv, ExternalLink, Play } from "lucide-react";
+import Image from "next/image";
+import { format, addDays, startOfWeek } from "date-fns";
+import { ArrowLeft, Clock, Calendar, Play } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { fetchWeeklySchedule } from "@/lib/api";
+import { StreamingPlatforms } from "@/components/streaming-platforms";
 import type { AiringSchedule } from "@/lib/types";
-import Image from "next/image";
-
-const STREAMING_PLATFORMS = {
-  Crunchyroll: {
-    url: "https://www.crunchyroll.com/search?q=",
-    color: "bg-[#F47521]",
-  },
-  Funimation: {
-    url: "https://www.funimation.com/search/?q=",
-    color: "bg-[#5B0BB5]",
-  },
-  Netflix: {
-    url: "https://www.netflix.com/search?q=",
-    color: "bg-[#E50914]",
-  },
-  Hulu: {
-    url: "https://www.hulu.com/search?q=",
-    color: "bg-[#1CE783]",
-  },
-  "Amazon Prime": {
-    url: "https://www.amazon.com/s?k=",
-    color: "bg-[#00A8E1]",
-  },
-  "HBO Max": {
-    url: "https://www.hbomax.com/search?q=",
-    color: "bg-[#5822B4]",
-  },
-  Disney: {
-    url: "https://www.disneyplus.com/search?q=",
-    color: "bg-[#113CCF]",
-  },
-  "Apple TV": {
-    url: "https://tv.apple.com/search?term=",
-    color: "bg-black",
-  },
-};
 
 interface WeekDay {
   name: string;
@@ -68,7 +29,7 @@ interface TimeRemaining {
   seconds: number;
 }
 
-export interface PremiereAnime {
+interface PremiereAnime {
   id: number;
   title: {
     romaji?: string;
@@ -87,6 +48,7 @@ export interface PremiereAnime {
   airingAt: number;
 }
 
+// Update the ScheduleAnime interface to include externalLinks
 interface ScheduleAnime {
   id: number;
   title: {
@@ -103,6 +65,15 @@ interface ScheduleAnime {
   airingAt: number;
   format: string;
   duration?: number;
+  externalLinks?: {
+    id: number;
+    url: string;
+    site: string;
+    type?: string;
+    language?: string;
+    color?: string;
+    icon?: string;
+  }[];
 }
 
 interface WeeklyScheduleData {
@@ -123,7 +94,7 @@ export default function SchedulePage() {
 
   // Generate week days starting from current week
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 0 }); // 0 = Sunday
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // 1 = Monday
 
   const weekDays: WeekDay[] = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(weekStart, i);
@@ -144,56 +115,58 @@ export default function SchedulePage() {
   const activeDay = format(today, "EEEE").toLowerCase();
 
   // Fetch schedule data
-  useEffect(() => {
-    const fetchScheduleData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch weekly schedule
-        const scheduleData = await fetchWeeklySchedule();
+  // Update the fetchScheduleData function to include externalLinks
+  const fetchScheduleData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch weekly schedule
+      const scheduleData = await fetchWeeklySchedule();
 
-        // Convert to format needed for the UI
-        const formattedSchedule: WeeklyScheduleData = {};
-        Object.entries(scheduleData).forEach(([day, schedules]) => {
-          formattedSchedule[day.toLowerCase()] = schedules.map(
-            (schedule: AiringSchedule) => ({
-              id: schedule.media.id,
-              title: schedule.media.title,
-              coverImage: schedule.media.coverImage,
-              episode: schedule.episode,
-              airingAt: schedule.airingAt,
-              format: schedule.media.format,
-              duration: schedule.media.duration || undefined,
-            })
-          );
-        });
-
-        setWeeklySchedule(formattedSchedule);
-
-        // Find upcoming premieres (first episodes)
-        const allSchedules = Object.values(scheduleData).flat();
-        const upcomingPremieres = allSchedules
-          .filter((schedule: AiringSchedule) => schedule.episode === 1)
-          .map((schedule: AiringSchedule) => ({
+      // Convert to format needed for the UI
+      const formattedSchedule: WeeklyScheduleData = {};
+      Object.entries(scheduleData).forEach(([day, schedules]) => {
+        formattedSchedule[day.toLowerCase()] = schedules.map(
+          (schedule: AiringSchedule) => ({
             id: schedule.media.id,
             title: schedule.media.title,
             coverImage: schedule.media.coverImage,
-            bannerImage: schedule.media.bannerImage,
             episode: schedule.episode,
-            episodes: schedule.media.episodes || undefined,
-            duration: schedule.media.duration || undefined,
             airingAt: schedule.airingAt,
-          }))
-          .sort((a, b) => a.airingAt - b.airingAt)
-          .slice(0, 5); // Take top 5 premieres
+            format: schedule.media.format,
+            duration: schedule.media.duration || undefined,
+            externalLinks: schedule.media.externalLinks || [],
+          })
+        );
+      });
 
-        setPremieres(upcomingPremieres);
-      } catch (error) {
-        console.error("Error fetching schedule data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setWeeklySchedule(formattedSchedule);
 
+      // Find upcoming premieres (first episodes)
+      const allSchedules = Object.values(scheduleData).flat();
+      const upcomingPremieres = allSchedules
+        .filter((schedule: AiringSchedule) => schedule.episode === 1)
+        .map((schedule: AiringSchedule) => ({
+          id: schedule.media.id,
+          title: schedule.media.title,
+          coverImage: schedule.media.coverImage,
+          bannerImage: schedule.media.bannerImage,
+          episode: schedule.episode,
+          episodes: schedule.media.episodes || undefined,
+          duration: schedule.media.duration || undefined,
+          airingAt: schedule.airingAt,
+        }))
+        .sort((a, b) => a.airingAt - b.airingAt)
+        .slice(0, 5); // Take top 5 premieres
+
+      setPremieres(upcomingPremieres);
+    } catch (error) {
+      console.error("Error fetching schedule data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchScheduleData();
   }, []);
 
@@ -241,13 +214,16 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <section className="py-8">
-        <h1 className="text-4xl font-bold mb-4">Anime Schedule</h1>
-        <p className="text-muted-foreground text-lg mb-6">
-          Discover anime schedule
-        </p>
-      </section>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex items-center gap-4">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back to home</span>
+          </Link>
+        </Button>
+        <h1 className="text-2xl font-bold">Anime Schedule</h1>
+      </div>
 
       {/* Upcoming Premiere Card */}
       {premieres.length > 0 && (
@@ -415,6 +391,7 @@ interface ScheduleCardProps {
   anime: ScheduleAnime;
 }
 
+// Update the ScheduleCard component to pass externalLinks to StreamingPlatforms
 function ScheduleCard({ anime }: ScheduleCardProps) {
   const title =
     anime.title.userPreferred ||
@@ -424,26 +401,26 @@ function ScheduleCard({ anime }: ScheduleCardProps) {
   const airingTime = new Date(anime.airingAt * 1000);
   const formattedTime = format(airingTime, "h:mm a");
 
-  // Default streaming platforms to show
-  const platforms = ["Crunchyroll", "Netflix", "Hulu"];
-
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all">
       <CardContent className="p-0">
-        <div className="flex items-center ">
+        <div className="flex items-center">
           <div className="w-24 h-32 shrink-0 relative overflow-hidden">
             <Image
-              src={anime.coverImage.medium || ""}
-              alt={anime.title.english || anime.title.romaji || ""}
+              src={
+                anime.coverImage.medium ||
+                anime.coverImage.large ||
+                "/placeholder.svg"
+              }
+              alt={title}
               className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 brightness-85 rounded-lg"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority
             />
             <Link
-              prefetch={true}
               href={`/anime/${anime.id}`}
-              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 hover:opacity-100 transition-opacity"
             >
               <Play className="w-8 h-8 text-white" />
             </Link>
@@ -466,63 +443,11 @@ function ScheduleCard({ anime }: ScheduleCardProps) {
             </div>
 
             {/* Streaming platforms */}
-            <div className="flex items-center gap-1.5 mt-1">
-              <Tv className="h-3.5 w-3.5 text-muted-foreground" />
-              <div className="flex gap-1">
-                <TooltipProvider>
-                  {platforms.map((platform) => (
-                    <Tooltip key={platform}>
-                      <TooltipTrigger asChild>
-                        <Link
-                          prefetch={true}
-                          href={`${
-                            STREAMING_PLATFORMS[
-                              platform as keyof typeof STREAMING_PLATFORMS
-                            ].url
-                          }${encodeURIComponent(
-                            anime.title.english || anime.title.romaji || ""
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex items-center justify-center w-5 h-5 rounded-full ${
-                            STREAMING_PLATFORMS[
-                              platform as keyof typeof STREAMING_PLATFORMS
-                            ].color
-                          } hover:opacity-80 transition-opacity`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span className="text-white text-[8px] font-bold">
-                            {platform.charAt(0)}
-                          </span>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Watch on {platform}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        prefetch={true}
-                        href={`https://www.google.com/search?q=watch+${encodeURIComponent(
-                          anime.title.english || anime.title.romaji || ""
-                        )}+online`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-r from-primary to-purple-400 hover:opacity-80 transition-opacity"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ExternalLink className="w-3 h-3 text-white" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      <p>Find more streaming options</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
+            <StreamingPlatforms
+              animeId={anime.id}
+              title={anime.title.english || anime.title.romaji || ""}
+              externalLinks={anime.externalLinks}
+            />
           </div>
         </div>
       </CardContent>
@@ -538,11 +463,16 @@ function LoadingSkeleton({
   activeDay: string;
 }) {
   return (
-    <div className="min-h-screen">
-      <section className="py-8">
-        <div className="h-10 w-64 animate-pulse rounded-md bg-muted mb-4"></div>
-        <div className="h-6 w-96 animate-pulse rounded-md bg-muted mb-6"></div>
-      </section>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex items-center gap-4">
+        <Button variant="outline" size="icon" asChild>
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back to home</span>
+          </Link>
+        </Button>
+        <h1 className="text-2xl font-bold">Anime Schedule</h1>
+      </div>
 
       {/* Upcoming Premiere Card Skeleton */}
       <div className="mb-8">
