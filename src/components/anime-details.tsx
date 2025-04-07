@@ -126,6 +126,117 @@ export async function AnimeDetails({ id }: { id: string }) {
                 </Button>
               </div> */}
 
+              <div className="block lg:hidden bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
+                <h1 className="text-2xl md:text-4xl font-bold text-white">
+                  {title}
+                </h1>
+                {anime.title.native && (
+                  <p className="mt-1 text-lg text-muted-foreground">
+                    {anime.title.native}
+                  </p>
+                )}
+
+                {/* Score, Popularity, Date & Duration */}
+                <div className="flex flex-wrap gap-6 mt-4">
+                  {anime.averageScore && (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-full bg-yellow-500/10">
+                        <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          {anime.averageScore / 10}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Score
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {anime.popularity ? (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          {anime.popularity.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Popularity
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  {anime.startDate && anime.startDate.year && (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Calendar className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          {`${anime.startDate.year}-${
+                            anime.startDate.month
+                              ?.toString()
+                              .padStart(2, "0") || "??"
+                          }-${
+                            anime.startDate.day?.toString().padStart(2, "0") ||
+                            "??"
+                          }`}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Release Date
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {anime.duration && (
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Clock className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{anime.duration} min</div>
+                        <div className="text-xs text-muted-foreground">
+                          Per Episode
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Next Episode Info */}
+                {anime.nextAiringEpisode && (
+                  <div className="flex lg:hidden mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Info className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          Episode {anime.nextAiringEpisode.episode} airing in{" "}
+                          {getTimeUntilAiring(anime.nextAiringEpisode.airingAt)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Next Episode
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {anime.description && (
+                <div className="block lg:hidden bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
+                  <h3 className="font-semibold mb-4">Synopsis</h3>
+                  <div
+                    className="text-muted-foreground prose prose-sm max-w-none prose-p:leading-relaxed prose-headings:text-foreground prose-a:text-primary"
+                    dangerouslySetInnerHTML={{ __html: anime.description }}
+                  />
+                </div>
+              )}
+
               {/* Basic Details Card - Redesigned */}
               <div className="rounded-xl border bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
                 <div className="bg-primary/20 p-4">
@@ -305,7 +416,7 @@ export async function AnimeDetails({ id }: { id: string }) {
             {/* Right Column - Main Content */}
             <div className="space-y-8">
               {/* Title & Meta - Positioned at the top of right column */}
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
+              <div className="md:block hidden bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                 <h1 className="text-2xl md:text-4xl font-bold text-white">
                   {title}
                 </h1>
@@ -407,7 +518,7 @@ export async function AnimeDetails({ id }: { id: string }) {
 
               {/* Description */}
               {anime.description && (
-                <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
+                <div className="hidden md:block bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                   <h3 className="font-semibold mb-4">Synopsis</h3>
                   <div
                     className="text-muted-foreground prose prose-sm max-w-none prose-p:leading-relaxed prose-headings:text-foreground prose-a:text-primary"

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Play } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
-
+import { slugify } from "@/lib/utils";
 interface AnimeImageCardProps {
   animeId: number;
   coverImage: { large: string; medium?: string };
@@ -28,7 +28,7 @@ export function AnimeImageCard({
         sizes="100vw"
       />
       <Link
-        href={`/anime/${animeId}`}
+        href={`/anime/${animeId}/${slugify(title)}`}
         className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <Play className="w-8 h-8 text-white" />
