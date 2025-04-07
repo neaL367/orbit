@@ -14,6 +14,11 @@ export const client = new ApolloClient({
                             return { ...existing, ...incoming };
                         },
                     },
+                    coverImage: {
+                        merge(existing = {}, incoming) {
+                            return { ...existing, ...incoming };
+                        }
+                    }
                 },
             },
         },

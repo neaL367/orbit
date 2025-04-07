@@ -8,6 +8,7 @@ import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { AnimeMedia } from "@/lib/types";
+import { slugify } from "@/lib/utils";
 
 export function AnimeCard({
   anime,
@@ -23,11 +24,13 @@ export function AnimeCard({
     anime.title.english ||
     anime.title.romaji ||
     "";
+
+  const slug = slugify(title);
   const imageUrl = anime.coverImage.large || "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
 
   return (
-    <Link prefetch={true} href={`/anime/${anime.id}`}>
+    <Link prefetch={true} href={`/anime/${anime.id}/${slug}`}>
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
@@ -99,7 +102,9 @@ export function AnimeCard({
 
         {/* Title */}
         <div className="mt-2.5">
-          <h3 className="line-clamp-2 text-xs md:text-sm text-white">{title}</h3>
+          <h3 className="line-clamp-2 text-xs md:text-sm text-white">
+            {title}
+          </h3>
         </div>
       </Card>
     </Link>

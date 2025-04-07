@@ -81,7 +81,7 @@ export async function AnimeDetails({ id }: { id: string }) {
         </div>
       )}
 
-      <div className="container px-4 mx-auto relative">
+      <div className="relative">
         {/* Main Content */}
         <div className="mt-[-100px] sm:mt-[-150px] relative z-10">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[320px_1fr]">
@@ -305,7 +305,7 @@ export async function AnimeDetails({ id }: { id: string }) {
             {/* Right Column - Main Content */}
             <div className="space-y-8">
               {/* Title & Meta - Positioned at the top of right column */}
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl p-6 border shadow-sm">
+              <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                 <h1 className="text-2xl md:text-4xl font-bold text-white">
                   {title}
                 </h1>
@@ -407,7 +407,7 @@ export async function AnimeDetails({ id }: { id: string }) {
 
               {/* Description */}
               {anime.description && (
-                <div className="bg-card/80 backdrop-blur-sm rounded-xl p-6 border shadow-sm">
+                <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                   <h3 className="font-semibold mb-4">Synopsis</h3>
                   <div
                     className="text-muted-foreground prose prose-sm max-w-none prose-p:leading-relaxed prose-headings:text-foreground prose-a:text-primary"
@@ -418,7 +418,7 @@ export async function AnimeDetails({ id }: { id: string }) {
 
               {/* Trailer */}
               {anime.trailer && (
-                <div className="bg-card/80 backdrop-blur-sm rounded-xl p-6 border shadow-sm">
+                <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                   <h3 className="font-semibold mb-4">Trailer</h3>
                   <div className="aspect-video w-full overflow-hidden rounded-lg border">
                     {anime.trailer.site === "youtube" && anime.trailer.id ? (
@@ -440,7 +440,7 @@ export async function AnimeDetails({ id }: { id: string }) {
               )}
 
               {/* Tabs for Characters, Staff, Relations */}
-              <div className="bg-card/80 backdrop-blur-sm rounded-xl p-6 border shadow-sm">
+              <div className="bg-card/80 backdrop-blur-sm rounded-xl p-4 md:p-6 border shadow-sm">
                 <Tabs defaultValue="characters" className="w-full">
                   <TabsList className="w-full mb-6 grid grid-cols-1 md:grid-cols-3 gap-2 h-auto">
                     <TabsTrigger value="characters" className="">
@@ -486,7 +486,7 @@ export async function AnimeDetails({ id }: { id: string }) {
                             {/* Voice Actor Info */}
                             {edge.voiceActors &&
                               edge.voiceActors.length > 0 && (
-                                <div className="border-t p-2 flex items-center justify-center gap-2 bg-muted/30">
+                                <div className="border-t p-2 flex flex-col md:flex-row items-center justify-center gap-2 bg-muted/30">
                                   <div className="relative w-8 h-8 rounded-full overflow-hidden">
                                     <Image
                                       src={

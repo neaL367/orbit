@@ -6,20 +6,19 @@ import { ArrowLeft } from "lucide-react";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; slug: string }>;
 }) {
-  const { id } = await params;
-
+  const { slug } = await params;
   return {
-    title: `Anime #${id} | Orbit`,
-    description: `Discover details about Anime #${id} on Orbit.`,
+    title: `${slug} | Orbit`,
+    description: `Discover details about ${slug} on Orbit.`,
   };
 }
 
 export default async function AnimePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; slug: string }>;
 }) {
   const { id } = await params;
 
