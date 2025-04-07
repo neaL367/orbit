@@ -1,13 +1,14 @@
 "use client";
 
-import { Link } from "next-view-transitions";
+import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { AnimeMedia } from "@/lib/types";
-import { useState } from "react";
-import { Star } from "lucide-react";
+import { slugify } from "@/lib/utils";
 
 export function AnimeCard({
   anime,
@@ -23,11 +24,13 @@ export function AnimeCard({
     anime.title.english ||
     anime.title.romaji ||
     "";
-  const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
+
+  const slug = slugify(title);
+  const imageUrl = anime.coverImage.large || "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
 
   return (
-    <Link href={`/anime/${anime.id}`}>
+    <Link prefetch={true} href={`/anime/${anime.id}/${slug}`}>
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
@@ -36,7 +39,7 @@ export function AnimeCard({
         {/* Rank Number Badge */}
         {typeof index === "number" && (
           <div
-            className="z-20 absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
+            className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow"
             style={{
               backgroundColor: anime.coverImage?.color ?? "#3b82f6",
             }}
@@ -99,7 +102,9 @@ export function AnimeCard({
 
         {/* Title */}
         <div className="mt-2.5">
-          <h3 className="line-clamp-2 text-sm text-white">{title}</h3>
+          <h3 className="line-clamp-2 text-xs md:text-sm text-white">
+            {title}
+          </h3>
         </div>
       </Card>
     </Link>

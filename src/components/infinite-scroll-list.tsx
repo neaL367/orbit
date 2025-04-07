@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import { AnimeCard } from "./anime-card";
 import type { AnimeMedia } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 
 interface InfiniteScrollListProps {
   initialData: AnimeMedia[];
@@ -81,15 +82,28 @@ export function InfiniteScrollList({
 
   if (items.length === 0 && !isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <p className="text-lg text-muted-foreground">{emptyMessage}</p>
+      <div className="flex h-[50vh] items-center justify-center bg-muted/30 rounded-xl">
+        <div className="text-center max-w-md px-4">
+          <p className="text-lg font-medium mb-2">{emptyMessage}</p>
+          <p className="text-sm text-muted-foreground">
+            Try adjusting your search or filters to find what you&apos;re
+            looking for
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-y-10 gap-x-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-medium">Results</h2>
+        <Badge variant="outline" className="rounded-full">
+          {items.length} anime found
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {items.map((item, index) => (
           <AnimeCard
             key={`${item.id}-${index}`}
@@ -101,13 +115,15 @@ export function InfiniteScrollList({
 
       <div ref={loadMoreRef} className="flex justify-center py-8">
         {isLoading && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-primary">
             <Loader2 className="h-5 w-5 animate-spin" />
             <span>Loading more...</span>
           </div>
         )}
         {!hasMore && items.length > 0 && (
-          <p className="text-muted-foreground">No more items to load</p>
+          <p className="text-muted-foreground px-4 py-2 bg-muted/30 rounded-full text-sm">
+            You&apos;ve reached the end
+          </p>
         )}
       </div>
     </div>

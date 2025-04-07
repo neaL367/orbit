@@ -17,7 +17,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.prefetch(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

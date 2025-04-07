@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 export default function AnimeError({
   error,
@@ -11,28 +11,66 @@ export default function AnimeError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [countdown, setCountdown] = useState<number | null>(null);
+
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error);
+    // If it's a rate limit error, start a countdown
+    if (error.message.includes("429")) {
+      setCountdown(15);
+
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timer);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
   }, [error]);
 
+  // Auto-retry after countdown
+  useEffect(() => {
+    if (countdown === null && error.message.includes("429")) {
+      reset();
+    }
+  }, [countdown, error, reset]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] px-4 py-16 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 mb-6">
-        <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
-      </div>
-      <h2 className="text-2xl font-bold tracking-tight mb-2">
-        Something went wrong!
-      </h2>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        {error.message.includes("429")
-          ? "We've hit the AniList API rate limit. Please wait a moment and try again."
-          : "There was an error loading the anime details. Please try again."}
-      </p>
-      <Button onClick={() => reset()} className="flex items-center gap-2">
-        <RefreshCw className="h-4 w-4" />
-        Try again
-      </Button>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center">
+      <AlertTriangle className="h-12 w-12 text-amber-500 mb-4" />
+      <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
+
+      {error.message.includes("429") ? (
+        <>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            We&apos;ve hit AniList&apos;s rate limit. This happens when there are too many
+            requests in a short period.
+          </p>
+
+          {countdown ? (
+            <div className="flex items-center gap-2 text-primary">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              <span>Retrying in {countdown} seconds...</span>
+            </div>
+          ) : (
+            <Button onClick={reset} className="flex items-center gap-2 hover:cursor-pointer">
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </Button>
+          )}
+        </>
+      ) : (
+        <>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            {error.message || "An unexpected error occurred"}
+          </p>
+          <Button onClick={reset} className="hover:cursor-pointer bg-primary/30">Try again</Button>
+        </>
+      )}
     </div>
   );
 }
