@@ -16,7 +16,6 @@ export function AnimeImageCard({
   coverImage,
   title,
   airingAt,
-  isAiringToday,
 }: AnimeImageCardProps) {
   return (
     <div className="relative flex-shrink-0 w-26 md:w-34 h-36 md:h-44 overflow-hidden group rounded-l-lg">
