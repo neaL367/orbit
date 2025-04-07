@@ -60,7 +60,7 @@ export function ScheduleCard({ anime }: ScheduleCardProps) {
           href={`/anime/${anime.id}`}
           className="group-hover:text-white text-white/80 transition-colors"
         >
-          <h3 className="font-medium text-base line-clamp-2">{title}</h3>
+          <h3 className="font-medium text-xs md:text-base line-clamp-1">{title}</h3>
         </Link>
         <div className="flex items-center mt-1 text-xs text-muted-foreground">
           <Badge variant="secondary" className="mr-2 text-xs">

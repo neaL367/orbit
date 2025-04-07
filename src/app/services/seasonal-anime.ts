@@ -1,4 +1,4 @@
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { SEASONAL_ANIME_QUERY } from "../graphql/queries/seasonal"
 import { cache } from "react"
 import { AnimeMedia, PageInfo, Season } from "@/lib/types"
@@ -13,7 +13,7 @@ export const getSeasonalAnime = cache(
     ) => {
 
         try {
-            const { data } = await apolloClient.query({
+            const { data } = await client.query({
                 query: SEASONAL_ANIME_QUERY,
                 variables: {
                     season: season.toUpperCase(),

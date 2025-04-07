@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { WEEKLY_SCHEDULE_QUERY } from "../graphql/queries/weekly-schedule"
 import { AiringSchedule } from "@/lib/types"
 
@@ -8,7 +8,7 @@ export const getWeeklyAnime = cache(async (weekOffset = 0, isAdult = false) => {
     const startTime = now + weekOffset * 7 * 24 * 60 * 60
     const endTime = startTime + 7 * 24 * 60 * 60
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: WEEKLY_SCHEDULE_QUERY,
             variables: {
                 airingAtGreater: startTime,

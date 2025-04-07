@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { AIRING_SCHEDULE_QUERY } from "../graphql/queries/airing-schedule"
 import { AiringSchedule, PageInfo } from "@/lib/types"
 
@@ -19,7 +19,7 @@ export const getAiringAnime = cache(
 
 
         try {
-            const { data } = await apolloClient.query({
+            const { data } = await client.query({
                 query: AIRING_SCHEDULE_QUERY,
                 variables,
                 fetchPolicy: "network-only",

@@ -1,12 +1,12 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { TRENDING_ANIME_QUERY } from "../graphql/queries/trending"
 import { AnimeMedia, PageInfo } from "@/lib/types"
 
 export const getTrendingAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
 
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: TRENDING_ANIME_QUERY,
             variables: { page, perPage, isAdult },
             fetchPolicy: "network-only",

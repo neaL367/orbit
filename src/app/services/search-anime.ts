@@ -1,12 +1,12 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { SEARCH_ANIME_QUERY } from "../graphql/queries/search"
 import { AnimeMedia, PageInfo } from "@/lib/types"
 
 export const getSearchAnime = cache(async (searchTerm: string, page = 1, perPage = 20, isAdult = false) => {
 
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: SEARCH_ANIME_QUERY,
             variables: { search: searchTerm, page, perPage, isAdult },
             fetchPolicy: "network-only",

@@ -1,11 +1,11 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { TOP_RATED_ANIME_QUERY } from "../graphql/queries/top-rated"
 import { AnimeMedia, PageInfo } from "@/lib/types"
 
 export const getTopRatedAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: TOP_RATED_ANIME_QUERY,
             variables: { page, perPage, isAdult },
             fetchPolicy: "network-only",

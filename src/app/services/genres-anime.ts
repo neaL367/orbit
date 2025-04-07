@@ -1,11 +1,11 @@
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { cache } from "react"
 import { ANIME_BY_GENRE_QUERY, GENRES_QUERY } from "../graphql/queries/genres"
 import { AnimeMedia, PageInfo } from "@/lib/types"
 
 export const getGenres = cache(async (includeAdult = false) => {
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: GENRES_QUERY,
             fetchPolicy: "network-only",
         })
@@ -19,7 +19,7 @@ export const getGenres = cache(async (includeAdult = false) => {
 
 export const getGenreBySlug = cache(async (genre: string, page = 1, perPage = 20, isAdult = false) => {
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: ANIME_BY_GENRE_QUERY,
             variables: { genre, page, perPage, isAdult },
             fetchPolicy: "network-only",

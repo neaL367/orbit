@@ -1,4 +1,4 @@
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { cache } from "react"
 import { ANIME_DETAILS_QUERY } from "../graphql/queries/detail"
 import { AnimeMedia } from "@/lib/types"
@@ -6,7 +6,7 @@ import { AnimeMedia } from "@/lib/types"
 export const getAnimeDetails = cache(async (id: string) => {
 
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: ANIME_DETAILS_QUERY,
             variables: { id: Number.parseInt(id) },
             fetchPolicy: "network-only",

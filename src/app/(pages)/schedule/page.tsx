@@ -289,7 +289,7 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="">
       <div className="mb-8 flex items-center gap-4">
         <Button variant="outline" size="icon" asChild className="rounded-full">
           <Link href="/">
@@ -300,10 +300,12 @@ export default function SchedulePage() {
         <h1 className="text-2xl font-bold text-white">Anime Schedule</h1>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+        <div className="mb-3.5 flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-medium">{formatWeekRange(weekStart)}</h2>
+          <h2 className="text-base md:text-lg font-medium">
+            {formatWeekRange(weekStart)}
+          </h2>
         </div>
         <div className="flex gap-2">
           <Button
@@ -331,7 +333,7 @@ export default function SchedulePage() {
         <div className="mb-8">
           <Card className="w-full overflow-hidden border shadow-lg">
             <div
-              className="relative h-64 md:h-96 bg-cover bg-center rounded-xl"
+              className="relative h-[400px] sm:h-[450px] md:h-96 bg-cover bg-center rounded-xl"
               style={{
                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${
                   currentPremiere.bannerImage ||
@@ -341,74 +343,78 @@ export default function SchedulePage() {
                 backgroundPosition: "center",
               }}
             >
-              <div className="absolute inset-0 flex flex-col justify-center py-4 px-6 md:px-12">
+              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:py-4 sm:px-6 md:px-12">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-1.5 bg-white text-primary px-3 py-1 rounded-full text-xs font-medium mb-4">
+                  <div className="inline-flex items-center gap-1.5 bg-white text-primary px-2 sm:px-3 py-1 rounded-full text-xs font-medium mb-2 sm:mb-4">
                     <Star className="h-3 w-3" />
-                    <span>UPCOMING PREMIERE</span>
+                    <span className="text-[10px] sm:text-xs">
+                      UPCOMING PREMIERE
+                    </span>
                   </div>
 
-                  <h2 className="text-white text-xl md:text-3xl font-bold mb-3 line-clamp-2">
+                  <h2 className="text-white text-lg sm:text-xl md:text-3xl font-bold mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-1">
                     {currentPremiere.title.english ||
                       currentPremiere.title.romaji}
                   </h2>
 
-                  <div className="flex flex-wrap gap-4 mb-8 text-white/80">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-8 text-white/80">
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1.5" />
-                      <span className="text-sm md:text-base">
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                      <span className="text-xs sm:text-sm md:text-base">
                         {currentPremiere.episodes || "??"} Episodes
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1.5" />
-                      <span className="text-sm md:text-base">
-                        {currentPremiere.duration || "??"} min per episode
-                      </span>
-                    </div>
+                    {currentPremiere.duration ? (
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                        <span className="text-xs sm:text-sm md:text-base">
+                          {currentPremiere.duration || ""} min per episode
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
-                  <div className="flex flex-wrap gap-2 md:gap-4">
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
-                      <div className="text-lg md:text-3xl font-bold text-white">
+                  <div className="grid grid-cols-4 gap-1 sm:gap-2 md:gap-4 max-w-md">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
+                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
                         {timeRemaining.days}
                       </div>
-                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
                         Days
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
-                      <div className="text-lg md:text-3xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
+                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
                         {timeRemaining.hours}
                       </div>
-                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
                         Hours
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
-                      <div className="text-lg md:text-3xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
+                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
                         {timeRemaining.minutes}
                       </div>
-                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Minutes
+                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Min
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
-                      <div className="text-lg md:text-3xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
+                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
                         {timeRemaining.seconds}
                       </div>
-                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Seconds
+                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Sec
                       </div>
                     </div>
                   </div>
 
                   <Button
-                    className="mt-8 bg-white/90 hover:bg-white text-primary rounded-full"
+                    className="mt-4 sm:mt-6 md:mt-8 bg-white/90 hover:bg-white text-primary rounded-full text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 h-auto"
                     asChild
                   >
                     <Link href={`/anime/${currentPremiere.id}`}>
-                      <Play className="h-4 w-4" />
+                      <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                       View Details
                     </Link>
                   </Button>
@@ -416,11 +422,11 @@ export default function SchedulePage() {
               </div>
 
               {premieres.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex space-x-2">
+                <div className="hidden absolute bottom-2 sm:bottom-4 right-2 sm:right-4 md:flex space-x-1 sm:space-x-2">
                   {premieres.map((_, index) => (
                     <button
                       key={index}
-                      className={`w-3 h-3 rounded-full transition-all ${
+                      className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
                         index === currentPremiereIndex
                           ? "bg-primary scale-110"
                           : "bg-white/50 hover:bg-white/80"
@@ -448,12 +454,12 @@ export default function SchedulePage() {
             >
               <div className="flex flex-col items-center">
                 <span className="hidden md:inline">{day.name}</span>
-                <span className="md:hidden">{day.shortName}</span>
-                <span className="text-xs text-muted-foreground md:mt-1">
+                <span className="text-xs md:hidden">{day.shortName}</span>
+                <span className="hidden md:flex text-xs text-muted-foreground md:mt-1">
                   {format(day.date, "MMM d")}
                 </span>
                 {day.isToday && (
-                  <span className="absolute -top-2 bg-white text-primary rounded-full px-2 py-0.5 text-[10px] font-medium">
+                  <span className="absolute -top-6 md:-top-2 bg-white text-primary rounded-full px-1 md:px-2 py-0.5 text-[10px] font-medium">
                     Today
                   </span>
                 )}

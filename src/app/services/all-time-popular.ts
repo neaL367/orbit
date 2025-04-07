@@ -1,12 +1,12 @@
 import { cache } from "react"
-import { apolloClient } from "@/app/services/apollo-client"
+import { client } from "@/app/services/apollo-client"
 import { AnimeMedia, PageInfo } from "@/lib/types"
 import { ALL_TIME_POPULAR_ANIME_QUERY } from "../graphql/queries/all-time-popular"
 
 export const getAllTimePopularAnime = cache(async (page = 1, perPage = 20, isAdult = false) => {
 
     try {
-        const { data } = await apolloClient.query({
+        const { data } = await client.query({
             query: ALL_TIME_POPULAR_ANIME_QUERY,
             variables: { page, perPage, isAdult },
             fetchPolicy: "network-only",

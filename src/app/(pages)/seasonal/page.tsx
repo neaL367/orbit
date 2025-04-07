@@ -157,10 +157,10 @@ export default function SeasonalPage() {
         ></div>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex  items-center gap-3">
+            <div className="flex flex-col md:flex-row items-center gap-3">
               <span className="text-4xl">{getSeasonEmoji(selectedSeason)}</span>
-              <div className="flex flex-col gap-2">
-                <h2 className="flex  gap-2 text-2xl md:text-3xl font-bold">
+              <div className="flex max-md:items-center flex-col gap-2">
+                <h2 className="flex gap-2 text-2xl md:text-3xl font-bold">
                   {formatSeasonName(selectedSeason)} {selectedYear}
                 </h2>
                 <p className="text-muted-foreground">
@@ -180,7 +180,7 @@ export default function SeasonalPage() {
               <Button
                 variant="outline"
                 onClick={goToPreviousSeason}
-                className="rounded-full"
+                className="rounded-full py-0"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">
@@ -192,7 +192,7 @@ export default function SeasonalPage() {
               <Button
                 variant="outline"
                 onClick={goToNextSeason}
-                className="rounded-full"
+                className="rounded-full py-0"
               >
                 <span className="hidden sm:inline">
                   {formatSeasonName(nextSeasonData.season)}
@@ -224,7 +224,7 @@ export default function SeasonalPage() {
                 <TabsTrigger
                   key={year}
                   value={year.toString()}
-                  className="text-sm px-3 py-1.5 data-[state=active]:bg-white data-[state=active]:text-primary"
+                  className="text-xs md:text-sm px-3 py-1.5 data-[state=active]:bg-white data-[state=active]:text-primary"
                 >
                   {year}
                 </TabsTrigger>
@@ -247,7 +247,7 @@ export default function SeasonalPage() {
               <TabsTrigger
                 key={season}
                 value={season}
-                className="text-sm flex flex-col gap-2 p-2 transition-all duration-300 hover:cursor-pointer hover:bg-white hover:text-zinc-950 data-[state=active]:bg-primary/30 data-[state=active]:text-white"
+                className="text-xs md:text-sm flex flex-col gap-2 p-2 transition-all duration-300 hover:cursor-pointer hover:bg-white hover:text-zinc-950 data-[state=active]:bg-primary/30 data-[state=active]:text-white"
               >
                 <span>{getSeasonEmoji(season)}</span>
                 <span>{formatSeasonName(season)}</span>

@@ -3,7 +3,7 @@ import { TrendingUp, Star, Users, Sparkles } from "lucide-react";
 
 export default function HomePageLoading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="">
       <div className="space-y-16">
         {/* Hero Section */}
         <section className="py-12">
