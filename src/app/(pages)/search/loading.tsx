@@ -1,18 +1,29 @@
-export default function Loading() {
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search } from "lucide-react";
+
+export default function SearchPageLoading() {
   return (
-    <div className="">
-      <div className="mb-8 flex items-center gap-4">
-        <div className="h-8 w-64 animate-pulse rounded-md bg-muted"></div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex items-center gap-3">
+        <Search className="h-5 w-5 text-primary" />
+        <Skeleton className="h-8 w-64" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-2">
-            <div className="aspect-[2/3] w-full animate-pulse rounded-md bg-muted"></div>
-            <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
-            <div className="h-3 w-1/2 animate-pulse rounded bg-muted"></div>
-          </div>
-        ))}
+      <div className="space-y-8">
+        <div className="flex justify-between items-center mb-4">
+          <Skeleton className="h-7 w-24" />
+          <Skeleton className="h-6 w-32 rounded-full" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

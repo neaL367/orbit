@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     ppr: 'incremental',
-    viewTransition: true,
     staleTimes: {
       dynamic: 30,
       static: 180,

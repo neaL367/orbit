@@ -1,16 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+  Calendar,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchSeasonalAnime, getCurrentSeason } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
 import { AnimeCard } from "@/components/anime-card";
 import type { AnimeMedia } from "@/lib/types";
+import { getCurrentSeason, getSeasonalAnime } from "@/app/services/seasonal-anime";
 
 const SEASONS = ["winter", "spring", "summer", "fall"] as const;
 type Season = (typeof SEASONS)[number];
+
+// Season colors for visual distinction
+const SEASON_COLORS = {
+  winter: "from-blue-500 to-cyan-300",
+  spring: "from-pink-500 to-pink-300",
+  summer: "from-orange-500 to-amber-300",
+  fall: "from-red-500 to-orange-300",
+};
 
 export default function SeasonalPage() {
   const currentSeason = getCurrentSeason();
@@ -64,12 +81,28 @@ export default function SeasonalPage() {
     return season.charAt(0).toUpperCase() + season.slice(1);
   }
 
+  // Get season emoji
+  function getSeasonEmoji(season: Season): string {
+    switch (season) {
+      case "winter":
+        return "❄️";
+      case "spring":
+        return "🌸";
+      case "summer":
+        return "☀️";
+      case "fall":
+        return "🍂";
+      default:
+        return "";
+    }
+  }
+
   // Load anime data when season or year changes
   useEffect(() => {
     async function loadSeasonalAnime() {
       setIsLoading(true);
       try {
-        const { media } = await fetchSeasonalAnime(
+        const { media } = await getSeasonalAnime(
           selectedSeason,
           selectedYear
         );
@@ -101,94 +134,123 @@ export default function SeasonalPage() {
     setSelectedYear(year);
   };
 
+  const isCurrentSeason =
+    selectedSeason === currentSeason.season.toLowerCase() &&
+    selectedYear === currentSeason.year;
+
   return (
-    <div className="w-full">
-      <section className="py-8 flex flex-col justify-center items-center">
-        <h1 className="text-4xl font-bold mb-4">Season Anime</h1>
-        <p className="text-muted-foreground text-lg mb-6">
-          Discover seasonal anime
-        </p>
-      </section>
+    <div className="">
+      <div className="mb-8 flex items-center gap-4">
+        <Button variant="outline" size="icon" asChild className="rounded-full">
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back to home</span>
+          </Link>
+        </Button>
+        <h1 className="text-2xl font-bold text-white">Seasonal Anime</h1>
+      </div>
 
-      {/* Season Navigation */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="px-2"
-            onClick={goToPreviousSeason}
-          >
-            <ChevronLeft className="h-3 w-3 mr-1" />
-            <span className="text-xs truncate max-w-12">
-              {formatSeasonName(prevSeasonData.season)}
-            </span>
-          </Button>
+      {/* Season Header Card */}
+      <Card className="w-full mb-8 overflow-hidden border shadow-md">
+        <div
+          className={`bg-gradient-to-r ${SEASON_COLORS[selectedSeason]} h-2`}
+        ></div>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex  items-center gap-3">
+              <span className="text-4xl">{getSeasonEmoji(selectedSeason)}</span>
+              <div className="flex flex-col gap-2">
+                <h2 className="flex  gap-2 text-2xl md:text-3xl font-bold">
+                  {formatSeasonName(selectedSeason)} {selectedYear}
+                </h2>
+                <p className="text-muted-foreground">
+                  {isCurrentSeason ? (
+                    <Badge className="bg-white text-primary">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Current Season
+                    </Badge>
+                  ) : (
+                    "Seasonal anime collection"
+                  )}
+                </p>
+              </div>
+            </div>
 
-          <div className="text-center px-1">
-            <h2 className="text-base sm:text-xl font-bold">
-              {formatSeasonName(selectedSeason)} {selectedYear}
-            </h2>
-            {selectedSeason === currentSeason.season.toLowerCase() &&
-              selectedYear === currentSeason.year && (
-                <span className="inline-block mt-1 bg-primary bg-gradient-to-r to-purple-400 text-primary-foreground px-1 py-0.5 rounded-full text-xs">
-                  Current
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={goToPreviousSeason}
+                className="rounded-full"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">
+                  {formatSeasonName(prevSeasonData.season)}
                 </span>
-              )}
-          </div>
+                <span className="sm:hidden">Prev</span>
+              </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="px-2"
-            onClick={goToNextSeason}
-          >
-            <span className="text-xs truncate max-w-12">
-              {formatSeasonName(nextSeasonData.season)}
-            </span>
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </Button>
+              <Button
+                variant="outline"
+                onClick={goToNextSeason}
+                className="rounded-full"
+              >
+                <span className="hidden sm:inline">
+                  {formatSeasonName(nextSeasonData.season)}
+                </span>
+                <span className="sm:hidden">Next</span>
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Year and Season Selection */}
+      <div className="mb-8 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium">Select Year</h3>
         </div>
 
-        {/* Season Tabs */}
         <Tabs
           value={selectedYear.toString()}
           onValueChange={(value) => setSelectedYear(Number.parseInt(value))}
-          className="mb-4"
+          className="mb-6"
         >
-          <div className="flex flex-wrap items-center justify-center mb-2">
-            {/* <span className="text-xs sm:text-sm font-medium mr-1 mb-1 sm:mb-0">
-              Year:
-            </span> */}
-            <TabsList className="h-8">
-              {[...Array(5)].map((_, i) => {
-                const year = currentSeason.year - 2 + i;
-                return (
-                  <TabsTrigger
-                    key={year}
-                    value={year.toString()}
-                    className="text-xs px-2 py-1"
-                  >
-                    {year}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-          </div>
+          <TabsList className="h-10 p-1">
+            {[...Array(5)].map((_, i) => {
+              const year = currentSeason.year - 2 + i;
+              return (
+                <TabsTrigger
+                  key={year}
+                  value={year.toString()}
+                  className="text-sm px-3 py-1.5 data-[state=active]:bg-white data-[state=active]:text-primary"
+                >
+                  {year}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
         </Tabs>
+
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium">Select Season</h3>
+        </div>
 
         <Tabs
           value={selectedSeason}
           onValueChange={(value) => setSelectedSeason(value as Season)}
         >
-          <TabsList className="grid grid-cols-4 w-full h-12">
+          <TabsList className="grid gap-x-2 grid-cols-4 w-full h-max p-2">
             {SEASONS.map((season) => (
               <TabsTrigger
                 key={season}
                 value={season}
-                className="text-xs px-1 hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 "
+                className="text-sm flex flex-col gap-2 p-2 transition-all duration-300 hover:cursor-pointer hover:bg-white hover:text-zinc-950 data-[state=active]:bg-primary/30 data-[state=active]:text-white"
               >
-                {formatSeasonName(season)}
+                <span>{getSeasonEmoji(season)}</span>
+                <span>{formatSeasonName(season)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -197,31 +259,56 @@ export default function SeasonalPage() {
 
       {/* Anime Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="aspect-[3/4] w-full bg-muted"></div>
-              <CardContent className="p-2">
-                <div className="h-3 w-3/4 bg-muted rounded mt-1"></div>
-                <div className="h-2 w-1/2 bg-muted rounded mt-1"></div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="text-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">
+            Loading anime for {formatSeasonName(selectedSeason)} {selectedYear}
+            ...
+          </p>
         </div>
       ) : animeList.length > 0 ? (
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {animeList.map((anime) => (
-            <AnimeCard key={anime.id} anime={anime} />
-          ))}
-        </div>
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Results</h3>
+            <Badge variant="outline" className="rounded-full">
+              {animeList.length} anime found
+            </Badge>
+          </div>
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {animeList.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} />
+            ))}
+          </div>
+        </>
       ) : (
-        <div className="text-center py-6 sm:py-12">
-          <h3 className="text-base sm:text-lg font-medium mb-2">
-            No anime found for this season
+        <div className="text-center py-16 bg-muted/30 rounded-xl">
+          <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <h3 className="text-lg font-medium mb-2">
+            No anime found for {formatSeasonName(selectedSeason)} {selectedYear}
           </h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Try selecting a different season or year.
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            This could be because the season hasn&apos;t started yet, or
+            there&apos;s no data available. Try selecting a different season or
+            year.
           </p>
+          <div className="flex justify-center gap-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={goToPreviousSeason}
+              className="rounded-full"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous Season
+            </Button>
+            <Button
+              variant="outline"
+              onClick={goToNextSeason}
+              className="rounded-full"
+            >
+              Next Season
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

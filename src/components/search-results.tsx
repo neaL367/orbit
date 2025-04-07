@@ -1,8 +1,8 @@
+import { getSearchAnime } from "@/app/services/search-anime";
 import { AnimeCard } from "./anime-card";
-import { searchAnime } from "@/lib/api";
 
 export async function SearchResults({ query }: { query: string }) {
-  const { media: results } = await searchAnime(query);
+  const { media: results } = await getSearchAnime(query);
 
   if (results.length === 0) {
     return (

@@ -1,5 +1,6 @@
-import { fetchAllTimePopularAnime } from "@/lib/api";
+import { getAllTimePopularAnime } from "@/app/services/all-time-popular";
 import { InfiniteScrollList } from "@/components/infinite-scroll-list";
+import { Users } from "lucide-react";
 
 export const metadata = {
   title: "All-Time Popular Anime | Orbit",
@@ -7,14 +8,19 @@ export const metadata = {
 };
 
 export default async function PopularPage() {
-  const { media: initialData } = await fetchAllTimePopularAnime();
+  const { media: initialData } = await getAllTimePopularAnime();
 
   return (
     <div className="">
       <section className="py-8">
-        <h1 className="text-4xl font-bold mb-4">All Time Popular</h1>
-        <p className="text-muted-foreground text-lg mb-6">
-          Discover the most popular anime of all time
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="h-5 w-5 text-primary" />
+          <h1 className="text-2xl font-bold text-white">
+            All Time Popular
+          </h1>
+        </div>
+        <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
+          Explore the most watched and followed anime series throughout history
         </p>
       </section>
 
@@ -22,7 +28,7 @@ export default async function PopularPage() {
         initialData={initialData}
         fetchNextPage={async (page) => {
           "use server";
-          const { media } = await fetchAllTimePopularAnime(page);
+          const { media } = await getAllTimePopularAnime(page);
           return media;
         }}
         emptyMessage="No popular anime found"

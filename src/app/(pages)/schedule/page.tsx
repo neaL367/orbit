@@ -1,18 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { format, addDays, startOfWeek } from "date-fns";
-import { ArrowLeft, Clock, Calendar, Play } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Calendar,
+  Play,
+  Star,
+  TrendingUp,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchWeeklySchedule } from "@/lib/api";
-import { StreamingPlatforms } from "@/components/streaming-platforms";
+import { Badge } from "@/components/ui/badge";
 import type { AiringSchedule } from "@/lib/types";
+import { getWeeklyAnime } from "@/app/services/weekly-anime";
+import { ScheduleCard } from "@/components/schedule-card";
 
 interface WeekDay {
   name: string;
@@ -48,7 +55,6 @@ interface PremiereAnime {
   airingAt: number;
 }
 
-// Update the ScheduleAnime interface to include externalLinks
 interface ScheduleAnime {
   id: number;
   title: {
@@ -91,17 +97,27 @@ export default function SchedulePage() {
     minutes: 0,
     seconds: 0,
   });
+  const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, 1 = next week
+  const [error, setError] = useState(false);
 
-  // Generate week days starting from current week
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // 1 = Monday
+  const weekStart = startOfWeek(addDays(today, weekOffset * 7), {
+    weekStartsOn: 1,
+  }); // 1 = Monday
+
+  const formatWeekRange = (start: Date) => {
+    const end = addDays(start, 6);
+    return `${format(start, "MMM d")} - ${format(end, "MMM d, yyyy")}`;
+  };
 
   const weekDays: WeekDay[] = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(weekStart, i);
     const dayName = format(date, "EEEE");
     const shortName = format(date, "EEE");
-    const value = format(date, "EEEE").toLowerCase();
-    const isToday = format(today, "EEEE").toLowerCase() === value;
+    const value = dayName.toLowerCase();
+    // Only mark as today if we're on the current week (weekOffset === 0)
+    const isToday =
+      weekOffset === 0 && format(today, "EEEE").toLowerCase() === value;
 
     return {
       name: dayName,
@@ -114,66 +130,70 @@ export default function SchedulePage() {
 
   const activeDay = format(today, "EEEE").toLowerCase();
 
-  // Fetch schedule data
-  // Update the fetchScheduleData function to include externalLinks
-  const fetchScheduleData = async () => {
+  const fetchScheduleData = useCallback(async () => {
     setIsLoading(true);
+    setError(false);
     try {
-      // Fetch weekly schedule
-      const scheduleData = await fetchWeeklySchedule();
+      const scheduleData = await getWeeklyAnime(weekOffset);
+      const hasAnyData = Object.values(scheduleData).some(
+        (day) => day.length > 0
+      );
 
-      // Convert to format needed for the UI
-      const formattedSchedule: WeeklyScheduleData = {};
-      Object.entries(scheduleData).forEach(([day, schedules]) => {
-        formattedSchedule[day.toLowerCase()] = schedules.map(
-          (schedule: AiringSchedule) => ({
+      if (!hasAnyData && weekOffset === 1) {
+        setError(true);
+      } else {
+        const formattedSchedule: WeeklyScheduleData = {};
+        Object.entries(scheduleData).forEach(([day, schedules]) => {
+          formattedSchedule[day.toLowerCase()] = schedules.map(
+            (schedule: AiringSchedule) => ({
+              id: schedule.media.id,
+              title: schedule.media.title,
+              coverImage: schedule.media.coverImage,
+              episode: schedule.episode,
+              airingAt: schedule.airingAt,
+              format: schedule.media.format,
+              duration: schedule.media.duration || undefined,
+              externalLinks: schedule.media.externalLinks || [],
+            })
+          );
+        });
+
+        setWeeklySchedule(formattedSchedule);
+
+        const allSchedules = Object.values(scheduleData).flat();
+        const upcomingPremieres = allSchedules
+          .filter((schedule: AiringSchedule) => schedule.episode === 1)
+          .map((schedule: AiringSchedule) => ({
             id: schedule.media.id,
             title: schedule.media.title,
             coverImage: schedule.media.coverImage,
+            bannerImage: schedule.media.bannerImage,
             episode: schedule.episode,
-            airingAt: schedule.airingAt,
-            format: schedule.media.format,
+            episodes: schedule.media.episodes || undefined,
             duration: schedule.media.duration || undefined,
-            externalLinks: schedule.media.externalLinks || [],
-          })
-        );
-      });
+            airingAt: schedule.airingAt,
+          }))
+          .sort((a, b) => a.airingAt - b.airingAt)
+          .slice(0, 5);
 
-      setWeeklySchedule(formattedSchedule);
-
-      // Find upcoming premieres (first episodes)
-      const allSchedules = Object.values(scheduleData).flat();
-      const upcomingPremieres = allSchedules
-        .filter((schedule: AiringSchedule) => schedule.episode === 1)
-        .map((schedule: AiringSchedule) => ({
-          id: schedule.media.id,
-          title: schedule.media.title,
-          coverImage: schedule.media.coverImage,
-          bannerImage: schedule.media.bannerImage,
-          episode: schedule.episode,
-          episodes: schedule.media.episodes || undefined,
-          duration: schedule.media.duration || undefined,
-          airingAt: schedule.airingAt,
-        }))
-        .sort((a, b) => a.airingAt - b.airingAt)
-        .slice(0, 5); // Take top 5 premieres
-
-      setPremieres(upcomingPremieres);
+        setPremieres(upcomingPremieres);
+      }
     } catch (error) {
       console.error("Error fetching schedule data:", error);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [weekOffset]);
 
+  // Fetch schedule only when the component mounts or weekOffset changes.
   useEffect(() => {
     fetchScheduleData();
-  }, []);
+  }, [fetchScheduleData]);
 
-  // Update countdown timer
+  // Update countdown timer for premieres
   useEffect(() => {
     if (!premieres.length) return;
-
     const currentPremiere = premieres[currentPremiereIndex];
     const targetTime = currentPremiere.airingAt * 1000; // Convert to milliseconds
 
@@ -193,7 +213,6 @@ export default function SchedulePage() {
 
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-
     return () => clearInterval(interval);
   }, [premieres, currentPremiereIndex]);
 
@@ -209,6 +228,62 @@ export default function SchedulePage() {
     (schedules) => !schedules || schedules.length === 0
   );
 
+  if (error) {
+    return (
+      <div className="">
+        <div className="mb-8 flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className="rounded-full"
+          >
+            <Link href="/">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to home</span>
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold text-white">Anime Schedule</h1>
+        </div>
+
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-medium">
+              {formatWeekRange(weekStart)}
+            </h2>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWeekOffset(0);
+                setError(false);
+              }}
+              disabled={weekOffset === 0}
+              className="rounded-full"
+            >
+              Current Week
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setWeekOffset(1);
+                setError(false);
+              }}
+              disabled={weekOffset === 1}
+              className="rounded-full"
+            >
+              Next Week
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return <LoadingSkeleton weekDays={weekDays} activeDay={activeDay} />;
   }
@@ -216,21 +291,47 @@ export default function SchedulePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
+        <Button variant="outline" size="icon" asChild className="rounded-full">
           <Link href="/">
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to home</span>
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">Anime Schedule</h1>
+        <h1 className="text-2xl font-bold text-white">Anime Schedule</h1>
       </div>
 
-      {/* Upcoming Premiere Card */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-medium">{formatWeekRange(weekStart)}</h2>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setWeekOffset(0)}
+            disabled={weekOffset === 0}
+            className="rounded-full"
+          >
+            Current Week
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setWeekOffset(1)}
+            disabled={weekOffset === 1}
+            className="rounded-full"
+          >
+            Next Week
+          </Button>
+        </div>
+      </div>
+
       {premieres.length > 0 && (
         <div className="mb-8">
-          <Card className="w-full overflow-hidden border-0 shadow-lg">
+          <Card className="w-full overflow-hidden border shadow-lg">
             <div
-              className="relative h-64 md:h-80 bg-cover bg-center rounded-xl"
+              className="relative h-64 md:h-96 bg-cover bg-center rounded-xl"
               style={{
                 backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${
                   currentPremiere.bannerImage ||
@@ -242,76 +343,87 @@ export default function SchedulePage() {
             >
               <div className="absolute inset-0 flex flex-col justify-center py-4 px-6 md:px-12">
                 <div className="max-w-3xl">
-                  <div className="inline-block bg-primary bg-gradient-to-r to-purple-400 text-primary-foreground px-3 py-1 rounded-md text-xs font-medium mb-4">
-                    UPCOMING PREMIERE
+                  <div className="inline-flex items-center gap-1.5 bg-white text-primary px-3 py-1 rounded-full text-xs font-medium mb-4">
+                    <Star className="h-3 w-3" />
+                    <span>UPCOMING PREMIERE</span>
                   </div>
 
-                  <h2 className="text-white text-sm md:text-2xl font-bold mb-2 line-clamp-1">
+                  <h2 className="text-white text-xl md:text-3xl font-bold mb-3 line-clamp-2">
                     {currentPremiere.title.english ||
                       currentPremiere.title.romaji}
                   </h2>
 
-                  <div className="flex flex-wrap gap-3 mb-6 text-white/80">
+                  <div className="flex flex-wrap gap-4 mb-8 text-white/80">
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
+                      <Calendar className="h-4 w-4 mr-1.5" />
                       <span className="text-sm md:text-base">
                         {currentPremiere.episodes || "??"} Episodes
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
+                      <Clock className="h-4 w-4 mr-1.5" />
                       <span className="text-sm md:text-base">
                         {currentPremiere.duration || "??"} min per episode
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5 md:gap-3">
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 md:p-3 text-center min-w-[70px]">
-                      <div className="text-sm md:text-2xl font-bold text-white">
+                  <div className="flex flex-wrap gap-2 md:gap-4">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
+                      <div className="text-lg md:text-3xl font-bold text-white">
                         {timeRemaining.days}
                       </div>
-                      <div className="text-[8px] md:text-xs text-white/70">
-                        DAYS
+                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Days
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 md:p-3 text-center min-w-[70px]">
-                      <div className="text-sm md:text-2xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
+                      <div className="text-lg md:text-3xl font-bold text-white">
                         {timeRemaining.hours}
                       </div>
-                      <div className="text-[8px] md:text-xs text-white/70">
-                        HOURS
+                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Hours
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 md:p-3 text-center min-w-[70px]">
-                      <div className="text-sm md:text-2xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
+                      <div className="text-lg md:text-3xl font-bold text-white">
                         {timeRemaining.minutes}
                       </div>
-                      <div className="text-[8px] md:text-xs text-white/70">
-                        MINUTES
+                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Minutes
                       </div>
                     </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 md:p-3 text-center min-w-[70px]">
-                      <div className="text-sm md:text-2xl font-bold text-white">
+                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]">
+                      <div className="text-lg md:text-3xl font-bold text-white">
                         {timeRemaining.seconds}
                       </div>
-                      <div className="text-[8px] md:text-xs text-white/70">
-                        SECONDS
+                      <div className="text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
+                        Seconds
                       </div>
                     </div>
                   </div>
+
+                  <Button
+                    className="mt-8 bg-white/90 hover:bg-white text-primary rounded-full"
+                    asChild
+                  >
+                    <Link href={`/anime/${currentPremiere.id}`}>
+                      <Play className="h-4 w-4" />
+                      View Details
+                    </Link>
+                  </Button>
                 </div>
               </div>
 
               {premieres.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex space-x-1">
+                <div className="absolute bottom-4 right-4 flex space-x-2">
                   {premieres.map((_, index) => (
                     <button
                       key={index}
-                      className={`w-2 h-2 rounded-full ${
+                      className={`w-3 h-3 rounded-full transition-all ${
                         index === currentPremiereIndex
-                          ? "bg-primary"
-                          : "bg-white/50"
+                          ? "bg-primary scale-110"
+                          : "bg-white/50 hover:bg-white/80"
                       }`}
                       onClick={() => setCurrentPremiereIndex(index)}
                       aria-label={`View premiere ${index + 1}`}
@@ -324,31 +436,38 @@ export default function SchedulePage() {
         </div>
       )}
 
-      {/* Weekly Schedule Tabs */}
       <Tabs defaultValue={activeDay} className="w-full">
-        <TabsList className="grid grid-cols-7 w-full">
+        <TabsList className="grid gap-1 grid-cols-7 w-full h-full rounded-xl">
           {weekDays.map((day) => (
             <TabsTrigger
               key={day.value}
               value={day.value}
-              className={`hover:cursor-pointer hover:bg-gradient-to-r hover:from-primary hover:to-purple-400 hover:text-white border hover:border-0 transition-all relative ${
+              className={`hover:cursor-pointer hover:bg-primary/30 hover:text-white border hover:border-0 transition-all relative py-3 ${
                 day.isToday ? "font-bold" : ""
               }`}
             >
-              <span className="hidden md:inline">{day.name}</span>
-              <span className="md:hidden">{day.shortName}</span>
-              {day.isToday && (
-                <span className="md:ml-1 text-xs max-lg:absolute max-lg:-top-7 bg-gradient-to-r from-primary to-purple-400 text-primary-foreground rounded-full px-1.5">
-                  Today
+              <div className="flex flex-col items-center">
+                <span className="hidden md:inline">{day.name}</span>
+                <span className="md:hidden">{day.shortName}</span>
+                <span className="text-xs text-muted-foreground md:mt-1">
+                  {format(day.date, "MMM d")}
                 </span>
-              )}
+                {day.isToday && (
+                  <span className="absolute -top-2 bg-white text-primary rounded-full px-2 py-0.5 text-[10px] font-medium">
+                    Today
+                  </span>
+                )}
+              </div>
             </TabsTrigger>
           ))}
         </TabsList>
 
         {hasNoData ? (
-          <div className="mt-8 text-center py-12 text-muted-foreground">
-            <p>No anime schedule data available for this week.</p>
+          <div className="mt-8 text-center py-16 text-muted-foreground bg-muted/30 rounded-xl">
+            <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+            <p className="text-lg font-medium">
+              No anime schedule data available for this week.
+            </p>
             <p className="mt-2">
               This could be due to a seasonal break or API limitations.
             </p>
@@ -356,17 +475,20 @@ export default function SchedulePage() {
         ) : (
           weekDays.map((day) => (
             <TabsContent key={day.value} value={day.value} className="mt-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">
                   {day.name}{" "}
                   <span className="text-muted-foreground font-normal">
                     ({format(day.date, "MMM d")})
                   </span>
                 </h2>
+                <Badge variant="outline" className="rounded-full px-3">
+                  {weeklySchedule[day.value]?.length || 0} anime
+                </Badge>
               </div>
 
               {weeklySchedule[day.value]?.length ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {weeklySchedule[day.value]?.map((anime, index) => (
                     <ScheduleCard
                       key={`${day.value}-${anime.id}-${index}`}
@@ -375,8 +497,11 @@ export default function SchedulePage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  No anime scheduled for this day
+                <div className="text-center py-16 text-muted-foreground bg-muted/30 rounded-xl">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-lg font-medium">
+                    No anime scheduled for this day
+                  </p>
                 </div>
               )}
             </TabsContent>
@@ -384,74 +509,6 @@ export default function SchedulePage() {
         )}
       </Tabs>
     </div>
-  );
-}
-
-interface ScheduleCardProps {
-  anime: ScheduleAnime;
-}
-
-// Update the ScheduleCard component to pass externalLinks to StreamingPlatforms
-function ScheduleCard({ anime }: ScheduleCardProps) {
-  const title =
-    anime.title.userPreferred ||
-    anime.title.english ||
-    anime.title.romaji ||
-    "";
-  const airingTime = new Date(anime.airingAt * 1000);
-  const formattedTime = format(airingTime, "h:mm a");
-
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-all">
-      <CardContent className="p-0">
-        <div className="flex items-center">
-          <div className="w-24 h-32 shrink-0 relative overflow-hidden">
-            <Image
-              src={
-                anime.coverImage.medium ||
-                anime.coverImage.large ||
-                "/placeholder.svg"
-              }
-              alt={title}
-              className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 brightness-85 rounded-lg"
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority
-            />
-            <Link
-              href={`/anime/${anime.id}`}
-              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 hover:opacity-100 transition-opacity"
-            >
-              <Play className="w-8 h-8 text-white" />
-            </Link>
-          </div>
-          <div className="flex flex-col w-full px-3.5 gap-1.5">
-            <h3 className="font-medium text-sm line-clamp-1">{title}</h3>
-            <div className="flex items-center mt-1 text-xs text-muted-foreground">
-              <span className="mr-2">Episode {anime.episode}</span>
-              <span className="mr-2">•</span>
-              <span>{formattedTime}</span>
-            </div>
-            <div className="flex items-center mt-1 text-xs text-muted-foreground">
-              <span>{anime.format}</span>
-              {anime.duration && (
-                <>
-                  <span className="mx-2">•</span>
-                  <span>{anime.duration} min</span>
-                </>
-              )}
-            </div>
-
-            {/* Streaming platforms */}
-            <StreamingPlatforms
-              animeId={anime.id}
-              title={anime.title.english || anime.title.romaji || ""}
-              externalLinks={anime.externalLinks}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -465,69 +522,70 @@ function LoadingSkeleton({
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to home</span>
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold">Anime Schedule</h1>
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-8 w-48" />
       </div>
 
-      {/* Upcoming Premiere Card Skeleton */}
       <div className="mb-8">
         <Card className="w-full overflow-hidden border-0 shadow-lg">
-          <div className="relative h-64 md:h-80 bg-muted rounded-xl">
+          <div className="relative h-64 md:h-96 bg-muted rounded-xl">
             <div className="absolute inset-0 flex flex-col justify-center py-4 px-6 md:px-12">
               <div className="max-w-3xl">
                 <Skeleton className="h-6 w-36 mb-4" />
-                <Skeleton className="h-8 w-3/4 mb-2" />
+                <Skeleton className="h-10 w-3/4 mb-2" />
+                <Skeleton className="h-8 w-1/2 mb-4" />
 
                 <div className="flex flex-wrap gap-3 mb-6">
                   <Skeleton className="h-6 w-32" />
                   <Skeleton className="h-6 w-32" />
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 md:gap-3">
+                <div className="flex flex-wrap gap-2 md:gap-4">
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="bg-black/20 backdrop-blur-sm rounded-lg p-1 md:p-3 text-center min-w-[70px]"
+                      className="bg-black/20 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]"
                     >
-                      <Skeleton className="h-8 w-full mb-1" />
+                      <Skeleton className="h-10 w-full mb-1" />
                       <Skeleton className="h-4 w-full" />
                     </div>
                   ))}
                 </div>
+
+                <Skeleton className="h-10 w-32 mt-8 rounded-full" />
               </div>
             </div>
 
-            <div className="absolute bottom-4 right-4 flex space-x-1">
+            <div className="absolute bottom-4 right-4 flex space-x-2">
               {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="w-2 h-2 rounded-full" />
+                <Skeleton key={i} className="w-3 h-3 rounded-full" />
               ))}
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Weekly Schedule Tabs Skeleton */}
       <div className="w-full">
-        <div className="grid grid-cols-7 w-full h-10 bg-muted rounded-lg mb-6">
+        <div className="grid grid-cols-7 w-full h-16 bg-muted rounded-xl mb-6">
           {weekDays.map((day) => (
             <div
               key={day.value}
-              className={`flex items-center justify-center ${
+              className={`flex flex-col items-center justify-center gap-1 ${
                 day.value === activeDay ? "bg-muted-foreground/20" : ""
               }`}
             >
-              <span className="hidden md:inline">
-                <Skeleton className="h-4 w-16" />
-              </span>
-              <span className="md:hidden">
-                <Skeleton className="h-4 w-8" />
-              </span>
+              <Skeleton className="h-4 w-16 hidden md:block" />
+              <Skeleton className="h-4 w-8 md:hidden" />
+              <Skeleton className="h-3 w-12" />
             </div>
+          ))}
+        </div>
+
+        <Skeleton className="h-8 w-48 mb-6" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full rounded-lg" />
           ))}
         </div>
       </div>

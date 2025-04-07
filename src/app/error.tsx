@@ -68,7 +68,7 @@ export default function AnimeError({
           <p className="text-muted-foreground mb-6 max-w-md">
             {error.message || "An unexpected error occurred"}
           </p>
-          <Button onClick={reset} className="hover:cursor-pointer">Try again</Button>
+          <Button onClick={reset} className="hover:cursor-pointer bg-primary/30">Try again</Button>
         </>
       )}
     </div>

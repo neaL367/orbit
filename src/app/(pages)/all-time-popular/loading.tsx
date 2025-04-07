@@ -1,19 +1,32 @@
-export default function Loading() {
+import { Skeleton } from "@/components/ui/skeleton";
+import { Users } from "lucide-react";
+
+export default function PopularPageLoading() {
   return (
-    <div className="">
+    <div className="container mx-auto px-4 py-8">
       <section className="py-8">
-        <div className="h-10 w-64 animate-pulse rounded-md bg-muted mb-4"></div>
-        <div className="h-6 w-96 animate-pulse rounded-md bg-muted mb-6"></div>
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="h-5 w-5 text-primary" />
+          <Skeleton className="h-10 w-64" />
+        </div>
+        <Skeleton className="h-6 w-full max-w-2xl mb-8" />
       </section>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-2">
-            <div className="aspect-[2/3] w-full animate-pulse rounded-md bg-muted"></div>
-            <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
-            <div className="h-3 w-1/2 animate-pulse rounded bg-muted"></div>
-          </div>
-        ))}
+      <div className="space-y-8">
+        <div className="flex justify-between items-center mb-4">
+          <Skeleton className="h-7 w-24" />
+          <Skeleton className="h-6 w-32 rounded-full" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

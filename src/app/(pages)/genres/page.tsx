@@ -1,43 +1,51 @@
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { fetchGenres } from "@/lib/api";
+  import Link from "next/link";
+  import { Card, CardContent } from "@/components/ui/card";
+  import { ArrowRight, Sparkles } from "lucide-react";
+import { getGenres } from "@/app/services/genres-anime";
 
-export const metadata = {
-  title: "Anime Genres | Orbit",
-  description: "Browse anime by genre on Orbit",
-};
+  export const metadata = {
+    title: "Anime Genres | Orbit",
+    description: "Browse anime by genre on Orbit",
+  };
 
-export default async function GenresPage() {
-  const genres = await fetchGenres();
+  export default async function GenresPage() {
+    const genres = await getGenres();
 
-  return (
-    <div className="">
-      <section className="py-8">
-        <h1 className="text-4xl font-bold mb-4">Anime Genres</h1>
-        <p className="text-muted-foreground text-lg mb-6">
-          Browse anime by genre
-        </p>
-      </section>
+    return (
+      <div className="">
+        <section className="py-8">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h1 className="text-2xl font-bold text-white">
+              Anime Genres
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
+            Discover your next favorite anime by exploring our comprehensive
+            collection of genres
+          </p>
+        </section>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {genres.map((genre) => (
-          <Link
-            prefetch={true}
-            key={genre}
-            href={`/genres/${decodeURIComponent(genre)}`}
-          >
-            <Card className="transition-all hover:scale-[1.02] hover:shadow-md overflow-hidden group border border-border/50 relative">
-              <CardContent className="flex h-24 items-center justify-center p-4 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-purple-400 transition-all">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <h2 className="text-center text-sm md:text-lg font-semibold group-hover:text-white">
-                    {genre}
-                  </h2>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {genres.map((genre) => (
+            <Link
+              prefetch={true}
+              key={genre}
+              href={`/genres/${encodeURIComponent(genre)}`}
+            >
+              <Card className="transition-all hover:scale-[1.02] hover:shadow-md overflow-hidden group border border-border/50 relative h-full">
+                <CardContent className="flex h-28 items-center justify-center p-4 group-hover:bg-primary/30 transition-all duration-300">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <h2 className="text-center text-sm md:text-lg font-semibold group-hover:text-white transition-colors">
+                      {genre}
+                    </h2>
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity text-white" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

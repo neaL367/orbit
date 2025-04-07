@@ -23,7 +23,7 @@ export function AnimeCard({
     anime.title.english ||
     anime.title.romaji ||
     "";
-  const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
+  const imageUrl = anime.coverImage.large || "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
 
   return (
