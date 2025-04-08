@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.prefetch(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -25,19 +25,8 @@ export default function Header() {
     setSearchQuery("");
   };
 
-  // Add a subtle animation effect when the component mounts
-  useEffect(() => {
-    const header = document.getElementById("main-header");
-    if (header) {
-      header.classList.add("animate-fadeIn");
-    }
-  }, []);
-
   return (
-    <header
-      id="main-header"
-      className="sticky top-0 z-50 w-full flex justify-center items-center bg-zinc-950/50 backdrop-blur-xl  transition-all duration-300 hover:shadow-md"
-    >
+    <header className="sticky top-0 z-50 w-full flex justify-center items-center bg-zinc-950/50 backdrop-blur-xl  transition-all duration-300 hover:shadow-md">
       <div className="w-full flex px-4 h-20 items-center justify-start">
         <SidebarTrigger className="p-7 mr-2.5 hover:cursor-pointer rounded-lg transition-all" />
 

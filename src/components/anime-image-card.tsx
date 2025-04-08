@@ -3,12 +3,14 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
 import { slugify } from "@/lib/utils";
+
 interface AnimeImageCardProps {
   animeId: number;
   coverImage: { large: string; medium?: string };
   title: string;
   airingAt: number;
   isAiringToday: boolean;
+  duration?: number; // Added duration parameter
 }
 
 export function AnimeImageCard({
@@ -16,7 +18,25 @@ export function AnimeImageCard({
   coverImage,
   title,
   airingAt,
+  duration,
 }: AnimeImageCardProps) {
+  // Calculate the current status to determine background color
+  const now = Date.now() / 1000;
+  const endTime = airingAt + (duration || 24) * 60; // End time based on duration or default 24 minutes
+  const isLive = now >= airingAt && now < endTime;
+  const isFinished = now >= endTime;
+
+  // Determine tag background color based on status
+  const getTagClass = () => {
+    if (isLive) {
+      return "bg-red-600 text-white";
+    } else if (isFinished) {
+      return "bg-gray-700 text-gray-300";
+    } else {
+      return "bg-primary-foreground text-primary";
+    }
+  };
+
   return (
     <div className="relative flex-shrink-0 w-26 md:w-34 h-36 md:h-44 overflow-hidden group rounded-l-lg">
       <Image
@@ -33,8 +53,10 @@ export function AnimeImageCard({
       >
         <Play className="w-8 h-8 text-white" />
       </Link>
-      <div className="absolute top-3 left-0 bg-primary-foreground text-primary text-xs font-medium py-0.5 px-2 rounded-r-full">
-        <CountdownTimer targetTime={airingAt} />
+      <div
+        className={`absolute top-3 left-0 ${getTagClass()} text-xs font-medium py-0.5 px-2 rounded-r-full`}
+      >
+        <CountdownTimer targetTime={airingAt} duration={duration} />
       </div>
     </div>
   );

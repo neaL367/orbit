@@ -2,11 +2,14 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Geist } from "next/font/google";
-import Header from "@/components/header";
 import { AppSidebar } from "@/components/app-sidebar";
-import ClientWrapper from "@/components/client-wrapper";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import Header from "@/components/header";
 
 export const experimental_ppr = true;
+
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 const geist = Geist({
   variable: "--font-geist",
@@ -19,9 +22,6 @@ export const metadata: Metadata = {
     "Discover and explore anime with detailed information and recommendations",
 };
 
-export const revalidate = 3600;
-export const dynamicParams = true;
-
 export default async function RootLayout({
   children,
 }: {
@@ -33,7 +33,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body className={geist.className}>
-        <ClientWrapper defaultOpen={defaultOpen}>
+        <SidebarProvider defaultOpen={defaultOpen}>
           <div className="flex min-h-screen w-full">
             <AppSidebar />
             <div className="flex flex-col w-full dark:bg-zinc-950">
@@ -43,7 +43,7 @@ export default async function RootLayout({
               </main>
             </div>
           </div>
-        </ClientWrapper>
+        </SidebarProvider>
       </body>
     </html>
   );

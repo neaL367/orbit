@@ -1,4 +1,4 @@
-export default function Loading() {
+export default function AnimeDetailLoading() {
   return (
     <div className="space-y-12">
       {/* Navigation skeleton */}

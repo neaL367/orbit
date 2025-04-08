@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Calendar,
   Clock,
@@ -12,31 +14,46 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import Link from "next/link";
-import { getAnimeDetails } from "@/app/services/detail-anime";
-import { getTimeUntilAiring } from "@/app/services/airing-anime";
+import { slugify } from "@/lib/utils";
+import { ANIME_DETAILS_QUERY } from "@/app/graphql/queries/detail";
+import { useQuery } from "@apollo/client";
+import { AnimeMedia } from "@/lib/types";
+import AnimeDetailLoading from "@/app/(pages)/anime/[id]/[slug]/loading";
 
-export async function AnimeDetails({ id }: { id: string }) {
-  const anime = await getAnimeDetails(id);
+function getTimeUntilAiring(timestamp: number): string {
+  const now = Date.now() / 1000;
+  const timeUntil = timestamp - now;
 
-  if (!anime) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold">Anime not found</h2>
-          <p className="text-muted-foreground">
-            The requested anime could not be found.
-          </p>
-          <Button asChild className="rounded-full">
-            <Link href="/anime">Browse Anime</Link>
-          </Button>
-        </div>
-      </div>
-    );
+  if (timeUntil <= 0) {
+    return "Aired";
   }
+
+  const days = Math.floor(timeUntil / (24 * 60 * 60));
+  const hours = Math.floor((timeUntil % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((timeUntil % (60 * 60)) / 60);
+
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
+
+export function AnimeDetails({ id }: { id: string }) {
+  const { data, loading, error } = useQuery(ANIME_DETAILS_QUERY, {
+    variables: { id: id },
+    notifyOnNetworkStatusChange: true,
+  });
+
+  if (loading && !data) return <AnimeDetailLoading />;
+  if (error) return <p>Error: {error.message}</p>;
+
+  const anime = data.Media as AnimeMedia;
 
   const title =
     anime.title.userPreferred ||
@@ -674,7 +691,13 @@ export async function AnimeDetails({ id }: { id: string }) {
                           <Link
                             prefetch={true}
                             key={nodes.mediaRecommendation?.id}
-                            href={`/anime/${nodes.mediaRecommendation?.id}`}
+                            href={`/anime/${nodes.mediaRecommendation.id}/${
+                              nodes.mediaRecommendation.title?.english
+                                ? slugify(
+                                    nodes.mediaRecommendation.title.english
+                                  )
+                                : "untitled"
+                            }`}
                             className="overflow-hidden rounded-lg border hover:shadow-md transition-all hover:border-primary/50 group"
                           >
                             <div className="h-full">
