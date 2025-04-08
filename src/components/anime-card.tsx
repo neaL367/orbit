@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -9,16 +9,36 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { AnimeMedia } from "@/lib/types";
 import { slugify } from "@/lib/utils";
+import { CountdownTimer, TimerStatus } from "./countdown-timer";
 
+// Helper function to get the appropriate class for the countdown tag based on status
+function getTagClass(status?: TimerStatus) {
+  switch (status) {
+    case TimerStatus.LIVE:
+      return "bg-red-600 text-white";
+    case TimerStatus.FINISHED:
+      return "bg-gray-700 text-gray-300";
+    case TimerStatus.UPCOMING:
+    default:
+      return "bg-white text-blue-600";
+  }
+}
+
+// Update the AnimeCard props to accept airingAt as a separate prop
 export function AnimeCard({
   anime,
   index,
+  airingAt,
 }: {
   anime: AnimeMedia;
   index?: number;
+  airingAt?: number;
 }) {
   const [isHovering, setIsHovering] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [timerStatus, setTimerStatus] = useState<TimerStatus>(
+    TimerStatus.UPCOMING
+  );
 
   const title =
     anime.title.userPreferred ||
@@ -27,20 +47,38 @@ export function AnimeCard({
     "";
 
   const slug = slugify(title);
-  const imageUrl =
-    anime.coverImage.large ||
-    anime.coverImage.medium ||
-    "";
+  const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
   const fallbackColor = anime.coverImage?.color || "#1f2937"; // default to gray-800
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const cardElement = cardRef.current;
+
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => setIsHovering(false);
+
+    if (cardElement) {
+      cardElement.addEventListener("mouseenter", handleMouseEnter, {
+        passive: true,
+      });
+      cardElement.addEventListener("mouseleave", handleMouseLeave, {
+        passive: true,
+      });
+
+      return () => {
+        cardElement.removeEventListener("mouseenter", handleMouseEnter);
+        cardElement.removeEventListener("mouseleave", handleMouseLeave);
+      };
+    }
+  }, []);
 
   return (
     <Link prefetch={true} href={`/anime/${anime.id}/${slug}`}>
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
+        ref={cardRef}
       >
         {/* Rank Number Badge */}
         {typeof index === "number" && (
@@ -54,8 +92,22 @@ export function AnimeCard({
           </div>
         )}
 
+        {airingAt ? (
+          <div
+            className={`absolute top-3 left-0 z-10 ${getTagClass(
+              timerStatus
+            )} text-xs font-medium py-0.5 px-2 rounded-r-full`}
+          >
+            <CountdownTimer
+              targetTime={airingAt}
+              duration={anime.duration}
+              onStatusChange={(status) => setTimerStatus(status)}
+            />
+          </div>
+        ) : null}
+
         {/* Rest of your component remains the same */}
-        <div className=" relative  aspect-[4/5] overflow-hidden w-full rounded-sm">
+        <div className="relative aspect-[4/5] overflow-hidden w-full rounded-sm">
           <div
             className={`absolute inset-0 transition-opacity duration-500 ${
               imageLoaded ? "opacity-0" : "opacity-100 animate-pulse"
@@ -71,10 +123,10 @@ export function AnimeCard({
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
             priority
-            onLoadingComplete={() => setImageLoaded(true)}
+            onLoad={() => setImageLoaded(true)}
           />
           {score && (
-            <div className="absolute  right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
+            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               <span>{score}</span>
             </div>

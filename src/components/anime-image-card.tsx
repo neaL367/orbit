@@ -28,7 +28,6 @@ export function AnimeImageCard({
   const endTime = airingAt + (duration || 24) * 60; // End time based on duration or default 24 minutes
   const isLive = now >= airingAt && now < endTime;
   const isFinished = now >= endTime;
-
   // Determine tag background color based on status
   const getTagClass = () => {
     if (isLive) {
@@ -51,7 +50,7 @@ export function AnimeImageCard({
         className={`object-cover transition-all hover:scale-110 brightness-85 duration-500 ${
           imageLoaded ? "opacity-100" : "opacity-0"
         }`}
-        onLoadingComplete={() => setImageLoaded(true)}
+        onLoad={() => setImageLoaded(true)}
       />
       <Link
         href={`/anime/${animeId}/${slugify(title)}`}
@@ -67,3 +66,4 @@ export function AnimeImageCard({
     </div>
   );
 }
+

@@ -1,7 +1,5 @@
 import { AnimeDetails } from "@/components/anime-details";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Navigator } from "@/components/navigator";
 
 export async function generateMetadata({
   params,
@@ -25,12 +23,7 @@ export default async function AnimePage({
   return (
     <div className="space-y-6">
       <div className="">
-        <Button variant="outline" size="icon" asChild className="rounded-full">
-          <Link href="/">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to home</span>
-          </Link>
-        </Button>
+        <Navigator />
       </div>
 
       <AnimeDetails id={id} />

@@ -15,7 +15,6 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { AiringSchedule, AnimeMedia } from "@/lib/types"; // adjust types as needed
 
@@ -291,106 +290,107 @@ export default function SchedulePage() {
       </div>
 
       {premieres.length > 0 && (
-        <div className="mb-8">
-          <Card className="w-full overflow-hidden border shadow-lg">
+        <div className="mb-6 md:mb-10 px-2 sm:px-4 md:px-6">
+          <div className="relative overflow-hidden rounded-xl bg-black/5 backdrop-blur-sm">
+            {/* Background image with blur effect */}
             <div
-              className="relative h-[400px] sm:h-[450px] md:h-96 bg-cover bg-center rounded-xl"
+              className="absolute inset-0 opacity-20 blur-sm"
               style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${
+                backgroundImage: `url(${
                   currentPremiere.media.bannerImage ||
                   currentPremiere.media.coverImage.large
                 })`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
-            >
-              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:py-4 sm:px-6 md:px-12">
-                <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-1.5 bg-white text-primary px-2 sm:px-3 py-1 rounded-full text-xs font-medium mb-2 sm:mb-4">
-                    <Star className="h-3 w-3" />
-                    <span className="text-[10px] sm:text-xs">
-                      UPCOMING PREMIERE
-                    </span>
-                  </div>
+            />
 
-                  <h2 className="text-white text-lg sm:text-xl md:text-3xl font-bold mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-1">
+            <div className="relative z-10 p-4 sm:p-6 md:p-8">
+              {/* Premiere badge */}
+              <div className="inline-flex w-full justify-center items-center text-xs font-medium mb-4 md:mb-6">
+                <div className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-full flex gap-2">
+                  <Star className="h-3 w-3 text-yellow-400" />
+                  <span className="uppercase tracking-wide text-[10px]">
+                    Upcoming Premiere
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-4 md:gap-8 place-content-center place-items-center">
+                {/* Left: Title and info */}
+                <div className="text-center">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 md:mb-3 line-clamp-2">
                     {currentPremiere.media.title.english ||
                       currentPremiere.media.title.romaji}
                   </h2>
 
-                  <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-8 text-white/80">
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-                      <span className="text-xs sm:text-sm md:text-base">
-                        {currentPremiere.media.episodes || "??"} Episodes
+                  <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 md:mb-6 items-center justify-center text-xs sm:text-sm opacity-80">
+                    <div className="flex justify-center items-center">
+                      <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
+                      <span>
+                        {currentPremiere.episode || ""} Episodes
                       </span>
                     </div>
                     {currentPremiere.media.duration && (
                       <div className="flex items-center">
-                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-                        <span className="text-xs sm:text-sm md:text-base">
-                          {currentPremiere.media.duration} min per episode
+                        <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
+                        <span>
+                          {currentPremiere.media.duration} min per ep.
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-1 sm:gap-2 md:gap-4 max-w-md">
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
-                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
-                        {timeRemaining.days}
-                      </div>
-                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Days
-                      </div>
-                    </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
-                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
-                        {timeRemaining.hours}
-                      </div>
-                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Hours
-                      </div>
-                    </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
-                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
-                        {timeRemaining.minutes}
-                      </div>
-                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Min
-                      </div>
-                    </div>
-                    <div className="bg-black/50 backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-4 text-center">
-                      <div className="text-sm sm:text-base md:text-3xl font-bold text-white">
-                        {timeRemaining.seconds}
-                      </div>
-                      <div className="text-[8px] sm:text-[10px] md:text-xs text-white/70 uppercase tracking-wider">
-                        Sec
-                      </div>
-                    </div>
-                  </div>
-
                   <Button
-                    className="mt-4 sm:mt-6 md:mt-8 bg-white/90 hover:bg-white text-primary rounded-full text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 h-auto"
+                    className="group relative overflow-hidden rounded-full px-4 sm:px-5 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all duration-300"
                     asChild
                   >
                     <Link href={`/anime/${currentPremiere.media.id}`}>
-                      <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      View Details
+                      <span className="relative z-10 flex items-center gap-1.5 sm:gap-2 text-sm">
+                        <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span>View Details</span>
+                      </span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-zinc-500/40 to-zinc-500/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Link>
                   </Button>
                 </div>
+
+                {/* Right: Countdown */}
+                <div className="relative mt-4 md:mt-0 w-full md:w-auto">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-zinc-300/20 to-zinc-300/20 rounded-xl blur-sm" />
+                  <div className="relative w-full md:w-max bg-black/30 backdrop-blur-md rounded-lg p-3 sm:p-4">
+                    <p className="text-xs uppercase tracking-wider mb-2 sm:mb-3 opacity-70 text-center">
+                      Premieres in
+                    </p>
+                    <div className="flex gap-4 sm:gap-8 md:gap-12 lg:gap-20 justify-between">
+                      {[
+                        { value: timeRemaining.days, label: "d" },
+                        { value: timeRemaining.hours, label: "h" },
+                        { value: timeRemaining.minutes, label: "m" },
+                        { value: timeRemaining.seconds, label: "s" },
+                      ].map((time, index) => (
+                        <div key={index} className="text-center">
+                          <p className="text-lg sm:text-xl md:text-2xl font-mono font-bold">
+                            {time.value.toString().padStart(2, "0")}
+                          </p>
+                          <p className="text-xs opacity-70">{time.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Minimal premiere navigation */}
               {premieres.length > 1 && (
-                <div className="hidden absolute bottom-2 sm:bottom-4 right-2 sm:right-4 md:flex space-x-1 sm:space-x-2">
+                <div className="flex justify-center mt-4 sm:mt-6 space-x-1.5">
                   {premieres.map((_, index) => (
                     <button
                       key={index}
-                      className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
+                      className={`w-4 sm:w-6 h-1 rounded-full transition-all duration-300 ${
                         index === currentPremiereIndex
-                          ? "bg-primary scale-110"
-                          : "bg-white/50 hover:bg-white/80"
+                          ? "bg-white/80 w-6 sm:w-8"
+                          : "bg-white/30 hover:bg-white/50"
                       }`}
                       onClick={() => setCurrentPremiereIndex(index)}
                       aria-label={`View premiere ${index + 1}`}
@@ -399,7 +399,7 @@ export default function SchedulePage() {
                 </div>
               )}
             </div>
-          </Card>
+          </div>
         </div>
       )}
 

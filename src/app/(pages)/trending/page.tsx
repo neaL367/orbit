@@ -6,13 +6,14 @@ import { Loader2, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AnimeCard } from "@/components/anime-card";
 import { TRENDING_ANIME_QUERY } from "@/app/graphql/queries/trending";
-import { AnimeMedia, PageInfo } from "@/lib/types";
+import type { AnimeMedia, PageInfo } from "@/lib/types";
 import TrendingPageLoading from "./loading";
 
 export default function TrendingAnimePage() {
   const { data, loading, error, fetchMore } = useQuery(TRENDING_ANIME_QUERY, {
     variables: { page: 1, perPage: 20, isAdult: false },
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network"
   });
 
   // Define refs with explicit types
@@ -63,6 +64,7 @@ export default function TrendingAnimePage() {
     };
   }, [data, fetchMore]);
 
+  // Show loading only on initial load, not during fetchMore
   if (loading && !data) return <TrendingPageLoading />;
   if (error) return <p>Error: {error.message}</p>;
 
@@ -104,7 +106,7 @@ export default function TrendingAnimePage() {
         )}
         {!pageInfo.hasNextPage && media.length > 0 && (
           <p className="text-muted-foreground px-4 py-2 bg-muted/30 rounded-full text-sm">
-            You’ve reached the end
+            You&apos;ve reached the end
           </p>
         )}
       </div>

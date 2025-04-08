@@ -8,7 +8,8 @@ import { GENRES_QUERY } from "@/app/graphql/queries/genres";
 import GenresPageLoading from "./loading";
 
 export default function GenresPage() {
-  const { data, loading, error } = useQuery(GENRES_QUERY);
+  const { data, loading, error } = useQuery(GENRES_QUERY, {
+  });
 
   if (loading) return <GenresPageLoading />;
   if (error) return <p>Error: {error.message}</p>;
@@ -16,7 +17,7 @@ export default function GenresPage() {
   const genres = data.GenreCollection.filter(
     (genre: string) => genre !== "Hentai" && genre !== "Ecchi"
   );
-  
+
   return (
     <div className="">
       <section className="py-8">

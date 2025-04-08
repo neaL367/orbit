@@ -92,8 +92,8 @@ export default function TopRatedPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {media.map((anime, idx: number) => (
-          <AnimeCard key={anime.id} anime={anime} index={idx} />
+        {media.map((anime, index) => (
+          <AnimeCard key={`${anime.id}`} anime={anime} index={index} />
         ))}
       </div>
 

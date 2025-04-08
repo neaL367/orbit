@@ -25,7 +25,7 @@ export function ScheduleCard({ anime }: ScheduleCardProps) {
   return (
     <div className="flex border rounded-lg bg-zinc-900 group hover:shadow-md transition-all">
       <AnimeImageCard
-        animeId={anime.id}
+        animeId={anime.media.id}
         coverImage={anime.media.coverImage}
         title={title}
         airingAt={anime.airingAt}
@@ -34,7 +34,7 @@ export function ScheduleCard({ anime }: ScheduleCardProps) {
       />
       <div className="flex flex-col flex-grow p-4 gap-2">
         <Link
-          href={`/anime/${anime.id}/${slugify(title)}`}
+          href={`/anime/${anime.media.id}/${slugify(title)}`}
           className="group-hover:text-white text-white/80 transition-colors"
         >
           <h3 className="font-medium text-xs md:text-base line-clamp-1">{title}</h3>

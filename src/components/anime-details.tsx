@@ -97,7 +97,7 @@ export function AnimeDetails({ id }: { id: string }) {
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
             priority
-            onLoadingComplete={() => setImageLoaded(true)}
+            onLoad={() => setImageLoaded(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>
@@ -127,7 +127,7 @@ export function AnimeDetails({ id }: { id: string }) {
                     className={`h-full w-full object-cover rounded-xl transition-all hover:scale-105 brightness-85 duration-500 ${
                       imageLoaded ? "opacity-100" : "opacity-0"
                     }`}
-                    onLoadingComplete={() => setImageLoaded(true)}
+                    onLoad={() => setImageLoaded(true)}
                   />
                 </div>
               </div>
@@ -614,7 +614,7 @@ export function AnimeDetails({ id }: { id: string }) {
                                 className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
                                   imageLoaded ? "opacity-100" : "opacity-0"
                                 }`}
-                                onLoadingComplete={() => setImageLoaded(true)}
+                                onLoad={() => setImageLoaded(true)}
                               />
                             </div>
                             {/* Character Details */}
@@ -732,7 +732,7 @@ export function AnimeDetails({ id }: { id: string }) {
                                   className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
                                     imageLoaded ? "opacity-100" : "opacity-0"
                                   }`}
-                                  onLoadingComplete={() => setImageLoaded(true)}
+                                  onLoad={() => setImageLoaded(true)}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-0 group-hover:opacity-60 transition-opacity"></div>
                               </div>

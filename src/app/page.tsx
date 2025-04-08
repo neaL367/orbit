@@ -21,7 +21,6 @@ import HomePageLoading from "./loading";
 export default function HomePage() {
   const { data, loading, error } = useQuery(HOME_PAGE_QUERY, {
     variables: { isAdult: false },
-    fetchPolicy: "network-only", 
   });
 
   if (loading) return <HomePageLoading />;
@@ -127,7 +126,7 @@ export default function HomePage() {
           {upcomingPremieres.length > 0 ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {upcomingPremieres.map((schedule: AiringSchedule) => (
-                <AnimeCard key={schedule.id} anime={schedule.media} />
+                <AnimeCard key={schedule.id} anime={schedule.media} airingAt={schedule.airingAt} />
               ))}
             </div>
           ) : (

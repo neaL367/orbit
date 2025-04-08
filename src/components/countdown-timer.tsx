@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 interface CountdownTimerProps {
   targetTime: number; // Unix timestamp in seconds
   duration?: number; // Duration in minutes, optional
+  onStatusChange?: (status: TimerStatus) => void; // Callback to notify parent of status changes
 }
 
 export enum TimerStatus {
@@ -16,6 +17,7 @@ export enum TimerStatus {
 export function CountdownTimer({
   targetTime,
   duration = 24,
+  onStatusChange,
 }: CountdownTimerProps) {
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,
@@ -34,15 +36,22 @@ export function CountdownTimer({
       const endTime = targetTime + (duration || 24) * 60;
 
       // Determine status based on current time in relation to airing time
+      let newStatus: TimerStatus;
       if (now >= targetTime && now < endTime) {
         // Currently airing
-        setStatus(TimerStatus.LIVE);
+        newStatus = TimerStatus.LIVE;
       } else if (now >= endTime) {
         // Finished airing
-        setStatus(TimerStatus.FINISHED);
+        newStatus = TimerStatus.FINISHED;
       } else {
         // Not yet aired
-        setStatus(TimerStatus.UPCOMING);
+        newStatus = TimerStatus.UPCOMING;
+      }
+
+      // Update status if changed
+      if (newStatus !== status) {
+        setStatus(newStatus);
+        onStatusChange?.(newStatus);
       }
 
       // Calculate time remaining until airing starts (only for upcoming shows)
@@ -60,17 +69,15 @@ export function CountdownTimer({
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [targetTime, duration]);
+  }, [targetTime, duration, status, onStatusChange]);
 
   const { days, hours, minutes, seconds } = timeRemaining;
 
   // Different display based on status
   if (status === TimerStatus.LIVE) {
-    return (
-      <span className="animate-pulse text-red-500 font-bold">LIVE NOW</span>
-    );
+    return <span className="animate-pulse text-white font-bold">LIVE NOW</span>;
   } else if (status === TimerStatus.FINISHED) {
-    return <span className="text-gray-500">AIRED</span>;
+    return <span className="text-gray-300">AIRED</span>;
   } else {
     if (days > 0) {
       return <span>{`${days}d ${hours}h`}</span>;

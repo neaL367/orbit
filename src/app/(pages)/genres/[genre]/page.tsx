@@ -3,13 +3,13 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Tag, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Tag, Loader2 } from "lucide-react";
+
 import { AnimeMedia, PageInfo } from "@/lib/types";
 import { AnimeCard } from "@/components/anime-card";
 import { ANIME_BY_GENRE_QUERY } from "@/app/graphql/queries/genres";
 import GenrePageLoading from "./loading";
+import { Navigator } from "@/components/navigator";
 
 export default function GenrePage() {
   const { genre } = useParams() as { genre: string };
@@ -72,12 +72,7 @@ export default function GenrePage() {
   return (
     <div className="">
       <div className="mb-8 flex items-center space-x-10">
-        <Button variant="outline" size="icon" asChild className="rounded-full">
-          <Link href="/genres">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to genres</span>
-          </Link>
-        </Button>
+        <Navigator />
         <div className="flex items-center gap-2">
           <Tag className="h-5 w-5 text-primary" />
           <h1 className="text-2xl font-bold">
