@@ -13,14 +13,18 @@ import {
   // Share2,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { slugify } from "@/lib/utils";
-import { ANIME_DETAILS_QUERY } from "@/app/graphql/queries/detail";
 import { useQuery } from "@apollo/client";
+
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { slugify } from "@/lib/utils";
 import { AnimeMedia } from "@/lib/types";
+
+import { ANIME_DETAILS_QUERY } from "@/app/graphql/queries/detail";
 import AnimeDetailLoading from "@/app/(pages)/anime/[id]/[slug]/loading";
 
 function getTimeUntilAiring(timestamp: number): string {
@@ -45,6 +49,8 @@ function getTimeUntilAiring(timestamp: number): string {
 }
 
 export function AnimeDetails({ id }: { id: string }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const { data, loading, error } = useQuery(ANIME_DETAILS_QUERY, {
     variables: { id: id },
     notifyOnNetworkStatusChange: true,
@@ -84,11 +90,14 @@ export function AnimeDetails({ id }: { id: string }) {
         <div className="relative w-full h-[200px] sm:h-[450px] rounded-xl overflow-hidden">
           <Image
             src={anime.bannerImage || ""}
-            alt={title}
+            alt={title || ""}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={`object-cover brightness-85 transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
             priority
-            className="absolute object-cover"
-            sizes="(min-width: 808px) 50vw, 100vw"
+            onLoadingComplete={() => setImageLoaded(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>
@@ -110,12 +119,15 @@ export function AnimeDetails({ id }: { id: string }) {
                   <Image
                     src={anime.coverImage.large || ""}
                     alt={title}
-                    className="h-full w-full object-cover rounded-xl transition-transform duration-500 hover:scale-105"
                     width={500}
                     height={750}
                     quality={90}
                     priority
                     sizes="(max-width: 640px) 250px, 320px"
+                    className={`h-full w-full object-cover rounded-xl transition-all hover:scale-105 brightness-85 duration-500 ${
+                      imageLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoadingComplete={() => setImageLoaded(true)}
                   />
                 </div>
               </div>
@@ -597,9 +609,12 @@ export function AnimeDetails({ id }: { id: string }) {
                               <Image
                                 src={edge.node.image.large || ""}
                                 alt={edge.node.name.full}
-                                className="object-cover transition-transform duration-500 hover:scale-110"
                                 fill
                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
+                                  imageLoaded ? "opacity-100" : "opacity-0"
+                                }`}
+                                onLoadingComplete={() => setImageLoaded(true)}
                               />
                             </div>
                             {/* Character Details */}
@@ -713,8 +728,11 @@ export function AnimeDetails({ id }: { id: string }) {
                                     ""
                                   }
                                   fill
-                                  className="object-cover brightness-90 transition-transform duration-500 group-hover:scale-110"
                                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                  className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
+                                    imageLoaded ? "opacity-100" : "opacity-0"
+                                  }`}
+                                  onLoadingComplete={() => setImageLoaded(true)}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-0 group-hover:opacity-60 transition-opacity"></div>
                               </div>

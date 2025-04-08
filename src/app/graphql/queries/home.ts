@@ -1,11 +1,9 @@
-// src/app/graphql/queries/home.ts
-
 import { gql } from "@apollo/client";
 import { MEDIA_FRAGMENT } from "./fragment";
 
 export const HOME_PAGE_QUERY = gql`
   ${MEDIA_FRAGMENT}
-  query ($isAdult: Boolean) {
+  query HomePageQuery($isAdult: Boolean) {
     trending: Page(page: 1, perPage: 6) {
       media(sort: TRENDING_DESC, type: ANIME, isAdult: $isAdult) {
         ...MediaFragment
@@ -25,8 +23,7 @@ export const HOME_PAGE_QUERY = gql`
       airingSchedules(
         sort: TIME,
         notYetAired: true,
-        airingAt_greater: 0,
-        media: { type: ANIME, isAdult: $isAdult }
+        airingAt_greater: 0
       ) {
         id
         airingAt

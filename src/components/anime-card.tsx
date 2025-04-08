@@ -18,6 +18,7 @@ export function AnimeCard({
   index?: number;
 }) {
   const [isHovering, setIsHovering] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const title =
     anime.title.userPreferred ||
@@ -26,8 +27,13 @@ export function AnimeCard({
     "";
 
   const slug = slugify(title);
-  const imageUrl = anime.coverImage.large || "";
+  const imageUrl =
+    anime.coverImage.large ||
+    anime.coverImage.medium ||
+    "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
+  const fallbackColor = anime.coverImage?.color || "#1f2937"; // default to gray-800
+
 
   return (
     <Link prefetch={true} href={`/anime/${anime.id}/${slug}`}>
@@ -50,15 +56,23 @@ export function AnimeCard({
 
         {/* Rest of your component remains the same */}
         <div className=" relative  aspect-[4/5] overflow-hidden w-full rounded-sm">
+          <div
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              imageLoaded ? "opacity-0" : "opacity-100 animate-pulse"
+            }`}
+            style={{ backgroundColor: fallbackColor }}
+          />
           <Image
             src={imageUrl || ""}
             alt={title || ""}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover brightness-85"
+            className={`object-cover brightness-85 transition-opacity duration-500 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
             priority
+            onLoadingComplete={() => setImageLoaded(true)}
           />
-
           {score && (
             <div className="absolute  right-2 top-2 flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-xs text-white">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -66,7 +80,6 @@ export function AnimeCard({
             </div>
           )}
 
-          {/* Hover Overlay with Details */}
           <div
             className={`max-md:hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 flex flex-col justify-end transition-opacity duration-300 ${
               isHovering ? "opacity-100" : "opacity-0"

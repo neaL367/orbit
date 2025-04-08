@@ -14,9 +14,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: false,
-    formats: ['image/webp'],
-    minimumCacheTTL: 2678400, // 31 days
+    unoptimized: true,  
   },
   experimental: {
     ppr: 'incremental',

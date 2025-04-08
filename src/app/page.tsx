@@ -16,13 +16,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { AiringSchedule, AnimeMedia } from "@/lib/types";
 import { HOME_PAGE_QUERY } from "./graphql/queries/home";
+import HomePageLoading from "./loading";
 
 export default function HomePage() {
   const { data, loading, error } = useQuery(HOME_PAGE_QUERY, {
     variables: { isAdult: false },
+    fetchPolicy: "network-only", 
   });
 
-  if (loading) return <p className="p-8">Loading...</p>;
+  if (loading) return <HomePageLoading />;
   if (error) return <p className="p-8 text-red-500">Error: {error.message}</p>;
 
   const trending = data.trending.media;

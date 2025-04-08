@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 import { CountdownTimer } from "./countdown-timer";
 import { slugify } from "@/lib/utils";
+import { useState } from "react";
 
 interface AnimeImageCardProps {
   animeId: number;
@@ -20,6 +21,8 @@ export function AnimeImageCard({
   airingAt,
   duration,
 }: AnimeImageCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   // Calculate the current status to determine background color
   const now = Date.now() / 1000;
   const endTime = airingAt + (duration || 24) * 60; // End time based on duration or default 24 minutes
@@ -43,9 +46,12 @@ export function AnimeImageCard({
         src={coverImage.large || coverImage.medium || ""}
         alt={title}
         fill
-        className="object-cover group-hover:scale-105 transition-all duration-300 brightness-90"
         priority
         sizes="(min-width: 808px) 50vw, 100vw"
+        className={`object-cover transition-all hover:scale-110 brightness-85 duration-500 ${
+          imageLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        onLoadingComplete={() => setImageLoaded(true)}
       />
       <Link
         href={`/anime/${animeId}/${slugify(title)}`}

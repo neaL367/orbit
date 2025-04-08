@@ -13,8 +13,10 @@ export default function GenresPage() {
   if (loading) return <GenresPageLoading />;
   if (error) return <p>Error: {error.message}</p>;
 
-  const genres = data.GenreCollection;
-
+  const genres = data.GenreCollection.filter(
+    (genre: string) => genre !== "Hentai" && genre !== "Ecchi"
+  );
+  
   return (
     <div className="">
       <section className="py-8">

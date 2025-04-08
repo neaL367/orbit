@@ -21,6 +21,13 @@ export const client = new ApolloClient({
                     }
                 },
             },
+            Page: {
+                // Disable merging so new queries replace previous data
+                keyFields: false,
+                merge(incoming) {
+                    return incoming;
+                },
+            },
         },
     })
 });
