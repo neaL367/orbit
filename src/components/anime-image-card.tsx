@@ -25,7 +25,7 @@ export function AnimeImageCard({
         fill
         className="object-cover group-hover:scale-105 transition-all duration-300 brightness-90"
         priority
-        sizes="100vw"
+        sizes="(min-width: 808px) 50vw, 100vw"
       />
       <Link
         href={`/anime/${animeId}/${slugify(title)}`}
@@ -33,9 +33,9 @@ export function AnimeImageCard({
       >
         <Play className="w-8 h-8 text-white" />
       </Link>
-        <div className="absolute top-3 left-0 bg-primary-foreground text-primary text-xs font-medium py-0.5 px-2 rounded-r-full">
-          <CountdownTimer targetTime={airingAt} />
-        </div>
+      <div className="absolute top-3 left-0 bg-primary-foreground text-primary text-xs font-medium py-0.5 px-2 rounded-r-full">
+        <CountdownTimer targetTime={airingAt} />
+      </div>
     </div>
   );
 }

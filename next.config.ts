@@ -14,7 +14,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: process.env.NODE_ENV === "production",
+    unoptimized: false,
+    formats: ['image/webp'],
+    minimumCacheTTL: 2678400, // 31 days
   },
   experimental: {
     ppr: 'incremental',

@@ -71,7 +71,7 @@ export async function AnimeDetails({ id }: { id: string }) {
             fill
             priority
             className="absolute object-cover"
-            sizes="100vw"
+            sizes="(min-width: 808px) 50vw, 100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         </div>

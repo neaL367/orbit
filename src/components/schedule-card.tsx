@@ -4,6 +4,7 @@ import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AnimeImageCard } from "./anime-image-card";
 import { StreamingPlatforms } from "./streaming-platforms";
+import { slugify } from "@/lib/utils";
 
 interface ScheduleAnime {
   id: number;
@@ -57,7 +58,7 @@ export function ScheduleCard({ anime }: ScheduleCardProps) {
       />
       <div className="flex flex-col flex-grow p-4 gap-2">
         <Link
-          href={`/anime/${anime.id}`}
+          href={`/anime/${anime.id}/${slugify(title)}`}
           className="group-hover:text-white text-white/80 transition-colors"
         >
           <h3 className="font-medium text-xs md:text-base line-clamp-1">{title}</h3>
