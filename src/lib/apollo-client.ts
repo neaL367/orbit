@@ -1,11 +1,8 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
-import { BatchHttpLink } from "@apollo/client/link/batch-http";
 
-const httpLink = new BatchHttpLink({
-  uri: 'https://graphql.anilist.co',
-  batchMax: 5, // Max number of operations per batch
-  batchInterval: 20 // Wait time in ms to batch operations
+const httpLink = new HttpLink({
+  uri: 'https://graphql.anilist.co'
 });
 
 export const client = new ApolloClient({
@@ -34,14 +31,19 @@ export const client = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: "network-only"
-    }
+      // Use cache-first as default strategy
+      fetchPolicy: "cache-first",
+      // Refetch on network connection if stale
+      nextFetchPolicy: "cache-and-network",
+      // Return partial results from cache if available
+      returnPartialData: true,
+    },
   }
 });
 
 
 if (process.env.NODE_ENV !== "production") {
-    loadDevMessages();
-    loadErrorMessages();
+  loadDevMessages();
+  loadErrorMessages();
 }
 

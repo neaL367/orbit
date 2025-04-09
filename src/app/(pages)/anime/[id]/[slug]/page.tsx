@@ -34,8 +34,8 @@ export default function AnimePage({
   const { data, loading, error } = useQuery(ANIME_DETAILS_QUERY, {
     variables: { id: id },
     notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-first", 
-   });
+    fetchPolicy: "cache-first",
+  });
 
   if (loading && !data) return <AnimeDetailLoading />;
   if (error) return <p>Error: {error.message}</p>;
@@ -125,78 +125,80 @@ export default function AnimePage({
 
                 {anime.trailer && <Trailer anime={anime} />}
 
-                {/* Tabs for Characters, Staff, etc. */}
+                {/* Improved Tabs for Characters, Staff, etc. */}
                 <div className="bg-card/80 backdrop-blur-sm rounded-xl border shadow-sm overflow-hidden">
                   <Tabs defaultValue="characters" className="w-full">
-                    <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-                      <TabsTrigger
-                        value="characters"
-                        className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                      >
-                        Characters
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="staff"
-                        className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                      >
-                        Staff
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="recommendations"
-                        className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent"
-                      >
-                        Recommendations
-                      </TabsTrigger>
-                    </TabsList>
+                    <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b">
+                      <TabsList className="w-full h-auto justify-start rounded-none bg-transparent p-0">
+                        <TabsTrigger
+                          value="characters"
+                          className="rounded-none border-b-2 border-transparent px-6 py-4 data-[state=active]:border-primary data-[state=active]:bg-transparent font-medium"
+                        >
+                          Characters
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="staff"
+                          className="rounded-none border-b-2 border-transparent px-6 py-4 data-[state=active]:border-primary data-[state=active]:bg-transparent font-medium"
+                        >
+                          Staff
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="recommendations"
+                          className="rounded-none border-b-2 border-transparent px-6 py-4 data-[state=active]:border-primary data-[state=active]:bg-transparent font-medium"
+                        >
+                          Recommendations
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
 
-                    <TabsContent value="characters" className="mt-4">
+                    <TabsContent value="characters" className="p-6">
                       {anime.characters &&
                       anime.characters.edges &&
                       anime.characters.edges.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
                           {anime.characters.edges.slice(0, 8).map((edge) => (
                             <div
                               key={edge.node.id}
-                              className="flex flex-col overflow-hidden rounded-lg border shadow-sm hover:shadow-md transition-all hover:border-primary/50"
+                              className="flex flex-col overflow-hidden rounded-lg border bg-card/50 shadow-sm hover:shadow-md transition-all hover:border-primary/50"
                             >
                               {/* Character Image */}
-                              <div className="relative aspect-square overflow-hidden">
+                              <div className="relative aspect-square overflow-hidden bg-muted/30">
                                 <Image
                                   src={edge.node.image.large || ""}
                                   alt={edge.node.name.full}
                                   fill
                                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                  className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
+                                  className={`object-cover transition-all hover:scale-105 duration-300 ${
                                     imageLoaded ? "opacity-100" : "opacity-0"
                                   }`}
                                   onLoad={() => setImageLoaded(true)}
                                 />
                               </div>
                               {/* Character Details */}
-                              <div className="p-3 flex flex-col flex-grow items-center bg-gradient-to-b from-background/50 to-background">
+                              <div className="p-3 flex flex-col flex-grow items-center">
                                 <h3 className="font-medium text-sm line-clamp-1 text-center">
                                   {edge.node.name.full}
                                 </h3>
-                                <p className="text-xs text-muted-foreground line-clamp-1 text-center">
+                                <p className="text-xs text-muted-foreground line-clamp-1 text-center mt-1">
                                   {edge.role}
                                 </p>
                               </div>
                               {/* Voice Actor Info */}
                               {edge.voiceActors &&
                                 edge.voiceActors.length > 0 && (
-                                  <div className="border-t p-2 flex flex-col md:flex-row items-center justify-center gap-2 bg-muted/30">
-                                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                                  <div className="border-t p-3 flex items-center justify-center gap-3 bg-muted/30">
+                                    <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                                       <Image
                                         src={
                                           edge.voiceActors[0].image.large || ""
                                         }
                                         alt={edge.voiceActors[0].name.full}
                                         fill
-                                        className="object-cover rounded-full border-2 border-primary/20 transition-transform duration-300 hover:scale-105"
+                                        className="object-cover border-2 border-primary/20"
                                         sizes="32px"
                                       />
                                     </div>
-                                    <span className="text-xs text-muted-foreground line-clamp-1">
+                                    <span className="text-xs font-medium line-clamp-1">
                                       {edge.voiceActors[0].name.full}
                                     </span>
                                   </div>
@@ -212,33 +214,33 @@ export default function AnimePage({
                       )}
                     </TabsContent>
 
-                    <TabsContent value="staff" className="mt-4">
+                    <TabsContent value="staff" className="p-6">
                       {anime.staff &&
                       anime.staff.edges &&
                       anime.staff.edges.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
                           {anime.staff.edges
                             .slice(0, 8)
                             .map((edge, index: number) => (
                               <div
                                 key={`${edge.node.id}-${index}`}
-                                className="overflow-hidden rounded-lg border hover:shadow-md transition-all hover:border-primary/50"
+                                className="overflow-hidden rounded-lg border bg-card/50 hover:shadow-md transition-all hover:border-primary/50"
                               >
                                 {/* Staff Image */}
-                                <div className="relative aspect-square overflow-hidden">
+                                <div className="relative aspect-square overflow-hidden bg-muted/30">
                                   <Image
                                     src={edge.node.image?.large || ""}
                                     alt={edge.node.name.full}
-                                    className="object-cover transition-transform duration-500 hover:scale-110"
+                                    className="object-cover transition-transform duration-300 hover:scale-105"
                                     fill
                                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                   />
                                 </div>
-                                <div className="p-3 flex flex-col justify-center items-center bg-gradient-to-b from-background/50 to-background">
+                                <div className="p-3 flex flex-col justify-center items-center">
                                   <h3 className="line-clamp-1 font-medium text-sm text-center">
                                     {edge.node.name.full}
                                   </h3>
-                                  <p className="line-clamp-1 text-xs text-muted-foreground text-center">
+                                  <p className="line-clamp-1 text-xs text-muted-foreground text-center mt-1">
                                     {edge.role}
                                   </p>
                                 </div>
@@ -253,10 +255,10 @@ export default function AnimePage({
                       )}
                     </TabsContent>
 
-                    <TabsContent value="recommendations" className="mt-4">
+                    <TabsContent value="recommendations" className="p-6">
                       {anime.recommendations &&
                       anime.recommendations.nodes.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
                           {anime.recommendations.nodes.map((nodes) => (
                             <Link
                               prefetch={true}
@@ -268,36 +270,33 @@ export default function AnimePage({
                                     )
                                   : "untitled"
                               }`}
-                              className="overflow-hidden rounded-lg border hover:shadow-md transition-all hover:border-primary/50 group"
+                              className="overflow-hidden rounded-lg border bg-card/50 hover:shadow-md transition-all hover:border-primary/50 group h-full flex flex-col"
                             >
-                              <div className="h-full">
-                                <div className="relative aspect-[4/3] w-full overflow-hidden">
-                                  <Image
-                                    src={
-                                      nodes.mediaRecommendation?.coverImage
-                                        .large || ""
-                                    }
-                                    alt={
-                                      nodes.mediaRecommendation?.title
-                                        .english ||
-                                      nodes.mediaRecommendation?.title.romaji ||
-                                      ""
-                                    }
-                                    fill
-                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                    className={`object-cover rounded-xl transition-all hover:scale-110 brightness-85 duration-500 ${
-                                      imageLoaded ? "opacity-100" : "opacity-0"
-                                    }`}
-                                    onLoad={() => setImageLoaded(true)}
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-0 group-hover:opacity-60 transition-opacity"></div>
-                                </div>
-                                <div className="p-3 bg-gradient-to-b from-background/50 to-background">
-                                  <h3 className="line-clamp-2 font-semibold text-sm">
-                                    {nodes.mediaRecommendation?.title.english ||
-                                      nodes.mediaRecommendation?.title.romaji}
-                                  </h3>
-                                </div>
+                              <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted/30">
+                                <Image
+                                  src={
+                                    nodes.mediaRecommendation?.coverImage
+                                      .large || ""
+                                  }
+                                  alt={
+                                    nodes.mediaRecommendation?.title.english ||
+                                    nodes.mediaRecommendation?.title.romaji ||
+                                    ""
+                                  }
+                                  fill
+                                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                  className={`object-cover transition-all group-hover:scale-105 duration-300 ${
+                                    imageLoaded ? "opacity-100" : "opacity-0"
+                                  }`}
+                                  onLoad={() => setImageLoaded(true)}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              </div>
+                              <div className="p-3 flex-grow">
+                                <h3 className="line-clamp-2 font-medium text-sm">
+                                  {nodes.mediaRecommendation?.title.english ||
+                                    nodes.mediaRecommendation?.title.romaji}
+                                </h3>
                               </div>
                             </Link>
                           ))}
