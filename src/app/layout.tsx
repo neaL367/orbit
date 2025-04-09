@@ -8,9 +8,6 @@ import Header from "@/components/header";
 
 export const experimental_ppr = true;
 
-export const revalidate = 3600;
-export const dynamicParams = true;
-
 const geist = Geist({
   variable: "--font-geist",
   subsets: ["latin"],
