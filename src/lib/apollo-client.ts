@@ -42,11 +42,7 @@ export const Client = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: "cache-first",
-      nextFetchPolicy: "cache-first",
-    },
-    query: {
-      fetchPolicy: "cache-first",
+      fetchPolicy: "cache-and-network",
     }
   }
 });
