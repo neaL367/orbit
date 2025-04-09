@@ -16,6 +16,7 @@ export default function TopRatedPage() {
   const { data, loading, error, fetchMore } = useQuery(TOP_RATED_ANIME_QUERY, {
     variables: { page: 1, perPage: 20, isAdult: false },
     notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-and-network",
   });
 
   // Define refs with explicit types

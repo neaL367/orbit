@@ -23,26 +23,8 @@ export default function SchedulePageLoading() {
                   <Skeleton className="h-6 w-32" />
                 </div>
 
-                <div className="flex flex-wrap gap-2 md:gap-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="bg-black/20 backdrop-blur-sm rounded-lg p-2 md:p-4 text-center min-w-[80px]"
-                    >
-                      <Skeleton className="h-10 w-full mb-1" />
-                      <Skeleton className="h-4 w-full" />
-                    </div>
-                  ))}
-                </div>
-
                 <Skeleton className="h-10 w-32 mt-8 rounded-full" />
               </div>
-            </div>
-
-            <div className="absolute bottom-4 right-4 flex space-x-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="w-3 h-3 rounded-full" />
-              ))}
             </div>
           </div>
         </Card>

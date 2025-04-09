@@ -66,10 +66,20 @@ export function AnimeCard({
       cardElement.addEventListener("mouseleave", handleMouseLeave, {
         passive: true,
       });
+      
+      // Add passive touch event listeners
+      cardElement.addEventListener("touchstart", handleMouseEnter, {
+        passive: true,
+      });
+      cardElement.addEventListener("touchend", handleMouseLeave, {
+        passive: true,
+      });
 
       return () => {
         cardElement.removeEventListener("mouseenter", handleMouseEnter);
         cardElement.removeEventListener("mouseleave", handleMouseLeave);
+        cardElement.removeEventListener("touchstart", handleMouseEnter);
+        cardElement.removeEventListener("touchend", handleMouseLeave);
       };
     }
   }, []);

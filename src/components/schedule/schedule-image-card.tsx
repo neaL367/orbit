@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Play } from "lucide-react";
-import { CountdownTimer } from "./countdown-timer";
 import { slugify } from "@/lib/utils";
 import { useState } from "react";
+import { CountdownTimer } from "../countdown-timer";
 
 interface AnimeImageCardProps {
   animeId: number;
@@ -14,7 +14,7 @@ interface AnimeImageCardProps {
   duration?: number; // Added duration parameter
 }
 
-export function AnimeImageCard({
+export function ScheduleImageCard({
   animeId,
   coverImage,
   title,

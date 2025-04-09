@@ -2,7 +2,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { AnimeImageCard } from "./anime-image-card";
+import { ScheduleImageCard } from "./schedule-image-card";
 import { StreamingPlatforms } from "./streaming-platforms";
 import { slugify } from "@/lib/utils";
 import { ScheduleMetadata } from "@/app/(pages)/schedule/page";
@@ -24,7 +24,7 @@ export function ScheduleCard({ anime }: ScheduleCardProps) {
 
   return (
     <div className="flex border rounded-lg bg-zinc-900 group hover:shadow-md transition-all">
-      <AnimeImageCard
+      <ScheduleImageCard
         animeId={anime.media.id}
         coverImage={anime.media.coverImage}
         title={title}
