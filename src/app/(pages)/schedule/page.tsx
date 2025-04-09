@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PremiereCountdown } from "@/components/schedule/premiere-countdown";
 import { ScheduleTabs } from "@/components/schedule/schedule-tabs";
-import { WeekNavigation } from "@/components/schedule/week-navigation";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Navigator } from "@/components/navigator";
 
 // Types
@@ -137,6 +136,7 @@ function usePremieres(data: { Page?: { airingSchedules?: AiringSchedule[] } }) {
       },
       episode: 0,
       airingAt: 0,
+      id: 0,
     },
   };
 }
@@ -219,33 +219,10 @@ export default function SchedulePage() {
           </Button>
           <h1 className="text-2xl font-bold text-white">Anime Schedule</h1>
         </div>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-medium">
-              {format(weekStart, "MMM d")} - {format(weekEnd, "MMM d, yyyy")}
-            </h2>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setWeekOffset(0)}
-              disabled={weekOffset === 0}
-              className="rounded-full"
-            >
-              Current Week
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setWeekOffset(1)}
-              disabled={weekOffset === 1}
-              className="rounded-full"
-            >
-              Next Week
-            </Button>
-          </div>
+        <div className="text-center py-16 text-muted-foreground bg-muted/30 rounded-xl">
+          <p className="text-lg font-medium">
+            Error loading schedule: {error.message}
+          </p>
         </div>
       </div>
     );
@@ -256,13 +233,8 @@ export default function SchedulePage() {
       <div className="mb-8 flex items-center gap-4">
         <Navigator />
         <h1 className="text-2xl font-bold text-white">Anime Schedule</h1>
-      </div>{" "}
-      <WeekNavigation
-        weekStart={weekStart}
-        weekEnd={weekEnd}
-        weekOffset={weekOffset}
-        setWeekOffset={setWeekOffset}
-      />
+      </div>
+
       {premieres.length > 0 && (
         <PremiereCountdown
           premieres={premieres}
@@ -272,10 +244,13 @@ export default function SchedulePage() {
           timeRemaining={timeRemaining}
         />
       )}
+
       <ScheduleTabs
         weekDays={weekDays}
         activeDay={activeDay}
         weeklySchedule={weeklySchedule}
+        weekOffset={weekOffset}
+        setWeekOffset={setWeekOffset}
       />
     </div>
   );
