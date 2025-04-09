@@ -1,15 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { useQuery } from "@apollo/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { getGenres } from "@/app/services/genres-anime";
+import { GENRES_QUERY } from "@/app/graphql/queries/genres";
+import GenresPageLoading from "./loading";
 
-export const metadata = {
-  title: "Anime Genres | Orbit",
-  description: "Browse anime by genre on Orbit",
-};
+export default function GenresPage() {
+  const { data, loading, error } = useQuery(GENRES_QUERY, {
+  });
 
-export default async function GenresPage() {
-  const genres = await getGenres();
+  if (loading) return <GenresPageLoading />;
+  if (error) return <p>Error: {error.message}</p>;
+
+  const genres = data.GenreCollection.filter(
+    (genre: string) => genre !== "Hentai" && genre !== "Ecchi"
+  );
 
   return (
     <div className="">
@@ -25,7 +32,7 @@ export default async function GenresPage() {
       </section>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {genres.map((genre) => (
+        {genres.map((genre: string) => (
           <Link
             prefetch={true}
             key={genre}

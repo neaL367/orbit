@@ -101,6 +101,7 @@ export const SCHEDULE_MEDIA_FRAGMENT = gql`
       medium
       color
     }
+    bannerImage  
     format
     episodes
     duration

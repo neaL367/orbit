@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useQuery } from "@apollo/client";
 import {
   ChevronRight,
   TrendingUp,
@@ -10,14 +13,23 @@ import {
 
 import { AnimeCard } from "@/components/anime-card";
 import { Button } from "@/components/ui/button";
-
-import type { AiringSchedule } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { getHomefetch } from "./services/home-anime";
+import type { AiringSchedule, AnimeMedia } from "@/lib/types";
+import { HOME_PAGE_QUERY } from "./graphql/queries/home";
+import HomePageLoading from "./loading";
 
-export default async function HomePage() {
-  const { trending, popular, topRated, upcomingPremieres } =
-    await getHomefetch();
+export default function HomePage() {
+  const { data, loading, error } = useQuery(HOME_PAGE_QUERY, {
+    variables: { isAdult: false },
+  });
+
+  if (loading) return <HomePageLoading />;
+  if (error) return <p className="p-8 text-red-500">Error: {error.message}</p>;
+
+  const trending = data.trending.media;
+  const popular = data.popular.media;
+  const topRated = data.topRated.media;
+  const upcomingPremieres = data.upcoming.airingSchedules;
 
   return (
     <div className="">
@@ -50,93 +62,56 @@ export default async function HomePage() {
         </section>
 
         {/* Trending Section */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h2 className="text-base md:text-2xl font-bold">Trending Now</h2>
-            </div>
-            <Link prefetch={true} href="/trending">
-              <Button
-                variant="ghost"
-                className="gap-1 hover:cursor-pointer rounded-full"
-              >
-                View All <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {trending.map((anime) => (
-              <AnimeCard key={anime.id} anime={anime} />
-            ))}
-          </div>
-        </section>
+        <Section
+          title="Trending Now"
+          icon={<TrendingUp className="h-5 w-5 text-primary" />}
+          link="/trending"
+        >
+          {trending.map((anime: AnimeMedia) => (
+            <AnimeCard key={anime.id} anime={anime} />
+          ))}
+        </Section>
 
         {/* Popular Section */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <h2 className="text-base md:text-2xl font-bold">All Time Popular</h2>
-            </div>
-            <Link prefetch={true} href="/all-time-popular">
-              <Button
-                variant="ghost"
-                className="gap-1 hover:cursor-pointer rounded-full"
-              >
-                View All <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {popular.map((anime) => (
-              <AnimeCard key={anime.id} anime={anime} />
-            ))}
-          </div>
-        </section>
+        <Section
+          title="All Time Popular"
+          icon={<Users className="h-5 w-5 text-primary" />}
+          link="/all-time-popular"
+        >
+          {popular.map((anime: AnimeMedia) => (
+            <AnimeCard key={anime.id} anime={anime} />
+          ))}
+        </Section>
 
         {/* Top Rated Section */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-              <h2 className="text-base md:text-2xl font-bold">Top 100</h2>
-            </div>
-            <Link prefetch={true} href="/top-100-anime">
-              <Button
-                variant="ghost"
-                className="gap-1 hover:cursor-pointer rounded-full"
+        <Section
+          title="Top 100"
+          icon={<Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />}
+          link="/top-100-anime"
+        >
+          {topRated.map((anime: AnimeMedia, index: number) => (
+            <div key={anime.id} className="relative">
+              <div
+                className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow-md"
+                style={{
+                  backgroundColor: anime.coverImage?.color ?? "#3b82f6",
+                }}
               >
-                View All <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {topRated.map((anime, index) => (
-              <div key={anime.id} className="relative">
-                <div
-                  className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow-md"
-                  style={{
-                    backgroundColor: anime.coverImage?.color ?? "#3b82f6",
-                  }}
-                >
-                  {index + 1}
-                </div>
-                <AnimeCard anime={anime} />
+                {index + 1}
               </div>
-            ))}
-          </div>
-        </section>
+              <AnimeCard anime={anime} />
+            </div>
+          ))}
+        </Section>
 
         {/* Upcoming Premieres */}
         <section className="pb-12">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="text-base md:text-2xl font-bold">Upcoming Premieres</h2>
+              <h2 className="text-base md:text-2xl font-bold">
+                Upcoming Premieres
+              </h2>
             </div>
             <Link prefetch={true} href="/schedule">
               <Button
@@ -151,7 +126,7 @@ export default async function HomePage() {
           {upcomingPremieres.length > 0 ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {upcomingPremieres.map((schedule: AiringSchedule) => (
-                <AnimeCard key={schedule.id} anime={schedule.media} />
+                <AnimeCard key={schedule.id} anime={schedule.media} airingAt={schedule.airingAt} />
               ))}
             </div>
           ) : (
@@ -174,5 +149,40 @@ export default async function HomePage() {
         </section>
       </div>
     </div>
+  );
+}
+
+// Reusable Section Component
+function Section({
+  title,
+  icon,
+  link,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  link: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          {icon}
+          <h2 className="text-base md:text-2xl font-bold">{title}</h2>
+        </div>
+        <Link prefetch={true} href={link}>
+          <Button
+            variant="ghost"
+            className="gap-1 hover:cursor-pointer rounded-full"
+          >
+            View All <ChevronRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        {children}
+      </div>
+    </section>
   );
 }

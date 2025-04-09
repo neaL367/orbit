@@ -210,6 +210,8 @@ export interface AnimeMedia {
     coverImage: CoverImage
     format: string
     episodes?: number
+    episode?: number
+    airingAt: number
     chapters?: number
     duration?: number
     status?: string

@@ -1,6 +1,6 @@
-export default function GenrePageLoading() {
+export default function GenresPageLoading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="">
       <section className="py-8">
         <div className="h-10 w-64 animate-pulse rounded-md bg-muted mb-4"></div>
         <div className="h-6 w-96 animate-pulse rounded-md bg-muted mb-6"></div>

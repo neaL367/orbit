@@ -3,7 +3,7 @@ import { TrendingUp } from "lucide-react";
 
 export default function TrendingPageLoading() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="">
       <section className="py-8">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="h-5 w-5 text-primary" />

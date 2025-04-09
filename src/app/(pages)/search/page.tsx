@@ -12,7 +12,7 @@ export default async function SearchPage({
     <div className="">
       <div className="mb-8 flex items-center gap-3">
         <Search className="h-5 w-5 text-primary" />
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold">
           {q ? `Search results for "${q}"` : "Search"}
         </h1>
       </div>

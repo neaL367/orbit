@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: process.env.NODE_ENV === "production",
+    unoptimized: true,  
   },
   experimental: {
     ppr: 'incremental',

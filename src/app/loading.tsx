@@ -73,9 +73,6 @@ export default function HomePageLoading() {
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-2 relative">
-                <div className="z-20 absolute -top-2.5 -left-2.5 md:-top-3 md:-left-3 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-white shadow-md bg-primary/50">
-                  {i + 1}
-                </div>
                 <Skeleton className="aspect-[3/4] w-full rounded-lg" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />

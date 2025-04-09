@@ -1,4 +1,4 @@
-export default function Loading() {
+export default function GenrePageLoading() {
   return (
     <div className="">
       <div className="mb-8 flex items-center gap-4">
