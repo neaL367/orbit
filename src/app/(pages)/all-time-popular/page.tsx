@@ -15,56 +15,47 @@ export default function PopularPage() {
     {
       variables: { page: 1, perPage: 20, isAdult: false },
       notifyOnNetworkStatusChange: true,
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: "cache-first",
     }
   );
 
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Local copy for the current node to ensure stability in cleanup
-    const currentLoadMore = loadMoreRef.current;
-    if (!currentLoadMore) return;
+    if (!data?.Page?.pageInfo?.hasNextPage) return;
 
-    // Define the callback with an explicit type for entries
-    const handleObserver = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && data?.Page?.pageInfo?.hasNextPage) {
-        fetchMore({
-          variables: { page: data.Page.pageInfo.currentPage + 1 },
-          updateQuery: (previousResult, { fetchMoreResult }) => {
-            if (!fetchMoreResult) return previousResult;
-            return {
-              Page: {
-                __typename: previousResult.Page.__typename,
-                pageInfo: fetchMoreResult.Page.pageInfo,
-                media: [
-                  ...previousResult.Page.media,
-                  ...fetchMoreResult.Page.media,
-                ],
-              },
-            };
-          },
-        });
-      }
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (
+          entry.isIntersecting &&
+          !loading &&
+          data?.Page?.pageInfo?.hasNextPage
+        ) {
+          fetchMore({
+            variables: { page: data.Page.pageInfo.currentPage + 1 },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) return prev;
+              return {
+                Page: {
+                  __typename: prev.Page.__typename,
+                  pageInfo: fetchMoreResult.Page.pageInfo,
+                  media: [...prev.Page.media, ...fetchMoreResult.Page.media],
+                },
+              };
+            },
+          });
+        }
+      },
+      { rootMargin: "200px" }
+    );
 
-    // Create observer and assign to observerRef.current
-    observerRef.current = new IntersectionObserver(handleObserver, {
-      rootMargin: "150px",
-    });
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
 
-    // Safe check before observing the node
-    observerRef.current.observe(currentLoadMore);
-
-    // Cleanup: unobserve the node if available
-    return () => {
-      if (observerRef.current && currentLoadMore) {
-        observerRef.current.unobserve(currentLoadMore);
-      }
-    };
-  }, [data, fetchMore]);
+    return () => observer.disconnect();
+  }, [data, loading, fetchMore]);
 
   if (loading && !data) return <PopularPageLoading />;
   if (error) return <p>Error: {error.message}</p>;

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, Star } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ScheduleMetadata } from "@/app/(pages)/schedule/page";
@@ -43,98 +43,134 @@ export function PremiereCountdown({
   const formattedDate = new Date(
     currentPremiere.airingAt * 1000
   ).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
+    year: "numeric",
   });
 
+  const handlePrevious = () => {
+    setCurrentPremiereIndex(
+      (currentPremiereIndex - 1 + premieres.length) % premieres.length
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentPremiereIndex((currentPremiereIndex + 1) % premieres.length);
+  };
+
   return (
-    <div className="mb-8 overflow-hidden rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-lg">
-      <div className="relative overflow-hidden rounded-xl bg-black/5 backdrop-blur-sm">
-        {/* Background image with blur effect */}
-        <div
-          className={cn(
-            "absolute inset-0 opacity-20 blur-sm transition-opacity duration-500",
-            imageLoaded ? "opacity-20" : "opacity-0"
-          )}
-          style={{
-            backgroundImage: `url(${
-              currentPremiere.media.bannerImage ||
-              currentPremiere.media.coverImage.large
-            })`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+    <div className="mb-8 overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm">
+      <div className="relative">
+        {/* Main content */}
+        <div className="flex flex-col md:flex-row">
+          {/* Left column - Info */}
+          <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col items-start justify-center md:w-1/2 lg:w-3/5">
+            {/* Premiere label */}
+            <div className="w-max flex justify-center items-center gap-1.5 bg-black/10 dark:bg-white/10 px-3 py-1 rounded-full">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              </span>
+              <span className="text-xs font-medium tracking-wide">
+                PREMIERES {formattedDate}
+              </span>
+            </div>
 
-        <div className="relative z-10 p-4 sm:p-6 md:p-8">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto]">
-            {/* Left column - Info */}
-            <div className="space-y-4">
-              {/* Premiere badge */}
-              <div className="inline-flex">
-                <div className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2">
-                  <Star className="h-3 w-3 text-yellow-400" />
-                  <span className="uppercase tracking-wide text-[10px] font-medium">
-                    Upcoming Premiere
-                  </span>
+            {/* Title */}
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight line-clamp-2">
+              {title}
+            </h2>
+
+            {/* Genres */}
+            {currentPremiere.media.genres &&
+              currentPremiere.media.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {currentPremiere.media.genres
+                    .slice(0, 4)
+                    .map((genre, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="outline"
+                        className="rounded-md font-normal text-xs"
+                      >
+                        {genre}
+                      </Badge>
+                    ))}
                 </div>
-              </div>
+              )}
 
-              {/* Title */}
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight">
-                {title}
-              </h2>
-
-              {/* Genres */}
-              {currentPremiere.media.genres &&
-                currentPremiere.media.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {currentPremiere.media.genres
-                      .slice(0, 3)
-                      .map((genre, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="rounded-full"
-                        >
-                          {genre}
-                        </Badge>
-                      ))}
-                  </div>
-                )}
-
-              {/* Date */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{formattedDate}</span>
-              </div>
-
-              {/* Description */}
-              {currentPremiere.media.description && (
+            {/* Description */}
+            {currentPremiere.media.description && (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
                 <p
-                  className="text-sm text-muted-foreground line-clamp-2 md:line-clamp-3 mt-2"
+                  className="line-clamp-2 sm:line-clamp-3 text-muted-foreground text-sm"
                   dangerouslySetInnerHTML={{
                     __html: currentPremiere.media.description,
                   }}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Right column - Image and countdown */}
-            <div className="flex flex-col items-center gap-4">
-              {/* Image */}
-              <div className="relative aspect-[3/4] w-full max-w-[200px] overflow-hidden rounded-lg shadow-md">
-                <div className="absolute inset-0 bg-muted/50 animate-pulse"></div>
+            {/* Countdown */}
+            <div className="pt-2 sm:pt-4 w-full">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium text-muted-foreground">
+                  Countdown to premiere
+                </p>
+              </div>
+              <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                {[
+                  { value: timeRemaining.days, label: "Days" },
+                  { value: timeRemaining.hours, label: "Hours" },
+                  { value: timeRemaining.minutes, label: "Min" },
+                  { value: timeRemaining.seconds, label: "Sec" },
+                ].map((time, index) => (
+                  <div key={index} className="text-center">
+                    <div className="bg-muted rounded-md px-1 py-1 sm:py-2">
+                      <p className="text-base sm:text-xl md:text-2xl font-mono font-bold">
+                        {time.value.toString().padStart(2, "0")}
+                      </p>
+                    </div>
+                    <p className="text-[10px] sm:text-xs mt-1 text-muted-foreground">
+                      {time.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right column - Image */}
+          <div className="relative h-48 sm:h-64 md:h-auto md:w-1/2 lg:w-2/5 overflow-hidden">
+            <div className="absolute inset-0 bg-muted/50 animate-pulse"></div>
+            {currentPremiere.media.bannerImage ? (
+              <Image
+                src={currentPremiere.media.bannerImage || ""}
+                alt={title}
+                fill
+                priority
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
+                className={cn(
+                  "object-cover transition-opacity duration-500",
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                )}
+                onLoad={() => setImageLoaded(true)}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{
+                  backgroundColor:
+                    currentPremiere.media.coverImage.color || "#1f2937",
+                }}
+              >
                 <Image
-                  src={
-                    currentPremiere.media.coverImage.large ||
-                    "/placeholder.svg?height=300&width=200"
-                  }
+                  src={currentPremiere.media.coverImage.large || ""}
                   alt={title}
                   fill
-                  sizes="(max-width: 768px) 100vw, 200px"
+                  priority
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
                   className={cn(
                     "object-cover transition-opacity duration-500",
                     imageLoaded ? "opacity-100" : "opacity-0"
@@ -142,65 +178,31 @@ export function PremiereCountdown({
                   onLoad={() => setImageLoaded(true)}
                 />
               </div>
-
-              {/* Countdown */}
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl blur-sm"></div>
-                <div className="relative bg-black/30 backdrop-blur-md rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-3 w-3 text-primary" />
-                    <p className="text-xs uppercase tracking-wider opacity-70">
-                      Premieres in
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-4 gap-3 sm:gap-4">
-                    {[
-                      { value: timeRemaining.days, label: "Days" },
-                      { value: timeRemaining.hours, label: "Hours" },
-                      { value: timeRemaining.minutes, label: "Mins" },
-                      { value: timeRemaining.seconds, label: "Secs" },
-                    ].map((time, index) => (
-                      <div key={index} className="text-center">
-                        <div className="bg-black/20 backdrop-blur-sm rounded-md px-2 py-1">
-                          <p className="text-xl sm:text-2xl font-mono font-bold">
-                            {time.value.toString().padStart(2, "0")}
-                          </p>
-                        </div>
-                        <p className="text-xs mt-1 opacity-70">{time.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-background to-transparent md:bg-gradient-to-r"></div>
           </div>
         </div>
 
-        {/* Navigation dots */}
+        {/* Navigation controls */}
         {premieres.length > 1 && (
-          <div
-            className="flex justify-center py-4 gap-2"
-            role="tablist"
-            aria-label="Premiere navigation"
-          >
-            {premieres.map((premiere, index) => (
-              <button
-                key={premiere.id || index}
-                type="button"
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentPremiereIndex
-                    ? "bg-white/90 w-8 sm:w-10"
-                    : "bg-white/30 w-4 sm:w-5 hover:bg-white/50"
-                }`}
-                onClick={() => {
-                  console.log("Changing premiere to index:", index);
-                  setCurrentPremiereIndex(index);
-                }}
-                aria-label={`View premiere ${index + 1}`}
-                aria-selected={index === currentPremiereIndex}
-                role="tab"
-              />
-            ))}
+          <div className="absolute bottom-4 right-4 flex items-center gap-2 z-10">
+            <button
+              onClick={handlePrevious}
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border/40 text-foreground hover:bg-background transition-colors"
+              aria-label="Previous premiere"
+            >
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+            </button>
+            <div className="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm border border-border/40">
+              {currentPremiereIndex + 1} / {premieres.length}
+            </div>
+            <button
+              onClick={handleNext}
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border/40 text-foreground hover:bg-background transition-colors"
+              aria-label="Next premiere"
+            >
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+            </button>
           </div>
         )}
       </div>

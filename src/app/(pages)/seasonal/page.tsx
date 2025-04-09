@@ -27,10 +27,11 @@ export default function SeasonalPage() {
       perPage: 50,
       isAdult: false,
     },
+    fetchPolicy: "cache-first",
   });
 
   const animeList: AnimeMedia[] = data?.Page?.media || [];
-  
+
   const isCurrentSeason =
     selectedSeason === currentSeason.season &&
     selectedYear === currentSeason.year;
@@ -49,7 +50,7 @@ export default function SeasonalPage() {
       </div>
 
       {/* Season Card */}
-      <SeasonHeader 
+      <SeasonHeader
         selectedSeason={selectedSeason}
         selectedYear={selectedYear}
         setSelectedSeason={setSelectedSeason}
@@ -67,7 +68,7 @@ export default function SeasonalPage() {
       />
 
       {/* Anime Grouped by Format */}
-      <AnimeList 
+      <AnimeList
         animeList={animeList}
         loading={loading}
         error={error}

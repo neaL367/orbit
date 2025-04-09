@@ -12,17 +12,28 @@ export const client = new ApolloClient({
       Query: {
         fields: {
           Page: {
+            keyArgs: false,
             merge(existing, incoming) {
-              return incoming;
-            },
-          },
-        },
-      },
-      Media: {
-        fields: {
-          coverImage: {
-            merge(existing, incoming) {
-              return { ...existing, ...incoming };
+              if (!existing) return incoming;
+              
+              // Create a map of existing media items by ID
+              const existingMediaMap = new Map(
+                (existing.media || []).map((item: { id: number }) => [item.id, item])
+              );
+              
+              // Add new media items that don't already exist
+              const mergedMedia = [...(existing.media || [])];
+              
+              (incoming.media || []).forEach((item: { id: number }) => {
+                if (!existingMediaMap.has(item.id)) {
+                  mergedMedia.push(item);
+                }
+              });
+              
+              return {
+                ...incoming,
+                media: mergedMedia,
+              };
             },
           },
         },
@@ -31,12 +42,7 @@ export const client = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      // Use cache-first as default strategy
       fetchPolicy: "cache-first",
-      // Refetch on network connection if stale
-      nextFetchPolicy: "cache-and-network",
-      // Return partial results from cache if available
-      returnPartialData: true,
     },
   }
 });
