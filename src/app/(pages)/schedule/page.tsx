@@ -14,7 +14,6 @@ import { ScheduleTabs } from "@/components/schedule/schedule-tabs";
 import { ArrowLeft } from "lucide-react";
 import { Navigator } from "@/components/navigator";
 
-// Types
 export interface WeekDay {
   name: string;
   shortName: string;
@@ -148,21 +147,23 @@ function useWeeklySchedule(data: {
     const weeklySchedule: WeeklyScheduleData = {};
 
     if (data?.Page?.airingSchedules) {
-      data.Page.airingSchedules.forEach((schedule: AiringSchedule) => {
-        const scheduleDate = new Date(schedule.airingAt * 1000);
-        const dayKey = format(scheduleDate, "EEEE").toLowerCase();
+      data.Page.airingSchedules
+        .filter((schedule) => !schedule.media.isAdult) 
+        .forEach((schedule: AiringSchedule) => {
+          const scheduleDate = new Date(schedule.airingAt * 1000);
+          const dayKey = format(scheduleDate, "EEEE").toLowerCase();
 
-        if (!weeklySchedule[dayKey]) {
-          weeklySchedule[dayKey] = [];
-        }
+          if (!weeklySchedule[dayKey]) {
+            weeklySchedule[dayKey] = [];
+          }
 
-        weeklySchedule[dayKey].push({
-          id: schedule.id,
-          airingAt: schedule.airingAt,
-          episode: schedule.episode,
-          media: schedule.media,
+          weeklySchedule[dayKey].push({
+            id: schedule.id,
+            airingAt: schedule.airingAt,
+            episode: schedule.episode,
+            media: schedule.media,
+          });
         });
-      });
     }
 
     return weeklySchedule;
@@ -187,7 +188,7 @@ export default function SchedulePage() {
       perPage: 50,
     },
     notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-first"
+    fetchPolicy: "cache-first",
   });
 
   // Process data with custom hooks
