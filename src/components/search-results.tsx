@@ -11,7 +11,7 @@ import SearchPageLoading from "@/app/(pages)/search/loading";
 export function SearchResults({ query }: { query: string }) {
   const { data, loading, error, fetchMore } = useQuery(SEARCH_ANIME_QUERY, {
     variables: { search: query, page: 1, perPage: 20, isAdult: false },
-    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-first"
   });
 
   // Define refs with explicit types

@@ -17,12 +17,13 @@ const nextConfig: NextConfig = {
     unoptimized: true,  
   },
   experimental: {
-    ppr: 'incremental',
     staleTimes: {
       dynamic: 30,
       static: 180,
     },
+    optimizePackageImports: ['lucide-react'], 
   },
+  transpilePackages: ['@apollo/client'],
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,

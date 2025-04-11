@@ -49,7 +49,7 @@ export function AnimeCard({
   const slug = slugify(title);
   const imageUrl = anime.coverImage.large || anime.coverImage.medium || "";
   const score = anime.averageScore ? anime.averageScore / 10 : undefined;
-  const fallbackColor = anime.coverImage?.color || "#1f2937"; // default to gray-800
+  // const fallbackColor = anime.coverImage?.color || "#1f2937"; // default to gray-800
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -84,8 +84,12 @@ export function AnimeCard({
     }
   }, []);
 
+
   return (
-    <Link prefetch={true} href={`/anime/${anime.id}/${slug}`}>
+    <Link 
+      prefetch={true} 
+      href={`/anime/${anime.id}/${slug}`}
+    >
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
         ref={cardRef}
@@ -122,7 +126,7 @@ export function AnimeCard({
             className={`absolute inset-0 transition-opacity duration-500 ${
               imageLoaded ? "opacity-0" : "opacity-100 animate-pulse"
             }`}
-            style={{ backgroundColor: fallbackColor }}
+            // style={{ backgroundColor: fallbackColor }}
           />
           <Image
             src={imageUrl || ""}

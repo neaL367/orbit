@@ -20,4 +20,4 @@ export const WEEKLY_SCHEDULE_QUERY = gql`
         }
       }
     }
-  `
+  `;

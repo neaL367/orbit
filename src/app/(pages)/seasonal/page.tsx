@@ -27,7 +27,7 @@ export default function SeasonalPage() {
       perPage: 50,
       isAdult: false,
     },
-    fetchPolicy: "cache-first",
+    fetchPolicy: "cache-first"
   });
 
   const animeList: AnimeMedia[] = data?.Page?.media || [];
