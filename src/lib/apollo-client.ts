@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
-import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import { AnimeMedia } from './types';
 
 const httpLink = new HttpLink({
@@ -33,15 +32,6 @@ export const Client = new ApolloClient({
       },
     },
   }),
-  defaultOptions: {
-    watchQuery: {
-      fetchPolicy: "cache-and-network",
-    }
-  }
 });
 
-if (process.env.NODE_ENV !== "production") {
-  loadDevMessages();
-  loadErrorMessages();
-}
 

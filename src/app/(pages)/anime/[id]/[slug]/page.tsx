@@ -33,7 +33,6 @@ export default function AnimePage({
 
   const { data, loading, error } = useQuery(ANIME_DETAILS_QUERY, {
     variables: { id: id },
-    notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-first",
   });
 

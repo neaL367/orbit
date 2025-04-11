@@ -187,8 +187,7 @@ export default function SchedulePage() {
       page: 1,
       perPage: 50,
     },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-first",
+    fetchPolicy: "cache-first"
   });
 
   // Process data with custom hooks

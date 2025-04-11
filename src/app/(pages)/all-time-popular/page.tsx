@@ -14,7 +14,6 @@ export default function PopularPage() {
     ALL_TIME_POPULAR_ANIME_QUERY,
     {
       variables: { page: 1, perPage: 20, isAdult: false },
-      notifyOnNetworkStatusChange: true,
       fetchPolicy: "cache-first",
     }
   );

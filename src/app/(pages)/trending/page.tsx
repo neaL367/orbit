@@ -12,8 +12,7 @@ import TrendingPageLoading from "./loading";
 export default function TrendingAnimePage() {
   const { data, loading, error, fetchMore } = useQuery(TRENDING_ANIME_QUERY, {
     variables: { page: 1, perPage: 20, isAdult: false },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network"
+    fetchPolicy: "cache-first"
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);

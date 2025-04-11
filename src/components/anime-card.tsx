@@ -84,19 +84,11 @@ export function AnimeCard({
     }
   }, []);
 
-  const handleClick = () => {
-    if (typeof window !== 'undefined') {
-      // Store current scroll position before navigation
-      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-      sessionStorage.setItem('scrollPosition', scrollPosition.toString());
-    }
-  };
 
   return (
     <Link 
       prefetch={true} 
       href={`/anime/${anime.id}/${slug}`}
-      onClick={handleClick}
     >
       <Card
         className="h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md bg-transparent relative rounded-lg"
