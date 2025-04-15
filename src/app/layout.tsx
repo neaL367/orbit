@@ -6,8 +6,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header";
 
-export const experimental_ppr = true;
-
 const geist = Geist({
   variable: "--font-geist",
   subsets: ["latin"],

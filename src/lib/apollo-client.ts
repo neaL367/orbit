@@ -1,11 +1,11 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
-import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
+import { AnimeMedia } from './types';
 
 const httpLink = new HttpLink({
   uri: 'https://graphql.anilist.co'
 });
 
-export const client = new ApolloClient({
+export const Client = new ApolloClient({
   link: httpLink,
   cache: new InMemoryCache({
     typePolicies: {
@@ -15,21 +15,13 @@ export const client = new ApolloClient({
             keyArgs: false,
             merge(existing, incoming) {
               if (!existing) return incoming;
-              
-              // Create a map of existing media items by ID
-              const existingMediaMap = new Map(
-                (existing.media || []).map((item: { id: number }) => [item.id, item])
-              );
-              
-              // Add new media items that don't already exist
-              const mergedMedia = [...(existing.media || [])];
-              
-              (incoming.media || []).forEach((item: { id: number }) => {
-                if (!existingMediaMap.has(item.id)) {
-                  mergedMedia.push(item);
-                }
-              });
-              
+
+              const existingIds = new Set((existing.media || []).map((item: AnimeMedia) => item.id));
+              const mergedMedia = [
+                ...(existing.media || []),
+                ...(incoming.media || []).filter((item: AnimeMedia) => item && !existingIds.has(item.id)),
+              ];
+
               return {
                 ...incoming,
                 media: mergedMedia,
@@ -40,16 +32,6 @@ export const client = new ApolloClient({
       },
     },
   }),
-  defaultOptions: {
-    watchQuery: {
-      fetchPolicy: "cache-first",
-    },
-  }
 });
 
-
-if (process.env.NODE_ENV !== "production") {
-  loadDevMessages();
-  loadErrorMessages();
-}
 

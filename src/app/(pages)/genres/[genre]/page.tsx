@@ -22,7 +22,7 @@ export default function GenrePage() {
       perPage: 20,
       isAdult: false,
     },
-    notifyOnNetworkStatusChange: true,
+    fetchPolicy: "cache-first"
   });
 
   const observerRef = useRef<IntersectionObserver | null>(null);
