@@ -9,6 +9,7 @@ export const WEEKLY_SCHEDULE_QUERY = gql`
           airingAt_greater: $airingAtGreater
           airingAt_lesser: $airingAtLesser
           sort: TIME
+          notYetAired: true,
         ) {
           id
           airingAt

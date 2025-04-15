@@ -13,7 +13,7 @@ export interface CoverImage {
     color?: string
 }
 
-export interface Date {
+export interface FuzzyDate {
     year?: number
     month?: number
     day?: number
@@ -42,8 +42,8 @@ export interface Staff {
     description?: string
     primaryOccupations?: string[]
     gender?: string
-    dateOfBirth?: Date
-    dateOfDeath?: Date
+    dateOfBirth?: FuzzyDate
+    dateOfDeath?: FuzzyDate
     age?: number
     yearsActive?: number[]
     homeTown?: string
@@ -65,39 +65,29 @@ export interface Character {
     }
     description?: string
     gender?: string
-    dateOfBirth?: Date
+    dateOfBirth?: FuzzyDate
     age?: string
     bloodType?: string
     siteUrl?: string
-    role?: string
-    voiceActors?: {
-        id: number
-        name: {
-            full: string
-            native: string
-        }
-        image: {
-            large: string | null
-        }
-        languageV2: string
-    }[]
 }
 
+export interface VoiceActor {
+    id: number
+    name: {
+        full: string
+        native?: string
+    }
+    image: {
+        large: string
+        medium?: string
+    }
+    language: string
+}
 
 export interface CharacterEdge {
     node: Character
     role: string
-    voiceActors: {
-        id: number
-        name: {
-            full: string
-            native: string
-        }
-        image: {
-            large: string | null
-        }
-        languageV2: string
-    }[]
+    voiceActors: VoiceActor[]
 }
 
 export interface CharacterConnection {
@@ -199,30 +189,46 @@ export interface MediaStats {
 }
 
 export interface NextAiringEpisode {
+    id: number
     airingAt: number
+    timeUntilAiring: number
     episode: number
-    timeUntilAiring?: number
 }
+
+export type MediaFormat = 
+    "TV" | "TV_SHORT" | "MOVIE" | "SPECIAL" | 
+    "OVA" | "ONA" | "MUSIC" | "MANGA" | 
+    "NOVEL" | "ONE_SHOT";
+
+export type MediaStatus = 
+    "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | 
+    "CANCELLED" | "HIATUS";
+
+export type MediaSeason = "WINTER" | "SPRING" | "SUMMER" | "FALL";
+
+export type MediaSource = 
+    "ORIGINAL" | "MANGA" | "LIGHT_NOVEL" | "VISUAL_NOVEL" | 
+    "VIDEO_GAME" | "OTHER" | "NOVEL" | "DOUJINSHI" | 
+    "ANIME" | "WEB_NOVEL" | "LIVE_ACTION" | "GAME" | 
+    "COMIC" | "MULTIMEDIA_PROJECT" | "PICTURE_BOOK";
 
 export interface AnimeMedia {
     id: number
     title: Title
     coverImage: CoverImage
-    format: string
+    format: MediaFormat
     episodes?: number
-    episode?: number
-    airingAt: number
-    chapters?: number
     duration?: number
-    status?: string
-    season?: string
+    status?: MediaStatus
+    season?: MediaSeason
     seasonYear?: number
     averageScore?: number
+    meanScore?: number
     popularity?: number
     genres?: string[]
     description?: string
-    startDate?: Date
-    endDate?: Date
+    startDate?: FuzzyDate
+    endDate?: FuzzyDate
     studios?: {
         nodes: Studio[]
     }
@@ -238,39 +244,35 @@ export interface AnimeMedia {
     externalLinks?: ExternalLink[]
     staff?: StaffConnection
     stats?: MediaStats
-    source?: string
+    source?: MediaSource
     hashtag?: string
     bannerImage?: string
     synonyms?: string[]
-    meanScore?: number
     favourites?: number
     trending?: number
     isFavourite?: boolean
     isLicensed?: boolean
-    type?: string
+    type?: "ANIME" | "MANGA"
 }
 
 export interface AiringSchedule {
     id: number
     airingAt: number
+    timeUntilAiring: number
     episode: number
     media: AnimeMedia
-    timeUntilAiring?: number
-}
-
-export interface Season {
-    year: number
-    season: "WINTER" | "SPRING" | "SUMMER" | "FALL"
 }
 
 export interface PageInfo {
-    hasNextPage: boolean
-    currentPage: number
     total?: number
+    perPage?: number
+    currentPage: number
+    lastPage?: number
+    hasNextPage: boolean
 }
 
-export interface GraphQLError {
-    message: string;
-    status?: number;
-    validation?: Record<string, string[]>;
+export interface Page {
+    pageInfo: PageInfo
+    media?: AnimeMedia[]
+    airingSchedules?: AiringSchedule[]
 }

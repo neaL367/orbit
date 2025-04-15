@@ -4,7 +4,14 @@ import { cookies } from "next/headers";
 import { Geist } from "next/font/google";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import Header from "@/components/header";
+
+
+if (process.env.NODE_ENV !== "production") {
+  loadDevMessages();
+  loadErrorMessages();
+}
 
 const geist = Geist({
   variable: "--font-geist",
@@ -26,7 +33,7 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "false";
 
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning className="dark scroll-smooth">
       <body className={geist.className}>
         <SidebarProvider defaultOpen={defaultOpen}>
           <div className="flex min-h-screen w-full">

@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true,  
+    // unoptimized: true,  
   },
   experimental: {
     staleTimes: {
