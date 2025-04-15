@@ -116,3 +116,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [AniList](https://anilist.co/) for providing the GraphQL API
 - [Next.js](https://nextjs.org/) team for the amazing framework
 - [Radix UI](https://www.radix-ui.com/) for accessible UI components
+
