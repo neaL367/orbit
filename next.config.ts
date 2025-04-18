@@ -14,14 +14,14 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    // unoptimized: true,  
+    unoptimized: process.env.NODE_ENV === 'production'
   },
   experimental: {
     staleTimes: {
       dynamic: 30,
       static: 180,
     },
-    optimizePackageImports: ['lucide-react'], 
+    optimizePackageImports: ['lucide-react'],
   },
   transpilePackages: ['@apollo/client'],
   compiler: {
