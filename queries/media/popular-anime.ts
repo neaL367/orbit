@@ -1,7 +1,7 @@
 import { graphql } from '@/graphql/gql'
 
 export const PopularAnimeQuery = graphql(`
-  query PopularAnime($page: Int, $perPage: Int) {
+  query PopularAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         total
@@ -10,7 +10,7 @@ export const PopularAnimeQuery = graphql(`
         hasNextPage
         perPage
       }
-      media(type: ANIME, sort: POPULARITY_DESC) {
+      media(type: ANIME, sort: POPULARITY_DESC, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear) {
         id
         title {
           romaji

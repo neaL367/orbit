@@ -10,16 +10,15 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navItems = [
-    { label: 'Trending', href: '/trending' },
-    { label: 'All Time Popular', href: '/popular' },
-    { label: 'Top 100', href: '/top100' },
-    { label: 'Genres', href: '/genres' },
-    { label: 'Seasonal', href: '/seasonal' },
-    { label: 'Schedule', href: '/schedule' },
+    { label: 'Trending', href: '/anime?sort=trending' },
+    { label: 'All Time Popular', href: '/anime?sort=popular' },
+    { label: 'Top 100', href: '/anime?sort=top-rated' },
+    { label: 'Seasonal', href: '/anime?sort=seasonal' },
+    { label: 'Schedule', href: '/' },
   ]
 
   return (
-    <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+    <nav className="sticky top-0 z-50 bg-background/70 backdrop-blur-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-8 sm:px-10 lg:px-12">
         <div className="flex items-center justify-center h-20">
           {/* Desktop Navigation */}

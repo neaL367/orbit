@@ -1,7 +1,7 @@
 import { graphql } from '@/graphql/gql'
 
 export const SeasonalAnimeQuery = graphql(`
-  query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+  query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         total
@@ -15,6 +15,9 @@ export const SeasonalAnimeQuery = graphql(`
         season: $season
         seasonYear: $seasonYear
         sort: POPULARITY_DESC
+        genre_in: $genres
+        format: $format
+        status: $status
       ) {
         id
         title {

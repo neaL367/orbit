@@ -4,13 +4,13 @@ import { notFound } from 'next/navigation'
 import { use } from 'react'
 
 import {
-    AnimeDetailHeader,
-    AnimeDetailRecommendations,
-    AnimeDetailRelations,
-    AnimeDetailLoading,
-    AnimeDetailError,
-    AnimeDetailTrailer,
-    AnimeDetailCharacters,
+  AnimeDetailHeader,
+  AnimeDetailRecommendations,
+  AnimeDetailRelations,
+  AnimeDetailLoading,
+  AnimeDetailError,
+  AnimeDetailTrailer,
+  AnimeDetailCharacters,
 } from '@/features/anime-detail'
 import { useGraphQL } from '@/hooks/use-graphql'
 import { AnimeByIdQuery } from '@/queries/media/anime-by-id'
@@ -24,7 +24,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
     notFound()
   }
 
-  const { data, isLoading, error } = useGraphQL(AnimeByIdQuery, { id: animeId })
+  const { data, isLoading, error, refetch } = useGraphQL(AnimeByIdQuery, { id: animeId })
 
   if (isLoading) {
     return <AnimeDetailLoading />
@@ -34,7 +34,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
   const anime = mediaData?.Media
 
   if (error || !anime) {
-    return <AnimeDetailError />
+    return <AnimeDetailError onRetry={() => refetch()} />
   }
 
   const recommendations = anime?.recommendations?.nodes?.filter(Boolean) || []

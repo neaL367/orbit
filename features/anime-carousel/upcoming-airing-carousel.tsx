@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 import type { Media } from '@/graphql/graphql'
 
 export function UpcomingAiringCarousel() {
-  const { data, isLoading, error } = useGraphQL(UpcomingAiringAnimeQuery, { page: 1, perPage: 10 })
+  const { data, isLoading, error, refetch } = useGraphQL(UpcomingAiringAnimeQuery, { page: 1, perPage: 10 })
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
@@ -50,7 +50,25 @@ export function UpcomingAiringCarousel() {
   }
 
   if (error) {
-    return null
+    return (
+      <div className="w-full mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Upcoming Airing</h2>
+            <p className="text-zinc-400 text-sm">Anime episodes coming soon</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center gap-4 py-12 bg-zinc-900 rounded-xl">
+          <p className="text-red-400">Error loading upcoming anime</p>
+          <button
+            onClick={() => refetch()}
+            className="px-6 py-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors text-white"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const pageData = data as { Page?: { media?: Array<Media | null> } } | undefined

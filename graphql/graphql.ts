@@ -4684,6 +4684,11 @@ export type AnimeByIdQuery = { __typename?: 'Query', Media?: { __typename?: 'Med
 export type PopularAnimeQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
+  genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  format?: InputMaybe<MediaFormat>;
+  status?: InputMaybe<MediaStatus>;
+  season?: InputMaybe<MediaSeason>;
+  seasonYear?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -4694,6 +4699,9 @@ export type SeasonalAnimeQueryVariables = Exact<{
   seasonYear?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
+  genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  format?: InputMaybe<MediaFormat>;
+  status?: InputMaybe<MediaStatus>;
 }>;
 
 
@@ -4702,6 +4710,11 @@ export type SeasonalAnimeQuery = { __typename?: 'Query', Page?: { __typename?: '
 export type TopRatedAnimeQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
+  genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  format?: InputMaybe<MediaFormat>;
+  status?: InputMaybe<MediaStatus>;
+  season?: InputMaybe<MediaSeason>;
+  seasonYear?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -4710,6 +4723,11 @@ export type TopRatedAnimeQuery = { __typename?: 'Query', Page?: { __typename?: '
 export type TrendingAnimeQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
+  genres?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  format?: InputMaybe<MediaFormat>;
+  status?: InputMaybe<MediaStatus>;
+  season?: InputMaybe<MediaSeason>;
+  seasonYear?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -4913,7 +4931,7 @@ export const AnimeByIdDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<AnimeByIdQuery, AnimeByIdQueryVariables>;
 export const PopularAnimeDocument = new TypedDocumentString(`
-    query PopularAnime($page: Int, $perPage: Int) {
+    query PopularAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       total
@@ -4922,7 +4940,15 @@ export const PopularAnimeDocument = new TypedDocumentString(`
       hasNextPage
       perPage
     }
-    media(type: ANIME, sort: POPULARITY_DESC) {
+    media(
+      type: ANIME
+      sort: POPULARITY_DESC
+      genre_in: $genres
+      format: $format
+      status: $status
+      season: $season
+      seasonYear: $seasonYear
+    ) {
       id
       title {
         romaji
@@ -4991,7 +5017,7 @@ export const PopularAnimeDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PopularAnimeQuery, PopularAnimeQueryVariables>;
 export const SeasonalAnimeDocument = new TypedDocumentString(`
-    query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+    query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       total
@@ -5005,6 +5031,9 @@ export const SeasonalAnimeDocument = new TypedDocumentString(`
       season: $season
       seasonYear: $seasonYear
       sort: POPULARITY_DESC
+      genre_in: $genres
+      format: $format
+      status: $status
     ) {
       id
       title {
@@ -5074,7 +5103,7 @@ export const SeasonalAnimeDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SeasonalAnimeQuery, SeasonalAnimeQueryVariables>;
 export const TopRatedAnimeDocument = new TypedDocumentString(`
-    query TopRatedAnime($page: Int, $perPage: Int) {
+    query TopRatedAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       total
@@ -5083,7 +5112,15 @@ export const TopRatedAnimeDocument = new TypedDocumentString(`
       hasNextPage
       perPage
     }
-    media(type: ANIME, sort: SCORE_DESC) {
+    media(
+      type: ANIME
+      sort: SCORE_DESC
+      genre_in: $genres
+      format: $format
+      status: $status
+      season: $season
+      seasonYear: $seasonYear
+    ) {
       id
       title {
         romaji
@@ -5152,7 +5189,7 @@ export const TopRatedAnimeDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<TopRatedAnimeQuery, TopRatedAnimeQueryVariables>;
 export const TrendingAnimeDocument = new TypedDocumentString(`
-    query TrendingAnime($page: Int, $perPage: Int) {
+    query TrendingAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       total
@@ -5161,7 +5198,15 @@ export const TrendingAnimeDocument = new TypedDocumentString(`
       hasNextPage
       perPage
     }
-    media(type: ANIME, sort: TRENDING_DESC) {
+    media(
+      type: ANIME
+      sort: TRENDING_DESC
+      genre_in: $genres
+      format: $format
+      status: $status
+      season: $season
+      seasonYear: $seasonYear
+    ) {
       id
       title {
         romaji

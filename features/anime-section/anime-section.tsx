@@ -15,7 +15,7 @@ type AnimeSectionProps = {
 }
 
 export function AnimeSection({ title, query, variables, viewAllHref, showRank = false }: AnimeSectionProps) {
-  const { data, isLoading, error } = useGraphQL(query, variables || { page: 1, perPage: 5 })
+  const { data, isLoading, error, refetch } = useGraphQL(query, variables || { page: 1, perPage: 5 })
 
   if (isLoading) {
     return (
@@ -48,7 +48,15 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
             </Link>
           )}
         </div>
-        <div className="px-4 text-red-400">Error loading {title.toLowerCase()}</div>
+        <div className="px-4 flex flex-col items-center gap-4 py-8">
+          <p className="text-red-400">Error loading {title.toLowerCase()}</p>
+          <button
+            onClick={() => refetch()}
+            className="px-6 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors text-white"
+          >
+            Try Again
+          </button>
+        </div>
       </section>
     )
   }

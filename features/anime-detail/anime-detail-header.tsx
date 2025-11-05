@@ -5,6 +5,7 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import { AnimeDetailExternalLinks } from "@/features/anime-detail/anime-detail-external-links"
+import { BackButton } from "@/features/shared/back-button"
 
 type AnimeDetailHeaderProps = {
   anime: Media
@@ -43,7 +44,7 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
   return (
     <header className="relative w-full">
       {/* HERO SECTION */}
-      <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden">
+      <div className="relative h-[500px] md:h-[700px] w-full overflow-hidden">
         {/* Background Banner */}
         <div className="absolute inset-0">
           {bannerImage ? (
@@ -73,6 +74,11 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
 
         {/* Content Container */}
         <div className="relative h-full max-w-[1680px] mx-auto px-4 md:px-6 lg:px-8">
+          {/* Back Button */}
+          <div className="absolute top-4 md:top-6 left-4 md:left-6 lg:left-8 z-10">
+            <BackButton />
+          </div>
+          
           <div className="flex items-end h-full pb-12 md:pb-16">
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full">
               {/* Cover Image */}

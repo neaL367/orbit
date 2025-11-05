@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -25,6 +25,7 @@ type AnimeCardProps = {
 }
 
 export function AnimeCard({ anime, rank }: AnimeCardProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
   const title =
     anime?.title?.userPreferred ||
     anime?.title?.romaji ||
@@ -81,7 +82,11 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
               loading="lazy"
               quality={75}
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+              onLoadingComplete={() => setIsLoaded(true)}
+              className={cn(
+                "object-cover transition-all duration-500 ease-out group-hover:scale-110",
+                isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"
+              )}
             />
           ) : (
             <div
