@@ -1,5 +1,9 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import type { Route } from "next"
 
@@ -9,6 +13,8 @@ type AnimeDetailTrailerProps = {
 }
 
 export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
+  
   if (!trailer || !trailer.id) return null
 
   if (trailer.site === "youtube") {
@@ -55,8 +61,12 @@ export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) 
               src={trailer.thumbnail || ""}
               alt={`${title} trailer`}
               fill
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
               sizes="100vw"
+              onLoadingComplete={() => setIsLoaded(true)}
+              className={cn(
+                "object-cover w-full h-full transition-all duration-700 ease-in-out group-hover:scale-105",
+                isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+              )}
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
               <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">

@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Autoplay from 'embla-carousel-autoplay'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from '@/components/ui/carousel'
 import { Card } from '@/components/ui/card'
 import { useGraphQL } from '@/hooks/use-graphql'
@@ -18,7 +18,28 @@ import type { Media } from '@/graphql/graphql'
 
 export function UpcomingAiringCarousel() {
   const { data, isLoading, error } = useGraphQL(UpcomingAiringAnimeQuery, { page: 1, perPage: 10 })
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  const handleImageLoad = (id: number) => {
+    setLoadedImages((prev) => new Set(prev).add(id))
+  }
+
+  useEffect(() => {
+    if (!api) return
+
+    setCurrent(api.selectedScrollSnap())
+
+    const handleSelect = () => {
+      setCurrent(api.selectedScrollSnap())
+    }
+
+    api.on('select', handleSelect)
+    return () => {
+      api.off('select', handleSelect)
+    }
+  }, [api])
 
   if (isLoading) {
     return (
@@ -41,23 +62,31 @@ export function UpcomingAiringCarousel() {
     return null
   }
 
+  const autoplayPlugin = Autoplay({
+    delay: 10000,
+    stopOnInteraction: false,
+    stopOnMouseEnter: false,
+  })
+
   return (
     <div className="w-full mb-12">
-      <div className="flex items-center justify-between mb-6 px-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl md:text-4xl font-bold mb-2">Upcoming Airing</h2>
           <p className="text-zinc-400 text-sm">Anime episodes coming soon</p>
         </div>
       </div>
       <Carousel
+        setApi={setApi}
         opts={{
           align: 'start',
           loop: true,
         }}
+        plugins={[autoplayPlugin]}
         className="w-full"
       >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {animeList.map((anime) => {
+        <CarouselContent className="ml-0 ">
+          {animeList.map((anime, index) => {
             if (!anime) return null
 
             const title = anime.title?.userPreferred || anime.title?.romaji || anime.title?.english || 'Unknown'
@@ -72,19 +101,24 @@ export function UpcomingAiringCarousel() {
             const hours = Math.floor((timeUntilAiring % 86400) / 3600)
             const minutes = Math.floor((timeUntilAiring % 3600) / 60)
 
+            const isActive = current === index
+
             return (
-              <CarouselItem key={anime.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={anime.id} className="pl-0 basis-full ">
                 <Link href={`/anime/${anime.id}`}>
                   <Card className="group relative overflow-hidden border-0 bg-zinc-900 hover:bg-zinc-800 transition-colors">
-                    <div className="relative aspect-video w-full overflow-hidden">
+                    <div className="relative aspect-video h-[300px] w-full overflow-hidden">
                       {bannerImage ? (
                         <Image
                           src={bannerImage}
                           alt={title}
                           fill
-                          sizes="50vw"
-                          onLoadingComplete={() => setIsLoaded(true)}
-                          className={cn(`object-cover transition-all duration-700 ease-in-out not-first:${isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"} group-hover:scale-110`)}
+                          sizes="100vw"
+                          onLoadingComplete={() => handleImageLoad(anime.id)}
+                          className={cn(
+                            "object-cover transition-all duration-700 ease-in-out group-hover:scale-110",
+                            loadedImages.has(anime.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                          )}
                         />
                       ) : (
                         <div
@@ -92,22 +126,38 @@ export function UpcomingAiringCarousel() {
                           style={{ backgroundColor: coverColor }}
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                      <div className="absolute top-4 right-4">
-                        <div className="px-3 py-1.5 rounded-lg backdrop-blur-md border bg-black/40">
-                          <p className="text-xs font-semibold text-white">Episode {episodeNumber}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                      <div className="absolute top-4 right-4 z-10">
+                        <div className="px-4 py-2 rounded-xl backdrop-blur-md border border-white/20 bg-black/60 shadow-lg">
+                          <p className="text-sm font-bold text-white">Episode {episodeNumber}</p>
                         </div>
                       </div>
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <h3 className="text-xl font-bold mb-2 line-clamp-2">{title}</h3>
+                      <div 
+                        className={cn(
+                          "absolute bottom-0 left-0 right-0 p-6 transition-all duration-600 ease-out z-10",
+                          isActive 
+                            ? "translate-y-0 opacity-100" 
+                            : "translate-y-4 opacity-0"
+                        )}
+                        style={{
+                          animation: isActive ? 'fadeUp 0.6s ease-out' : 'none'
+                        }}
+                      >
+                        <h3 className="text-2xl md:text-3xl max-w-[400px] font-extrabold mb-3 line-clamp-2 text-white drop-shadow-2xl leading-tight">
+                          {title}
+                        </h3>
                         {timeUntilAiring > 0 && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-zinc-300">
-                              {days > 0 && `${days}d `}
-                              {hours > 0 && `${hours}h `}
-                              {minutes > 0 && `${minutes}m`}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md border border-white/20 bg-black/50">
+                              <span className="text-base font-bold text-white">
+                                {days > 0 && `${days}d `}
+                                {hours > 0 && `${hours}h `}
+                                {minutes > 0 && `${minutes}m`}
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium text-zinc-300 uppercase tracking-wide">
+                              until airing
                             </span>
-                            <span className="text-zinc-400">until airing</span>
                           </div>
                         )}
                       </div>
@@ -118,9 +168,19 @@ export function UpcomingAiringCarousel() {
             )
           })}
         </CarouselContent>
-        <CarouselPrevious className="left-4" />
-        <CarouselNext className="right-4" />
       </Carousel>
+      <style jsx global>{`
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(1rem);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   )
 }

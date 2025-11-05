@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -19,9 +19,12 @@ const hexToRgba = (hex: string, opacity: number = 1): string => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }
 
-export function AnimeCard({ anime }: { anime: MediaItem }) {
-  const [isLoaded, setIsLoaded] = useState(false)
+type AnimeCardProps = {
+  anime: MediaItem
+  rank?: number
+}
 
+export function AnimeCard({ anime, rank }: AnimeCardProps) {
   const title =
     anime?.title?.userPreferred ||
     anime?.title?.romaji ||
@@ -36,41 +39,50 @@ export function AnimeCard({ anime }: { anime: MediaItem }) {
   const genres = anime?.genres?.filter(Boolean) || []
   const status = anime?.status?.toLowerCase()
 
+  const colors = useMemo(() => ({
+    border: hexToRgba(coverColor, 0.3),
+    borderHover: hexToRgba(coverColor, 0.8),
+    shadow: `0 4px 6px -1px ${hexToRgba(coverColor, 0.1)}, 0 2px 4px -1px ${hexToRgba(coverColor, 0.06)}`,
+    shadowHover: `0 20px 25px -5px ${hexToRgba(coverColor, 0.3)}, 0 10px 10px -5px ${hexToRgba(coverColor, 0.1)}`,
+    badgeBg: hexToRgba(coverColor, 0.4),
+    badgeBorder: hexToRgba(coverColor, 0.6),
+    statusBg: hexToRgba(coverColor, 0.3),
+  }), [coverColor])
+
   return (
     <Link href={`/anime/${anime?.id}` as Route} className="group block">
       <Card
         className={cn(
           'relative overflow-hidden rounded-xl border bg-zinc-900/90 transition-all duration-300',
-          'hover:-translate-y-1 hover:shadow-2xl'
+          'hover:-translate-y-1 hover:shadow-2xl will-change-transform'
         )}
         style={{
-          borderColor: hexToRgba(coverColor, 0.3),
-          boxShadow: `0 4px 6px -1px ${hexToRgba(coverColor, 0.1)}, 0 2px 4px -1px ${hexToRgba(coverColor, 0.06)}`
-        }}
+          borderColor: colors.border,
+          boxShadow: colors.shadow,
+          '--border-hover': colors.borderHover,
+          '--shadow-hover': colors.shadowHover,
+        } as React.CSSProperties}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = hexToRgba(coverColor, 0.8)
-          e.currentTarget.style.boxShadow = `0 20px 25px -5px ${hexToRgba(coverColor, 0.3)}, 0 10px 10px -5px ${hexToRgba(coverColor, 0.1)}`
+          e.currentTarget.style.borderColor = colors.borderHover
+          e.currentTarget.style.boxShadow = colors.shadowHover
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = hexToRgba(coverColor, 0.3)
-          e.currentTarget.style.boxShadow = `0 4px 6px -1px ${hexToRgba(coverColor, 0.1)}, 0 2px 4px -1px ${hexToRgba(coverColor, 0.06)}`
+          e.currentTarget.style.borderColor = colors.border
+          e.currentTarget.style.boxShadow = colors.shadow
         }}
       >
         {/* Cover with Info Overlay */}
         <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl">
           {coverImage ? (
-            <>
-              <Image
-                src={coverImage}
-                alt={title}
-                fill
-                priority={false}
-                sizes="50vw"
-                loading="eager"
-                onLoadingComplete={() => setIsLoaded(true)}
-                className={cn(`object-cover transition-all duration-700 ease-in-out not-first:${isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"} group-hover:scale-110`)}
-              />
-            </>
+            <Image
+              src={coverImage}
+              alt={title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+              loading="lazy"
+              quality={75}
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+            />
           ) : (
             <div
               className="absolute inset-0"
@@ -78,13 +90,24 @@ export function AnimeCard({ anime }: { anime: MediaItem }) {
             />
           )}
 
-          {/* Gradient from bottom for info section background */}
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent "
-          // style={{ 
-          //   background: `linear-gradient(to top, ${hexToRgba(coverColor, 0.1)} 0%, ${hexToRgba(coverColor, 0.1)} 20%, transparent 60%)`
-          // }}
-          />
+          {/* Rank Badge */}
+          {rank !== undefined && (
+            <div className="absolute top-0 left-0 z-20">
+              <div 
+                className="flex items-center justify-center w-8 h-8 rounded-br-xl backdrop-blur-md border-2 border-white/30 shadow-lg"
+                style={{
+                  backgroundColor: hexToRgba(coverColor, 0.5),
+                  borderTop: 'none',
+                  borderLeft: 'none',
+                }}
+              >
+                <span className="text-sm font-bold text-white">#{rank}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
           {/* Info Section - Overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2 z-10">
@@ -119,8 +142,8 @@ export function AnimeCard({ anime }: { anime: MediaItem }) {
                     key={genre}
                     className="text-[10px] font-medium px-1.5 py-0.5 text-white backdrop-blur-sm"
                     style={{
-                      backgroundColor: hexToRgba(coverColor, 0.4),
-                      borderColor: hexToRgba(coverColor, 0.6),
+                      backgroundColor: colors.badgeBg,
+                      borderColor: colors.badgeBorder,
                       borderWidth: '1px'
                     }}
                   >
@@ -135,8 +158,8 @@ export function AnimeCard({ anime }: { anime: MediaItem }) {
               <Badge
                 className="text-[10px] capitalize text-white backdrop-blur-sm"
                 style={{
-                  backgroundColor: hexToRgba(coverColor, 0.3),
-                  borderColor: hexToRgba(coverColor, 0.6),
+                  backgroundColor: colors.statusBg,
+                  borderColor: colors.badgeBorder,
                   borderWidth: '1px'
                 }}
               >

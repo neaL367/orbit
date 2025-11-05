@@ -11,9 +11,10 @@ type AnimeSectionProps = {
   query: TypedDocumentString<unknown, { page?: number; perPage?: number; season?: MediaSeason; seasonYear?: number }>
   variables?: { page?: number; perPage?: number; season?: MediaSeason; seasonYear?: number }
   viewAllHref?: string
+  showRank?: boolean
 }
 
-export function AnimeSection({ title, query, variables, viewAllHref }: AnimeSectionProps) {
+export function AnimeSection({ title, query, variables, viewAllHref, showRank = false }: AnimeSectionProps) {
   const { data, isLoading, error } = useGraphQL(query, variables || { page: 1, perPage: 5 })
 
   if (isLoading) {
@@ -61,7 +62,7 @@ export function AnimeSection({ title, query, variables, viewAllHref }: AnimeSect
 
   return (
     <section className="mb-12">
-      <div className="flex items-center justify-between mb-6 px-4">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">{title}</h2>
         {viewAllHref && (
           <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
@@ -69,8 +70,14 @@ export function AnimeSection({ title, query, variables, viewAllHref }: AnimeSect
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 px-4">
-        {animeList.map((anime) => anime ? <AnimeCard key={anime.id} anime={anime} /> : null)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {animeList.map((anime, index) => {
+          if (!anime) return null
+          const page = variables?.page || 1
+          const perPage = variables?.perPage || 5
+          const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
+          return <AnimeCard key={anime.id} anime={anime} rank={rank} />
+        })}
       </div>
     </section>
   )

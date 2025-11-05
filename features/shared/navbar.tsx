@@ -21,14 +21,7 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-8 sm:px-10 lg:px-12">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-white">
-              ORBIT
-            </Link>
-          </div>
-
+        <div className="flex items-center justify-center h-20">
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (

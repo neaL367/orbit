@@ -1,5 +1,9 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import { ExternalLinkType } from "@/graphql/graphql"
 import type { Route } from "next"
@@ -11,6 +15,8 @@ type AnimeDetailExternalLinksProps = {
 }
 
 function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
+  const [isLoaded, setIsLoaded] = useState(false)
+  
   if (!link || !link.url || link.isDisabled) return null
 
   const siteName = link.site || "External Link"
@@ -34,7 +40,11 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             src={linkIcon}
             alt={siteName}
             fill
-            className="object-contain"
+            onLoadingComplete={() => setIsLoaded(true)}
+            className={cn(
+              "object-contain transition-all duration-700 ease-in-out",
+              isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+            )}
             style={{ filter: `drop-shadow(0 0 2px ${linkColor}80)` }}
           />
         </div>

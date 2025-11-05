@@ -1,6 +1,8 @@
 "use client"
 
 import Image from "next/image"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import { AnimeDetailExternalLinks } from "@/features/anime-detail/anime-detail-external-links"
 
@@ -18,6 +20,9 @@ const hexToRgba = (hex?: string, alpha = 1) => {
 }
 
 export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
+  const [bannerLoaded, setBannerLoaded] = useState(false)
+  const [coverLoaded, setCoverLoaded] = useState(false)
+  
   const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || 'Unknown'
   const subtitle = anime?.title?.english && anime.title.english !== title ? anime.title.english : undefined
   const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
@@ -46,9 +51,13 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
               src={bannerImage}
               alt={`${title} banner`}
               fill
-              className="object-cover scale-105"
               sizes="100vw"
               priority
+              onLoadingComplete={() => setBannerLoaded(true)}
+              className={cn(
+                "object-cover scale-105 transition-all duration-700 ease-in-out",
+                bannerLoaded ? "opacity-100 blur-0" : "opacity-0 blur-lg"
+              )}
             />
           ) : (
             <div 
@@ -59,11 +68,11 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
 
           {/* Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-transparent to-transparent" />
         </div>
 
         {/* Content Container */}
-        <div className="relative h-full container mx-auto px-4 md:px-6 lg:px-8">
+        <div className="relative h-full max-w-[1680px] mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex items-end h-full pb-12 md:pb-16">
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full">
               {/* Cover Image */}
@@ -74,9 +83,13 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
                       src={coverImage}
                       alt={`${title} cover`}
                       fill
-                      className="object-cover"
                       sizes="(max-width: 768px) 176px, (max-width: 1024px) 224px, 256px"
                       priority
+                      onLoadingComplete={() => setCoverLoaded(true)}
+                      className={cn(
+                        "object-cover transition-all duration-700 ease-in-out",
+                        coverLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                      )}
                     />
                   ) : (
                     <div className="w-full h-full" style={{ backgroundColor: coverColor }} />
@@ -148,8 +161,8 @@ export function AnimeDetailHeader({ anime }: AnimeDetailHeaderProps) {
       </div>
 
       {/* DETAILS SECTION */}
-      <div className="bg-zinc-950">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
+      <div className="">
+        <div className="max-w-[1680px] mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
             {/* Left Column - Metadata */}
             <div className="lg:col-span-1">

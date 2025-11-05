@@ -1,4 +1,8 @@
+"use client"
+
 import Image from "next/image"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 
 type CharacterEdge = NonNullable<NonNullable<Media["characters"]>["edges"]>[number]
@@ -8,9 +12,15 @@ type AnimeDetailCharactersProps = {
 }
 
 export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps) {
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
+  
   const validCharacters = characters.filter((edge) => edge?.node).slice(0, 12)
 
   if (validCharacters.length === 0) return null
+
+  const handleImageLoad = (id: number) => {
+    setLoadedImages((prev) => new Set(prev).add(id))
+  }
 
   return (
     <div className="mt-16 space-y-8">
@@ -35,8 +45,12 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                     src={characterImage || "/placeholder.svg"}
                     alt={characterName}
                     fill
-                    className="object-cover w-full h-full"
                     sizes="50vw"
+                    onLoadingComplete={() => handleImageLoad(character.id)}
+                    className={cn(
+                      "object-cover w-full h-full transition-all duration-700 ease-in-out",
+                      loadedImages.has(character.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                    )}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-zinc-500">
@@ -65,7 +79,16 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                         <div key={va.id} className="flex items-center gap-2 text-xs mb-2.5">
                           {vaImage ? (
                             <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700">
-                              <Image src={vaImage || "/placeholder.svg"} alt={vaName} fill className="object-cover" sizes="50vw"
+                              <Image
+                                src={vaImage || "/placeholder.svg"}
+                                alt={vaName}
+                                fill
+                                sizes="50vw"
+                                onLoadingComplete={() => handleImageLoad(va.id)}
+                                className={cn(
+                                  "object-cover transition-all duration-700 ease-in-out",
+                                  loadedImages.has(va.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                                )}
                               />
                             </div>
                           ) : (

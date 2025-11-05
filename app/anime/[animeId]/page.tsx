@@ -43,9 +43,9 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
   const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || 'Unknown'
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white  ">
       <AnimeDetailHeader anime={anime} />
-      <div className="container mx-auto px-4 pb-12">
+      <div className="pb-12 max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
         <AnimeDetailTrailer trailer={anime.trailer} title={title} />
         <AnimeDetailCharacters characters={characters} />
         <AnimeDetailRecommendations recommendations={recommendations} />
