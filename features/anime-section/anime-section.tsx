@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { useGraphQL } from '@/hooks/use-graphql'
-import { AnimeCard } from '@/features/shared/anime-card'
+import { AnimeCard } from '@/features/shared'
 import type { Media, MediaSeason, TypedDocumentString } from '@/graphql/graphql'
 
 type AnimeSectionProps = {
@@ -15,7 +15,14 @@ type AnimeSectionProps = {
 }
 
 export function AnimeSection({ title, query, variables, viewAllHref, showRank = false }: AnimeSectionProps) {
-  const { data, isLoading, error, refetch } = useGraphQL(query, variables || { page: 1, perPage: 5 })
+  const { data, isLoading, error, refetch } = useGraphQL(
+    query, 
+    variables || { page: 1, perPage: 5 },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes - home page sections update frequently
+      retry: 3
+    }
+  )
 
   if (isLoading) {
     return (

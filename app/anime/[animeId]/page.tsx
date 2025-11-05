@@ -24,7 +24,14 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
     notFound()
   }
 
-  const { data, isLoading, error, refetch } = useGraphQL(AnimeByIdQuery, { id: animeId })
+  const { data, isLoading, error, refetch } = useGraphQL(
+    AnimeByIdQuery, 
+    { id: animeId },
+    { 
+      staleTime: 10 * 60 * 1000, // 10 minutes - detail pages don't change often
+      retry: 3 
+    }
+  )
 
   if (isLoading) {
     return <AnimeDetailLoading />

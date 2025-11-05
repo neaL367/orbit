@@ -4,8 +4,8 @@ import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
-import { AnimeDetailExternalLinks } from "@/features/anime-detail/anime-detail-external-links"
-import { BackButton } from "@/features/shared/back-button"
+import { AnimeDetailExternalLinks } from "@/features/anime-detail"
+import { BackButton } from "@/features/shared"
 
 type AnimeDetailHeaderProps = {
   anime: Media

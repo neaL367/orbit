@@ -5,7 +5,7 @@ import { useMemo, useCallback } from 'react'
 import { useInfiniteGraphQL } from '@/hooks/use-infinite-graphql'
 import { AnimeCard } from '@/features/shared/anime-card'
 import { BackButton } from '@/features/shared/back-button'
-import { AnimeFilters } from '@/features/anime-filters/anime-filters'
+import { AnimeFilters } from '@/features/anime-filters'
 import {
   TrendingAnimeQuery,
   PopularAnimeQuery,
@@ -86,11 +86,26 @@ export default function AnimeListPage() {
     seasonYear: seasonYearValue,
   }), [perPage, genresArray, formatValue, statusValue, seasonValue, seasonYearValue])
 
-  // Call all hooks (required by React rules) but only use the active one
-  const trendingData = useInfiniteGraphQL(TrendingAnimeQuery, regularBaseVariables)
-  const popularData = useInfiniteGraphQL(PopularAnimeQuery, regularBaseVariables)
-  const topRatedData = useInfiniteGraphQL(TopRatedAnimeQuery, regularBaseVariables)
-  const seasonalData = useInfiniteGraphQL(SeasonalAnimeQuery, seasonalBaseVariables)
+  const trendingData = useInfiniteGraphQL(
+    TrendingAnimeQuery,
+    regularBaseVariables,
+    { enabled: sort === 'trending', staleTime: 5 * 60 * 1000, retry: 3 }
+  )
+  const popularData = useInfiniteGraphQL(
+    PopularAnimeQuery,
+    regularBaseVariables,
+    { enabled: sort === 'popular', staleTime: 5 * 60 * 1000, retry: 3 }
+  )
+  const topRatedData = useInfiniteGraphQL(
+    TopRatedAnimeQuery,
+    regularBaseVariables,
+    { enabled: sort === 'top-rated', staleTime: 5 * 60 * 1000, retry: 3 }
+  )
+  const seasonalData = useInfiniteGraphQL(
+    SeasonalAnimeQuery,
+    seasonalBaseVariables,
+    { enabled: sort === 'seasonal', staleTime: 5 * 60 * 1000, retry: 3 }
+  )
 
   // Select the appropriate data based on sort
   const infiniteQuery = useMemo(() => {
@@ -110,16 +125,21 @@ export default function AnimeListPage() {
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = infiniteQuery
 
-  // Flatten all pages into a single array
+  // Flatten all pages into a single array and deduplicate by ID
   const animeList = useMemo(() => {
     if (!data?.pages) return []
-    const allMedia: Media[] = []
+    const mediaMap = new Map<number, Media>()
     data.pages.forEach((page) => {
       const pageData = page as { Page?: { media?: Array<Media | null> } } | undefined
       const media = pageData?.Page?.media?.filter((anime: Media | null): anime is Media => anime !== null && !anime.isAdult) || []
-      allMedia.push(...media)
+      media.forEach((anime) => {
+        // Only add if not already in map (deduplicate by ID)
+        if (!mediaMap.has(anime.id)) {
+          mediaMap.set(anime.id, anime)
+        }
+      })
     })
-    return allMedia
+    return Array.from(mediaMap.values())
   }, [data])
 
   const title = getPageTitle(sort, season || undefined, year?.toString())

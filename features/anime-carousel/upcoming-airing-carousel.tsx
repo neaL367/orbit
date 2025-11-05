@@ -17,7 +17,14 @@ import { cn } from '@/lib/utils'
 import type { Media } from '@/graphql/graphql'
 
 export function UpcomingAiringCarousel() {
-  const { data, isLoading, error, refetch } = useGraphQL(UpcomingAiringAnimeQuery, { page: 1, perPage: 10 })
+  const { data, isLoading, error, refetch } = useGraphQL(
+    UpcomingAiringAnimeQuery, 
+    { page: 1, perPage: 10 },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes - carousel updates frequently
+      retry: 3
+    }
+  )
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)

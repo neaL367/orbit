@@ -1,4 +1,4 @@
-import { AnimeCard } from "@/features/shared/anime-card"
+import { AnimeCard } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
 type AnimeDetailRelationsProps = {
