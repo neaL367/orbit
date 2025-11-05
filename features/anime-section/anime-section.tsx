@@ -1,0 +1,78 @@
+"use client"
+
+import Link from 'next/link'
+import type { Route } from 'next'
+import { useGraphQL } from '@/hooks/use-graphql'
+import { AnimeCard } from '@/features/shared/anime-card'
+import type { Media, MediaSeason, TypedDocumentString } from '@/graphql/graphql'
+
+type AnimeSectionProps = {
+  title: string
+  query: TypedDocumentString<unknown, { page?: number; perPage?: number; season?: MediaSeason; seasonYear?: number }>
+  variables?: { page?: number; perPage?: number; season?: MediaSeason; seasonYear?: number }
+  viewAllHref?: string
+}
+
+export function AnimeSection({ title, query, variables, viewAllHref }: AnimeSectionProps) {
+  const { data, isLoading, error } = useGraphQL(query, variables || { page: 1, perPage: 5 })
+
+  if (isLoading) {
+    return (
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6 px-4">
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {viewAllHref && (
+            <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
+              View All →
+            </Link>
+          )}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 px-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="aspect-2/3 bg-zinc-900 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6 px-4">
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {viewAllHref && (
+            <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
+              View All →
+            </Link>
+          )}
+        </div>
+        <div className="px-4 text-red-400">Error loading {title.toLowerCase()}</div>
+      </section>
+    )
+  }
+
+  const pageData = data as { Page?: { media?: Array<Media | null> } } | undefined
+  const animeList = pageData?.Page?.media?.filter((anime: Media | null) => anime && !anime.isAdult) || []
+
+  if (animeList.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="mb-12">
+      <div className="flex items-center justify-between mb-6 px-4">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        {viewAllHref && (
+          <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
+            View All →
+          </Link>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 px-4">
+        {animeList.map((anime) => anime ? <AnimeCard key={anime.id} anime={anime} /> : null)}
+      </div>
+    </section>
+  )
+}
+

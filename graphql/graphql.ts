@@ -4674,6 +4674,13 @@ export type YearStats = {
   year?: Maybe<Scalars['Int']['output']>;
 };
 
+export type AnimeByIdQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AnimeByIdQuery = { __typename?: 'Query', Media?: { __typename?: 'Media', id: number, description?: string | null, bannerImage?: string | null, averageScore?: number | null, meanScore?: number | null, popularity?: number | null, favourites?: number | null, status?: MediaStatus | null, genres?: Array<string | null> | null, format?: MediaFormat | null, duration?: number | null, episodes?: number | null, season?: MediaSeason | null, seasonYear?: number | null, countryOfOrigin?: any | null, source?: MediaSource | null, hashtag?: string | null, synonyms?: Array<string | null> | null, siteUrl?: string | null, isAdult?: boolean | null, trending?: number | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null, userPreferred?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null, extraLarge?: string | null, color?: string | null } | null, tags?: Array<{ __typename?: 'MediaTag', id: number, name: string, description?: string | null, category?: string | null, rank?: number | null } | null> | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', airingAt: number, timeUntilAiring: number, episode: number } | null, studios?: { __typename?: 'StudioConnection', nodes?: Array<{ __typename?: 'Studio', id: number, name: string, siteUrl?: string | null, isAnimationStudio: boolean } | null> | null } | null, staff?: { __typename?: 'StaffConnection', edges?: Array<{ __typename?: 'StaffEdge', role?: string | null, node?: { __typename?: 'Staff', id: number, name?: { __typename?: 'StaffName', full?: string | null, native?: string | null } | null, image?: { __typename?: 'StaffImage', large?: string | null, medium?: string | null } | null } | null } | null> | null } | null, characters?: { __typename?: 'CharacterConnection', edges?: Array<{ __typename?: 'CharacterEdge', role?: CharacterRole | null, voiceActors?: Array<{ __typename?: 'Staff', id: number, languageV2?: string | null, name?: { __typename?: 'StaffName', full?: string | null, native?: string | null } | null, image?: { __typename?: 'StaffImage', large?: string | null, medium?: string | null } | null } | null> | null, node?: { __typename?: 'Character', id: number, name?: { __typename?: 'CharacterName', full?: string | null, native?: string | null } | null, image?: { __typename?: 'CharacterImage', large?: string | null, medium?: string | null } | null } | null } | null> | null } | null, relations?: { __typename?: 'MediaConnection', edges?: Array<{ __typename?: 'MediaEdge', relationType?: MediaRelation | null, node?: { __typename?: 'Media', id: number, type?: MediaType | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null } | null } | null> | null } | null, recommendations?: { __typename?: 'RecommendationConnection', nodes?: Array<{ __typename?: 'Recommendation', rating?: number | null, userRating?: RecommendationRating | null, mediaRecommendation?: { __typename?: 'Media', id: number, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null } | null } | null } | null> | null } | null, streamingEpisodes?: Array<{ __typename?: 'MediaStreamingEpisode', title?: string | null, thumbnail?: string | null, url?: string | null, site?: string | null } | null> | null, trailer?: { __typename?: 'MediaTrailer', id?: string | null, site?: string | null, thumbnail?: string | null } | null, externalLinks?: Array<{ __typename?: 'MediaExternalLink', id: number, url?: string | null, site: string, siteId?: number | null, type?: ExternalLinkType | null, language?: string | null, color?: string | null, icon?: string | null, notes?: string | null, isDisabled?: boolean | null } | null> | null } | null };
+
 export type PopularAnimeQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
@@ -4708,6 +4715,14 @@ export type TrendingAnimeQueryVariables = Exact<{
 
 export type TrendingAnimeQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', pageInfo?: { __typename?: 'PageInfo', total?: number | null, currentPage?: number | null, lastPage?: number | null, hasNextPage?: boolean | null, perPage?: number | null } | null, media?: Array<{ __typename?: 'Media', id: number, description?: string | null, bannerImage?: string | null, averageScore?: number | null, meanScore?: number | null, popularity?: number | null, favourites?: number | null, status?: MediaStatus | null, genres?: Array<string | null> | null, format?: MediaFormat | null, duration?: number | null, episodes?: number | null, season?: MediaSeason | null, seasonYear?: number | null, countryOfOrigin?: any | null, source?: MediaSource | null, hashtag?: string | null, synonyms?: Array<string | null> | null, siteUrl?: string | null, isAdult?: boolean | null, trending?: number | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null, userPreferred?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null, extraLarge?: string | null, color?: string | null } | null, tags?: Array<{ __typename?: 'MediaTag', id: number, name: string, description?: string | null, category?: string | null, rank?: number | null } | null> | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', airingAt: number, timeUntilAiring: number, episode: number } | null, studios?: { __typename?: 'StudioConnection', nodes?: Array<{ __typename?: 'Studio', id: number, name: string, siteUrl?: string | null, isAnimationStudio: boolean } | null> | null } | null } | null> | null } | null };
 
+export type UpcomingAiringAnimeQueryVariables = Exact<{
+  page?: InputMaybe<Scalars['Int']['input']>;
+  perPage?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UpcomingAiringAnimeQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', pageInfo?: { __typename?: 'PageInfo', total?: number | null, currentPage?: number | null, lastPage?: number | null, hasNextPage?: boolean | null, perPage?: number | null } | null, media?: Array<{ __typename?: 'Media', id: number, description?: string | null, bannerImage?: string | null, averageScore?: number | null, meanScore?: number | null, popularity?: number | null, favourites?: number | null, status?: MediaStatus | null, genres?: Array<string | null> | null, format?: MediaFormat | null, duration?: number | null, episodes?: number | null, season?: MediaSeason | null, seasonYear?: number | null, countryOfOrigin?: any | null, source?: MediaSource | null, hashtag?: string | null, synonyms?: Array<string | null> | null, siteUrl?: string | null, isAdult?: boolean | null, trending?: number | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null, userPreferred?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null, extraLarge?: string | null, color?: string | null } | null, tags?: Array<{ __typename?: 'MediaTag', id: number, name: string, description?: string | null, category?: string | null, rank?: number | null } | null> | null, startDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, endDate?: { __typename?: 'FuzzyDate', year?: number | null, month?: number | null, day?: number | null } | null, nextAiringEpisode?: { __typename?: 'AiringSchedule', airingAt: number, timeUntilAiring: number, episode: number } | null, studios?: { __typename?: 'StudioConnection', nodes?: Array<{ __typename?: 'Studio', id: number, name: string, siteUrl?: string | null, isAnimationStudio: boolean } | null> | null } | null } | null> | null } | null };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -4727,6 +4742,176 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const AnimeByIdDocument = new TypedDocumentString(`
+    query AnimeById($id: Int) {
+  Media(id: $id, type: ANIME) {
+    id
+    title {
+      romaji
+      english
+      native
+      userPreferred
+    }
+    description
+    coverImage {
+      large
+      medium
+      extraLarge
+      color
+    }
+    bannerImage
+    averageScore
+    meanScore
+    popularity
+    favourites
+    status
+    genres
+    tags {
+      id
+      name
+      description
+      category
+      rank
+    }
+    format
+    duration
+    episodes
+    startDate {
+      year
+      month
+      day
+    }
+    endDate {
+      year
+      month
+      day
+    }
+    season
+    seasonYear
+    countryOfOrigin
+    source
+    hashtag
+    synonyms
+    siteUrl
+    isAdult
+    nextAiringEpisode {
+      airingAt
+      timeUntilAiring
+      episode
+    }
+    trending
+    studios(isMain: true) {
+      nodes {
+        id
+        name
+        siteUrl
+        isAnimationStudio
+      }
+    }
+    staff {
+      edges {
+        role
+        node {
+          id
+          name {
+            full
+            native
+          }
+          image {
+            large
+            medium
+          }
+        }
+      }
+    }
+    characters {
+      edges {
+        role
+        voiceActors {
+          id
+          name {
+            full
+            native
+          }
+          image {
+            large
+            medium
+          }
+          languageV2
+        }
+        node {
+          id
+          name {
+            full
+            native
+          }
+          image {
+            large
+            medium
+          }
+        }
+      }
+    }
+    relations {
+      edges {
+        relationType
+        node {
+          id
+          title {
+            romaji
+            english
+          }
+          coverImage {
+            large
+            medium
+          }
+          type
+        }
+      }
+    }
+    recommendations {
+      nodes {
+        rating
+        userRating
+        mediaRecommendation {
+          id
+          title {
+            romaji
+            english
+          }
+          coverImage {
+            large
+            medium
+          }
+        }
+      }
+    }
+    streamingEpisodes {
+      title
+      thumbnail
+      url
+      site
+    }
+    trailer {
+      id
+      site
+      thumbnail
+    }
+    externalLinks {
+      id
+      url
+      site
+      siteId
+      type
+      language
+      color
+      icon
+      notes
+      isDisabled
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AnimeByIdQuery, AnimeByIdQueryVariables>;
 export const PopularAnimeDocument = new TypedDocumentString(`
     query PopularAnime($page: Int, $perPage: Int) {
   Page(page: $page, perPage: $perPage) {
@@ -5044,3 +5229,81 @@ export const TrendingAnimeDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<TrendingAnimeQuery, TrendingAnimeQueryVariables>;
+export const UpcomingAiringAnimeDocument = new TypedDocumentString(`
+    query UpcomingAiringAnime($page: Int, $perPage: Int) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo {
+      total
+      currentPage
+      lastPage
+      hasNextPage
+      perPage
+    }
+    media(type: ANIME, sort: [POPULARITY_DESC, TRENDING_DESC], status: RELEASING) {
+      id
+      title {
+        romaji
+        english
+        native
+        userPreferred
+      }
+      description
+      coverImage {
+        large
+        medium
+        extraLarge
+        color
+      }
+      bannerImage
+      averageScore
+      meanScore
+      popularity
+      favourites
+      status
+      genres
+      tags {
+        id
+        name
+        description
+        category
+        rank
+      }
+      format
+      duration
+      episodes
+      startDate {
+        year
+        month
+        day
+      }
+      endDate {
+        year
+        month
+        day
+      }
+      season
+      seasonYear
+      countryOfOrigin
+      source
+      hashtag
+      synonyms
+      siteUrl
+      isAdult
+      nextAiringEpisode {
+        airingAt
+        timeUntilAiring
+        episode
+      }
+      trending
+      studios(isMain: true) {
+        nodes {
+          id
+          name
+          siteUrl
+          isAnimationStudio
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpcomingAiringAnimeQuery, UpcomingAiringAnimeQueryVariables>;

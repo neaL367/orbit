@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -10,7 +11,6 @@ import type { Route } from 'next'
 
 type MediaItem = Media
 
-// Helper function to convert hex to rgba with opacity
 const hexToRgba = (hex: string, opacity: number = 1): string => {
   if (!hex || hex.length < 7) return `rgba(26, 26, 26, ${opacity})`
   const r = parseInt(hex.slice(1, 3), 16)
@@ -19,7 +19,9 @@ const hexToRgba = (hex: string, opacity: number = 1): string => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`
 }
 
-export function AnimeCard({ anime }: { anime: MediaItem}) {
+export function AnimeCard({ anime }: { anime: MediaItem }) {
+  const [isLoaded, setIsLoaded] = useState(false)
+
   const title =
     anime?.title?.userPreferred ||
     anime?.title?.romaji ||
@@ -63,9 +65,10 @@ export function AnimeCard({ anime }: { anime: MediaItem}) {
                 alt={title}
                 fill
                 priority={false}
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
                 sizes="50vw"
                 loading="eager"
+                onLoadingComplete={() => setIsLoaded(true)}
+                className={cn(`object-cover transition-all duration-700 ease-in-out not-first:${isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"} group-hover:scale-110`)}
               />
             </>
           ) : (

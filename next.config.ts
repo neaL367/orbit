@@ -5,12 +5,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   typedRoutes: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 's4.anilist.co',
-      },
-    ],
+    unoptimized: true,
   },
 };
 
