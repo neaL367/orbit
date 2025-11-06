@@ -14,7 +14,7 @@ type AnimeDetailTrailerProps = {
 
 export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  
+
   if (!trailer || !trailer.id) return null
 
   if (trailer.site === "youtube") {
@@ -61,7 +61,8 @@ export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) 
               src={trailer.thumbnail || ""}
               alt={`${title} trailer`}
               fill
-              sizes="100vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              priority
               referrerPolicy="no-referrer"
               onLoad={() => setIsLoaded(true)}
               className={cn(

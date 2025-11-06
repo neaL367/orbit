@@ -1,8 +1,7 @@
 "use client"
 
 import { useMemo } from 'react'
-import { AnimeSection } from '@/features/anime-section'
-import { UpcomingAiringCarousel } from '@/features/anime-carousel'
+import dynamic from 'next/dynamic'
 import {
   TrendingAnimeQuery,
   PopularAnimeQuery,
@@ -15,6 +14,16 @@ import {
   getNextSeason,
   getNextSeasonYear,
 } from '@/hooks/use-date'
+
+const UpcomingAiringCarousel = dynamic(
+  () => import('@/features/anime-carousel').then((mod) => ({ default: mod.UpcomingAiringCarousel })),
+  { ssr: true }
+)
+
+const AnimeSection = dynamic(
+  () => import('@/features/anime-section').then((mod) => ({ default: mod.AnimeSection })),
+  { ssr: true }
+)
 
 export default function HomePage() {
   const dateValues = useMemo(() => ({

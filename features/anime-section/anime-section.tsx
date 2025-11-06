@@ -1,10 +1,9 @@
 "use client"
 
-import Link from 'next/link'
 import type { Route } from 'next'
 import { useGraphQL } from '@/hooks/use-graphql'
-import { AnimeCard } from '@/features/shared'
-import type { Media, MediaSeason, TypedDocumentString } from '@/graphql/graphql'
+import { AnimeCard, SectionHeader, ErrorState, LoadingSkeleton, extractMediaList } from '@/features/shared'
+import type { MediaSeason, TypedDocumentString } from '@/graphql/graphql'
 
 type AnimeSectionProps = {
   title: string
@@ -24,22 +23,16 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
     }
   )
 
+  const animeList = extractMediaList(data)
+
   if (isLoading) {
     return (
       <section className="mb-12">
-        <div className="flex items-center justify-between mb-6 px-4">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {viewAllHref && (
-            <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
-              View All →
-            </Link>
-          )}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 px-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="aspect-2/3 bg-zinc-900 rounded-xl animate-pulse" />
-          ))}
-        </div>
+        <SectionHeader title={title} viewAllHref={viewAllHref as Route} className="px-4" />
+        <LoadingSkeleton
+          count={5}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 px-4"
+        />
       </section>
     )
   }
@@ -47,29 +40,15 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
   if (error) {
     return (
       <section className="mb-12">
-        <div className="flex items-center justify-between mb-6 px-4">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {viewAllHref && (
-            <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
-              View All →
-            </Link>
-          )}
-        </div>
-        <div className="px-4 flex flex-col items-center gap-4 py-8">
-          <p className="text-red-400">Error loading {title.toLowerCase()}</p>
-          <button
-            onClick={() => refetch()}
-            className="px-6 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors text-white"
-          >
-            Try Again
-          </button>
-        </div>
+        <SectionHeader title={title} viewAllHref={viewAllHref as Route} className="px-4" />
+        <ErrorState
+          message={`Error loading ${title.toLowerCase()}`}
+          onRetry={() => refetch()}
+          className="px-4"
+        />
       </section>
     )
   }
-
-  const pageData = data as { Page?: { media?: Array<Media | null> } } | undefined
-  const animeList = pageData?.Page?.media?.filter((anime: Media | null) => anime && !anime.isAdult) || []
 
   if (animeList.length === 0) {
     return null
@@ -77,14 +56,7 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
 
   return (
     <section className="mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">{title}</h2>
-        {viewAllHref && (
-          <Link href={viewAllHref as Route} className="text-sm text-zinc-400 hover:text-white transition-colors">
-            View All →
-          </Link>
-        )}
-      </div>
+      <SectionHeader title={title} viewAllHref={viewAllHref as Route} />
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {animeList.map((anime, index) => {
           if (!anime) return null

@@ -45,7 +45,8 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                     src={characterImage || ""}
                     alt={characterName}
                     fill
-                    sizes="50vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    priority
                     referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
@@ -84,7 +85,8 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                                 src={vaImage || ""}
                                 alt={vaName}
                                 fill
-                                sizes="50vw"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                priority
                                 referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(

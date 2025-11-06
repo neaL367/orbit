@@ -40,6 +40,8 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             src={linkIcon}
             alt={siteName}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(

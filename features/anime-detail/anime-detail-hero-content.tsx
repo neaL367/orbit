@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 import { Star, Flame, Calendar, Clock, ChevronDown } from "lucide-react"
 
@@ -10,29 +11,11 @@ type AnimeDetailHeroContentProps = {
   anime: Media
 }
 
-const formatDate = (date?: { year?: number | null; month?: number | null; day?: number | null }) => {
-  if (!date?.year) return null
-  const year = date.year
-  const month = date.month ? String(date.month).padStart(2, "0") : "01"
-  const day = date.day ? String(date.day).padStart(2, "0") : "01"
-  return `${year}-${month}-${day}`
-}
-
-const formatTimeUntilAiring = (seconds?: number) => {
-  if (!seconds) return null
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  if (days > 0) {
-    return `${days}d ${hours}h`
-  }
-  return `${hours}h`
-}
-
 export function AnimeDetailHeroContent({ anime }: AnimeDetailHeroContentProps) {
   const [coverLoaded, setCoverLoaded] = useState(false)
 
-  const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || "Unknown"
-  const subtitle = anime?.title?.english && anime.title.english !== title ? anime.title.english : undefined
+  const title = getAnimeTitle(anime)
+  const subtitle = getAnimeSubtitle(anime)
   const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
   const coverColor = anime?.coverImage?.color || "#0b0b0b"
   const score = anime?.averageScore ?? anime?.meanScore

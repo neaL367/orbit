@@ -6,18 +6,11 @@ import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { hexToRgba, getAnimeTitle } from './utils/anime-utils'
 import type { Media } from '@/graphql/graphql'
 import type { Route } from 'next'
 
 type MediaItem = Media
-
-const hexToRgba = (hex: string, opacity: number = 1): string => {
-  if (!hex || hex.length < 7) return `rgba(26, 26, 26, ${opacity})`
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`
-}
 
 type AnimeCardProps = {
   anime: MediaItem
@@ -25,15 +18,15 @@ type AnimeCardProps = {
 }
 
 export function AnimeCard({ anime, rank }: AnimeCardProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const title =
-    anime?.title?.userPreferred ||
-    anime?.title?.romaji ||
-    anime?.title?.english ||
-    'Unknown'
+  const [mediumLoaded, setMediumLoaded] = useState(false)
+  const [highQualityLoaded, setHighQualityLoaded] = useState(false)
+  const title = getAnimeTitle(anime)
 
-  const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large || anime?.coverImage?.medium
+  const mediumImage = anime?.coverImage?.medium
+  const highQualityImage = anime?.coverImage?.extraLarge 
   const coverColor = anime?.coverImage?.color || '#1a1a1a'
+  
+  const currentImage = highQualityLoaded && highQualityImage ? highQualityImage : mediumImage
   const score = anime?.averageScore || anime?.meanScore
   const episodes = anime?.episodes
   const duration = anime?.duration
@@ -74,27 +67,50 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
       >
         {/* Cover with Info Overlay */}
         <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl">
-          {coverImage ? (
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              loading="eager"
-              quality={75}
-              referrerPolicy="no-referrer"
-              onLoad={() => setIsLoaded(true)}
-              className={cn(
-                "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
-                isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"
+          {/* Placeholder background - always visible */}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: coverColor }}
+          />
+          {currentImage ? (
+            <>
+              {/* Medium quality image - loads first */}
+              {mediumImage && (
+                <Image
+                  src={mediumImage}
+                  alt={title}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                  loading="lazy"
+                  fetchPriority="high"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setMediumLoaded(true)}
+                  className={cn(
+                    "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
+                    mediumLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md",
+                    highQualityLoaded && highQualityImage ? "opacity-0" : ""
+                  )}
+                />
               )}
-            />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{ backgroundColor: coverColor }}
-            />
-          )}
+              {/* High quality image - loads after medium is loaded, swaps in when ready */}
+              {highQualityImage && mediumLoaded && (
+                <Image
+                  src={highQualityImage}
+                  alt={title}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                  priority={false}
+                  loading="eager"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setHighQualityLoaded(true)}
+                  className={cn(
+                    "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
+                    highQualityLoaded ? "opacity-100 blur-0" : "opacity-0"
+                  )}
+                />
+              )}
+            </>
+          ) : null}
 
           {/* Rank Badge */}
           {rank !== undefined && (

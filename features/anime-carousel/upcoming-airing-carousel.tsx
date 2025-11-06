@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/card'
 import { useGraphQL } from '@/hooks/use-graphql'
 import { UpcomingAiringAnimeQuery } from '@/queries/media'
 import { cn } from '@/lib/utils'
+import { ErrorState, SectionHeader, extractMediaList, getAnimeTitle, formatTimeUntilAiringDetailed } from '@/features/shared'
 import type { Media } from '@/graphql/graphql'
 
 export function UpcomingAiringCarousel() {
@@ -48,6 +49,10 @@ export function UpcomingAiringCarousel() {
     }
   }, [api])
 
+  const pageData = data as { Page?: { media?: Array<Media | null> } } | undefined
+  const allMedia = extractMediaList(data)
+  const animeList = allMedia.filter((anime) => anime.nextAiringEpisode)
+
   if (isLoading) {
     return (
       <div className="w-full mb-12">
@@ -59,29 +64,18 @@ export function UpcomingAiringCarousel() {
   if (error) {
     return (
       <div className="w-full mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Upcoming Airing</h2>
-            <p className="text-zinc-400 text-sm">Anime episodes coming soon</p>
-          </div>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 py-12 bg-zinc-900 rounded-xl">
-          <p className="text-red-400">Error loading upcoming anime</p>
-          <button
-            onClick={() => refetch()}
-            className="px-6 py-2 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors text-white"
-          >
-            Try Again
-          </button>
-        </div>
+        <SectionHeader
+          title="Upcoming Airing"
+          subtitle="Anime episodes coming soon"
+        />
+        <ErrorState
+          message="Error loading upcoming anime"
+          onRetry={() => refetch()}
+          className="bg-zinc-900 rounded-xl"
+        />
       </div>
     )
   }
-
-  const pageData = data as { Page?: { media?: Array<Media | null> } } | undefined
-  const animeList = pageData?.Page?.media?.filter(
-    (anime: Media | null) => anime && !anime.isAdult && anime.nextAiringEpisode
-  ) || []
 
   if (animeList.length === 0) {
     return null
@@ -95,12 +89,10 @@ export function UpcomingAiringCarousel() {
 
   return (
     <div className="w-full mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-2">Upcoming Airing</h2>
-          <p className="text-zinc-400 text-sm">Anime episodes coming soon</p>
-        </div>
-      </div>
+      <SectionHeader
+        title="Upcoming Airing"
+        subtitle="Anime episodes coming soon"
+      />
       <Carousel
         setApi={setApi}
         opts={{
@@ -114,45 +106,49 @@ export function UpcomingAiringCarousel() {
           {animeList.map((anime, index) => {
             if (!anime) return null
 
-            const title = anime.title?.userPreferred || anime.title?.romaji || anime.title?.english || 'Unknown'
-            const bannerImage = anime.bannerImage || anime.coverImage?.extraLarge || anime.coverImage?.large
+            const title = getAnimeTitle(anime)
+            // Use large instead of extraLarge to reduce image size
+            const bannerImage = anime.bannerImage || anime.coverImage?.large || anime.coverImage?.medium
             const coverColor = anime.coverImage?.color || '#1a1a1a'
             const nextEpisode = anime.nextAiringEpisode
             const timeUntilAiring = nextEpisode?.timeUntilAiring || 0
             const episodeNumber = nextEpisode?.episode || 0
 
             // Calculate time until airing
-            const days = Math.floor(timeUntilAiring / 86400)
-            const hours = Math.floor((timeUntilAiring % 86400) / 3600)
-            const minutes = Math.floor((timeUntilAiring % 3600) / 60)
+            const { days, hours, minutes } = formatTimeUntilAiringDetailed(timeUntilAiring)
 
             const isActive = current === index
+
+            const isFirstItem = index === 0
+            const isPriority = isFirstItem
 
             return (
               <CarouselItem key={anime.id} className="pl-0 basis-full ">
                 <Link href={`/anime/${anime.id}`}>
                   <Card className="group relative overflow-hidden border-0 bg-zinc-900 hover:bg-zinc-800 transition-colors">
                     <div className="relative aspect-video h-[300px] w-full overflow-hidden">
+                      {/* Placeholder background - loads first, always visible */}
+                      <div
+                        className="absolute inset-0 z-0"
+                        style={{ backgroundColor: coverColor }}
+                      />
                       {bannerImage ? (
                         <Image
                           src={bannerImage}
                           alt={title}
                           fill
-                          sizes="100vw"
-                          loading="eager"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          priority={isPriority}
+                          loading={isPriority ? "eager" : "lazy"}
+                          fetchPriority={isPriority ? "high" : "auto"}
                           referrerPolicy="no-referrer"
                           onLoad={() => handleImageLoad(anime.id)}
                           className={cn(
-                            "object-cover transition-all duration-700 ease-in-out group-hover:scale-110",
-                            loadedImages.has(anime.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                            "object-cover transition-all duration-700 ease-in-out group-hover:scale-110 z-10",
+                            loadedImages.has(anime.id) || isPriority ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
                           )}
                         />
-                      ) : (
-                        <div
-                          className="w-full h-full"
-                          style={{ backgroundColor: coverColor }}
-                        />
-                      )}
+                      ) : null}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
                       <div className="absolute top-4 right-4 z-10">
                         <div className="px-4 py-2 rounded-xl backdrop-blur-md border border-white/20 bg-black/60 shadow-lg">

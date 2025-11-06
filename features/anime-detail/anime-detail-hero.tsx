@@ -3,25 +3,17 @@
 import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { hexToRgba, getAnimeTitle } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
 type AnimeDetailHeroProps = {
     anime: Media
 }
 
-const hexToRgba = (hex?: string, alpha = 1) => {
-    if (!hex || !/^#?[0-9A-Fa-f]{6}$/.test(hex)) return `rgba(26,26,26,${alpha})`
-    const h = hex.replace("#", "")
-    const r = Number.parseInt(h.slice(0, 2), 16)
-    const g = Number.parseInt(h.slice(2, 4), 16)
-    const b = Number.parseInt(h.slice(4, 6), 16)
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
 export function AnimeDetailHero({ anime }: AnimeDetailHeroProps) {
     const [bannerLoaded, setBannerLoaded] = useState(false)
 
-    const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || "Unknown"
+    const title = getAnimeTitle(anime)
     const bannerImage = anime?.bannerImage
     const coverColor = anime?.coverImage?.color || "#0b0b0b"
 
@@ -47,7 +39,7 @@ export function AnimeDetailHero({ anime }: AnimeDetailHeroProps) {
                         src={bannerImage || ""}
                         alt={`${title} banner`}
                         fill
-                        sizes="100vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         priority
                         referrerPolicy="no-referrer"
                         onLoad={() => setBannerLoaded(true)}
