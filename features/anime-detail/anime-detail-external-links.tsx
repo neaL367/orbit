@@ -36,6 +36,10 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
     >
       {linkIcon ? (
         <div className="relative w-4 h-4 shrink-0">
+          <div
+            className="absolute inset-0 rounded"
+            style={{ backgroundColor: linkColor }}
+          />
           <Image
             src={linkIcon}
             alt={siteName}
@@ -45,8 +49,8 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(
-              "object-contain transition-all duration-700 ease-in-out",
-              isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+              "object-contain transition-opacity duration-300",
+              isLoaded ? "opacity-100" : "opacity-0"
             )}
             style={{ filter: `drop-shadow(0 0 2px ${linkColor}80)` }}
           />

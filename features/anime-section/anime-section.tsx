@@ -2,6 +2,7 @@
 
 import type { Route } from 'next'
 import { useGraphQL } from '@/hooks/use-graphql'
+import { CACHE_TIMES } from '@/lib/constants'
 import { AnimeCard, SectionHeader, ErrorState, LoadingSkeleton, extractMediaList } from '@/features/shared'
 import type { MediaSeason, TypedDocumentString } from '@/graphql/graphql'
 
@@ -18,7 +19,7 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
     query, 
     variables || { page: 1, perPage: 5 },
     {
-      staleTime: 5 * 60 * 1000, // 5 minutes - home page sections update frequently
+      staleTime: CACHE_TIMES.MEDIUM, // 5 minutes - home page sections update frequently
       retry: 3
     }
   )
@@ -57,7 +58,7 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
   return (
     <section className="mb-12">
       <SectionHeader title={title} viewAllHref={viewAllHref as Route} />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {animeList.map((anime, index) => {
           if (!anime) return null
           const page = variables?.page || 1

@@ -1,80 +1,43 @@
-"use client"
-
-import { useMemo } from 'react'
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import {
-  TrendingAnimeQuery,
-  PopularAnimeQuery,
-  TopRatedAnimeQuery,
-  SeasonalAnimeQuery,
-} from '@/queries/media'
-import {
-  getCurrentSeason,
-  getCurrentYear,
-  getNextSeason,
-  getNextSeasonYear,
-} from '@/hooks/use-date'
 
-const UpcomingAiringCarousel = dynamic(
-  () => import('@/features/anime-carousel').then((mod) => ({ default: mod.UpcomingAiringCarousel })),
-  { ssr: true }
-)
+export const metadata: Metadata = {
+  title: 'Discover Trending Anime',
+  description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases. Explore the best anime content with AnimeX.',
+  keywords: ['anime', 'trending anime', 'popular anime', 'anime streaming', 'anime list'],
+  openGraph: {
+    title: 'Discover Trending Anime',
+    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
+    type: 'website',
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Discover Trending Anime',
+    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
+  },
+}
 
-const AnimeSection = dynamic(
-  () => import('@/features/anime-section').then((mod) => ({ default: mod.AnimeSection })),
+const HomePageContent = dynamic(
+  () => import('../features/home').then((mod) => ({ default: mod.HomePageContent })),
   { ssr: true }
 )
 
 export default function HomePage() {
-  const dateValues = useMemo(() => ({
-    currentSeason: getCurrentSeason(),
-    currentYear: getCurrentYear(),
-    nextSeason: getNextSeason(),
-    nextSeasonYear: getNextSeasonYear(),
-  }), []) 
-
-  const { currentSeason, currentYear, nextSeason, nextSeasonYear } = dateValues
-
   return (
-    <div className="min-h-screen max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-white">
-
-      <UpcomingAiringCarousel />
-
-      <AnimeSection
-        title="Trending Now"
-        query={TrendingAnimeQuery}
-        variables={{ page: 1, perPage: 6 }}
-        viewAllHref="/anime?sort=trending"
-      />
-
-      <AnimeSection
-        title="Popular This Season"
-        query={SeasonalAnimeQuery}
-        variables={{ season: currentSeason, seasonYear: currentYear, page: 1, perPage: 6 }}
-        viewAllHref={`/anime?sort=seasonal&season=${currentSeason}&year=${currentYear}`}
-      />
-
-      <AnimeSection
-        title="Upcoming Next Season"
-        query={SeasonalAnimeQuery}
-        variables={{ season: nextSeason, seasonYear: nextSeasonYear, page: 1, perPage: 6 }}
-        viewAllHref={`/anime?sort=seasonal&season=${nextSeason}&year=${nextSeasonYear}`}
-      />
-
-      <AnimeSection
-        title="Top 100"
-        query={TopRatedAnimeQuery}
-        variables={{ page: 1, perPage: 6 }}
-        viewAllHref="/anime?sort=top-rated"
-        showRank={true}
-      />
-
-      <AnimeSection
-        title="All Time Popular"
-        query={PopularAnimeQuery}
-        variables={{ page: 1, perPage: 6 }}
-        viewAllHref="/anime?sort=popular"
-      />
-    </div>
+    <Suspense
+      fallback={
+        <div className="min-h-screen max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-white">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="aspect-2/3 bg-zinc-900 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   )
 }

@@ -12,8 +12,40 @@ const geistSans = Geist({
 
 
 export const metadata: Metadata = {
-  title: "AnimeX",
-  description: "AnimeX is a platform for watching anime",
+  metadataBase: new URL(`https://orbit-git-dev-mess-projects.vercel.app`),
+  title: {
+    default: 'AnimeX - Discover Trending Anime',
+    template: '%s | AnimeX',
+  },
+  description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases. Explore the best anime content with AnimeX.',
+  keywords: ['anime', 'trending anime', 'popular anime', 'anime streaming', 'anime list', 'anime database'],
+  authors: [{ name: 'AnimeX' }],
+  creator: 'AnimeX',
+  publisher: 'AnimeX',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    siteName: 'AnimeX',
+    title: 'AnimeX - Discover Trending Anime',
+    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
+    
+  },
+  twitter: {
+    title: 'AnimeX - Discover Trending Anime',
+    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({

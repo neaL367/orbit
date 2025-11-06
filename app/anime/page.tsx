@@ -1,24 +1,16 @@
 'use client'
 
+import { Suspense, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useMemo, useCallback } from 'react'
-import { useInfiniteGraphQL } from '@/hooks/use-infinite-graphql'
-import { AnimeCard } from '@/features/shared/anime-card'
-import { BackButton } from '@/features/shared/back-button'
+import { useAnimeList } from '@/hooks/use-anime-list'
+import { AnimeCard, BackButton } from '@/features/shared'
 import { AnimeFilters } from '@/features/anime-filters'
 import {
-  TrendingAnimeQuery,
-  PopularAnimeQuery,
-  TopRatedAnimeQuery,
-  SeasonalAnimeQuery,
-} from '@/queries/media'
-import {
-  getCurrentSeason,
-  getCurrentYear,
-  getNextSeason,
-  getNextSeasonYear,
-} from '@/hooks/use-date'
-import type { Media, MediaFormat, MediaSeason, MediaStatus } from '@/graphql/graphql'
+  AnimeListLoading,
+  AnimeListError,
+  AnimeListEmpty,
+  AnimeListLoadMore,
+} from '@/features/anime-list'
 
 type SortType = 'trending' | 'popular' | 'top-rated' | 'seasonal'
 
@@ -32,7 +24,8 @@ function getPageTitle(sort: SortType, season?: string, year?: string): string {
       return 'Top 100'
     case 'seasonal':
       if (season && year) {
-        return `${season.charAt(0).toUpperCase() + season.slice(1).toLowerCase()} ${year} Anime`
+        const capitalizedSeason = season.charAt(0).toUpperCase() + season.slice(1).toLowerCase()
+        return `${capitalizedSeason} ${year} Anime`
       }
       return 'Seasonal Anime'
     default:
@@ -40,111 +33,29 @@ function getPageTitle(sort: SortType, season?: string, year?: string): string {
   }
 }
 
-export default function AnimeListPage() {
+function AnimeListContent() {
   const searchParams = useSearchParams()
   const sort = (searchParams.get('sort') || 'trending') as SortType
-  const perPage = 24
-  const season = searchParams.get('season') as MediaSeason | null
-  const year = searchParams.get('year') ? parseInt(searchParams.get('year')!, 10) : null
-  const genres = searchParams.get('genres')?.split(',').filter(Boolean) || []
-  const format = searchParams.get('format') as string | null
-  const status = searchParams.get('status') as string | null
+  const season = searchParams.get('season') || undefined
+  const year = searchParams.get('year') || undefined
 
-  const dateValues = useMemo(() => ({
-    currentSeason: getCurrentSeason(),
-    currentYear: getCurrentYear(),
-    nextSeason: getNextSeason(),
-    nextSeasonYear: getNextSeasonYear(),
-  }), [])
-
-  // Determine query type and showRank
-  const showRank = sort === 'top-rated'
-
-  // Build filter variables
-  const genresArray = genres.length > 0 ? genres : undefined
-  const formatValue = format ? (format as MediaFormat) : undefined
-  const statusValue = status ? (status as MediaStatus) : undefined
-  const seasonValue = season ? (season as MediaSeason) : undefined
-  const seasonYearValue = year || undefined
-
-  // Handle seasonal query separately due to different variable types
-  const seasonalBaseVariables = useMemo(() => ({
+  const {
+    animeList,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+    showRank,
     perPage,
-    season: (season || dateValues.currentSeason) as MediaSeason,
-    seasonYear: year || dateValues.currentYear,
-    genres: genresArray,
-    format: formatValue,
-    status: statusValue,
-  }), [perPage, season, year, dateValues, genresArray, formatValue, statusValue])
+  } = useAnimeList()
 
-  const regularBaseVariables = useMemo(() => ({
-    perPage,
-    genres: genresArray,
-    format: formatValue,
-    status: statusValue,
-    season: seasonValue,
-    seasonYear: seasonYearValue,
-  }), [perPage, genresArray, formatValue, statusValue, seasonValue, seasonYearValue])
-
-  const trendingData = useInfiniteGraphQL(
-    TrendingAnimeQuery,
-    regularBaseVariables,
-    { enabled: sort === 'trending', staleTime: 5 * 60 * 1000, retry: 3 }
-  )
-  const popularData = useInfiniteGraphQL(
-    PopularAnimeQuery,
-    regularBaseVariables,
-    { enabled: sort === 'popular', staleTime: 5 * 60 * 1000, retry: 3 }
-  )
-  const topRatedData = useInfiniteGraphQL(
-    TopRatedAnimeQuery,
-    regularBaseVariables,
-    { enabled: sort === 'top-rated', staleTime: 5 * 60 * 1000, retry: 3 }
-  )
-  const seasonalData = useInfiniteGraphQL(
-    SeasonalAnimeQuery,
-    seasonalBaseVariables,
-    { enabled: sort === 'seasonal', staleTime: 5 * 60 * 1000, retry: 3 }
+  const title = useMemo(
+    () => getPageTitle(sort, season, year),
+    [sort, season, year]
   )
 
-  // Select the appropriate data based on sort
-  const infiniteQuery = useMemo(() => {
-    switch (sort) {
-      case 'trending':
-        return trendingData
-      case 'popular':
-        return popularData
-      case 'top-rated':
-        return topRatedData
-      case 'seasonal':
-        return seasonalData
-      default:
-        return trendingData
-    }
-  }, [sort, trendingData, popularData, topRatedData, seasonalData])
-
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = infiniteQuery
-
-  // Flatten all pages into a single array and deduplicate by ID
-  const animeList = useMemo(() => {
-    if (!data?.pages) return []
-    const mediaMap = new Map<number, Media>()
-    data.pages.forEach((page) => {
-      const pageData = page as { Page?: { media?: Array<Media | null> } } | undefined
-      const media = pageData?.Page?.media?.filter((anime: Media | null): anime is Media => anime !== null && !anime.isAdult) || []
-      media.forEach((anime) => {
-        // Only add if not already in map (deduplicate by ID)
-        if (!mediaMap.has(anime.id)) {
-          mediaMap.set(anime.id, anime)
-        }
-      })
-    })
-    return Array.from(mediaMap.values())
-  }, [data])
-
-  const title = getPageTitle(sort, season || undefined, year?.toString())
-
-  // Handle load more
   const handleLoadMore = useCallback(() => {
     if (!isFetchingNextPage && hasNextPage) {
       fetchNextPage()
@@ -153,7 +64,7 @@ export default function AnimeListPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
         <div className="mb-8">
           <BackButton className="mb-6" />
           <h1 className="text-4xl md:text-5xl font-bold mb-2">{title}</h1>
@@ -164,28 +75,14 @@ export default function AnimeListPage() {
         </div>
 
         {isLoading && animeList.length === 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(perPage)].map((_, i) => (
-              <div key={i} className="aspect-2/3 bg-zinc-900 rounded-xl animate-pulse" />
-            ))}
-          </div>
+          <AnimeListLoading count={perPage} />
         )}
 
-        {error && (
-          <div className="flex flex-col items-center justify-center gap-4 py-12">
-            <p className="text-red-400">Error loading anime. Please try again.</p>
-            <button
-              onClick={() => refetch()}
-              className="px-6 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors text-white"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
+        {error && <AnimeListError onRetry={() => refetch()} />}
 
         {animeList.length > 0 && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12">
               {animeList.map((anime, index) => {
                 if (!anime) return null
                 const rank = showRank ? index + 1 : undefined
@@ -193,34 +90,33 @@ export default function AnimeListPage() {
               })}
             </div>
 
-            {/* Load More Button */}
-            {hasNextPage && (
-              <div className="flex items-center justify-center">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={isFetchingNextPage}
-                  className="px-8 py-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isFetchingNextPage ? 'Loading more...' : 'Load More'}
-                </button>
-              </div>
-            )}
-
-            {!hasNextPage && animeList.length > 0 && (
-              <div className="text-center py-8 text-zinc-400">
-                No more anime to load
-              </div>
-            )}
+            <AnimeListLoadMore
+              onLoadMore={handleLoadMore}
+              isLoading={isFetchingNextPage}
+              hasMore={hasNextPage}
+            />
           </>
         )}
 
-        {!isLoading && !error && animeList.length === 0 && (
-          <div className="text-center py-12 text-zinc-400">
-            No anime found.
-          </div>
-        )}
+        {!isLoading && !error && animeList.length === 0 && <AnimeListEmpty />}
       </div>
     </div>
+  )
+}
+
+export default function AnimeListPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black text-white">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
+            <AnimeListLoading count={24} />
+          </div>
+        </div>
+      }
+    >
+      <AnimeListContent />
+    </Suspense>
   )
 }
 

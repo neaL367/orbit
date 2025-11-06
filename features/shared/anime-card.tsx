@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -17,119 +17,98 @@ type AnimeCardProps = {
   rank?: number
 }
 
-export function AnimeCard({ anime, rank }: AnimeCardProps) {
-  const [mediumLoaded, setMediumLoaded] = useState(false)
-  const [highQualityLoaded, setHighQualityLoaded] = useState(false)
-  const title = getAnimeTitle(anime)
-
-  const mediumImage = anime?.coverImage?.medium
-  const highQualityImage = anime?.coverImage?.extraLarge 
-  const coverColor = anime?.coverImage?.color || '#1a1a1a'
+function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
   
-  const currentImage = highQualityLoaded && highQualityImage ? highQualityImage : mediumImage
-  const score = anime?.averageScore || anime?.meanScore
+  const title = useMemo(() => getAnimeTitle(anime), [anime])
+  const coverImage = useMemo(() => 
+    anime?.coverImage?.extraLarge || anime?.coverImage?.large || anime?.coverImage?.medium,
+    [anime?.coverImage]
+  )
+  const coverColor = useMemo(() => anime?.coverImage?.color || '#1a1a1a', [anime?.coverImage?.color])
+  
   const episodes = anime?.episodes
   const duration = anime?.duration
-  const genres = anime?.genres?.filter(Boolean) || []
+  const genres = useMemo(() => anime?.genres?.filter(Boolean) || [], [anime?.genres])
   const status = anime?.status?.toLowerCase()
+  const format = anime?.format
+  const year = anime?.startDate?.year
 
   const colors = useMemo(() => ({
     border: hexToRgba(coverColor, 0.3),
-    borderHover: hexToRgba(coverColor, 0.8),
     shadow: `0 4px 6px -1px ${hexToRgba(coverColor, 0.1)}, 0 2px 4px -1px ${hexToRgba(coverColor, 0.06)}`,
-    shadowHover: `0 20px 25px -5px ${hexToRgba(coverColor, 0.3)}, 0 10px 10px -5px ${hexToRgba(coverColor, 0.1)}`,
     badgeBg: hexToRgba(coverColor, 0.4),
     badgeBorder: hexToRgba(coverColor, 0.6),
     statusBg: hexToRgba(coverColor, 0.3),
   }), [coverColor])
 
   return (
-    <Link href={`/anime/${anime?.id}` as Route} className="group block">
+    <Link 
+      href={`/anime/${anime?.id}` as Route} 
+      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-zinc-400 rounded-xl"
+      aria-label={`View ${title} details`}
+    >
       <Card
         className={cn(
-          'relative overflow-hidden rounded-xl border bg-zinc-900/90 transition-all duration-300',
-          'hover:-translate-y-1 hover:shadow-2xl will-change-transform'
+          'relative overflow-hidden rounded-xl border bg-zinc-900/90 transition-all duration-200',
+          'hover:-translate-y-1 will-change-transform'
         )}
         style={{
           borderColor: colors.border,
           boxShadow: colors.shadow,
-          '--border-hover': colors.borderHover,
-          '--shadow-hover': colors.shadowHover,
         } as React.CSSProperties}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = colors.borderHover
-          e.currentTarget.style.boxShadow = colors.shadowHover
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = colors.border
-          e.currentTarget.style.boxShadow = colors.shadow
-        }}
       >
         {/* Cover with Info Overlay */}
-        <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl">
+        <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg">
           {/* Placeholder background - always visible */}
           <div
-            className="absolute inset-0"
-            style={{ backgroundColor: coverColor }}
+            className="absolute inset-0 transition-opacity duration-300"
+            style={{ 
+              backgroundColor: coverColor,
+              opacity: imageLoaded && !imageError ? 0 : 1
+            }}
           />
-          {currentImage ? (
-            <>
-              {/* Medium quality image - loads first */}
-              {mediumImage && (
-                <Image
-                  src={mediumImage}
-                  alt={title}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                  loading="lazy"
-                  fetchPriority="high"
-                  referrerPolicy="no-referrer"
-                  onLoad={() => setMediumLoaded(true)}
-                  className={cn(
-                    "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
-                    mediumLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md",
-                    highQualityLoaded && highQualityImage ? "opacity-0" : ""
-                  )}
-                />
+
+          {/* Image */}
+          {coverImage && !imageError && (
+            <Image
+              src={coverImage}
+              alt={title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                setImageError(true)
+                setImageLoaded(true)
+              }}
+              className={cn(
+                "object-cover transition-opacity duration-300",
+                imageLoaded ? "opacity-100" : "opacity-0"
               )}
-              {/* High quality image - loads after medium is loaded, swaps in when ready */}
-              {highQualityImage && mediumLoaded && (
-                <Image
-                  src={highQualityImage}
-                  alt={title}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                  priority={false}
-                  loading="eager"
-                  referrerPolicy="no-referrer"
-                  onLoad={() => setHighQualityLoaded(true)}
-                  className={cn(
-                    "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
-                    highQualityLoaded ? "opacity-100 blur-0" : "opacity-0"
-                  )}
-                />
-              )}
-            </>
-          ) : null}
+            />
+          )}
 
           {/* Rank Badge */}
           {rank !== undefined && (
             <div className="absolute top-0 left-0 z-20">
               <div 
-                className="flex items-center justify-center w-8 h-8 rounded-br-xl backdrop-blur-md border-2 border-white/30 shadow-lg"
+                className="flex items-center justify-center w-9 h-9 rounded-br-xl backdrop-blur-md border-2 border-white/30 shadow-lg"
                 style={{
-                  backgroundColor: hexToRgba(coverColor, 0.5),
+                  backgroundColor: hexToRgba(coverColor, 0.6),
                   borderTop: 'none',
                   borderLeft: 'none',
                 }}
               >
-                <span className="text-sm font-bold text-white">#{rank}</span>
+                <span className="text-sm font-bold text-white drop-shadow-lg">#{rank}</span>
               </div>
             </div>
           )}
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 group-hover:opacity-0" />
+          {/* Gradient overlay - stronger at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
           {/* Info Section - Overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2 z-10">
@@ -138,31 +117,37 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
               {title}
             </h3>
 
-            {/* Meta */}
-            <div className="flex flex-wrap items-center gap-x-2 text-xs">
-              {score && (
-                <span
-                  className="font-semibold drop-shadow-md"
-                  style={{ color: '#fff', textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)' }}
-                >
-                  {score}%
+            {/* Meta Info */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              {episodes && (
+                <span className="text-white/90 drop-shadow-md font-medium">
+                  {episodes} ep
                 </span>
               )}
-              {episodes && (
-                <span className="text-white/80 drop-shadow-md">{episodes} ep</span>
-              )}
               {duration && (
-                <span className="text-white/80 drop-shadow-md">{duration}m</span>
+                <span className="text-white/80 drop-shadow-md">
+                  {duration}m
+                </span>
+              )}
+              {year && (
+                <span className="text-white/80 drop-shadow-md">
+                  {year}
+                </span>
+              )}
+              {format && (
+                <span className="text-white/70 drop-shadow-md text-[10px] uppercase tracking-wide">
+                  {format.replace(/_/g, ' ')}
+                </span>
               )}
             </div>
 
             {/* Genres */}
             {genres.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {genres.slice(0, 2).map((genre: string | null) => (
                   <Badge
                     key={genre}
-                    className="text-[10px] font-medium px-1.5 py-0.5 text-white backdrop-blur-sm"
+                    className="text-[10px] font-medium px-2 py-0.5 text-white backdrop-blur-sm border"
                     style={{
                       backgroundColor: colors.badgeBg,
                       borderColor: colors.badgeBorder,
@@ -178,7 +163,7 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
             {/* Status */}
             {status && (
               <Badge
-                className="text-[10px] capitalize text-white backdrop-blur-sm"
+                className="text-[10px] capitalize text-white backdrop-blur-sm border"
                 style={{
                   backgroundColor: colors.statusBg,
                   borderColor: colors.badgeBorder,
@@ -194,3 +179,8 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
     </Link>
   )
 }
+
+export const AnimeCard = memo(AnimeCardComponent, (prevProps, nextProps) => {
+  return prevProps.anime.id === nextProps.anime.id && 
+         prevProps.rank === nextProps.rank
+})

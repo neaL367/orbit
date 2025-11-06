@@ -3,10 +3,8 @@
 import { useMemo } from "react"
 import { FilterX, Tags, Calendar, Clock, Film, PlayCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { FilterButtonGroup } from "@/features/anime-filters/filter-button-group"
-import { AddFilterDropdown } from "@/features/anime-filters/add-filter-dropdown"
+import { FilterButtonGroup, AddFilterDropdown, COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "@/features/anime-filters"
 import { useAnimeFilters } from "@/hooks/use-anime-filters"
-import { COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "@/features/anime-filters/constants"
 
 type AnimeFiltersProps = {
   className?: string

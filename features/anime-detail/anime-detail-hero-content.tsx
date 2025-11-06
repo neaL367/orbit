@@ -33,6 +33,10 @@ export function AnimeDetailHeroContent({ anime }: AnimeDetailHeroContentProps) {
         {/* Cover Image */}
         <div className="shrink-0 w-full sm:w-48 md:w-56 lg:w-64">
           <div className="relative w-full aspect-[2/3] rounded-lg sm:rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20">
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: coverColor }}
+            />
             {coverImage ? (
               <Image
                 src={coverImage || "/placeholder.svg"}
@@ -43,13 +47,11 @@ export function AnimeDetailHeroContent({ anime }: AnimeDetailHeroContentProps) {
                 referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
-                  "object-cover transition-all duration-700 ease-in-out",
-                  coverLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg",
+                  "object-cover transition-opacity duration-300",
+                  coverLoaded ? "opacity-100" : "opacity-0",
                 )}
               />
-            ) : (
-              <div className="w-full h-full" style={{ backgroundColor: coverColor }} />
-            )}
+            ) : null}
           </div>
         </div>
 

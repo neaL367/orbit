@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ANILIST_API_URL } from '@/lib/constants'
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const responses = await Promise.all(
       requests.map(async (req) => {
-        const response = await fetch('https://graphql.anilist.co/', {
+        const response = await fetch(ANILIST_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

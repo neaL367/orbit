@@ -1,3 +1,4 @@
+export { AnimeDetailContent } from './anime-detail-content'
 export { AnimeDetailHero } from './anime-detail-hero'
 export { AnimeDetailHeroContent } from './anime-detail-hero-content'
 export { AnimeDetailInfo } from './anime-detail-info'

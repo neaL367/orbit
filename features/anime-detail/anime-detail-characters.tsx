@@ -39,7 +39,10 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
 
           return (
             <div key={character.id} className="group">
-              <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 shadow-lg transition-transform duration-300 hover:scale-105">
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-zinc-800 mb-3 shadow-lg">
+                <div
+                  className="absolute inset-0 bg-zinc-800"
+                />
                 {characterImage ? (
                   <Image
                     src={characterImage || ""}
@@ -50,8 +53,8 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                     referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
-                      "object-cover object w-full h-full transition-all duration-700 ease-in-out",
-                      loadedImages.has(character.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                      "object-cover object w-full h-full transition-opacity duration-300",
+                      loadedImages.has(character.id) ? "opacity-100" : "opacity-0"
                     )}
                   />
                 ) : (
@@ -81,6 +84,9 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                         <div key={va.id} className="flex items-center gap-2 text-xs mb-2.5">
                           {vaImage ? (
                             <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700">
+                              <div
+                                className="absolute inset-0 bg-zinc-700"
+                              />
                               <Image
                                 src={vaImage || ""}
                                 alt={vaName}
@@ -90,8 +96,8 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                                 referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
-                                  "object-cover transition-all duration-700 ease-in-out",
-                                  loadedImages.has(va.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
+                                  "object-cover transition-opacity duration-300",
+                                  loadedImages.has(va.id) ? "opacity-100" : "opacity-0"
                                 )}
                               />
                             </div>
