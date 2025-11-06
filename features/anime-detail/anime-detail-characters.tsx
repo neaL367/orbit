@@ -28,7 +28,7 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
         <h2 className="text-3xl md:text-4xl font-bold mb-3">Cast & Characters</h2>
         <p className="text-zinc-400 text-sm md:text-base">Meet the characters bringing this story to life</p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
         {validCharacters.map((edge) => {
           if (!edge?.node) return null
 
@@ -39,16 +39,16 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
 
           return (
             <div key={character.id} className="group">
-              <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 shadow-lg transition-transform duration-300 hover:scale-105">
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-900 mb-3 shadow-lg transition-transform duration-300 hover:scale-105">
                 {characterImage ? (
                   <Image
-                    src={characterImage || "/placeholder.svg"}
+                    src={characterImage || ""}
                     alt={characterName}
                     fill
                     sizes="50vw"
-                    onLoadingComplete={() => handleImageLoad(character.id)}
+                    onLoad={() => handleImageLoad(character.id)}
                     className={cn(
-                      "object-cover w-full h-full transition-all duration-700 ease-in-out",
+                      "object-cover object w-full h-full transition-all duration-700 ease-in-out",
                       loadedImages.has(character.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
                     )}
                   />
@@ -80,11 +80,11 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                           {vaImage ? (
                             <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700">
                               <Image
-                                src={vaImage || "/placeholder.svg"}
+                                src={vaImage || ""}
                                 alt={vaName}
                                 fill
                                 sizes="50vw"
-                                onLoadingComplete={() => handleImageLoad(va.id)}
+                                onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
                                   "object-cover transition-all duration-700 ease-in-out",
                                   loadedImages.has(va.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"

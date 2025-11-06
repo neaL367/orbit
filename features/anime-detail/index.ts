@@ -1,4 +1,7 @@
-export { AnimeDetailHeader } from './anime-detail-header'
+export { AnimeDetailHero } from './anime-detail-hero'
+export { AnimeDetailHeroContent } from './anime-detail-hero-content'
+export { AnimeDetailInfo } from './anime-detail-info'
+export { AnimeDetailSynopsis } from './anime-detail-synopsis'
 export { AnimeDetailRecommendations } from './anime-detail-recommendations'
 export { AnimeDetailRelations } from './anime-detail-relations'
 export { AnimeDetailLoading } from './anime-detail-loading'

@@ -139,7 +139,8 @@ export function UpcomingAiringCarousel() {
                           alt={title}
                           fill
                           sizes="100vw"
-                          onLoadingComplete={() => handleImageLoad(anime.id)}
+                          loading="eager"
+                          onLoad={() => handleImageLoad(anime.id)}
                           className={cn(
                             "object-cover transition-all duration-700 ease-in-out group-hover:scale-110",
                             loadedImages.has(anime.id) ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"

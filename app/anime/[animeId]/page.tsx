@@ -4,7 +4,10 @@ import { notFound } from 'next/navigation'
 import { use } from 'react'
 
 import {
-  AnimeDetailHeader,
+  AnimeDetailHero,
+  AnimeDetailHeroContent,
+  AnimeDetailInfo,
+  AnimeDetailSynopsis,
   AnimeDetailRecommendations,
   AnimeDetailRelations,
   AnimeDetailLoading,
@@ -25,11 +28,11 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
   }
 
   const { data, isLoading, error, refetch } = useGraphQL(
-    AnimeByIdQuery, 
+    AnimeByIdQuery,
     { id: animeId },
-    { 
+    {
       staleTime: 10 * 60 * 1000, // 10 minutes - detail pages don't change often
-      retry: 3 
+      retry: 3
     }
   )
 
@@ -50,14 +53,29 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
   const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || 'Unknown'
 
   return (
-    <div className="min-h-screen bg-black text-white  ">
-      <AnimeDetailHeader anime={anime} />
-      <div className="pb-12 max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimeDetailTrailer trailer={anime.trailer} title={title} />
-        <AnimeDetailCharacters characters={characters} />
-        <AnimeDetailRecommendations recommendations={recommendations} />
-        <AnimeDetailRelations relations={relations} />
+    <div className="min-h-screen bg-black text-white">
+      <AnimeDetailHero anime={anime} />
+
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
+        <AnimeDetailHeroContent anime={anime} />
+
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 mt-10">
+          {/* Left Sidebar - Anime Details */}
+          <aside className="w-full lg:w-[380px] shrink-0 space-y-6">
+            <AnimeDetailInfo anime={anime} />
+          </aside>
+
+          {/* Right Side - Main Content */}
+          <main className="flex-1 space-y-10">
+            <AnimeDetailSynopsis description={anime.description} />
+            <AnimeDetailTrailer trailer={anime.trailer} title={title} />
+            <AnimeDetailCharacters characters={characters} />
+            <AnimeDetailRecommendations recommendations={recommendations} />
+            <AnimeDetailRelations relations={relations} />
+          </main>
+        </div>
       </div>
     </div>
+
   )
 }

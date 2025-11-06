@@ -62,7 +62,7 @@ export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) 
               alt={`${title} trailer`}
               fill
               sizes="100vw"
-              onLoadingComplete={() => setIsLoaded(true)}
+              onLoad={() => setIsLoaded(true)}
               className={cn(
                 "object-cover w-full h-full transition-all duration-700 ease-in-out group-hover:scale-105",
                 isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"

@@ -16,7 +16,7 @@ export function AnimeDetailRecommendations({ recommendations }: AnimeDetailRecom
         <h2 className="text-3xl md:text-4xl font-bold mb-3">Recommended For You</h2>
         <p className="text-zinc-400 text-sm md:text-base">Similar anime you might enjoy</p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
         {recommendations.slice(0, 10).map((rec) => {
           if (!rec) return null
           const recAnime = rec.mediaRecommendation

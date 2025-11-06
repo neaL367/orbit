@@ -80,11 +80,11 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
               alt={title}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              loading="lazy"
+              loading="eager"
               quality={75}
-              onLoadingComplete={() => setIsLoaded(true)}
+              onLoad={() => setIsLoaded(true)}
               className={cn(
-                "object-cover transition-all duration-500 ease-out group-hover:scale-110",
+                "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",
                 isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-md"
               )}
             />
@@ -112,7 +112,7 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
           )}
 
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 group-hover:opacity-0" />
 
           {/* Info Section - Overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2 z-10">

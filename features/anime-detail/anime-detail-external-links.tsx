@@ -40,7 +40,7 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             src={linkIcon}
             alt={siteName}
             fill
-            onLoadingComplete={() => setIsLoaded(true)}
+            onLoad={() => setIsLoaded(true)}
             className={cn(
               "object-contain transition-all duration-700 ease-in-out",
               isLoaded ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-105 blur-lg"
