@@ -14,7 +14,7 @@ export function Navbar() {
     { label: 'All Time Popular', href: '/anime?sort=popular' },
     { label: 'Top 100', href: '/anime?sort=top-rated' },
     { label: 'Seasonal', href: '/anime?sort=seasonal' },
-    { label: 'Schedule', href: '/' },
+    { label: 'Schedule', href: '/schedule' },
   ]
 
   return (

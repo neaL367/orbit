@@ -1,27 +1,34 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { CACHE_TIMES } from '@/lib/constants'
-import Autoplay from 'embla-carousel-autoplay'
-import {
-  Carousel,
-  CarouselContent,
-  type CarouselApi,
-} from '@/components/ui/carousel'
-import { useGraphQL } from '@/hooks/use-graphql'
-import { UpcomingAiringAnimeQuery } from '@/queries/media'
-import { ErrorState, SectionHeader, extractMediaList } from '@/features/shared'
-import { UpcomingAiringCarouselItem } from './carousel-item'
+import { useState, useEffect } from "react"
+import type { Route } from "next"
+import { CACHE_TIMES } from "@/lib/constants"
+import { cn } from "@/lib/utils"
+import Autoplay from "embla-carousel-autoplay"
+import { Carousel, CarouselContent, type CarouselApi } from "@/components/ui/carousel"
+import { useGraphQL } from "@/hooks/use-graphql"
+import { UpcomingAiringAnimeQuery } from "@/queries/media"
+import { ErrorState, SectionHeader, extractMediaList } from "@/features/shared"
+import { UpcomingAiringCarouselItem } from "./carousel-item"
 
-export function UpcomingAiringCarousel() {
+type UpcomingAiringCarouselProps = {
+  hideViewAll?: boolean
+  className?: string
+}
+
+export function UpcomingAiringCarousel({
+  hideViewAll = false,
+  className,
+}: UpcomingAiringCarouselProps) {
   const { data, isLoading, error, refetch } = useGraphQL(
-    UpcomingAiringAnimeQuery, 
+    UpcomingAiringAnimeQuery,
     { page: 1, perPage: 10 },
     {
-      staleTime: CACHE_TIMES.MEDIUM, // 5 minutes - carousel updates frequently
-      retry: 3
-    }
+      staleTime: CACHE_TIMES.MEDIUM,
+      retry: 3,
+    },
   )
+
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
@@ -39,9 +46,9 @@ export function UpcomingAiringCarousel() {
       setCurrent(api.selectedScrollSnap())
     }
 
-    api.on('select', handleSelect)
+    api.on("select", handleSelect)
     return () => {
-      api.off('select', handleSelect)
+      api.off("select", handleSelect)
     }
   }, [api])
 
@@ -50,18 +57,20 @@ export function UpcomingAiringCarousel() {
 
   if (isLoading) {
     return (
-      <div className="w-full mb-12">
-        <div className="h-96 bg-zinc-900 rounded-xl animate-pulse" />
+      <div className={cn("w-full", className)}>
+        <div className="h-12 mb-8 animate-pulse bg-zinc-900 rounded-xl" />
+        <div className="h-[400px] bg-zinc-900 rounded-xl animate-pulse" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="w-full mb-12">
+      <div className={cn("w-full", className)}>
         <SectionHeader
           title="Upcoming Airing"
           subtitle="Anime episodes coming soon"
+          viewAllHref={hideViewAll ? undefined : ("/schedule" as Route)}
         />
         <ErrorState
           message="Error loading upcoming anime"
@@ -83,15 +92,16 @@ export function UpcomingAiringCarousel() {
   })
 
   return (
-    <div className="w-full mb-12">
+    <div className={cn("w-full", className)}>
       <SectionHeader
         title="Upcoming Airing"
         subtitle="Anime episodes coming soon"
+        viewAllHref={hideViewAll ? undefined : ("/schedule" as Route)}
       />
       <Carousel
         setApi={setApi}
         opts={{
-          align: 'start',
+          align: "start",
           loop: true,
         }}
         plugins={[autoplayPlugin]}
@@ -113,19 +123,6 @@ export function UpcomingAiringCarousel() {
           })}
         </CarouselContent>
       </Carousel>
-      <style jsx global>{`
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(1rem);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   )
 }
-

@@ -120,7 +120,7 @@ export function AnimeFilters({ className }: AnimeFiltersProps) {
   }
 
   return (
-    <div className={`mb-8 ${className}`}>
+    <div className={`${className}`}>
       <div className="flex items-center gap-2 flex-wrap">
         <AddFilterDropdown
           open={open}

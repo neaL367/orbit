@@ -12,6 +12,7 @@ import {
   PopularAnimeQuery,
   TopRatedAnimeQuery,
   SeasonalAnimeQuery,
+  SearchAnimeQuery,
 } from '@/queries/media'
 import {
   getCurrentSeason,
@@ -19,7 +20,7 @@ import {
 } from '@/lib/utils'
 import type { Media, MediaFormat, MediaSeason, MediaStatus } from '@/graphql/graphql'
 
-type SortType = 'trending' | 'popular' | 'top-rated' | 'seasonal'
+type SortType = 'trending' | 'popular' | 'top-rated' | 'seasonal' | 'search'
 
 const PER_PAGE = 24
 
@@ -27,14 +28,15 @@ const PER_PAGE = 24
  * Parse search params into filter values
  */
 function parseSearchParams(searchParams: URLSearchParams) {
-  const sort = (searchParams.get('sort') || 'trending') as SortType
+  const search = searchParams.get('search') || ''
+  const sort = search ? 'search' : (searchParams.get('sort') || 'trending') as SortType
   const season = searchParams.get('season') as MediaSeason | null
   const year = searchParams.get('year') ? parseInt(searchParams.get('year')!, 10) : null
   const genres = searchParams.get('genres')?.split(',').filter(Boolean) || []
   const format = searchParams.get('format') as string | null
   const status = searchParams.get('status') as string | null
 
-  return { sort, season, year, genres, format, status }
+  return { sort, search, season, year, genres, format, status }
 }
 
 /**
@@ -44,16 +46,18 @@ function buildGraphQLVariables(
   filters: ReturnType<typeof parseSearchParams>,
   dateValues: { currentSeason: MediaSeason; currentYear: number }
 ) {
-  const { season, year, genres, format, status } = filters
+  const { search, season, year, genres, format, status } = filters
   
   const genresArray = genres.length > 0 ? genres : undefined
   const formatValue = format ? (format as MediaFormat) : undefined
   const statusValue = status ? (status as MediaStatus) : undefined
   const seasonValue = season ? (season as MediaSeason) : undefined
   const seasonYearValue = year || undefined
+  const searchValue = search || undefined
 
   const regularVariables = {
     perPage: PER_PAGE,
+    search: searchValue,
     genres: genresArray,
     format: formatValue,
     status: statusValue,
@@ -70,7 +74,15 @@ function buildGraphQLVariables(
     status: statusValue,
   }
 
-  return { regularVariables, seasonalVariables }
+  const searchVariables = {
+    perPage: PER_PAGE,
+    search: searchValue,
+    genres: genresArray,
+    format: formatValue,
+    status: statusValue,
+  }
+
+  return { regularVariables, seasonalVariables, searchVariables }
 }
 
 /**
@@ -107,7 +119,7 @@ export function useAnimeList() {
     currentYear: getCurrentYear(),
   }), [])
 
-  const { regularVariables, seasonalVariables } = useMemo(
+  const { regularVariables, seasonalVariables, searchVariables } = useMemo(
     () => buildGraphQLVariables(filters, dateValues),
     [filters, dateValues]
   )
@@ -142,6 +154,12 @@ export function useAnimeList() {
     { ...queryOptions, enabled: filters.sort === 'seasonal' }
   )
 
+  const searchData = useInfiniteGraphQL(
+    SearchAnimeQuery,
+    searchVariables,
+    { ...queryOptions, enabled: filters.sort === 'search' && !!filters.search }
+  )
+
   const activeQuery = useMemo(() => {
     switch (filters.sort) {
       case 'trending':
@@ -152,10 +170,12 @@ export function useAnimeList() {
         return topRatedData
       case 'seasonal':
         return seasonalData
+      case 'search':
+        return searchData
       default:
         return trendingData
     }
-  }, [filters.sort, trendingData, popularData, topRatedData, seasonalData])
+  }, [filters.sort, trendingData, popularData, topRatedData, seasonalData, searchData])
 
   const animeList = useMemo(() => {
     const queryData = activeQuery.data as { pages?: unknown[] } | undefined

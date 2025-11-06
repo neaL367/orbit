@@ -1,0 +1,113 @@
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import { ExternalLink } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { getAnimeTitle } from '@/features/shared'
+import type { AiringSchedule } from '@/graphql/graphql'
+import type { Route } from 'next'
+
+type ScheduleCardProps = {
+  schedule: AiringSchedule
+  media: NonNullable<AiringSchedule['media']>
+  formatTime: (timestamp: number) => string
+  getStreamingLinks: (schedule: AiringSchedule) => Array<{
+    site: string
+    url: string
+    icon?: string | null
+    color?: string | null
+  }>
+}
+
+export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }: ScheduleCardProps) {
+  const title = getAnimeTitle(media)
+  const coverImage = media.coverImage?.large || media.coverImage?.medium
+  const format = media.format
+  const streamingLinks = getStreamingLinks(schedule)
+
+  return (
+    <Card className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all group">
+      <div className="p-4">
+        <div className="flex gap-4">
+          {/* Cover Image */}
+          {coverImage && (
+            <Link 
+              href={`/anime/${media.id}` as Route}
+              className="shrink-0"
+            >
+              <div className="relative w-20 h-28 rounded overflow-hidden">
+                <Image
+                  src={coverImage}
+                  alt={title}
+                  fill
+                  sizes="80px"
+                  className="object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+            </Link>
+          )}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0 space-y-2">
+            {/* Time & Episode */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-semibold text-zinc-300 bg-zinc-800 px-2 py-1 rounded">
+                {formatTime(schedule.airingAt)}
+              </span>
+              <Badge 
+                variant="outline" 
+                className="text-[10px] px-2 py-0.5 border-zinc-700 text-zinc-300"
+              >
+                Ep {schedule.episode}
+              </Badge>
+              {format && (
+                <Badge 
+                  variant="outline" 
+                  className="text-[10px] px-2 py-0.5 border-zinc-700 text-zinc-300"
+                >
+                  {format.replace(/_/g, ' ')}
+                </Badge>
+              )}
+            </div>
+
+            {/* Title */}
+            <Link 
+              href={`/anime/${media.id}` as Route}
+              className="block"
+            >
+              <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight hover:text-zinc-300 transition-colors">
+                {title}
+              </h3>
+            </Link>
+
+            {/* Streaming Links */}
+            {streamingLinks.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                {streamingLinks.slice(0, 3).map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded bg-zinc-800/50 hover:bg-zinc-800"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span className="truncate max-w-[80px]">{link.site}</span>
+                  </a>
+                ))}
+                {streamingLinks.length > 3 && (
+                  <span className="text-[10px] text-zinc-500 px-2">
+                    +{streamingLinks.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  )
+}
+

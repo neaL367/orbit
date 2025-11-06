@@ -37,7 +37,7 @@ export function HomePageContent() {
   const { currentSeason, currentYear, nextSeason, nextSeasonYear } = dateValues
 
   return (
-    <div className="min-h-screen max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-white">
+    <div className="min-h-screen max-w-[1680px] space-y-12 mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-white">
 
       <UpcomingAiringCarousel />
 
