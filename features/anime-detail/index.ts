@@ -1,0 +1,13 @@
+export { AnimeDetailContent } from './anime-detail-content'
+export { AnimeDetailHero } from './anime-detail-hero'
+export { AnimeDetailHeroContent } from './anime-detail-hero-content'
+export { AnimeDetailInfo } from './anime-detail-info'
+export { AnimeDetailSynopsis } from './anime-detail-synopsis'
+export { AnimeDetailRecommendations } from './anime-detail-recommendations'
+export { AnimeDetailRelations } from './anime-detail-relations'
+export { AnimeDetailLoading } from './anime-detail-loading'
+export { AnimeDetailError } from './anime-detail-error'
+export { AnimeDetailTrailer } from './anime-detail-trailer'
+export { AnimeDetailCharacters } from './anime-detail-characters'
+export { AnimeDetailExternalLinks } from './anime-detail-external-links'
+

@@ -1,119 +1,129 @@
-# Orbit - Anime Information Explorer
+# AnimeX- Anime Discovery Platform
 
-![Next.js](https://img.shields.io/badge/Next.js-15.3.0-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
-![Apollo Client](https://img.shields.io/badge/Apollo%20Client-3.13.6-purple)
-
-Orbit is a modern web application for exploring anime information, details, seasonal releases, and schedules. Built with Next.js 15.3.0, TypeScript, and powered by the AniList GraphQL API.
+A modern anime browsing and discovery platform built with Next.js, featuring real-time data from AniList API, advanced filtering, and an intuitive user interface.
 
 ## Features
 
-- **Home Page**: Discover trending, popular, and top-rated anime
-- **Anime Details**: Comprehensive information about each anime
-- **Seasonal Anime**: Browse anime by season and year
-- **Schedule**: Weekly anime airing schedule
-- **Search**: Find anime by title, genre, and more
-- **Responsive Design**: Optimized for all device sizes
+- 🎬 **Anime Discovery**: Browse trending, popular, top-rated, and seasonal anime
+- 🔍 **Advanced Filtering**: Filter by genres, year, season, format, and airing status
+- 📱 **Responsive Design**: Fully responsive UI that works on all devices
+- ⚡ **Performance Optimized**: 
+  - Query caching with React Query
+  - Request cancellation and deduplication
+  - Infinite scrolling with "Load More"
+  - Optimized image loading
+- 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
+- 📊 **Anime Details**: Comprehensive anime detail pages with:
+  - Trailers
+  - Character information
+  - Recommendations
+  - Related anime
+  - Airing schedules
 
 ## Tech Stack
 
-- **Framework**: [Next.js 15.3.0](https://nextjs.org/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **API Client**: [Apollo Client](https://www.apollographql.com/docs/react/)
-- **GraphQL API**: [AniList API](https://anilist.gitbook.io/anilist-apiv2-docs/)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/) with custom styling
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+- **Framework**: [Next.js 16](https://nextjs.org) with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Data Fetching**: 
+  - [@tanstack/react-query](https://tanstack.com/query) for server state management
+  - GraphQL with [AniList API](https://anilist.co)
+- **Code Generation**: [GraphQL Code Generator](https://the-guild.dev/graphql/codegen) for type-safe GraphQL queries
+- **Carousel**: [Embla Carousel](https://www.embla-carousel.com)
+- **Icons**: [Lucide React](https://lucide.dev)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18.17 or later
+- Node.js 18+ or Bun
 - npm, yarn, pnpm, or bun
 
 ### Installation
 
-1. Clone the repository
-
 ```bash
-git clone https://github.com/yourusername/orbit.git
-cd orbit
-```
-
-2. Install dependencies
-
-```bash
+# Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
 # or
 bun install
 ```
 
-3. Start the development server
+### Development
 
 ```bash
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 # or
 bun dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Code Generation
+
+This project uses GraphQL Code Generator to generate TypeScript types from GraphQL queries:
+
+```bash
+# Generate types
+npm run codegen
+
+# Watch mode for development
+npm run codegen:watch
+```
 
 ## Project Structure
 
 ```
-src/
-├── app/                  # Next.js App Router
-│   ├── (pages)/          # Route groups for pages
-│   ├── graphql/          # GraphQL queries and fragments
-│   ├── error.tsx         # Global error handling
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Home page
-├── components/           # Reusable components
-│   ├── anime/            # Anime-specific components
-│   ├── schedule/         # Schedule-related components
-│   ├── seasonal/         # Seasonal anime components
-│   └── ui/               # UI components
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility functions and types
-│   ├── apollo-client.ts  # Apollo Client configuration
-│   ├── apollo-types.ts   # Apollo-specific type definitions
-│   ├── image-utils.ts    # Image optimization utilities
-│   ├── types.ts          # TypeScript interfaces
-│   └── utils.ts          # General utility functions
+orbit/
+├── app/                    # Next.js App Router pages
+│   ├── anime/             # Anime listing and detail pages
+│   └── page.tsx           # Home page
+├── features/              # Feature-based components
+│   ├── anime-carousel/    # Upcoming airing carousel
+│   ├── anime-detail/      # Anime detail page components
+│   ├── anime-filters/     # Filter components
+│   └── anime-section/     # Anime section components
+├── components/            # Shared UI components
+│   └── ui/                # shadcn/ui components
+├── hooks/                 # Custom React hooks
+│   ├── use-graphql.ts     # GraphQL query hook
+│   └── use-infinite-graphql.ts  # Infinite query hook
+├── graphql/               # GraphQL utilities
+│   ├── execute.ts         # GraphQL execution
+│   └── graphql.ts         # Generated types
+└── queries/               # GraphQL queries
+    └── media/             # Anime-related queries
 ```
 
-## Custom Hooks
+## Key Features
 
-- `usePaginatedQuery`: Handles paginated GraphQL queries with infinite scrolling
-- `useErrorHandler`: Manages error states, including rate limiting
+### Filtering System
+- Multi-select genre filtering
+- Year selection (1940 to present)
+- Season filtering (Winter, Spring, Summer, Fall)
+- Format filtering (TV, Movie, OVA, ONA, Special)
+- Status filtering (Releasing, Finished, etc.)
+- Debounced filter updates for performance
+- URL-based filter state management
 
-## Performance Optimizations
+### Performance Optimizations
+- Query caching (5-10 minutes stale time)
+- Request cancellation for stale requests
+- Deduplication of anime items
+- Optimized image loading with Next.js Image
+- Lazy loading and code splitting
 
-- Image optimization with Next.js Image and custom utilities
-- Apollo Client cache configuration for efficient data fetching
-- Code splitting and lazy loading
-- Optimized bundle size with package imports optimization
+## API
 
-## Contributing
+This project uses the [AniList GraphQL API](https://anilist.co/graphiql) for anime data.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Query Documentation](https://tanstack.com/query/latest)
+- [AniList API Documentation](hhttps://docs.anilist.co/guide/introduction)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- [AniList](https://anilist.co/) for providing the GraphQL API
-- [Next.js](https://nextjs.org/) team for the amazing framework
-- [Radix UI](https://www.radix-ui.com/) for accessible UI components
-
+MIT

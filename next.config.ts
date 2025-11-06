@@ -1,32 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  cacheComponents: true,
+  typedRoutes: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.anilist.co',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.youtube.com',
-        pathname: '/**',
-      },
-    ],
-    unoptimized: process.env.NODE_ENV === 'production'
+    unoptimized: true,
   },
-  experimental: {
-    staleTimes: {
-      dynamic: 30,
-      static: 180,
-    },
-    optimizePackageImports: ['lucide-react'],
-  },
-  transpilePackages: ['@apollo/client'],
   compiler: {
-    removeConsole:
-      process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
 };
 
