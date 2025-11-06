@@ -46,6 +46,7 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                     alt={characterName}
                     fill
                     sizes="50vw"
+                    referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
                       "object-cover object w-full h-full transition-all duration-700 ease-in-out",
@@ -84,6 +85,7 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
                                 alt={vaName}
                                 fill
                                 sizes="50vw"
+                                referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
                                   "object-cover transition-all duration-700 ease-in-out",

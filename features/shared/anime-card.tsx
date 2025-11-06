@@ -82,6 +82,7 @@ export function AnimeCard({ anime, rank }: AnimeCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
               loading="eager"
               quality={75}
+              referrerPolicy="no-referrer"
               onLoad={() => setIsLoaded(true)}
               className={cn(
                 "object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-70",

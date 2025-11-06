@@ -49,6 +49,7 @@ export function AnimeDetailHero({ anime }: AnimeDetailHeroProps) {
                         fill
                         sizes="100vw"
                         priority
+                        referrerPolicy="no-referrer"
                         onLoad={() => setBannerLoaded(true)}
                         className={cn(
                             "object-cover transition-all duration-700 ease-in-out",

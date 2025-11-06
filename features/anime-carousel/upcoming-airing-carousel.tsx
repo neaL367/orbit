@@ -140,6 +140,7 @@ export function UpcomingAiringCarousel() {
                           fill
                           sizes="100vw"
                           loading="eager"
+                          referrerPolicy="no-referrer"
                           onLoad={() => handleImageLoad(anime.id)}
                           className={cn(
                             "object-cover transition-all duration-700 ease-in-out group-hover:scale-110",

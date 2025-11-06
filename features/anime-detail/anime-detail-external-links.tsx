@@ -40,6 +40,7 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             src={linkIcon}
             alt={siteName}
             fill
+            referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(
               "object-contain transition-all duration-700 ease-in-out",

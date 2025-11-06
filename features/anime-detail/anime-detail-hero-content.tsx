@@ -57,6 +57,7 @@ export function AnimeDetailHeroContent({ anime }: AnimeDetailHeroContentProps) {
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 224px, 256px"
                 priority
+                referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
                   "object-cover transition-all duration-700 ease-in-out",

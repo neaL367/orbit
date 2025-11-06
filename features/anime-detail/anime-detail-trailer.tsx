@@ -62,6 +62,7 @@ export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) 
               alt={`${title} trailer`}
               fill
               sizes="100vw"
+              referrerPolicy="no-referrer"
               onLoad={() => setIsLoaded(true)}
               className={cn(
                 "object-cover w-full h-full transition-all duration-700 ease-in-out group-hover:scale-105",
