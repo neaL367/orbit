@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.className} antialiased dark bg-black`}
+        className={`${geistSans.variable} antialiased dark bg-black`}
       >
         <Navbar />
         <main>
