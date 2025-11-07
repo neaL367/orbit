@@ -7,25 +7,6 @@ import { handleGraphQLErrors, isAbortError, createTimeoutError, batchGraphQLRequ
 let batcherLoaded = false
 
 /**
- * Create abort controller with timeout
- */
-function createTimeoutController(signal?: AbortSignal): {
-  controller: AbortController
-  timeoutId: NodeJS.Timeout
-  signal: AbortSignal
-} {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), GRAPHQL_TIMEOUT)
-  const finalSignal = signal || controller.signal
-
-  if (signal) {
-    signal.addEventListener('abort', () => clearTimeout(timeoutId))
-  }
-
-  return { controller, timeoutId, signal: finalSignal }
-}
-
-/**
  * Execute GraphQL query on client side using batcher
  */
 async function executeClient<TResult>(
@@ -68,14 +49,22 @@ export async function execute<TResult, TVariables>(
   options?: { signal?: AbortSignal }
 ): Promise<ExecutionResult<TResult>> {
   const variables = variablesOrEmpty as TVariables | undefined
-  const { timeoutId, signal } = createTimeoutController(options?.signal)
   const queryString = query.toString()
   const isClient = typeof window !== 'undefined'
 
+  // Create abort controller with timeout
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), GRAPHQL_TIMEOUT)
+  const finalSignal = options?.signal || controller.signal
+
+  if (options?.signal) {
+    options.signal.addEventListener('abort', () => clearTimeout(timeoutId))
+  }
+
   try {
     const result = isClient
-      ? await executeClient<TResult>(queryString, variables, signal)
-      : await executeServer<TResult>(queryString, variables, signal)
+      ? await executeClient<TResult>(queryString, variables, finalSignal)
+      : await executeServer<TResult>(queryString, variables, finalSignal)
 
     clearTimeout(timeoutId)
 

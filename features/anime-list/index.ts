@@ -1,5 +1,4 @@
-export { AnimeListLoading } from './anime-list-loading'
-export { AnimeListError } from './anime-list-error'
-export { AnimeListEmpty } from './anime-list-empty'
-export { AnimeListLoadMore } from './anime-list-load-more'
-
+export { Loading } from './loading'
+export { Error } from './error'
+export { Empty } from './empty'
+export { LoadMore } from './load-more'

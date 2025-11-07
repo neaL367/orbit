@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import type { Route } from 'next'
 
 type BackButtonProps = {
@@ -30,7 +31,7 @@ export function BackButton({ className, label = 'Back', href }: BackButtonProps)
   return (
     <Button
       onClick={handleClick}
-      className={`${className}`}
+      className={cn(className)}
       aria-label="Go back"
       variant="outline"
     >

@@ -9,9 +9,9 @@ import { Carousel, CarouselContent, type CarouselApi } from "@/components/ui/car
 import { useGraphQL } from "@/hooks/use-graphql"
 import { UpcomingAiringAnimeQuery } from "@/queries/media"
 import { ErrorState, SectionHeader, extractMediaList } from "@/features/shared"
-import { UpcomingAiringCarouselItem } from "./carousel-item"
+import { Item } from "./item"
 
-type UpcomingAiringCarouselProps = {
+type CarouselProps = {
   hideViewAll?: boolean
   className?: string
 }
@@ -19,7 +19,7 @@ type UpcomingAiringCarouselProps = {
 export function UpcomingAiringCarousel({
   hideViewAll = false,
   className,
-}: UpcomingAiringCarouselProps) {
+}: CarouselProps) {
   const { data, isLoading, error, refetch } = useGraphQL(
     UpcomingAiringAnimeQuery,
     { page: 1, perPage: 10 },
@@ -111,7 +111,7 @@ export function UpcomingAiringCarousel({
           {animeList.map((anime, index) => {
             if (!anime) return null
             return (
-              <UpcomingAiringCarouselItem
+              <Item
                 key={anime.id}
                 anime={anime}
                 index={index}
@@ -126,3 +126,4 @@ export function UpcomingAiringCarousel({
     </div>
   )
 }
+

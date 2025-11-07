@@ -4,7 +4,7 @@
  */
 
 import type { ExecutionResult } from 'graphql'
-import { ANILIST_API_URL, CACHE_TIMES, GRAPHQL_BATCHER } from './constants'
+import { ANILIST_API_URL, GRAPHQL_BATCHER, CACHE_TAGS } from './constants'
 
 // ============================================================================
 // Types
@@ -36,18 +36,83 @@ export function getQueryName(queryString: string): string {
 }
 
 /**
- * Check if error is a rate limit error
+ * Determine cache tags and revalidation time based on query type
+ * Following Next.js caching best practices: https://nextjs.org/docs/app/guides/caching
  */
-export function isRateLimitError(error: { message?: string }): boolean {
-  const message = error.message?.toLowerCase() || ''
-  return message.includes('rate limit') || message.includes('too many requests')
-}
+export function getCacheConfig(query: string, variables?: Record<string, unknown>): {
+  tags: string[]
+  revalidate: number
+} {
+  const queryName = getQueryName(query)
+  const queryLower = query.toLowerCase()
+  
+  // Extract variables for dynamic tags
+  const mediaId = variables?.id as number | undefined
+  const season = variables?.season as string | undefined
+  const seasonYear = variables?.seasonYear as number | undefined
 
-/**
- * Format GraphQL errors into a single error message
- */
-export function formatGraphQLErrors(errors: ReadonlyArray<{ message?: string | null }>): string {
-  return errors.map((e) => e.message || 'Unknown error').join(', ')
+  // Determine cache tags based on query type
+  const tags: string[] = []
+  let revalidate = 600 // Default: 10 minutes
+
+  // Schedule queries - real-time data (revalidate every minute)
+  if (queryLower.includes('airingschedule') || queryLower.includes('scheduleanime')) {
+    tags.push(CACHE_TAGS.ANIME_SCHEDULE)
+    revalidate = 60 // 1 minute
+  }
+  // Upcoming airing queries - real-time data
+  else if (queryLower.includes('upcoming') || queryName.toLowerCase().includes('upcoming')) {
+    tags.push(CACHE_TAGS.ANIME_UPCOMING)
+    revalidate = 60 // 1 minute
+  }
+  // Anime detail queries - daily updates
+  else if (queryLower.includes('media(id:') || queryLower.includes('animebyid') || mediaId) {
+    tags.push(CACHE_TAGS.ANIME_DETAIL)
+    if (mediaId) {
+      tags.push(CACHE_TAGS.animeById(mediaId))
+    }
+    revalidate = 86400 // 1 day
+  }
+  // Trending queries - frequently updated (every 10 minutes)
+  else if (queryLower.includes('trending') || queryName.toLowerCase().includes('trending')) {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    tags.push(CACHE_TAGS.TRENDING)
+    revalidate = 600 // 10 minutes
+  }
+  // Popular queries - frequently updated (every 10 minutes)
+  else if (queryLower.includes('popular') || queryName.toLowerCase().includes('popular')) {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    tags.push(CACHE_TAGS.POPULAR)
+    revalidate = 600 // 10 minutes
+  }
+  // Seasonal queries - hourly updates
+  else if (queryLower.includes('season') || queryName.toLowerCase().includes('seasonal')) {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    tags.push(CACHE_TAGS.SEASONAL)
+    if (season && seasonYear) {
+      tags.push(CACHE_TAGS.animeBySeason(season, seasonYear))
+    }
+    revalidate = 3600 // 1 hour
+  }
+  // Top rated queries - hourly updates
+  else if (queryLower.includes('top') || queryName.toLowerCase().includes('toprated')) {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    tags.push(CACHE_TAGS.TOP_RATED)
+    revalidate = 3600 // 1 hour
+  }
+  // Search queries - frequently updated (every 10 minutes)
+  else if (queryLower.includes('search') || queryName.toLowerCase().includes('search')) {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    tags.push(CACHE_TAGS.ANIME_SEARCH)
+    revalidate = 600 // 10 minutes
+  }
+  // Default - general anime list
+  else {
+    tags.push(CACHE_TAGS.ANIME_LIST)
+    revalidate = 600 // 10 minutes
+  }
+
+  return { tags, revalidate }
 }
 
 /**
@@ -72,12 +137,19 @@ export function handleGraphQLErrors(result: ExecutionResult<unknown>): never {
     throw new Error('Unknown GraphQL error')
   }
 
-  const rateLimitError = result.errors.find(isRateLimitError)
+  // Check for rate limit errors
+  const rateLimitError = result.errors.find((e) => {
+    const message = e.message?.toLowerCase() || ''
+    return message.includes('rate limit') || message.includes('too many requests')
+  })
+  
   if (rateLimitError) {
     throw new Error('Rate limit exceeded. Please wait a moment and try again.')
   }
 
-  throw new Error(formatGraphQLErrors(result.errors))
+  // Format and throw error message
+  const errorMessage = result.errors.map((e) => e.message || 'Unknown error').join(', ')
+  throw new Error(errorMessage)
 }
 
 // ============================================================================
@@ -226,11 +298,13 @@ export function batchGraphQLRequest(
 /**
  * Shared server-side fetch function
  * Used by both execute() and executeGraphQL()
+ * Now supports Next.js caching
+ * Can also be used by API routes
  */
-async function fetchGraphQLServer<T>(
+export async function fetchGraphQLServer<T>(
   query: string,
   variables?: unknown,
-  options?: { signal?: AbortSignal; revalidate?: number }
+  options?: { signal?: AbortSignal; revalidate?: number; tags?: string[] }
 ): Promise<ExecutionResult<T>> {
   const response = await fetch(ANILIST_API_URL, {
     method: 'POST',
@@ -243,7 +317,11 @@ async function fetchGraphQLServer<T>(
       variables: variables || undefined,
     }),
     signal: options?.signal,
-    ...(options?.revalidate !== undefined && { next: { revalidate: options.revalidate } }),
+    cache: 'force-cache', // Explicitly opt into Data Cache
+    next: {
+      ...(options?.revalidate !== undefined && { revalidate: options.revalidate }),
+      ...(options?.tags && { tags: options.tags }),
+    },
   })
 
   if (!response.ok) {
@@ -256,25 +334,50 @@ async function fetchGraphQLServer<T>(
 /**
  * Execute GraphQL query on server-side (for typed execute function)
  * Used by graphql/execute.ts
+ * Supports optional caching configuration
  */
 export async function executeServerGraphQL<TResult>(
   query: string,
   variables: unknown,
-  signal: AbortSignal
+  signal: AbortSignal,
+  options?: { tags?: string[]; revalidate?: number }
 ): Promise<ExecutionResult<TResult>> {
-  return fetchGraphQLServer<TResult>(query, variables, { signal })
+  // Use dynamic cache configuration if not explicitly provided
+  const cacheConfig = options?.tags && options?.revalidate
+    ? { tags: options.tags, revalidate: options.revalidate }
+    : getCacheConfig(query, variables as Record<string, unknown>)
+
+  return fetchGraphQLServer<TResult>(query, variables, {
+    signal,
+    revalidate: cacheConfig.revalidate,
+    tags: cacheConfig.tags,
+  })
 }
 
 /**
  * Execute GraphQL query on server-side (for metadata generation)
  * Used for server components and generateMetadata functions
+ * Now supports Next.js caching with dynamic cache configuration
  */
 export async function executeGraphQL<T = unknown>(
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  options?: { tags?: string[]; revalidate?: number }
 ): Promise<GraphQLResult<T>> {
   try {
-    const result = await fetchGraphQLServer<T>(query, variables, { revalidate: CACHE_TIMES.SHORT })
+    // Use dynamic cache configuration if not explicitly provided
+    const cacheConfig = options?.tags && options?.revalidate
+      ? { tags: options.tags, revalidate: options.revalidate }
+      : getCacheConfig(query, variables)
+
+    const result = await fetchGraphQLServer<T>(
+      query,
+      variables,
+      {
+        revalidate: cacheConfig.revalidate,
+        tags: cacheConfig.tags,
+      }
+    )
     
     if (result.errors && result.errors.length > 0) {
       return {

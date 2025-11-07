@@ -2,11 +2,11 @@
  * Error state for anime list
  */
 
-type AnimeListErrorProps = {
+type ErrorProps = {
   onRetry: () => void
 }
 
-export function AnimeListError({ onRetry }: AnimeListErrorProps) {
+export function Error({ onRetry }: ErrorProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-12">
       <p className="text-red-400">Error loading anime. Please try again.</p>

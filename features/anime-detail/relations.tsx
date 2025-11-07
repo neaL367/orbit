@@ -1,7 +1,7 @@
 import { AnimeCard } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
-type AnimeDetailRelationsProps = {
+type RelationsProps = {
   relations: Array<{
     node?:
       | ({
@@ -12,7 +12,7 @@ type AnimeDetailRelationsProps = {
   } | null>
 }
 
-export function AnimeDetailRelations({ relations }: AnimeDetailRelationsProps) {
+export function Relations({ relations }: RelationsProps) {
   if (relations.length === 0) return null
 
   return (
@@ -31,3 +31,4 @@ export function AnimeDetailRelations({ relations }: AnimeDetailRelationsProps) {
     </div>
   )
 }
+

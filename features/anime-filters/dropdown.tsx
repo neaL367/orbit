@@ -23,7 +23,7 @@ type FilterCategory = {
   isMultiSelect: boolean
 }
 
-type AddFilterDropdownProps = {
+type DropdownProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   categories: FilterCategory[]
@@ -31,12 +31,12 @@ type AddFilterDropdownProps = {
   onOptionSelect: (categoryKey: string, optionValue: string, isMultiSelect: boolean) => void
 }
 
-export function AddFilterDropdown({
+export function Dropdown({
   open,
   onOpenChange,
   categories,
   onOptionSelect,
-}: AddFilterDropdownProps) {
+}: DropdownProps) {
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>

@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import type { Route } from "next"
 
-type AnimeDetailTrailerProps = {
+type TrailerProps = {
   trailer: Media["trailer"]
   title: string
 }
 
-export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) {
+export function Trailer({ trailer, title }: TrailerProps) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   if (!trailer || !trailer.id) return null
@@ -99,3 +99,4 @@ export function AnimeDetailTrailer({ trailer, title }: AnimeDetailTrailerProps) 
     </div>
   )
 }
+

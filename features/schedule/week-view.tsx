@@ -4,10 +4,10 @@ import { useMemo, useState, useEffect } from 'react'
 import { UpcomingAiringCarousel } from '@/features/anime-carousel'
 import { AiringNow } from './airing-now'
 import { DaySection } from './day-section'
-import { formatTime, getStreamingLinks } from './schedule-utils'
+import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/graphql/graphql'
 
-type ScheduleWeekViewProps = {
+type WeekViewProps = {
   schedules: AiringSchedule[]
 }
 
@@ -21,7 +21,7 @@ const DAYS_OF_WEEK = [
   { index: 0, name: 'Sunday' },
 ] as const
 
-export function ScheduleWeekView({ schedules }: ScheduleWeekViewProps) {
+export function WeekView({ schedules }: WeekViewProps) {
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
 
   // Update current time every minute
@@ -35,36 +35,44 @@ export function ScheduleWeekView({ schedules }: ScheduleWeekViewProps) {
 
   const { airingNowSchedules, schedulesByDay } = useMemo(() => {
     const airingNow: AiringSchedule[] = []
-    const grouped: Record<number, AiringSchedule[]> = {
-      1: [], // Monday
-      2: [], // Tuesday
-      3: [], // Wednesday
-      4: [], // Thursday
-      5: [], // Friday
-      6: [], // Saturday
-      0: [], // Sunday
+    const grouped: Record<number, Record<string, AiringSchedule[]>> = {
+      1: {}, // Monday
+      2: {}, // Tuesday
+      3: {}, // Wednesday
+      4: {}, // Thursday
+      5: {}, // Friday
+      6: {}, // Saturday
+      0: {}, // Sunday
     }
 
-    // Process all schedules (deduplication by schedule ID is already done in schedule-content.tsx)
+    // Process all schedules (deduplication by schedule ID is already done in content.tsx)
     schedules.forEach((schedule) => {
       const airingAt = schedule.airingAt
       const date = new Date(airingAt * 1000)
       const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const format = schedule.media?.format
+      const formatKey = format ? String(format) : 'UNKNOWN'
 
       // Check if airing now (within 30 minutes window)
       if (airingAt <= now && airingAt + 1800 >= now) {
         airingNow.push(schedule)
       }
 
-      grouped[dayOfWeek].push(schedule)
+      // Group by format within each day
+      if (!grouped[dayOfWeek][formatKey]) {
+        grouped[dayOfWeek][formatKey] = []
+      }
+      grouped[dayOfWeek][formatKey].push(schedule)
     })
 
     // Sort airing now by airing time
     airingNow.sort((a, b) => a.airingAt - b.airingAt)
 
-    // Sort each day's schedules by airing time
+    // Sort each day's format groups by airing time
     Object.keys(grouped).forEach((day) => {
-      grouped[Number(day)].sort((a, b) => a.airingAt - b.airingAt)
+      Object.keys(grouped[Number(day)]).forEach((format) => {
+        grouped[Number(day)][format].sort((a, b) => a.airingAt - b.airingAt)
+      })
     })
 
     return {
@@ -119,7 +127,7 @@ export function ScheduleWeekView({ schedules }: ScheduleWeekViewProps) {
         <DaySection
           dayName={displayDays.today.name}
           isToday={true}
-          schedules={schedulesByDay[displayDays.today.index]}
+          schedulesByFormat={schedulesByDay[displayDays.today.index]}
           formatTime={formatTime}
           getStreamingLinks={getStreamingLinks}
         />
@@ -130,7 +138,7 @@ export function ScheduleWeekView({ schedules }: ScheduleWeekViewProps) {
         <DaySection
           key={dayIndex}
           dayName={dayName}
-          schedules={schedulesByDay[dayIndex]}
+          schedulesByFormat={schedulesByDay[dayIndex]}
           formatTime={formatTime}
           getStreamingLinks={getStreamingLinks}
         />
@@ -138,4 +146,4 @@ export function ScheduleWeekView({ schedules }: ScheduleWeekViewProps) {
     </div>
   )
 }
-<UpcomingAiringCarousel hideViewAll className="h-full flex flex-col" />
+

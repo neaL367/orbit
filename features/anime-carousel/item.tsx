@@ -9,7 +9,7 @@ import { getAnimeTitle, formatTimeUntilAiringDetailed } from "@/features/shared"
 import { useCountdownTimer } from "../../hooks/use-countdown-timer"
 import type { Media } from "@/graphql/graphql"
 
-type CarouselItemProps = {
+type ItemProps = {
   anime: Media
   index: number
   current: number
@@ -17,13 +17,13 @@ type CarouselItemProps = {
   loadedImages: Set<number>
 }
 
-export function UpcomingAiringCarouselItem({
+export function Item({
   anime,
   index,
   current,
   onImageLoad,
   loadedImages,
-}: CarouselItemProps) {
+}: ItemProps) {
   const title = getAnimeTitle(anime)
   const bannerImage = anime.bannerImage || anime.coverImage?.large || anime.coverImage?.medium
   const coverColor = anime.coverImage?.color || "#1a1a1a"
@@ -120,3 +120,4 @@ export function UpcomingAiringCarouselItem({
     </CarouselItem>
   )
 }
+

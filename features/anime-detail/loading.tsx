@@ -1,4 +1,4 @@
-export function AnimeDetailLoading() {
+export function Loading() {
   return (
     <div className="min-h-[70dvh] bg-black text-white">
       <div className="container mx-auto py-8">

@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Clock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { getAnimeTitle } from '@/features/shared'
+import { getAnimeTitle, formatTimeUntilAiring } from '@/features/shared'
+import { useCountdownTimer } from '@/hooks/use-countdown-timer'
 import type { AiringSchedule } from '@/graphql/graphql'
 import type { Route } from 'next'
 
@@ -26,6 +27,9 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
   const coverImage = media.coverImage?.large || media.coverImage?.medium
   const format = media.format
   const streamingLinks = getStreamingLinks(schedule)
+  
+  const timeUntilAiring = useCountdownTimer(schedule.timeUntilAiring)
+  const timeUntilAiringFormatted = formatTimeUntilAiring(timeUntilAiring)
 
   return (
     <Card className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all group">
@@ -37,12 +41,12 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
               href={`/anime/${media.id}` as Route}
               className="shrink-0"
             >
-              <div className="relative w-20 h-28 rounded overflow-hidden">
+              <div className="relative w-24 h-36 sm:w-28 sm:h-40 rounded overflow-hidden">
                 <Image
                   src={coverImage}
                   alt={title}
                   fill
-                  sizes="80px"
+                  sizes="(max-width: 640px) 96px, 112px"
                   className="object-cover group-hover:scale-105 transition-transform"
                 />
               </div>
@@ -56,6 +60,12 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
               <span className="text-xs font-semibold text-zinc-300 bg-zinc-800 px-2 py-1 rounded">
                 {formatTime(schedule.airingAt)}
               </span>
+              {timeUntilAiringFormatted && timeUntilAiring > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded">
+                  <Clock className="h-3 w-3" />
+                  {timeUntilAiringFormatted}
+                </span>
+              )}
               <Badge 
                 variant="outline" 
                 className="text-[10px] px-2 py-0.5 border-zinc-700 text-zinc-300"
@@ -77,7 +87,7 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
               href={`/anime/${media.id}` as Route}
               className="block"
             >
-              <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight hover:text-zinc-300 transition-colors">
+              <h3 className="text-sm font-semibold text-white line-clamp-1 leading-tight hover:text-zinc-300 transition-colors">
                 {title}
               </h3>
             </Link>

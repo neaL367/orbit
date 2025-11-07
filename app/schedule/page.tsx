@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense } from 'react'
-import { ScheduleContent } from '@/features/schedule/schedule-content'
+import { Content } from '@/features/schedule'
 
 export default function SchedulePage() {
   return (
@@ -28,7 +28,7 @@ export default function SchedulePage() {
         </div>
       }
     >
-      <ScheduleContent />
+      <Content />
     </Suspense>
   )
 }

@@ -3,16 +3,18 @@
 import { Suspense, useMemo, useCallback, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useDebouncedCallback } from 'use-debounce'
-import { Search } from 'lucide-react'
+import { Search, ArrowUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useAnimeList } from '@/hooks/use-anime-list'
 import { AnimeCard, BackButton } from '@/features/shared'
-import { AnimeFilters } from '@/features/anime-filters'
+import { Filters } from '@/features/anime-filters'
 import {
-  AnimeListLoading,
-  AnimeListError,
-  AnimeListEmpty,
-  AnimeListLoadMore,
+  Loading,
+  Error,
+  Empty,
+  LoadMore,
 } from '@/features/anime-list'
 import type { Route } from 'next'
 
@@ -49,11 +51,40 @@ function AnimeListContent() {
   const year = searchParams.get('year') || undefined
 
   const [searchInput, setSearchInput] = useState(searchQuery)
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
 
   // Update local state when URL search param changes
   useEffect(() => {
     setSearchInput(searchQuery)
   }, [searchQuery])
+
+  // Handle scroll to top button visibility
+  useEffect(() => {
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY || document.documentElement.scrollTop
+          setShowScrollToTop(scrollY > 400) // Show button after scrolling 400px
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }, [])
 
   const {
     animeList,
@@ -116,16 +147,16 @@ function AnimeListContent() {
                 className="pl-10 bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:border-zinc-700"
               />
             </div>
-              <AnimeFilters />
+              <Filters />
           </div>
 
         </div>
 
         {isLoading && animeList.length === 0 && (
-          <AnimeListLoading count={perPage} />
+          <Loading count={perPage} />
         )}
 
-        {error && <AnimeListError onRetry={() => refetch()} />}
+        {error && <Error onRetry={() => refetch()} />}
 
         {animeList.length > 0 && (
           <>
@@ -137,7 +168,7 @@ function AnimeListContent() {
               })}
             </div>
 
-            <AnimeListLoadMore
+            <LoadMore
               onLoadMore={handleLoadMore}
               isLoading={isFetchingNextPage}
               hasMore={hasNextPage}
@@ -145,8 +176,22 @@ function AnimeListContent() {
           </>
         )}
 
-        {!isLoading && !error && animeList.length === 0 && <AnimeListEmpty />}
+        {!isLoading && !error && animeList.length === 0 && <Empty />}
       </div>
+
+      {/* Scroll to Top Button */}
+      <Button
+        onClick={scrollToTop}
+        className={cn(
+          'fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 shadow-lg transition-all duration-300',
+          showScrollToTop
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        )}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5 text-white" />
+      </Button>
     </div>
   )
 }
@@ -157,7 +202,7 @@ export default function AnimeListPage() {
       fallback={
         <div className="min-h-screen bg-black text-white">
           <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
-            <AnimeListLoading count={24} />
+            <Loading count={24} />
           </div>
         </div>
       }
@@ -166,4 +211,3 @@ export default function AnimeListPage() {
     </Suspense>
   )
 }
-

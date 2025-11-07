@@ -7,11 +7,11 @@ import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } fr
 import type { Media } from "@/graphql/graphql"
 import { Star, Flame, Calendar, Clock, ChevronDown } from "lucide-react"
 
-type AnimeDetailHeroContentProps = {
+type HeroContentProps = {
   anime: Media
 }
 
-export function AnimeDetailHeroContent({ anime }: AnimeDetailHeroContentProps) {
+export function HeroContent({ anime }: HeroContentProps) {
   const [coverLoaded, setCoverLoaded] = useState(false)
 
   const title = getAnimeTitle(anime)

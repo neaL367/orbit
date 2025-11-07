@@ -1,10 +1,10 @@
 "use client"
 
-type AnimeDetailSynopsisProps = {
+type SynopsisProps = {
   description?: string | null
 }
 
-export function AnimeDetailSynopsis({ description }: AnimeDetailSynopsisProps) {
+export function Synopsis({ description }: SynopsisProps) {
   if (!description) return null
 
   return (

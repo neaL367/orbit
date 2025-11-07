@@ -4,11 +4,11 @@ import { useMemo } from 'react'
 import { useGraphQL } from '@/hooks/use-graphql'
 import { ScheduleAnimeQuery } from '@/queries/media'
 import { CACHE_TIMES } from '@/lib/constants'
-import { ScheduleWeekView } from './schedule-week-view'
+import { WeekView } from './week-view'
 import { BackButton } from '@/features/shared'
 import type { AiringSchedule } from '@/graphql/graphql'
 
-export function ScheduleContent() {
+export function Content() {
   const { data, isLoading, error } = useGraphQL(
     ScheduleAnimeQuery,
     {
@@ -18,7 +18,7 @@ export function ScheduleContent() {
     },
     {
       enabled: true,
-      staleTime: CACHE_TIMES.SHORT,
+      staleTime: CACHE_TIMES.MEDIUM,
       retry: 3,
     }
   )
@@ -73,7 +73,7 @@ export function ScheduleContent() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
         <BackButton className="mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
-        <ScheduleWeekView schedules={schedules} />
+        <WeekView schedules={schedules} />
       </div>
     </div>
   )

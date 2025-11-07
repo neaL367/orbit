@@ -1,4 +1,4 @@
-export { AnimeFilters } from './anime-filters'
-export { FilterButtonGroup } from './filter-button-group'
-export { AddFilterDropdown } from './add-filter-dropdown'
+export { Filters } from './filters'
+export { FilterButtonGroup } from './button-group'
+export { Dropdown } from './dropdown'
 export * from './constants'

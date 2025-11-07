@@ -3,14 +3,15 @@
 import { useMemo } from "react"
 import { FilterX, Tags, Calendar, Clock, Film, PlayCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { FilterButtonGroup, AddFilterDropdown, COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "@/features/anime-filters"
+import { cn } from "@/lib/utils"
+import { FilterButtonGroup, Dropdown, COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "@/features/anime-filters"
 import { useAnimeFilters } from "@/hooks/use-anime-filters"
 
-type AnimeFiltersProps = {
+type FiltersProps = {
   className?: string
 }
 
-export function AnimeFilters({ className }: AnimeFiltersProps) {
+export function Filters({ className }: FiltersProps) {
   const {
     years,
     genres,
@@ -120,9 +121,9 @@ export function AnimeFilters({ className }: AnimeFiltersProps) {
   }
 
   return (
-    <div className={`${className}`}>
+    <div className={cn(className)}>
       <div className="flex items-center gap-2 flex-wrap">
-        <AddFilterDropdown
+        <Dropdown
           open={open}
           onOpenChange={setOpen}
           categories={filterCategories}
@@ -164,3 +165,4 @@ export function AnimeFilters({ className }: AnimeFiltersProps) {
     </div>
   )
 }
+

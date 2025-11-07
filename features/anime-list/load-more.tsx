@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button"
 
-type AnimeListLoadMoreProps = {
+type LoadMoreProps = {
   onLoadMore: () => void
   isLoading: boolean
   hasMore: boolean
 }
 
-export function AnimeListLoadMore({ onLoadMore, isLoading, hasMore }: AnimeListLoadMoreProps) {
+export function LoadMore({ onLoadMore, isLoading, hasMore }: LoadMoreProps) {
   if (!hasMore) {
     return (
       <div className="text-center py-8 text-zinc-400">

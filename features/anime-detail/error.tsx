@@ -1,10 +1,10 @@
 import Link from 'next/link'
 
-type AnimeDetailErrorProps = {
+type ErrorProps = {
   onRetry?: () => void
 }
 
-export function AnimeDetailError({ onRetry }: AnimeDetailErrorProps) {
+export function Error({ onRetry }: ErrorProps) {
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center">
       <div className="text-center">

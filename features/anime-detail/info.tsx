@@ -1,13 +1,13 @@
 "use client"
 
 import type { Media } from "@/graphql/graphql"
-import { AnimeDetailExternalLinks } from "@/features/anime-detail"
+import { ExternalLinks } from "@/features/anime-detail"
 
-type AnimeDetailInfoProps = {
+type InfoProps = {
   anime: Media
 }
 
-export function AnimeDetailInfo({ anime }: AnimeDetailInfoProps) {
+export function Info({ anime }: InfoProps) {
   const format = anime?.format
   const episodes = anime?.episodes
   const duration = anime?.duration
@@ -130,7 +130,7 @@ export function AnimeDetailInfo({ anime }: AnimeDetailInfoProps) {
 
       {/* External Links */}
       <div className="pt-4 border-t border-zinc-800">
-        <AnimeDetailExternalLinks externalLinks={externalLinks} />
+        <ExternalLinks externalLinks={externalLinks} />
       </div>
     </div>
   )

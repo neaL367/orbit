@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils"
 import { getAnimeTitle, BackButton } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
-type AnimeDetailHeroProps = {
+type HeroProps = {
     anime: Media
 }
 
-export function AnimeDetailHero({ anime }: AnimeDetailHeroProps) {
+export function Hero({ anime }: HeroProps) {
     const [bannerLoaded, setBannerLoaded] = useState(false)
 
     const title = getAnimeTitle(anime)

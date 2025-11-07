@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import { cn } from '@/lib/utils'
-import { hexToRgba, getAnimeTitle } from './utils/anime-utils'
+import { hexToRgba, getAnimeTitle } from '../utils/anime-utils'
 import type { Media } from '@/graphql/graphql'
 import type { Route } from 'next'
 
@@ -302,3 +302,4 @@ export const AnimeCard = memo(AnimeCardComponent, (prevProps, nextProps) => {
   return prevProps.anime.id === nextProps.anime.id && 
          prevProps.rank === nextProps.rank
 })
+

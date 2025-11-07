@@ -10,7 +10,7 @@ import type { Route } from "next"
 
 type ExternalLink = NonNullable<Media["externalLinks"]>[number]
 
-type AnimeDetailExternalLinksProps = {
+type ExternalLinksProps = {
   externalLinks: Array<ExternalLink | null>
 }
 
@@ -66,7 +66,7 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
   )
 }
 
-export function AnimeDetailExternalLinks({ externalLinks }: AnimeDetailExternalLinksProps) {
+export function ExternalLinks({ externalLinks }: ExternalLinksProps) {
   const allExternalLinks = externalLinks.filter(
     (link) => link?.url && !link.isDisabled
   )

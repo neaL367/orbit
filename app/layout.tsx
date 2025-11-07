@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { Navbar } from "@/features/shared";
+import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
 const geistSans = Geist({
@@ -56,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} antialiased dark bg-black`}
+        className={cn(geistSans.variable, 'antialiased dark bg-black')}
       >
         <Navbar />
         <main>

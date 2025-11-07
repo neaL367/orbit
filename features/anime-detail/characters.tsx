@@ -7,11 +7,11 @@ import type { Media } from "@/graphql/graphql"
 
 type CharacterEdge = NonNullable<NonNullable<Media["characters"]>["edges"]>[number]
 
-type AnimeDetailCharactersProps = {
+type CharactersProps = {
   characters: Array<CharacterEdge | null>
 }
 
-export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps) {
+export function Characters({ characters }: CharactersProps) {
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   
   const validCharacters = characters.filter((edge) => edge?.node).slice(0, 12)
@@ -118,3 +118,4 @@ export function AnimeDetailCharacters({ characters }: AnimeDetailCharactersProps
     </div>
   )
 }
+

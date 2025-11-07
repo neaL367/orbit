@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 import type { Route } from 'next'
 
 type ErrorStateProps = {
@@ -23,7 +24,7 @@ export function ErrorState({
   className = '',
 }: ErrorStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center gap-4 py-12 ${className}`}>
+    <div className={cn('flex flex-col items-center justify-center gap-4 py-12', className)}>
       <p className="text-red-400">{message}</p>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         {onRetry && (

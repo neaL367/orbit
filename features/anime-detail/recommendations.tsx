@@ -1,13 +1,13 @@
 import { AnimeCard } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
-type AnimeDetailRecommendationsProps = {
+type RecommendationsProps = {
   recommendations: Array<{
     mediaRecommendation?: Media | null
   } | null>
 }
 
-export function AnimeDetailRecommendations({ recommendations }: AnimeDetailRecommendationsProps) {
+export function Recommendations({ recommendations }: RecommendationsProps) {
   if (recommendations.length === 0) return null
 
   return (
@@ -26,3 +26,4 @@ export function AnimeDetailRecommendations({ recommendations }: AnimeDetailRecom
     </div>
   )
 }
+
