@@ -1,8 +1,7 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { UpcomingAiringCarousel } from '@/features/anime-carousel'
-import { AiringNow } from './airing-now'
 import { DaySection } from './day-section'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/graphql/graphql'
@@ -22,19 +21,8 @@ const DAYS_OF_WEEK = [
 ] as const
 
 export function WeekView({ schedules }: WeekViewProps) {
-  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
 
-  // Update current time every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(Math.floor(Date.now() / 1000))
-    }, 60000) // Update every minute
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const { airingNowSchedules, schedulesByDay } = useMemo(() => {
-    const airingNow: AiringSchedule[] = []
+  const schedulesByDay = useMemo(() => {
     const grouped: Record<number, Record<string, AiringSchedule[]>> = {
       1: {}, // Monday
       2: {}, // Tuesday
@@ -53,20 +41,12 @@ export function WeekView({ schedules }: WeekViewProps) {
       const format = schedule.media?.format
       const formatKey = format ? String(format) : 'UNKNOWN'
 
-      // Check if airing now (within 30 minutes window)
-      if (airingAt <= now && airingAt + 1800 >= now) {
-        airingNow.push(schedule)
-      }
-
       // Group by format within each day
       if (!grouped[dayOfWeek][formatKey]) {
         grouped[dayOfWeek][formatKey] = []
       }
       grouped[dayOfWeek][formatKey].push(schedule)
     })
-
-    // Sort airing now by airing time
-    airingNow.sort((a, b) => a.airingAt - b.airingAt)
 
     // Sort each day's format groups by airing time
     Object.keys(grouped).forEach((day) => {
@@ -75,11 +55,8 @@ export function WeekView({ schedules }: WeekViewProps) {
       })
     })
 
-    return {
-      airingNowSchedules: airingNow,
-      schedulesByDay: grouped,
-    }
-  }, [schedules, now])
+    return grouped
+  }, [schedules])
 
   const todayIndex = new Date().getDay()
 
@@ -112,14 +89,9 @@ export function WeekView({ schedules }: WeekViewProps) {
 
   return (
     <div className="space-y-12">
-      {/* Upcoming Airing Carousel and Airing Now Section - Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 h-full">
-        <div className="lg:col-span-2">
-          <UpcomingAiringCarousel hideViewAll />
-        </div>
-        <div className="lg:col-span-1">
-          <AiringNow schedules={airingNowSchedules} formatTime={formatTime} getStreamingLinks={getStreamingLinks} />
-        </div>
+      {/* Upcoming Airing Carousel */}
+      <div className="mb-12">
+        <UpcomingAiringCarousel hideViewAll />
       </div>
 
       {/* Today - Always on top */}

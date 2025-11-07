@@ -48,9 +48,6 @@ export function Info({ anime }: InfoProps) {
 
         {/* Additional Details */}
         <div>
-          <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
-            Additional Details
-          </div>
           <div className="space-y-3">
             {duration && (
               <div>

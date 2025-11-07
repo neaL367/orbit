@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/features/shared"
+import { useCurrentTime } from "@/hooks/use-current-time"
 import type { Media } from "@/graphql/graphql"
 import { Star, Flame, Calendar, Clock, ChevronDown } from "lucide-react"
 
@@ -12,6 +13,7 @@ type HeroContentProps = {
 
 export function HeroContent({ anime }: HeroContentProps) {
   const [coverLoaded, setCoverLoaded] = useState(false)
+  const now = useCurrentTime()
 
   const title = getAnimeTitle(anime)
   const subtitle = getAnimeSubtitle(anime)
@@ -30,7 +32,16 @@ export function HeroContent({ anime }: HeroContentProps) {
   const episodes = anime?.episodes
   const nextAiring = anime?.nextAiringEpisode
   const releaseDate = anime?.startDate ? formatDate(anime.startDate) : null
-  const timeUntilAiring = formatTimeUntilAiring(nextAiring?.timeUntilAiring ?? undefined)
+  
+  // Calculate time until airing from airingAt timestamp
+  const timeUntilAiring = useMemo(() => {
+    if (!nextAiring?.airingAt) return null
+    const airingAt = nextAiring.airingAt
+    const timeUntil = airingAt - now
+    return timeUntil > 0 ? timeUntil : 0
+  }, [nextAiring?.airingAt, now])
+  
+  const timeUntilAiringFormatted = formatTimeUntilAiring(timeUntilAiring ?? undefined)
 
   return (
     <div className="mb-8 sm:mb-12 lg:mb-16">
@@ -120,11 +131,11 @@ export function HeroContent({ anime }: HeroContentProps) {
           </div>
 
           {/* Next Episode Countdown */}
-          {nextAiring && timeUntilAiring && (
+          {nextAiring && timeUntilAiringFormatted && timeUntilAiring && timeUntilAiring > 0 && (
             <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-green-500/20 backdrop-blur-md border border-green-500/40 w-fit">
               <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 shrink-0" />
               <span className="text-sm sm:text-base font-semibold text-green-200">
-                Ep {nextAiring.episode} in {timeUntilAiring}
+                Ep {nextAiring.episode} in {timeUntilAiringFormatted}
               </span>
             </div>
           )}
