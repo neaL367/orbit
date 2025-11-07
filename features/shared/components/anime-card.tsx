@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useMemo, memo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -26,6 +25,13 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
     anime?.coverImage?.extraLarge || anime?.coverImage?.large || anime?.coverImage?.medium,
     [anime?.coverImage]
   )
+  const coverImageSrcSet = useMemo(() => {
+    const images = []
+    if (anime?.coverImage?.medium) images.push(`${anime.coverImage.medium} 300w`)
+    if (anime?.coverImage?.large) images.push(`${anime.coverImage.large} 600w`)
+    if (anime?.coverImage?.extraLarge) images.push(`${anime.coverImage.extraLarge} 1000w`)
+    return images.length > 0 ? images.join(', ') : undefined
+  }, [anime])
   const coverColor = useMemo(() => anime?.coverImage?.color || '#1a1a1a', [anime?.coverImage?.color])
   
   const episodes = anime?.episodes
@@ -70,12 +76,13 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
 
           {/* Image */}
           {coverImage && !imageError && (
-            <Image
+            <img
               src={coverImage}
-              alt={title}
-              fill
+              srcSet={coverImageSrcSet}
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+              alt={title}
               loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
@@ -83,7 +90,7 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
                 setImageLoaded(true)
               }}
               className={cn(
-                "object-cover transition-opacity duration-300",
+                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
                 imageLoaded ? "opacity-100" : "opacity-0"
               )}
             />

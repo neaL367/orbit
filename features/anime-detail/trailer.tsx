@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -60,16 +59,16 @@ export function Trailer({ trailer, title }: TrailerProps) {
             <div
               className="absolute inset-0 bg-zinc-800"
             />
-            <Image
+            <img
               src={trailer.thumbnail || ""}
               alt={`${title} trailer`}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               referrerPolicy="no-referrer"
               onLoad={() => setIsLoaded(true)}
               className={cn(
-                "object-cover w-full h-full transition-opacity duration-300",
+                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
                 isLoaded ? "opacity-100" : "opacity-0"
               )}
             />

@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { CarouselItem } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, formatTimeUntilAiringDetailed } from "@/features/shared"
@@ -56,19 +55,17 @@ export function Item({
 
           {/* Banner Image */}
           {bannerImage && (
-            <Image
+            <img
               src={bannerImage}
               alt={title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority={isPriority}
               loading={isPriority ? "eager" : "lazy"}
+              decoding="async"
               fetchPriority={isPriority ? "high" : "auto"}
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
               onError={() => setLocalImageLoaded(true)}
               className={cn(
-                "object-cover transition-opacity duration-300 z-10 h-full w-full rounded-xl",
+                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300 z-10 rounded-xl",
                 isImageLoaded ? "opacity-100" : "opacity-0",
               )}
             />

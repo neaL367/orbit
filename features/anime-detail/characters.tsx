@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -44,16 +43,15 @@ export function Characters({ characters }: CharactersProps) {
                   className="absolute inset-0 bg-zinc-800"
                 />
                 {characterImage ? (
-                  <Image
+                  <img
                     src={characterImage || ""}
                     alt={characterName}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    priority
+                    loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
-                      "object-cover object w-full h-full transition-opacity duration-300",
+                      "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
                       loadedImages.has(character.id) ? "opacity-100" : "opacity-0"
                     )}
                   />
@@ -87,16 +85,15 @@ export function Characters({ characters }: CharactersProps) {
                               <div
                                 className="absolute inset-0 bg-zinc-700"
                               />
-                              <Image
+                              <img
                                 src={vaImage || ""}
                                 alt={vaName}
-                                fill
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                priority
+                                loading="lazy"
+                                decoding="async"
                                 referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
-                                  "object-cover transition-opacity duration-300",
+                                  "absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300",
                                   loadedImages.has(va.id) ? "opacity-100" : "opacity-0"
                                 )}
                               />
