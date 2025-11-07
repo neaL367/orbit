@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ANILIST_API_URL } from '@/lib/constants'
+import { fetchGraphQLServer } from '@/lib/graphql'
 
+/**
+ * GraphQL API Route Handler
+ * 
+ * Purpose: Proxy for client-side GraphQL requests
+ * - Client components can't directly call external APIs (CORS)
+ * - Client-side batcher sends batched requests here
+ * - This route then uses the shared fetchGraphQLServer function
+ * 
+ * Flow: Client Component → batchGraphQLRequest → /api/graphql → fetchGraphQLServer → AniList API
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -26,25 +36,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Use the shared fetchGraphQLServer function
+    // This ensures consistent caching behavior across server and client requests
     const responses = await Promise.all(
       requests.map(async (req) => {
-        const response = await fetch(ANILIST_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            query: req.query,
-            variables: req.variables || undefined,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`)
-        }
-
-        return response.json()
+        return fetchGraphQLServer(req.query, req.variables)
       })
     )
 
@@ -58,4 +54,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

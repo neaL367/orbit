@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Geist } from "next/font/google";
+import { Suspense } from "react";
 import { Navbar } from "@/features/shared";
+import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
 const geistSans = Geist({
@@ -56,9 +58,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} antialiased dark bg-black`}
+        className={cn(geistSans.variable, 'antialiased dark bg-black')}
       >
-        <Navbar />
+        <Suspense fallback={
+          <nav className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg">
+            <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <div className="text-xl font-bold text-white">AnimeX</div>
+              </div>
+            </div>
+          </nav>
+        }>
+          <Navbar />
+        </Suspense>
         <main>
           {children}
         </main>

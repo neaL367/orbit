@@ -1,2 +1,1 @@
-export { UpcomingAiringCarousel } from './upcoming-airing-carousel'
-
+export { UpcomingAiringCarousel } from './carousel'

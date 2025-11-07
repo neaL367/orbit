@@ -1,10 +1,8 @@
-export { BackButton } from './back-button'
-export { AnimeCard } from './anime-card'
-export { Navbar } from './navbar'
-export { QueryProviders } from './query-providers'
+// Components
+export * from './components'
 
-export { ErrorState } from './error-state'
-export { LoadingSkeleton } from './loading-skeleton'
-export { SectionHeader } from './section-header'
+// Providers
+export * from './providers'
 
+// Utils
 export * from './utils/anime-utils'

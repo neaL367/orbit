@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { AnimeDetailContent } from '@/features/anime-detail'
+import { Content } from '@/features/anime-detail'
 import { AnimeByIdQuery } from '@/queries/media/anime-by-id'
 import { getAnimeTitle } from '@/features/shared'
 import { executeGraphQL } from '@/lib/graphql'
@@ -91,7 +91,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<{ animeId:
         </div>
       </div>
     }>
-      <AnimeDetailContent params={params} />
+      <Content params={params} />
     </Suspense>
   )
 }
