@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
@@ -16,6 +16,13 @@ export function HeroContent({ anime }: HeroContentProps) {
   const title = getAnimeTitle(anime)
   const subtitle = getAnimeSubtitle(anime)
   const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
+  const coverImageSrcSet = useMemo(() => {
+    const images = []
+    if (anime?.coverImage?.medium) images.push(`${anime.coverImage.medium} 300w`)
+    if (anime?.coverImage?.large) images.push(`${anime.coverImage.large} 600w`)
+    if (anime?.coverImage?.extraLarge) images.push(`${anime.coverImage.extraLarge} 1000w`)
+    return images.length > 0 ? images.join(', ') : undefined
+  }, [anime])
   const coverColor = anime?.coverImage?.color || "#0b0b0b"
   const score = anime?.averageScore ?? anime?.meanScore
   const popularity = anime?.popularity
@@ -39,6 +46,8 @@ export function HeroContent({ anime }: HeroContentProps) {
             {coverImage ? (
               <img
                 src={coverImage || "/placeholder.svg"}
+                srcSet={coverImageSrcSet}
+                sizes="(max-width: 640px) 192px, (max-width: 768px) 224px, 256px"
                 alt={`${title} cover`}
                 loading="eager"
                 decoding="async"

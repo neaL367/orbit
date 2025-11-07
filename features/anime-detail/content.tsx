@@ -14,6 +14,7 @@ import {
   Error,
   Trailer,
   Characters,
+  StreamingEpisodes,
 } from '@/features/anime-detail'
 import { useGraphQL } from '@/hooks/use-graphql'
 import { AnimeByIdQuery } from '@/queries/media/anime-by-id'
@@ -50,6 +51,7 @@ export function Content({ params }: { params: Promise<{ animeId: string }> }) {
   const recommendations = anime?.recommendations?.nodes?.filter(Boolean) || []
   const relations = anime?.relations?.edges?.filter(Boolean) || []
   const characters = anime?.characters?.edges?.filter(Boolean) || []
+  const streamingEpisodes = anime?.streamingEpisodes?.filter(Boolean) || []
   const title = anime?.title?.userPreferred || anime?.title?.romaji || anime?.title?.english || 'Unknown'
 
   return (
@@ -69,6 +71,7 @@ export function Content({ params }: { params: Promise<{ animeId: string }> }) {
           <main className="flex-1 space-y-10">
             <Synopsis description={anime.description} />
             <Trailer trailer={anime.trailer} title={title} />
+            <StreamingEpisodes streamingEpisodes={streamingEpisodes} />
             <Characters characters={characters} />
             <Recommendations recommendations={recommendations} />
             <Relations relations={relations} />
