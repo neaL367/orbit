@@ -10,6 +10,14 @@ type CharactersProps = {
   characters: Array<CharacterEdge | null>
 }
 
+function getImageSrcSet(image: { medium?: string | null; large?: string | null } | null | undefined): string | undefined {
+  if (!image) return undefined
+  const images = []
+  if (image.medium) images.push(`${image.medium} 300w`)
+  if (image.large) images.push(`${image.large} 600w`)
+  return images.length > 0 ? images.join(', ') : undefined
+}
+
 export function Characters({ characters }: CharactersProps) {
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   
@@ -34,6 +42,7 @@ export function Characters({ characters }: CharactersProps) {
           const character = edge.node
           const characterName = character.name?.full || character.name?.native || "Unknown"
           const characterImage = character.image?.large || character.image?.medium
+          const characterImageSrcSet = getImageSrcSet(character.image)
           const voiceActors = edge.voiceActors?.filter(Boolean) || []
 
           return (
@@ -45,6 +54,8 @@ export function Characters({ characters }: CharactersProps) {
                 {characterImage ? (
                   <img
                     src={characterImage || ""}
+                    srcSet={characterImageSrcSet}
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                     alt={characterName}
                     loading="lazy"
                     decoding="async"
@@ -78,6 +89,7 @@ export function Characters({ characters }: CharactersProps) {
                       if (!va) return null
                       const vaName = va.name?.full || va.name?.native || "Unknown"
                       const vaImage = va.image?.large || va.image?.medium
+                      const vaImageSrcSet = getImageSrcSet(va.image)
                       return (
                         <div key={va.id} className="flex items-center gap-2 text-xs mb-2.5">
                           {vaImage ? (
@@ -87,6 +99,8 @@ export function Characters({ characters }: CharactersProps) {
                               />
                               <img
                                 src={vaImage || ""}
+                                srcSet={vaImageSrcSet}
+                                sizes="32px"
                                 alt={vaName}
                                 loading="lazy"
                                 decoding="async"

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useMemo } from 'react'
 import { ExternalLink, Clock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +25,13 @@ type ScheduleCardProps = {
 export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }: ScheduleCardProps) {
   const title = getAnimeTitle(media)
   const coverImage = media.coverImage?.large || media.coverImage?.medium
+  const coverImageSrcSet = useMemo(() => {
+    const images = []
+    if (media.coverImage?.medium) images.push(`${media.coverImage.medium} 300w`)
+    if (media.coverImage?.large) images.push(`${media.coverImage.large} 600w`)
+    if (media.coverImage?.extraLarge) images.push(`${media.coverImage.extraLarge} 1000w`)
+    return images.length > 0 ? images.join(', ') : undefined
+  }, [media])
   const format = media.format
   const streamingLinks = getStreamingLinks(schedule)
   
@@ -43,6 +51,8 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
               <div className="relative w-24 h-36 sm:w-28 sm:h-40 rounded overflow-hidden">
                 <img
                   src={coverImage}
+                  srcSet={coverImageSrcSet}
+                  sizes="(max-width: 640px) 96px, 112px"
                   alt={title}
                   loading="lazy"
                   decoding="async"
