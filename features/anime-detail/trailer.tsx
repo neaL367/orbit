@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import type { Route } from "next"
@@ -12,13 +11,10 @@ type TrailerProps = {
 }
 
 export function Trailer({ trailer, title }: TrailerProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-
   if (!trailer || !trailer.id) return null
 
   if (trailer.site === "youtube") {
-    const embedUrl = `https://www.youtube.com/embed/${trailer.id}?autoplay=1&rel=0&hd=1&vq=hd1080&modestbranding=1`
+    const embedUrl = `https://www.youtube.com/embed/${trailer.id}?rel=0&hd=1&vq=hd1080&modestbranding=1`
 
     return (
       <div className="mt-16 space-y-8">
@@ -27,47 +23,13 @@ export function Trailer({ trailer, title }: TrailerProps) {
           <p className="text-zinc-400 text-sm md:text-base">Watch the official trailer</p>
         </div>
         <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
-          {!isPlaying ? (
-            <button
-              onClick={() => setIsPlaying(true)}
-              className="relative w-full h-full group cursor-pointer"
-              aria-label={`Play ${title} trailer`}
-            >
-              {trailer.thumbnail ? (
-                <>
-                  <div className="absolute inset-0 bg-zinc-800" />
-                  <img
-                    src={trailer.thumbnail}
-                    alt={`${title} trailer`}
-                    loading="lazy"
-                    decoding="async"
-                    onLoad={() => setIsLoaded(true)}
-                    className={cn(
-                      "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-                      isLoaded ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </>
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900" />
-              )}
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:bg-white/30 transition-colors duration-300 group-hover:scale-110">
-                  <svg className="w-12 h-12 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </div>
-            </button>
-          ) : (
-            <iframe
-              src={embedUrl}
-              title={`${title} trailer`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
-            />
-          )}
+          <iframe
+            src={embedUrl}
+            title={`${title} trailer`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+          />
         </div>
       </div>
     )
@@ -91,20 +53,14 @@ export function Trailer({ trailer, title }: TrailerProps) {
             rel="noopener noreferrer"
             className="block relative w-full h-full"
           >
-            <div
-              className="absolute inset-0 bg-zinc-800"
-            />
+            <div className="absolute inset-0 bg-zinc-800" />
             <img
               src={trailer.thumbnail || ""}
               alt={`${title} trailer`}
-              loading="eager"
+              loading="lazy"
               decoding="async"
-              fetchPriority="high"
-              referrerPolicy="no-referrer"
-              onLoad={() => setIsLoaded(true)}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-                isLoaded ? "opacity-100" : "opacity-0"
+                "absolute inset-0 w-full h-full object-cover"
               )}
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
@@ -133,4 +89,3 @@ export function Trailer({ trailer, title }: TrailerProps) {
     </div>
   )
 }
-
