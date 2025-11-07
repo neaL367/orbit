@@ -15,10 +15,9 @@ type MediaItem = Media
 type AnimeCardProps = {
   anime: MediaItem
   rank?: number
-  priority?: boolean
 }
 
-function AnimeCardComponent({ anime, rank, priority = false }: AnimeCardProps) {
+function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   
@@ -76,9 +75,7 @@ function AnimeCardComponent({ anime, rank, priority = false }: AnimeCardProps) {
               alt={title}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              priority={priority}
-              loading={priority ? "eager" : "lazy"}
-              fetchPriority={priority ? "high" : "auto"}
+              loading="lazy"
               referrerPolicy="no-referrer"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
