@@ -70,11 +70,6 @@ export function AiringNow({ schedules, formatTime, getStreamingLinks }: AiringNo
             subtitle="Episodes currently airing or recently started"
             className="mb-0"
           />
-          {hasSchedules && (
-            <Badge variant="outline" className="text-xs px-2 py-1 border-zinc-700 text-zinc-300">
-              {schedules.length}
-            </Badge>
-          )}
         </div>
       </div>
 

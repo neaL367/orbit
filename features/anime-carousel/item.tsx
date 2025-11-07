@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { CarouselItem } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, formatTimeUntilAiringDetailed } from "@/features/shared"
-import { useCountdownTimer } from "../../hooks/use-countdown-timer"
+import { useCurrentTime } from "@/hooks/use-current-time"
 import type { Media } from "@/graphql/graphql"
 
 type ItemProps = {
@@ -23,14 +23,22 @@ export function Item({
   onImageLoad,
   loadedImages,
 }: ItemProps) {
+  const now = useCurrentTime()
+
   const title = getAnimeTitle(anime)
   const bannerImage = anime.bannerImage || anime.coverImage?.large || anime.coverImage?.medium
   const coverColor = anime.coverImage?.color || "#1a1a1a"
   const nextEpisode = anime.nextAiringEpisode
-  const initialTimeUntilAiring = nextEpisode?.timeUntilAiring || 0
   const episodeNumber = nextEpisode?.episode || 0
 
-  const timeUntilAiring = useCountdownTimer(initialTimeUntilAiring)
+  // Calculate time until airing from airingAt timestamp
+  const timeUntilAiring = useMemo(() => {
+    if (!nextEpisode?.airingAt) return 0
+    const airingAt = nextEpisode.airingAt
+    const timeUntil = airingAt - now
+    return timeUntil > 0 ? timeUntil : 0
+  }, [nextEpisode?.airingAt, now])
+  
   const { days, hours, minutes, seconds } = formatTimeUntilAiringDetailed(timeUntilAiring)
 
   const isActive = current === index
