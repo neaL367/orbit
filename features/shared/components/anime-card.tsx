@@ -15,9 +15,10 @@ type MediaItem = Media
 type AnimeCardProps = {
   anime: MediaItem
   rank?: number
+  priority?: boolean
 }
 
-function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
+function AnimeCardComponent({ anime, rank, priority = false }: AnimeCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   
@@ -31,14 +32,8 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
   const episodes = anime?.episodes
   const duration = anime?.duration
   const genres = useMemo(() => anime?.genres?.filter(Boolean) || [], [anime?.genres])
-  const status = anime?.status?.toLowerCase()
   const format = anime?.format
   const year = anime?.startDate?.year
-  const description = anime?.description
-  const averageScore = anime?.averageScore
-  const popularity = anime?.popularity
-  const source = anime?.source
-  const studios = anime?.studios?.nodes
 
   const colors = useMemo(() => ({
     border: hexToRgba(coverColor, 0.3),
@@ -46,12 +41,6 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
     badgeBg: hexToRgba(coverColor, 0.4),
     badgeBorder: hexToRgba(coverColor, 0.6),
   }), [coverColor])
-
-  // Strip HTML tags from description
-  const cleanDescription = useMemo(() => {
-    if (!description) return null
-    return description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
-  }, [description])
 
   return (
     <Link 
@@ -87,7 +76,9 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
               alt={title}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-              loading="lazy"
+              priority={priority}
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
               referrerPolicy="no-referrer"
               onLoad={() => setImageLoaded(true)}
               onError={() => {
