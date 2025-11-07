@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { ExternalLink, Clock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -42,12 +41,12 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
               className="shrink-0"
             >
               <div className="relative w-24 h-36 sm:w-28 sm:h-40 rounded overflow-hidden">
-                <Image
+                <img
                   src={coverImage}
                   alt={title}
-                  fill
-                  sizes="(max-width: 640px) 96px, 112px"
-                  className="object-cover group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
               </div>
             </Link>

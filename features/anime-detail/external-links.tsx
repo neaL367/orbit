@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -40,16 +39,15 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
             className="absolute inset-0 rounded"
             style={{ backgroundColor: linkColor }}
           />
-          <Image
+          <img
             src={linkIcon}
             alt={siteName}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            priority
+            loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(
-              "object-contain transition-opacity duration-300",
+              "absolute inset-0 w-full h-full object-contain transition-opacity duration-300",
               isLoaded ? "opacity-100" : "opacity-0"
             )}
             style={{ filter: `drop-shadow(0 0 2px ${linkColor}80)` }}

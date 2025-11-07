@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/features/shared"
@@ -38,16 +37,16 @@ export function HeroContent({ anime }: HeroContentProps) {
               style={{ backgroundColor: coverColor }}
             />
             {coverImage ? (
-              <Image
+              <img
                 src={coverImage || "/placeholder.svg"}
                 alt={`${title} cover`}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 224px, 256px"
-                priority
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
-                  "object-cover transition-opacity duration-300",
+                  "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
                   coverLoaded ? "opacity-100" : "opacity-0",
                 )}
               />

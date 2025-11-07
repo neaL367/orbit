@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, BackButton } from "@/features/shared"
@@ -31,16 +30,16 @@ export function Hero({ anime }: HeroProps) {
                     style={{ backgroundColor: coverColor }}
                 />
                 {bannerImage ? (
-                    <Image
+                    <img
                         src={bannerImage || ""}
                         alt={`${title} banner`}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        priority
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
                         referrerPolicy="no-referrer"
                         onLoad={() => setBannerLoaded(true)}
                         className={cn(
-                            "object-cover transition-opacity duration-300",
+                            "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
                             bannerLoaded ? "opacity-100" : "opacity-0",
                         )}
                     />
