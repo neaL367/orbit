@@ -64,7 +64,9 @@ export function AnimeSection({ title, query, variables, viewAllHref, showRank = 
           const page = variables?.page || 1
           const perPage = variables?.perPage || 5
           const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
-          return <AnimeCard key={anime.id} anime={anime} rank={rank} />
+          // Priority for first 3 images in first section (Trending Now) for LCP
+          const isPriority = title === "Trending Now" && index < 3
+          return <AnimeCard key={anime.id} anime={anime} rank={rank} priority={isPriority} />
         })}
       </div>
     </section>
