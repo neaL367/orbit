@@ -17,15 +17,16 @@ export function HeroContent({ anime }: HeroContentProps) {
 
   const title = getAnimeTitle(anime)
   const subtitle = getAnimeSubtitle(anime)
-  const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
+  // For hero cover, use large as default (displayed at ~288px max on large screens)
+  const coverImage = anime?.coverImage?.large || anime?.coverImage?.extraLarge || anime?.coverImage?.medium
   const coverColor = anime?.coverImage?.color || "#0b0b0b"
   
-  // Generate srcset for cover image
+  // Generate srcset for cover image - hero displays at max ~288px width
   const coverSrcSet = useMemo(() => {
     const sizes = []
-    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
-    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
-    if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 200w`)
+    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 300w`)
+    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 400w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
   }, [anime])
   const score = anime?.averageScore ?? anime?.meanScore
@@ -63,6 +64,7 @@ export function HeroContent({ anime }: HeroContentProps) {
               <img
                 src={coverImage}
                 srcSet={coverSrcSet}
+                sizes="(max-width: 640px) 200px, (max-width: 1024px) 250px, 300px"
                 alt={`${title} cover`}
                 loading="eager"
                 decoding="async"

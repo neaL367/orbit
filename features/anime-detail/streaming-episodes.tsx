@@ -41,6 +41,7 @@ function StreamingEpisodeItem({ episode }: { episode: MediaStreamingEpisode | nu
               loading="lazy"
               decoding="async"
               fetchPriority="low"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               referrerPolicy="no-referrer"
               onLoad={() => setThumbnailLoaded(true)}
               className={cn(

@@ -27,18 +27,19 @@ export function Item({
   const [localImageLoaded, setLocalImageLoaded] = useState(false)
 
   const title = getAnimeTitle(anime)
+  // For carousel banners, use large as default (full width but optimized)
   const bannerImage = anime.bannerImage || anime.coverImage?.large || anime.coverImage?.medium
   const coverColor = anime.coverImage?.color || '#1a1a1a'
   const nextEpisode = anime.nextAiringEpisode
   const episodeNumber = nextEpisode?.episode || 0
 
-  // Generate srcset for banner image if multiple sizes available
+  // Generate srcset for banner image - carousel displays at full width (400-450px height)
   const bannerSrcSet = useMemo(() => {
     if (anime.bannerImage) return undefined
     const sizes = []
-    if (anime.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
-    if (anime.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
-    if (anime.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    if (anime.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 600w`)
+    if (anime.coverImage?.large) sizes.push(`${anime.coverImage.large} 1200w`)
+    if (anime.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 1600w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
   }, [anime])
 
@@ -90,6 +91,7 @@ export function Item({
             <img
               src={bannerImage}
               srcSet={bannerSrcSet}
+              sizes="100vw"
               alt={title}
               loading={isPriority ? "eager" : "lazy"}
               decoding="async"

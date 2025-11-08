@@ -24,18 +24,19 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
   const [imageError, setImageError] = useState(false)
   
   const title = useMemo(() => getAnimeTitle(anime), [anime])
+  // Use medium as default (smallest) for cards, let srcset provide larger images for bigger screens
   const coverImage = useMemo(() => 
-    anime?.coverImage?.extraLarge || anime?.coverImage?.large || anime?.coverImage?.medium,
+    anime?.coverImage?.medium || anime?.coverImage?.large || anime?.coverImage?.extraLarge,
     [anime]
   )
   const coverColor = useMemo(() => anime?.coverImage?.color || '#1a1a1a', [anime])
   
-  // Generate srcset for cover image
+  // Generate srcset for cover image - use realistic widths for card displays
   const coverSrcSet = useMemo(() => {
     const sizes = []
-    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
-    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
     if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 500w`)
+    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 700w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
   }, [anime])
   
@@ -104,6 +105,7 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
             <img
               src={coverImage}
               srcSet={coverSrcSet}
+              sizes="(max-width: 640px) 300px, (max-width: 1024px) 400px, 500px"
               alt={title}
               loading="eager"
               decoding="async"
