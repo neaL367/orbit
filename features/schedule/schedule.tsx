@@ -9,32 +9,24 @@ import { execute } from '@/graphql/execute'
 import { CACHE_TIMES } from '@/lib/constants'
 import type { AiringSchedule } from '@/graphql/graphql'
 
-// Helper function to get start and end timestamps for each day of the week
-// Returns an array of 7 day ranges, starting from today
 function getDayRanges(): Array<{ dayIndex: number; start: number; end: number }> {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const ranges: Array<{ dayIndex: number; start: number; end: number }> = []
 
-  // Generate 7 day ranges starting from today
   for (let i = 0; i < 7; i++) {
     const dayDate = new Date(today)
     dayDate.setDate(today.getDate() + i)
     
-    // Start of day (00:00:00)
     const start = new Date(dayDate)
     start.setHours(0, 0, 0, 0)
     
-    // End of day (23:59:59)
     const end = new Date(dayDate)
     end.setHours(23, 59, 59, 999)
     
-    // Calculate day index (0 = Sunday, 1 = Monday, etc.)
-    const dayIndex = dayDate.getDay()
-    
     ranges.push({
-      dayIndex,
-      start: Math.floor(start.getTime() / 1000), // Convert to Unix timestamp (seconds)
+      dayIndex: dayDate.getDay(),
+      start: Math.floor(start.getTime() / 1000),
       end: Math.floor(end.getTime() / 1000),
     })
   }
@@ -43,33 +35,62 @@ function getDayRanges(): Array<{ dayIndex: number; start: number; end: number }>
 }
 
 function ScheduleContent() {
-  // Get day ranges for the next 7 days
   const dayRanges = useMemo(() => getDayRanges(), [])
 
-  // Fetch schedules for each day in parallel
   const dayQueries = useQueries({
-    queries: dayRanges.map(({ dayIndex, start, end }) => ({
-      queryKey: ['ScheduleAnime', dayIndex, start, end],
-      queryFn: async ({ signal }) => {
-        const result = await execute(ScheduleAnimeQuery, {
-          page: 1,
-          perPage: 50,
-          notYetAired: true,
-          airingAt_greater: start,
-          airingAt_lesser: end,
-        }, { signal })
-        return result.data
-      },
-      staleTime: CACHE_TIMES.MEDIUM,
-      retry: 2,
-    })),
+    queries: dayRanges.map(({ dayIndex, start, end }, index) => {
+      const isToday = index === 0
+      return {
+        queryKey: ['ScheduleAnime', dayIndex, start, end, isToday],
+        queryFn: async ({ signal }) => {
+          if (isToday) {
+            const [finishedResult, upcomingResult] = await Promise.all([
+              execute(ScheduleAnimeQuery, {
+                page: 1,
+                perPage: 50,
+                notYetAired: false,
+                airingAt_greater: start,
+                airingAt_lesser: end,
+              }, { signal }),
+              execute(ScheduleAnimeQuery, {
+                page: 1,
+                perPage: 50,
+                notYetAired: true,
+                airingAt_greater: start,
+                airingAt_lesser: end,
+              }, { signal }),
+            ])
+            
+            const finishedSchedules = finishedResult.data?.Page?.airingSchedules || []
+            const upcomingSchedules = upcomingResult.data?.Page?.airingSchedules || []
+            
+            return {
+              ...finishedResult.data,
+              Page: {
+                ...finishedResult.data?.Page,
+                airingSchedules: [...finishedSchedules, ...upcomingSchedules],
+              },
+            }
+          }
+          
+          const result = await execute(ScheduleAnimeQuery, {
+            page: 1,
+            perPage: 50,
+            notYetAired: true,
+            airingAt_greater: start,
+            airingAt_lesser: end,
+          }, { signal })
+          return result.data
+        },
+        staleTime: CACHE_TIMES.MEDIUM,
+        retry: 2,
+      }
+    }),
   })
 
-  // Combine all schedules from all days
   const schedules = useMemo(() => {
     const allSchedules: AiringSchedule[] = []
 
-    // Collect schedules from all day queries
     dayQueries.forEach((query) => {
       if (query.data?.Page?.airingSchedules) {
         const validSchedules = query.data.Page.airingSchedules.filter(
@@ -79,49 +100,37 @@ function ScheduleContent() {
       }
     })
 
-    // Deduplicate by schedule ID first
     const seenIds = new Set<number>()
     const schedulesById = new Map<number, AiringSchedule>()
     
     for (const schedule of allSchedules) {
-      // Skip if we've already seen this schedule ID
-      if (seenIds.has(schedule.id)) {
-        continue
-      }
+      if (seenIds.has(schedule.id)) continue
       seenIds.add(schedule.id)
       schedulesById.set(schedule.id, schedule)
     }
 
-    // Group by mediaId and keep only the next episode (earliest airing time) for each anime
     const schedulesByMedia = new Map<number, AiringSchedule>()
     
     for (const schedule of schedulesById.values()) {
-      const mediaId = schedule.mediaId
-      const existing = schedulesByMedia.get(mediaId)
-      
-      // If no existing schedule for this anime, or this one airs earlier, keep this one
+      const existing = schedulesByMedia.get(schedule.mediaId)
       if (!existing || schedule.airingAt < existing.airingAt) {
-        schedulesByMedia.set(mediaId, schedule)
+        schedulesByMedia.set(schedule.mediaId, schedule)
       }
     }
 
-    // Return only the next episode for each anime
     return Array.from(schedulesByMedia.values())
   }, [dayQueries])
 
-  // Check loading and error states
   const isLoading = dayQueries.some((query) => query.isLoading)
   const error = dayQueries.find((query) => query.error)?.error
 
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
-        {/* Header Section - Always Visible */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
         </div>
 
-        {/* Content Section - Shows loading, error, or data */}
         {error ? (
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold mb-4">Error loading schedule</h1>
@@ -142,11 +151,9 @@ export function Schedule() {
     <Suspense fallback={
       <div className="min-h-screen bg-black text-white">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
-          {/* Header Section - Always Visible */}
           <div className="mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
           </div>
-          {/* Loading Skeleton - Content Only */}
           <ScheduleLoading />
         </div>
       </div>

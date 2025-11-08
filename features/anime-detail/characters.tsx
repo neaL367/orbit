@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -8,14 +9,6 @@ type CharacterEdge = NonNullable<NonNullable<Media["characters"]>["edges"]>[numb
 
 type CharactersProps = {
   characters: Array<CharacterEdge | null>
-}
-
-function getImageSrcSet(image: { medium?: string | null; large?: string | null } | null | undefined): string | undefined {
-  if (!image) return undefined
-  const images = []
-  if (image.medium) images.push(`${image.medium} 300w`)
-  if (image.large) images.push(`${image.large} 600w`)
-  return images.length > 0 ? images.join(', ') : undefined
 }
 
 export function Characters({ characters }: CharactersProps) {
@@ -42,7 +35,6 @@ export function Characters({ characters }: CharactersProps) {
           const character = edge.node
           const characterName = character.name?.full || character.name?.native || "Unknown"
           const characterImage = character.image?.large || character.image?.medium
-          const characterImageSrcSet = getImageSrcSet(character.image)
           const voiceActors = edge.voiceActors?.filter(Boolean) || []
 
           return (
@@ -53,17 +45,15 @@ export function Characters({ characters }: CharactersProps) {
                   style={{ opacity: loadedImages.has(character.id) ? 0 : 1 }}
                 />
                 {characterImage ? (
-                  <img
-                    src={characterImage || ""}
-                    srcSet={characterImageSrcSet}
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                  <Image
+                    src={characterImage}
                     alt={characterName}
+                    fill
                     loading="lazy"
-                    decoding="async"
                     referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
-                      "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                      "object-cover transition-all duration-500",
                       loadedImages.has(character.id) ? "opacity-100 scale-100" : "opacity-0 scale-105",
                       "group-hover:scale-110"
                     )}
@@ -95,23 +85,20 @@ export function Characters({ characters }: CharactersProps) {
                       if (!va) return null
                       const vaName = va.name?.full || va.name?.native || "Unknown"
                       const vaImage = va.image?.large || va.image?.medium
-                      const vaImageSrcSet = getImageSrcSet(va.image)
                       return (
                         <div key={va.id} className="flex items-center gap-1.5 text-[10px] sm:text-xs justify-center">
                           {vaImage ? (
                             <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700/50">
                               <div className="absolute inset-0 bg-zinc-700 transition-opacity duration-300" style={{ opacity: loadedImages.has(va.id) ? 0 : 1 }} />
-                              <img
-                                src={vaImage || ""}
-                                srcSet={vaImageSrcSet}
-                                sizes="28px"
+                              <Image
+                                src={vaImage}
                                 alt={vaName}
+                                fill
                                 loading="lazy"
-                                decoding="async"
                                 referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
-                                  "absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300",
+                                  "object-cover rounded-full transition-opacity duration-300",
                                   loadedImages.has(va.id) ? "opacity-100" : "opacity-0"
                                 )}
                               />
