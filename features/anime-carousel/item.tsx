@@ -40,7 +40,7 @@ export function Item({
     if (anime.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
     if (anime.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
-  }, [anime.bannerImage, anime.coverImage])
+  }, [anime])
 
   const timeUntilAiring = useMemo(() => {
     if (!nextEpisode?.airingAt) return 0

@@ -42,7 +42,7 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
     if (media.coverImage?.large) sizes.push(`${media.coverImage.large} 400w`)
     if (media.coverImage?.medium) sizes.push(`${media.coverImage.medium} 300w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
-  }, [media.coverImage])
+  }, [media])
 
   const timeUntilAiring = useMemo(() => {
     const timeUntil = schedule.airingAt - now
