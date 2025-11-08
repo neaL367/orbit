@@ -95,7 +95,7 @@ export function Characters({ characters }: CharactersProps) {
                             <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700/50">
                               <div className="absolute inset-0 bg-zinc-700 transition-opacity duration-300" style={{ opacity: loadedImages.has(va.id) ? 0 : 1 }} />
                               <img
-                                src={va.image?.medium || va.image?.large}
+                                src={vaImage}
                                 alt={vaName}
                                 width={28}
                                 height={28}
