@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -15,7 +16,7 @@ type ExternalLinksProps = {
 
 function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
   const [isLoaded, setIsLoaded] = useState(false)
-  
+
   if (!link || !link.url || link.isDisabled) return null
 
   const siteName = link.site || "External Link"
@@ -34,20 +35,20 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
       }}
     >
       {linkIcon ? (
-        <div className="relative w-4 h-4 shrink-0">
+        <div className="relative w-4 h-auto shrink-0 flex items-center justify-center">
           <div
             className="absolute inset-0 rounded"
             style={{ backgroundColor: linkColor }}
           />
-          <img
+          <Image
             src={linkIcon}
             alt={siteName}
-            loading="lazy"
-            decoding="async"
+            width={16}
+            height={16}
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(
-              "absolute inset-0 w-full h-full object-contain transition-opacity duration-300",
+              "relative object-contain transition-opacity duration-300",
               isLoaded ? "opacity-100" : "opacity-0"
             )}
             style={{ filter: `drop-shadow(0 0 2px ${linkColor}80)` }}

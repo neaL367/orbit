@@ -1,9 +1,9 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
-import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
 import type { Route } from "next"
 
@@ -68,12 +68,12 @@ function LiteYouTubeEmbed({ videoId, title }: { videoId: string; title: string }
         >
           {/* Thumbnail Image */}
           <div className="absolute inset-0">
-            <img
+            <Image
               src={thumbnailUrl}
               alt={`${title} trailer thumbnail`}
+              fill
               loading="lazy"
-              decoding="async"
-              className="w-full h-full object-cover"
+              className="object-cover"
               onError={handleImageError}
             />
             {/* Gradient Overlay */}
@@ -158,14 +158,12 @@ export function Trailer({ trailer, title }: TrailerProps) {
             className="block relative w-full h-full"
           >
             <div className="absolute inset-0 bg-zinc-800" />
-            <img
-              src={trailer.thumbnail || ""}
+            <Image
+              src={trailer.thumbnail}
               alt={`${title} trailer`}
+              fill
               loading="lazy"
-              decoding="async"
-              className={cn(
-                "absolute inset-0 w-full h-full object-cover"
-              )}
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
               <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:bg-white/30 transition-colors duration-300">
