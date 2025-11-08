@@ -55,8 +55,9 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
     >
       <Card
         className={cn(
-          'relative overflow-hidden rounded-xl border bg-zinc-900/90 transition-all duration-200',
-          'hover:-translate-y-1 will-change-transform'
+          'relative overflow-hidden rounded-xl border bg-zinc-900/90 transition-all duration-300',
+          'hover:-translate-y-2 hover:shadow-2xl will-change-transform',
+          'hover:border-opacity-60'
         )}
         style={{
           borderColor: colors.border,
@@ -67,7 +68,7 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
         <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg">
           {/* Placeholder background - always visible */}
           <div
-            className="absolute inset-0 transition-opacity duration-300"
+            className="absolute inset-0 transition-opacity duration-500"
             style={{ 
               backgroundColor: coverColor,
               opacity: imageLoaded && !imageError ? 0 : 1
@@ -90,8 +91,9 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
                 setImageLoaded(true)
               }}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-                imageLoaded ? "opacity-100" : "opacity-0"
+                "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
+                "group-hover:scale-110"
               )}
             />
           )}
@@ -100,47 +102,54 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
           {rank !== undefined && (
             <div className="absolute top-0 left-0 z-20">
               <div 
-                className="flex items-center justify-center w-9 h-9 rounded-br-xl backdrop-blur-md border-2 border-white/30 shadow-lg"
+                className="relative flex items-center justify-center min-w-[44px] h-11 px-3 rounded-br-2xl rounded-tl-lg backdrop-blur-md shadow-2xl group-hover:scale-110 transition-all duration-300 overflow-hidden"
                 style={{
-                  backgroundColor: hexToRgba(coverColor, 0.6),
-                  borderTop: 'none',
-                  borderLeft: 'none',
+                  backgroundColor: hexToRgba(coverColor, 0.85),
+                  borderRight: `2px solid ${hexToRgba(coverColor, 0.9)}`,
+                  borderBottom: `2px solid ${hexToRgba(coverColor, 0.9)}`,
+                  boxShadow: `0 4px 12px -2px ${hexToRgba(coverColor, 0.4)}, inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`,
                 }}
               >
-                <span className="text-sm font-bold text-white drop-shadow-lg">#{rank}</span>
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                {/* Rank number */}
+                <span className="relative text-sm font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-tight">
+                  #{rank}
+                </span>
               </div>
             </div>
           )}
 
           {/* Gradient overlay - stronger at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20 group-hover:from-black/90 group-hover:via-black/40 transition-all duration-300" />
 
           {/* Info Section - Overlaid at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2 z-10">
+          <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2.5 z-10">
             {/* Title */}
-            <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight drop-shadow-lg">
+            <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight drop-shadow-xl group-hover:text-zinc-100 transition-colors">
               {title}
             </h3>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            <div className="hidden sm:flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs">
               {episodes && (
-                <span className="text-white/90 drop-shadow-md font-medium">
+                <span className="text-white/95 drop-shadow-lg font-semibold bg-white/10 px-2 py-0.5 rounded-md backdrop-blur-sm">
                   {episodes} ep
                 </span>
               )}
               {duration && (
-                <span className="text-white/80 drop-shadow-md">
+                <span className="text-white/90 drop-shadow-md font-medium">
                   {duration}m
                 </span>
               )}
               {year && (
-                <span className="text-white/80 drop-shadow-md">
+                <span className="text-white/85 drop-shadow-md font-medium">
                   {year}
                 </span>
               )}
               {format && (
-                <span className="text-white/70 drop-shadow-md text-[10px] uppercase tracking-wide">
+                <span className="text-white/75 drop-shadow-md text-[10px] uppercase tracking-wider font-medium">
                   {format.replace(/_/g, ' ')}
                 </span>
               )}
@@ -148,11 +157,11 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
 
             {/* Genres */}
             {genres.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="hidden sm:flex flex-wrap gap-1.5">
                 {genres.slice(0, 2).map((genre: string | null) => (
                   <Badge
                     key={genre}
-                    className="text-[10px] font-medium px-2 py-0.5 text-white backdrop-blur-sm border"
+                    className="text-[10px] font-semibold px-2.5 py-1 text-white backdrop-blur-md border group-hover:scale-105 transition-transform duration-200"
                     style={{
                       backgroundColor: colors.badgeBg,
                       borderColor: colors.badgeBorder,

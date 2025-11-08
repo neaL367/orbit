@@ -52,13 +52,19 @@ export function Item({
   }
 
   return (
-    <CarouselItem className={cn("pl-0 w-full h-[400px] basis-full rounded-xl")}>
-      <Link href={`/anime/${anime.id}`} className={cn("h-full block")}>
-        <div className={cn("relative w-full overflow-hidden h-full rounded-xl")}>
+    <CarouselItem className={cn("pl-0 w-full h-[400px] md:h-[450px] basis-full rounded-xl")}>
+      <Link 
+        href={`/anime/${anime.id}`} 
+        className={cn("h-full block group")}
+      >
+        <div className={cn("relative w-full overflow-hidden h-full rounded-xl cursor-pointer")}>
           {/* Background Color */}
           <div
-            className="absolute inset-0 z-0 rounded-xl"
-            style={{ backgroundColor: coverColor }}
+            className="absolute inset-0 z-0 rounded-xl transition-opacity duration-500"
+            style={{ 
+              backgroundColor: coverColor,
+              opacity: isImageLoaded ? 0 : 1
+            }}
           />
 
           {/* Banner Image */}
@@ -73,19 +79,19 @@ export function Item({
               onLoad={handleImageLoad}
               onError={() => setLocalImageLoaded(true)}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity duration-300 z-10 rounded-xl",
-                isImageLoaded ? "opacity-100" : "opacity-0",
+                "absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 rounded-xl",
+                isImageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
+                "group-hover:scale-110"
               )}
             />
           )}
 
           {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-10 rounded-xl" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10 rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/30 z-10 rounded-xl group-hover:from-black/90 group-hover:via-black/60 transition-all duration-300" />
 
           {/* Episode Badge */}
           <div className="absolute top-4 right-4 z-20">
-            <div className="px-4 py-2 rounded-xl backdrop-blur-md border border-white/20 bg-black/60 shadow-lg">
+            <div className="px-4 py-2 rounded-xl backdrop-blur-md border border-white/30 bg-black/70 shadow-xl group-hover:bg-black/80 group-hover:border-white/40 transition-all duration-300">
               <p className="text-sm font-bold text-white">Episode {episodeNumber}</p>
             </div>
           </div>
@@ -93,28 +99,25 @@ export function Item({
           {/* Content Overlay */}
           <div
             className={cn(
-              "absolute bottom-0 left-0 right-0 p-6 transition-all duration-600 ease-out z-20",
+              "absolute bottom-0 left-0 right-0 p-6 md:p-8 transition-all duration-500 ease-out z-20",
               isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
             )}
-            style={{
-              animation: isActive ? "fadeUp 0.6s ease-out" : "none",
-            }}
           >
-            <h3 className="text-2xl md:text-3xl max-w-[400px] font-extrabold mb-3 line-clamp-2 text-white drop-shadow-2xl leading-tight">
+            <h3 className="text-2xl md:text-3xl lg:text-4xl max-w-[400px] font-extrabold mb-4 line-clamp-2 text-white drop-shadow-2xl leading-tight group-hover:text-zinc-100 transition-colors">
               {title}
             </h3>
 
             {timeUntilAiring > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md border border-white/20 bg-black/50">
-                  <span className="text-base font-bold text-white">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl backdrop-blur-md border border-white/30 bg-black/70 shadow-xl group-hover:bg-black/80 group-hover:border-white/40 transition-all duration-300">
+                  <span className="text-base md:text-lg font-bold text-white tabular-nums">
                     {days > 0 && `${days}d `}
                     {hours > 0 && `${hours}h `}
                     {minutes > 0 && `${minutes}m `}
-                    {seconds > 0 && `${seconds}s`}
+                    {seconds >= 0 && `${seconds}s`}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-zinc-300 uppercase tracking-wide">
+                <span className="text-sm md:text-base font-semibold text-zinc-200 uppercase tracking-wider">
                   until airing
                 </span>
               </div>

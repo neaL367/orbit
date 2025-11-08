@@ -1,5 +1,6 @@
 'use client'
 
+import { addDays, format, fromUnixTime, getDay } from 'date-fns'
 import { useMemo } from 'react'
 import { UpcomingAiringCarousel } from '@/features/anime-carousel'
 import { DaySection } from './day-section'
@@ -46,8 +47,8 @@ export function ScheduleView({ data }: ScheduleViewProps) {
     // Process all schedules (deduplication by schedule ID is already done in schedule.tsx)
     data.forEach((schedule) => {
       const airingAt = schedule.airingAt
-      const date = new Date(airingAt * 1000)
-      const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const date = fromUnixTime(airingAt)
+      const dayOfWeek = getDay(date) // 0 = Sunday, 1 = Monday, etc.
       const format = schedule.media?.format
       const formatKey = format ? String(format) : 'UNKNOWN'
 
@@ -74,22 +75,24 @@ export function ScheduleView({ data }: ScheduleViewProps) {
     return grouped
   }, [data])
 
-  const todayIndex = new Date().getDay()
+  const today = new Date()
+  const todayIndex = getDay(today)
 
   // Sort days so today appears first, then the rest in order
-  const sortedDays = useMemo(() => {
-    const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
-    if (todayDayIndex === -1) {
-      return DAYS_OF_WEEK
-    }
-    
-    // Reorder: today first, then remaining days
-    return [
-      DAYS_OF_WEEK[todayDayIndex],
-      ...DAYS_OF_WEEK.slice(todayDayIndex + 1),
-      ...DAYS_OF_WEEK.slice(0, todayDayIndex)
-    ]
-  }, [todayIndex])
+  // Direct computation without useMemo for React Compiler compatibility
+  const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
+  const sortedDays = todayDayIndex === -1
+    ? DAYS_OF_WEEK
+    : [
+        DAYS_OF_WEEK[todayDayIndex],
+        ...DAYS_OF_WEEK.slice(todayDayIndex + 1),
+        ...DAYS_OF_WEEK.slice(0, todayDayIndex)
+      ]
+
+  // Format date as "15th Jan" or "1st Jan" using date-fns
+  const formatDate = (date: Date): string => {
+    return format(date, 'do MMM')
+  }
 
   return (
     <div className="space-y-12">
@@ -99,16 +102,22 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       </div>
 
       {/* All Days of the Week - Today first */}
-      {sortedDays.map(({ index: dayIndex, name: dayName }) => (
-        <DaySection
-          key={dayIndex}
-          dayName={dayName}
-          isToday={dayIndex === todayIndex}
-          schedulesByFormat={schedulesByDay[dayIndex]}
-          formatTime={formatTime}
-          getStreamingLinks={getStreamingLinks}
-        />
-      ))}
+      {sortedDays.map(({ index: dayIndex, name: dayName }, arrayIndex) => {
+        // Calculate date based on position in sorted array (today is index 0, tomorrow is index 1, etc.)
+        const date = addDays(today, arrayIndex)
+        const dateString = formatDate(date)
+        return (
+          <DaySection
+            key={dayIndex}
+            dayName={dayName}
+            dateString={dateString}
+            isToday={dayIndex === todayIndex}
+            schedulesByFormat={schedulesByDay[dayIndex]}
+            formatTime={formatTime}
+            getStreamingLinks={getStreamingLinks}
+          />
+        )
+      })}
     </div>
   )
 }

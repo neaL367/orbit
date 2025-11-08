@@ -7,6 +7,7 @@ import type { AiringSchedule } from '@/graphql/graphql'
 
 type DaySectionProps = {
   dayName: string
+  dateString?: string
   isToday?: boolean
   schedulesByFormat: Record<string, AiringSchedule[]>
   formatTime: (timestamp: number) => string
@@ -32,7 +33,8 @@ const FORMAT_LABELS: Record<string, string> = {
 }
 
 export function DaySection({ 
-  dayName, 
+  dayName,
+  dateString,
   isToday = false, 
   schedulesByFormat, 
   formatTime, 
@@ -45,46 +47,70 @@ export function DaySection({
   // Get formats in order, filtering out empty ones
   const formats = FORMAT_ORDER.filter(format => schedulesByFormat[format] && schedulesByFormat[format].length > 0)
 
+  // Determine section background for sticky header
+  const sectionBg = isToday 
+    ? 'bg-zinc-900/60' 
+    : hasSchedules 
+      ? 'bg-zinc-900/40' 
+      : 'bg-zinc-900/20'
+
   return (
     <section className={cn(
       'space-y-6 rounded-xl border-2 transition-all',
-      isToday && 'bg-zinc-900/60 border-zinc-700/50 shadow-lg shadow-zinc-900/50',
+      isToday && 'bg-zinc-950 border-zinc-700/50 shadow-lg shadow-zinc-900/50',
       !isToday && hasSchedules && 'bg-zinc-900/40 border-zinc-800/50',
       !isToday && !hasSchedules && 'bg-zinc-900/20 border-zinc-800/30'
     )}>
-      <div className="p-6 space-y-6">
-        {/* Day Header */}
+      <div className="px-6 pb-6 space-y-6">
+        {/* Day Header - Sticky */}
         <div className={cn(
-          'flex items-center gap-3 pb-4 border-b-2',
+          'sticky top-16 z-20 py-4 -mx-6 px-6 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl rounded-t-xl',
+          sectionBg,
           isToday && 'border-zinc-600/50',
           !isToday && hasSchedules && 'border-zinc-800/50',
           !isToday && !hasSchedules && 'border-zinc-800/30'
         )}>
-          <div className="flex items-center gap-3 flex-1">
-            {isToday && (
-              <div className="h-2 w-2 rounded-full bg-yellow-600 animate-pulse" />
-            )}
-            <h2 className={cn(
-              'text-2xl md:text-3xl font-bold',
-              (isToday || hasSchedules) && 'text-white',
-              !isToday && !hasSchedules && 'text-zinc-500'
-            )}>
-              {isToday && <span className="text-yellow-500 mr-2 font-semibold">Today</span>}
-              {dayName}
-            </h2>
-          </div>
-          {hasSchedules && (
-            <Badge 
-              variant="outline" 
-              className={cn(
-                'text-xs px-3 py-1',
-                isToday && 'border-blue-600/50 text-blue-300 bg-blue-950/30',
-                !isToday && 'border-zinc-700 text-zinc-300'
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              {isToday && (
+                <Badge className="px-3 py-1.5 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 border-yellow-500/50 text-yellow-400 font-semibold shadow-lg shadow-yellow-500/20 animate-pulse">
+                  Today
+                </Badge>
               )}
-            >
-              {totalSchedules} {totalSchedules === 1 ? 'anime' : 'anime'}
-            </Badge>
-          )}
+              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+                <h2 className={cn(
+                  'text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight',
+                  isToday && 'text-white',
+                  !isToday && hasSchedules && 'text-white',
+                  !isToday && !hasSchedules && 'text-zinc-500'
+                )}>
+                  {dayName}
+                </h2>
+                {dateString && (
+                  <span className={cn(
+                    'text-sm sm:text-base md:text-lg font-medium',
+                    isToday && 'text-zinc-300',
+                    !isToday && hasSchedules && 'text-zinc-400',
+                    !isToday && !hasSchedules && 'text-zinc-600'
+                  )}>
+                    {dateString}
+                  </span>
+                )}
+              </div>
+            </div>
+            {hasSchedules && (
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  'text-xs px-3 py-1 whitespace-nowrap',
+                  isToday && 'border-blue-600/50 text-blue-300 bg-blue-950/30',
+                  !isToday && 'border-zinc-700 text-zinc-300'
+                )}
+              >
+                {totalSchedules} {totalSchedules === 1 ? 'anime' : 'anime'}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {!hasSchedules ? (
@@ -92,13 +118,16 @@ export function DaySection({
             No airings scheduled
           </div>
         ) : (
-          <div className="space-y-8">
-            {formats.map((format) => {
+          <div className="divide-y divide-zinc-800/50">
+            {formats.map((format, formatIndex) => {
               const schedules = schedulesByFormat[format] || []
               if (schedules.length === 0) return null
 
               return (
-                <div key={format} className="space-y-4">
+                <div key={format} className={cn(
+                  "space-y-4",
+                  formatIndex === 0 ? "pt-0" : "pt-8"
+                )}>
                   {/* Format Header */}
                   <div className="flex items-center gap-2 pb-2 border-b border-zinc-800/50">
                     <h3 className="text-lg font-semibold text-zinc-300">
@@ -110,7 +139,7 @@ export function DaySection({
                   </div>
 
                   {/* Schedule Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8">
                     {schedules.map((schedule) => {
                       const media = schedule.media
                       if (!media) return null

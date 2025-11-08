@@ -1,12 +1,9 @@
+import { format, fromUnixTime } from 'date-fns'
 import type { AiringSchedule } from '@/graphql/graphql'
 
 export function formatTime(timestamp: number): string {
-  const date = new Date(timestamp * 1000)
-  return date.toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit',
-    hour12: true 
-  })
+  const date = fromUnixTime(timestamp)
+  return format(date, 'h:mm a')
 }
 
 export function getStreamingLinks(schedule: AiringSchedule): Array<{

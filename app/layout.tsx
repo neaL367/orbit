@@ -1,17 +1,16 @@
 import "./globals.css";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Footer, Header } from "@/features/shared";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
   preload: false,
 });
-
 
 export const metadata: Metadata = {
   metadataBase: new URL(`https://orbit-eight-rosy.vercel.app`),
@@ -54,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
-        className={cn(geistSans.variable, 'antialiased dark bg-black')}
+        className={cn(inter.variable, 'antialiased dark bg-black')}
       >
         <Header />
         <main className="min-h-[calc(100vh-4rem)]">

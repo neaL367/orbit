@@ -3,7 +3,6 @@
 import { useQueries } from '@tanstack/react-query'
 import { Suspense, useMemo } from 'react'
 import { ScheduleView } from './schedule-view'
-import { BackButton } from '@/features/shared'
 import { ScheduleLoading } from './schedule-loading'
 import { ScheduleAnimeQuery } from '@/queries/media'
 import { execute } from '@/graphql/execute'
@@ -119,7 +118,6 @@ function ScheduleContent() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
         {/* Header Section - Always Visible */}
         <div className="mb-8">
-          <BackButton className="mb-6" />
           <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
         </div>
 
@@ -146,7 +144,6 @@ export function Schedule() {
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
           {/* Header Section - Always Visible */}
           <div className="mb-8">
-            <BackButton className="mb-6" />
             <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
           </div>
           {/* Loading Skeleton - Content Only */}

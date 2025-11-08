@@ -1,7 +1,3 @@
-/**
- * Loading skeleton for schedule content only
- * Does not include page wrapper or header section
- */
 export function ScheduleLoading() {
   return (
     <div className="animate-pulse space-y-12">
