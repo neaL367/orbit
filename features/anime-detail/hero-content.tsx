@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/features/shared"
@@ -20,6 +19,15 @@ export function HeroContent({ anime }: HeroContentProps) {
   const subtitle = getAnimeSubtitle(anime)
   const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
   const coverColor = anime?.coverImage?.color || "#0b0b0b"
+  
+  // Generate srcset for cover image
+  const coverSrcSet = useMemo(() => {
+    const sizes = []
+    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
+    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
+    if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    return sizes.length > 1 ? sizes.join(', ') : undefined
+  }, [anime?.coverImage])
   const score = anime?.averageScore ?? anime?.meanScore
   const popularity = anime?.popularity
   const duration = anime?.duration
@@ -52,15 +60,17 @@ export function HeroContent({ anime }: HeroContentProps) {
               }}
             />
             {coverImage ? (
-              <Image
+              <img
                 src={coverImage}
+                srcSet={coverSrcSet}
                 alt={`${title} cover`}
-                fill
-                priority
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
-                  "object-cover transition-all duration-500",
+                  "absolute inset-0 w-full h-full object-cover transition-all duration-500",
                   coverLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
                   "group-hover:scale-105"
                 )}

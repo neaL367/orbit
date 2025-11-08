@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Play, ExternalLink, ChevronDown } from "lucide-react"
@@ -36,15 +35,16 @@ function StreamingEpisodeItem({ episode }: { episode: MediaStreamingEpisode | nu
               className="absolute inset-0 bg-zinc-800 transition-opacity duration-500"
               style={{ opacity: thumbnailLoaded ? 0 : 1 }}
             />
-            <Image
+            <img
               src={thumbnail}
               alt={title}
-              fill
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               referrerPolicy="no-referrer"
               onLoad={() => setThumbnailLoaded(true)}
               className={cn(
-                "object-cover transition-all duration-500",
+                "absolute inset-0 w-full h-full object-cover transition-all duration-500",
                 thumbnailLoaded ? "opacity-100" : "opacity-0"
               )}
             />
