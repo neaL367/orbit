@@ -17,8 +17,8 @@ export function HeroContent({ anime }: HeroContentProps) {
 
   const title = getAnimeTitle(anime)
   const subtitle = getAnimeSubtitle(anime)
-  // For hero cover, use large as default (displayed at ~288px max on large screens)
-  const coverImage = anime?.coverImage?.large || anime?.coverImage?.extraLarge || anime?.coverImage?.medium
+  // For hero cover, use medium as default to reduce initial payload (displayed at ~288px max on large screens)
+  const coverImage = anime?.coverImage?.medium || anime?.coverImage?.large || anime?.coverImage?.extraLarge
   const coverColor = anime?.coverImage?.color || "#0b0b0b"
   
   // Generate srcset for cover image - hero displays at max ~288px width
