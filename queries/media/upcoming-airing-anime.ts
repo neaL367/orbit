@@ -4,9 +4,7 @@ export const UpcomingAiringAnimeQuery = graphql(`
   query UpcomingAiringAnime($page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
-        total
         currentPage
-        lastPage
         hasNextPage
         perPage
       }

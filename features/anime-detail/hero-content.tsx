@@ -20,8 +20,6 @@ export function HeroContent({ anime }: HeroContentProps) {
   const coverImage = anime?.coverImage?.extraLarge || anime?.coverImage?.large
   const coverImageSrcSet = useMemo(() => {
     const images = []
-    if (anime?.coverImage?.medium) images.push(`${anime.coverImage.medium} 300w`)
-    if (anime?.coverImage?.large) images.push(`${anime.coverImage.large} 600w`)
     if (anime?.coverImage?.extraLarge) images.push(`${anime.coverImage.extraLarge} 1000w`)
     return images.length > 0 ? images.join(', ') : undefined
   }, [anime])

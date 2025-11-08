@@ -4,9 +4,7 @@ export const ScheduleAnimeQuery = graphql(`
   query ScheduleAnime($page: Int, $perPage: Int, $notYetAired: Boolean, $airingAt_greater: Int, $airingAt_lesser: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
-        total
         currentPage
-        lastPage
         hasNextPage
         perPage
       }

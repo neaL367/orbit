@@ -4,9 +4,7 @@ export const SeasonalAnimeQuery = graphql(`
   query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
-        total
         currentPage
-        lastPage
         hasNextPage
         perPage
       }

@@ -1,7 +1,3 @@
-/**
- * Error state for anime list
- */
-
 type ErrorProps = {
   onRetry: () => void
 }

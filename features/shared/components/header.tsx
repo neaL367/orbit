@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Route } from 'next'
 
-export function Navbar() {
+function HeaderContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -129,3 +130,12 @@ export function Navbar() {
     </nav>
   )
 }
+
+export function Header() {
+  return (
+    <Suspense>
+      <HeaderContent />
+    </Suspense>
+  )
+}
+

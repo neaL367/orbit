@@ -1,5 +1,3 @@
-'use client'
-
 type LoadingSkeletonProps = {
   count?: number
   className?: string

@@ -1,8 +1,6 @@
-'use client'
-
 import Link from 'next/link'
-import type { Route } from 'next'
 import { cn } from '@/lib/utils'
+import type { Route } from 'next'
 
 type SectionHeaderProps = {
   title: string

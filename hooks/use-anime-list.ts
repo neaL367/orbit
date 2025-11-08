@@ -127,7 +127,7 @@ export function useAnimeList() {
   const queryOptions = {
     enabled: true,
     staleTime: CACHE_TIMES.MEDIUM,
-    retry: 3,
+    retry: 2,
   }
 
   const trendingData = useInfiniteGraphQL(
