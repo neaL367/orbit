@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -45,15 +44,19 @@ export function Characters({ characters }: CharactersProps) {
                   style={{ opacity: loadedImages.has(character.id) ? 0 : 1 }}
                 />
                 {characterImage ? (
-                  <Image
+                  <img
                     src={characterImage}
+                    srcSet={character.image?.large && character.image?.medium 
+                      ? `${character.image.large} 400w, ${character.image.medium} 300w` 
+                      : undefined}
                     alt={characterName}
-                    fill
                     loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                     referrerPolicy="no-referrer"
                     onLoad={() => handleImageLoad(character.id)}
                     className={cn(
-                      "object-cover transition-all duration-500",
+                      "absolute inset-0 w-full h-full object-cover transition-all duration-500",
                       loadedImages.has(character.id) ? "opacity-100 scale-100" : "opacity-0 scale-105",
                       "group-hover:scale-110"
                     )}
@@ -90,15 +93,19 @@ export function Characters({ characters }: CharactersProps) {
                           {vaImage ? (
                             <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700/50">
                               <div className="absolute inset-0 bg-zinc-700 transition-opacity duration-300" style={{ opacity: loadedImages.has(va.id) ? 0 : 1 }} />
-                              <Image
+                              <img
                                 src={vaImage}
+                                srcSet={va.image?.large && va.image?.medium 
+                                  ? `${va.image.large} 200w, ${va.image.medium} 150w` 
+                                  : undefined}
                                 alt={vaName}
-                                fill
                                 loading="lazy"
+                                decoding="async"
+                                fetchPriority="low"
                                 referrerPolicy="no-referrer"
                                 onLoad={() => handleImageLoad(va.id)}
                                 className={cn(
-                                  "object-cover rounded-full transition-opacity duration-300",
+                                  "absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300",
                                   loadedImages.has(va.id) ? "opacity-100" : "opacity-0"
                                 )}
                               />

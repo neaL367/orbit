@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import type { Media } from "@/graphql/graphql"
@@ -35,16 +34,19 @@ function ExternalLinkItem({ link }: { link: ExternalLink | null }) {
       }}
     >
       {linkIcon ? (
-        <div className="relative w-4 h-auto shrink-0 flex items-center justify-center">
+        <div className="relative w-4 h-4 shrink-0 flex items-center justify-center">
           <div
             className="absolute inset-0 rounded"
             style={{ backgroundColor: linkColor }}
           />
-          <Image
+          <img
             src={linkIcon}
             alt={siteName}
             width={16}
             height={16}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
             className={cn(

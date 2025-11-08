@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 import { hexToRgba, getAnimeTitle } from '../utils/anime-utils'
 import type { Media } from '@/graphql/graphql'
 import type { Route } from 'next'
-import Image from 'next/image'
 
 type MediaItem = Media
 
@@ -30,6 +29,15 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
     [anime]
   )
   const coverColor = useMemo(() => anime?.coverImage?.color || '#1a1a1a', [anime])
+  
+  // Generate srcset for cover image
+  const coverSrcSet = useMemo(() => {
+    const sizes = []
+    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
+    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
+    if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    return sizes.length > 1 ? sizes.join(', ') : undefined
+  }, [anime?.coverImage])
   
   const handleClick = useCallback(() => {
     const referrerData = {
@@ -93,17 +101,18 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
           />
 
           {coverImage && !imageError && (
-            <Image
+            <img
               src={coverImage}
+              srcSet={coverSrcSet}
               alt={title}
-              fill
               loading="eager"
               decoding="async"
+              fetchPriority="high"
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
               onError={handleImageError}
               className={cn(
-                'object-cover transition-opacity duration-300 ease-out',
+                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-out',
                 'group-hover:scale-110 transition-transform duration-300 ease-out',
                 imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
               )}

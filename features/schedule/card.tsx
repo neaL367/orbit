@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useCallback } from 'react'
 import { Clock } from 'lucide-react'
@@ -35,6 +34,15 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
   const coverColor = media.coverImage?.color || '#000000'
   const format = media.format
   const streamingLinks = getStreamingLinks(schedule)
+
+  // Generate srcset for cover image
+  const coverSrcSet = useMemo(() => {
+    const sizes = []
+    if (media.coverImage?.extraLarge) sizes.push(`${media.coverImage.extraLarge} 600w`)
+    if (media.coverImage?.large) sizes.push(`${media.coverImage.large} 400w`)
+    if (media.coverImage?.medium) sizes.push(`${media.coverImage.medium} 300w`)
+    return sizes.length > 1 ? sizes.join(', ') : undefined
+  }, [media.coverImage])
 
   const timeUntilAiring = useMemo(() => {
     const timeUntil = schedule.airingAt - now
@@ -100,15 +108,17 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Image
+                <img
                   src={coverImage}
+                  srcSet={coverSrcSet}
                   alt={title}
-                  fill
                   loading="eager"
+                  decoding="async"
+                  fetchPriority="auto"
                   onLoad={() => setImageLoaded(true)}
                   onError={() => setImageLoaded(true)}
                   className={cn(
-                    'object-cover object-[25%_25%] group-hover:scale-110 transition-all duration-500',
+                    'absolute inset-0 w-full h-full object-cover object-[25%_25%] group-hover:scale-110 transition-all duration-500',
                     imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                   )}
                 />
@@ -194,11 +204,14 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
                         className="absolute inset-0 rounded"
                         style={{ backgroundColor: linkColor }}
                       />
-                      <Image
+                      <img
                         src={linkIcon}
                         alt={link.site}
                         width={14}
                         height={14}
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
                         referrerPolicy="no-referrer"
                         className="relative object-contain"
                         style={{ filter: `drop-shadow(0 0 2px ${linkColor}90)` }}

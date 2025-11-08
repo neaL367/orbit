@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useMemo, useCallback } from 'react'
 import { CarouselItem } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
@@ -33,12 +32,22 @@ export function Item({
   const nextEpisode = anime.nextAiringEpisode
   const episodeNumber = nextEpisode?.episode || 0
 
+  // Generate srcset for banner image if multiple sizes available
+  const bannerSrcSet = useMemo(() => {
+    if (anime.bannerImage) return undefined
+    const sizes = []
+    if (anime.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 600w`)
+    if (anime.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
+    if (anime.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
+    return sizes.length > 1 ? sizes.join(', ') : undefined
+  }, [anime.bannerImage, anime.coverImage])
+
   const timeUntilAiring = useMemo(() => {
     if (!nextEpisode?.airingAt) return 0
     const airingAt = nextEpisode.airingAt
     const timeUntil = airingAt - now
     return timeUntil > 0 ? timeUntil : 0
-  }, [nextEpisode?.airingAt, now])
+  }, [nextEpisode, now])
   
   const { days, hours, minutes, seconds } = formatTimeUntilAiringDetailed(timeUntilAiring)
 
@@ -78,16 +87,18 @@ export function Item({
           />
 
           {bannerImage && (
-            <Image
+            <img
               src={bannerImage}
+              srcSet={bannerSrcSet}
               alt={title}
-              fill
-              priority={isPriority}
+              loading={isPriority ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={isPriority ? "high" : "auto"}
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
               onError={() => setLocalImageLoaded(true)}
               className={cn(
-                'object-cover transition-all duration-500 z-10 rounded-xl',
+                'absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 rounded-xl',
                 'group-hover:scale-110',
                 isImageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
               )}
