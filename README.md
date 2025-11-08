@@ -243,7 +243,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🔗 Links
 
 - **Live Demo**: [https://orbit-eight-rosy.vercel.app](https://orbit-eight-rosy.vercel.app)
-- **GitHub Repository**: [https://github.com/your-username/orbit](https://github.com/your-username/orbit)
+- **GitHub Repository**: [https://github.com/neaL367/orbit.git](https://github.com/neaL367/orbit.git)
 - **AniList API**: [https://anilist.co](https://anilist.co)
 - **AniList API Docs**: [https://anilist.github.io/ApiV2-GraphQL-Docs/](https://anilist.github.io/ApiV2-GraphQL-Docs/)
 
