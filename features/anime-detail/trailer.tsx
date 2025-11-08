@@ -73,6 +73,7 @@ function LiteYouTubeEmbed({ videoId, title }: { videoId: string; title: string }
               loading="lazy"
               decoding="async"
               fetchPriority="auto"
+              sizes="100vw"
               className="absolute inset-0 w-full h-full object-cover"
               onError={handleImageError}
             />
@@ -164,6 +165,7 @@ export function Trailer({ trailer, title }: TrailerProps) {
               loading="lazy"
               decoding="async"
               fetchPriority="auto"
+              sizes="100vw"
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">

@@ -30,17 +30,18 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const title = getAnimeTitle(media)
-  const coverImage = media.coverImage?.large || media.coverImage?.medium
+  // Use medium as default for schedule cards (displayed small)
+  const coverImage = media.coverImage?.medium || media.coverImage?.large || media.coverImage?.extraLarge
   const coverColor = media.coverImage?.color || '#000000'
   const format = media.format
   const streamingLinks = getStreamingLinks(schedule)
 
-  // Generate srcset for cover image
+  // Generate srcset for cover image - schedule cards are small
   const coverSrcSet = useMemo(() => {
     const sizes = []
-    if (media.coverImage?.extraLarge) sizes.push(`${media.coverImage.extraLarge} 600w`)
-    if (media.coverImage?.large) sizes.push(`${media.coverImage.large} 400w`)
     if (media.coverImage?.medium) sizes.push(`${media.coverImage.medium} 300w`)
+    if (media.coverImage?.large) sizes.push(`${media.coverImage.large} 500w`)
+    if (media.coverImage?.extraLarge) sizes.push(`${media.coverImage.extraLarge} 700w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
   }, [media])
 
@@ -111,6 +112,7 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
                 <img
                   src={coverImage}
                   srcSet={coverSrcSet}
+                  sizes="(max-width: 640px) 300px, 400px"
                   alt={title}
                   loading="eager"
                   decoding="async"

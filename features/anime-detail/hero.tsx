@@ -27,6 +27,7 @@ export function Hero({ anime }: HeroProps) {
                 {bannerImage ? (
                     <img
                         src={bannerImage}
+                        sizes="100vw"
                         alt={`${title} banner`}
                         loading="eager"
                         decoding="async"

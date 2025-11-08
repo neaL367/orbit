@@ -47,8 +47,9 @@ export function Characters({ characters }: CharactersProps) {
                   <img
                     src={characterImage}
                     srcSet={character.image?.large && character.image?.medium 
-                      ? `${character.image.large} 400w, ${character.image.medium} 300w` 
+                      ? `${character.image.medium} 200w, ${character.image.large} 300w` 
                       : undefined}
+                    sizes="(max-width: 640px) 150px, (max-width: 1024px) 180px, 200px"
                     alt={characterName}
                     loading="lazy"
                     decoding="async"
@@ -96,8 +97,9 @@ export function Characters({ characters }: CharactersProps) {
                               <img
                                 src={vaImage}
                                 srcSet={va.image?.large && va.image?.medium 
-                                  ? `${va.image.large} 200w, ${va.image.medium} 150w` 
+                                  ? `${va.image.medium} 50w, ${va.image.large} 100w` 
                                   : undefined}
+                                sizes="50px"
                                 alt={vaName}
                                 loading="lazy"
                                 decoding="async"
