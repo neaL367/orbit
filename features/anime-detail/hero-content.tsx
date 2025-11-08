@@ -27,7 +27,7 @@ export function HeroContent({ anime }: HeroContentProps) {
     if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 400w`)
     if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 300w`)
     return sizes.length > 1 ? sizes.join(', ') : undefined
-  }, [anime?.coverImage])
+  }, [anime])
   const score = anime?.averageScore ?? anime?.meanScore
   const popularity = anime?.popularity
   const duration = anime?.duration
