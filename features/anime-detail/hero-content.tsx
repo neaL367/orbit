@@ -43,20 +43,23 @@ export function HeroContent({ anime }: HeroContentProps) {
 
   return (
     <div className="mb-8 sm:mb-12 lg:mb-16">
-      {/* Main Content - Flex layout without overlap */}
-      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 md:gap-10 items-start">
+      {/* Main Content - Flex layout */}
+      <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-10 items-start">
         {/* Cover Image */}
-        <div className="shrink-0 w-full sm:w-48 md:w-56 lg:w-64">
-          <div className="relative w-full aspect-[2/3] rounded-lg sm:rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20">
+        <div className="shrink-0 w-full sm:w-52 md:w-60 lg:w-72 mx-auto lg:mx-0">
+          <div className="group relative w-full aspect-[2/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10 hover:ring-white/20 transition-all duration-300">
             <div
-              className="absolute inset-0"
-              style={{ backgroundColor: coverColor }}
+              className="absolute inset-0 transition-opacity duration-500"
+              style={{ 
+                backgroundColor: coverColor,
+                opacity: coverLoaded ? 0 : 1
+              }}
             />
             {coverImage ? (
               <img
                 src={coverImage || "/placeholder.svg"}
                 srcSet={coverImageSrcSet}
-                sizes="(max-width: 640px) 192px, (max-width: 768px) 224px, 256px"
+                sizes="(max-width: 640px) 208px, (max-width: 768px) 240px, 288px"
                 alt={`${title} cover`}
                 loading="eager"
                 decoding="async"
@@ -64,23 +67,26 @@ export function HeroContent({ anime }: HeroContentProps) {
                 referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
-                  "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-                  coverLoaded ? "opacity-100" : "opacity-0",
+                  "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                  coverLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
+                  "group-hover:scale-105"
                 )}
               />
             ) : null}
+            {/* Gradient overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
         </div>
 
         {/* Title & Meta Information */}
-        <div className="flex-1 min-w-0 space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="flex-1 min-w-0 space-y-5 sm:space-y-6 lg:space-y-7">
           {/* Title */}
-          <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">
+          <div className="space-y-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight break-words tracking-tight">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-sm sm:text-base md:text-lg text-white/70 font-medium break-words mt-2">
+              <p className="text-base sm:text-lg md:text-xl text-zinc-300 font-medium break-words leading-relaxed">
                 {subtitle}
               </p>
             )}
@@ -89,18 +95,22 @@ export function HeroContent({ anime }: HeroContentProps) {
           {/* Primary Stats */}
           <div className="flex flex-wrap gap-3 sm:gap-4">
             {typeof score === "number" && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors">
-                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 shrink-0" />
-                <span className="text-sm sm:text-base font-bold text-white">{score / 10}</span>
+              <div className="group flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-md border border-yellow-500/40 shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/20 hover:border-yellow-500/60 transition-all duration-200">
+                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 shrink-0 fill-yellow-400" />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg sm:text-xl font-extrabold text-white">{score / 10}</span>
+                  <span className="text-xs text-yellow-300/70">/10</span>
+                </div>
               </div>
             )}
 
             {popularity != null && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors">
-                <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 shrink-0" />
-                <span className="text-sm sm:text-base font-bold text-white">
-                  #{popularity.toLocaleString()}
-                </span>
+              <div className="group flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/20 backdrop-blur-md border border-orange-500/40 shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 hover:border-orange-500/60 transition-all duration-200">
+                <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400 shrink-0 fill-orange-400" />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xs text-orange-300/70">#</span>
+                  <span className="text-lg sm:text-xl font-extrabold text-white">{popularity.toLocaleString()}</span>
+                </div>
               </div>
             )}
           </div>
@@ -108,34 +118,48 @@ export function HeroContent({ anime }: HeroContentProps) {
           {/* Secondary Info */}
           <div className="flex flex-wrap gap-3 sm:gap-4">
             {releaseDate && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />
-                <span className="text-sm sm:text-base font-medium text-white">{releaseDate}</span>
+              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-800/60 backdrop-blur-md border border-zinc-700/60 hover:bg-zinc-700/60 hover:border-zinc-600/60 transition-all duration-200 shadow-lg">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-300 shrink-0" />
+                <span className="text-sm sm:text-base font-semibold text-white">{releaseDate}</span>
               </div>
             )}
 
             {duration && (
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white shrink-0" />
-                <span className="text-sm sm:text-base font-medium text-white">{duration}m/ep</span>
+              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-800/60 backdrop-blur-md border border-zinc-700/60 hover:bg-zinc-700/60 hover:border-zinc-600/60 transition-all duration-200 shadow-lg">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-300 shrink-0" />
+                <span className="text-sm sm:text-base font-semibold text-white">{duration} min/ep</span>
               </div>
             )}
 
             {episodes && (
-              <div className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-white/10 backdrop-blur-md border border-white/20">
-                <span className="text-sm sm:text-base font-medium text-white">{episodes} Episodes</span>
+              <div className="px-4 py-2.5 rounded-xl bg-zinc-800/60 backdrop-blur-md border border-zinc-700/60 shadow-lg">
+                <span className="text-sm sm:text-base font-semibold text-white">{episodes} Episodes</span>
               </div>
             )}
           </div>
 
           {/* Next Episode Countdown */}
           {nextAiring && timeUntilAiringFormatted && timeUntilAiring && timeUntilAiring > 0 && (
-            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-green-500/20 backdrop-blur-md border border-green-500/40 w-fit">
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 shrink-0" />
-              <span className="text-sm sm:text-base font-semibold text-green-200">
-                Ep {nextAiring.episode} in {timeUntilAiringFormatted}
-              </span>
-            </div>
+            <button
+              onClick={() => {
+                const element = document.getElementById('streaming-episodes')
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-md border border-green-500/50 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:border-green-500/70 transition-all duration-200 w-fit animate-pulse cursor-pointer active:scale-95"
+            >
+              <div className="relative">
+                <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 shrink-0" />
+                <div className="absolute inset-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-500/30 animate-ping" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-green-300/70 font-medium">Next Episode</span>
+                <span className="text-sm sm:text-base font-bold text-green-200">
+                  Ep {nextAiring.episode} in {timeUntilAiringFormatted}
+                </span>
+              </div>
+            </button>
           )}
         </div>
       </div>

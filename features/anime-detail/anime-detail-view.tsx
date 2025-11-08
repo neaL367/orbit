@@ -26,7 +26,7 @@ export function AnimeDetailView({ data }: AnimeDetailViewProps) {
     <div className="min-h-screen bg-black text-white">
       <Hero anime={data} />
 
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 lg:py-16">
+      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <HeroContent anime={data} />
 
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 mt-10">

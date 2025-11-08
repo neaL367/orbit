@@ -1,3 +1,4 @@
+import { getUnixTime } from 'date-fns'
 import { useState, useEffect } from "react"
 
 /**
@@ -5,11 +6,11 @@ import { useState, useEffect } from "react"
  * Useful for countdown timers and time-based calculations
  */
 export function useCurrentTime() {
-  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
+  const [now, setNow] = useState(() => getUnixTime(new Date()))
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setNow(Math.floor(Date.now() / 1000))
+      setNow(getUnixTime(new Date()))
     }, 1000) // Update every second
     
     return () => clearInterval(interval)

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
+  productionBrowserSourceMaps: process.env.NODE_ENV === 'production',
 };
 
 export default nextConfig;

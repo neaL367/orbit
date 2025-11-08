@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { getAnimeTitle, BackButton } from "@/features/shared"
+import { getAnimeTitle } from "@/features/shared"
 import type { Media } from "@/graphql/graphql"
 
 type HeroProps = {
@@ -20,11 +20,6 @@ export function Hero({ anime }: HeroProps) {
         <div className="relative w-full overflow-hidden">
             {/* Background Banner */}
             <div className="relative h-[350px] w-full">
-                <div className="relative max-w-[1680px] mx-auto">
-                    <div className="absolute top-4 left-4 md:left-10 z-10 ">
-                        <BackButton />
-                    </div>
-                </div>
                 <div
                     className="absolute inset-0"
                     style={{ backgroundColor: coverColor }}
@@ -39,14 +34,14 @@ export function Hero({ anime }: HeroProps) {
                         referrerPolicy="no-referrer"
                         onLoad={() => setBannerLoaded(true)}
                         className={cn(
-                            "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+                            "absolute inset-0 w-full h-full object-cover transition-opacity duration-300 object-top",
                             bannerLoaded ? "opacity-100" : "opacity-0",
                         )}
                     />
                 ) : null}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
             </div>
         </div>
     )

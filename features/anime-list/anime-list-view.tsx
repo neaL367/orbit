@@ -2,7 +2,6 @@
 
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { BackButton } from '@/features/shared'
 import { Filters } from '@/features/anime-filters'
 import { AnimeCard } from '@/features/shared'
 import { LoadMore, Empty, Loading } from './'
@@ -40,16 +39,15 @@ export function AnimeListView({
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         {/* Header Section - Always Visible */}
         <div className="mb-8">
-          <BackButton className="mb-6" />
           <h1 className="text-4xl md:text-5xl font-bold mb-2">{title}</h1>
-          {data.length > 0 && (
+          {/* {data.length > 0 && (
             <p className="text-zinc-400 mb-6">
               {data.length} anime found
             </p>
-          )}
+          )} */}
 
           {/* Search Input */}
-          <div className="mb-6 flex items-center gap-4">
+          <div className="my-6 flex items-center gap-4">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <Input

@@ -1,3 +1,4 @@
+import { format, intervalToDuration } from 'date-fns'
 import type { Media } from '@/graphql/graphql'
 
 /**
@@ -58,27 +59,29 @@ export function formatDate(date?: {
 }): string | null {
   if (!date?.year) return null
   const year = date.year
-  const month = date.month ? String(date.month).padStart(2, '0') : '01'
-  const day = date.day ? String(date.day).padStart(2, '0') : '01'
-  return `${year}-${month}-${day}`
+  const month = date.month ?? 1
+  const day = date.day ?? 1
+  const dateObj = new Date(year, month - 1, day)
+  return format(dateObj, 'yyyy-MM-dd')
 }
 
 /**
  * Format seconds until airing to human-readable string
  */
 export function formatTimeUntilAiring(seconds?: number): string | null {
-  if (!seconds) return null
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
+  if (!seconds || seconds <= 0) return null
   
-  if (days > 0) {
-    return `${days}d ${hours}h`
+  const now = new Date()
+  const target = new Date(now.getTime() + seconds * 1000)
+  const duration = intervalToDuration({ start: now, end: target })
+  
+  if (duration.days && duration.days > 0) {
+    return `${duration.days}d ${duration.hours || 0}h`
   }
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`
+  if (duration.hours && duration.hours > 0) {
+    return `${duration.hours}h ${duration.minutes || 0}m`
   }
-  return `${minutes}m`
+  return `${duration.minutes || 0}m`
 }
 
 /**
@@ -90,11 +93,19 @@ export function formatTimeUntilAiringDetailed(seconds?: number): {
   minutes: number
   seconds: number
 } {
-  if (!seconds) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remainingSeconds = seconds % 60
-  return { days, hours, minutes, seconds: remainingSeconds }
+  if (!seconds || seconds <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+  
+  const now = new Date()
+  const target = new Date(now.getTime() + seconds * 1000)
+  const duration = intervalToDuration({ start: now, end: target })
+  
+  return {
+    days: duration.days ?? 0,
+    hours: duration.hours ?? 0,
+    minutes: duration.minutes ?? 0,
+    seconds: duration.seconds ?? 0,
+  }
 }
 
