@@ -15,9 +15,11 @@ type MediaItem = Media
 type AnimeCardProps = {
   anime: MediaItem
   rank?: number
+  loading?: 'eager' | 'lazy'
+  fetchPriority?: 'high' | 'auto' | 'low'
 }
 
-function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
+function AnimeCardComponent({ anime, rank, loading = 'eager', fetchPriority = 'high' }: AnimeCardProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -107,9 +109,9 @@ function AnimeCardComponent({ anime, rank }: AnimeCardProps) {
               srcSet={coverSrcSet}
               sizes="(max-width: 640px) 300px, (max-width: 1024px) 400px, 500px"
               alt={title}
-              loading="eager"
+              loading={loading}
               decoding="async"
-              fetchPriority="high"
+              fetchPriority={fetchPriority}
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
               onError={handleImageError}

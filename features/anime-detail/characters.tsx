@@ -47,7 +47,7 @@ export function Characters({ characters }: CharactersProps) {
                   <img
                     src={characterImage}
                     srcSet={character.image?.large && character.image?.medium 
-                      ? `${character.image.medium} 200w, ${character.image.large} 300w` 
+                      ? `${character.image.medium} 150w, ${character.image.large} 250w` 
                       : undefined}
                     sizes="(max-width: 640px) 150px, (max-width: 1024px) 180px, 200px"
                     alt={characterName}
@@ -95,12 +95,10 @@ export function Characters({ characters }: CharactersProps) {
                             <div className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 ring-1 ring-zinc-700/50">
                               <div className="absolute inset-0 bg-zinc-700 transition-opacity duration-300" style={{ opacity: loadedImages.has(va.id) ? 0 : 1 }} />
                               <img
-                                src={vaImage}
-                                srcSet={va.image?.large && va.image?.medium 
-                                  ? `${va.image.medium} 50w, ${va.image.large} 100w` 
-                                  : undefined}
-                                sizes="50px"
+                                src={va.image?.medium || va.image?.large}
                                 alt={vaName}
+                                width={28}
+                                height={28}
                                 loading="lazy"
                                 decoding="async"
                                 fetchPriority="low"

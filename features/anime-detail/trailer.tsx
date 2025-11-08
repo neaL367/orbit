@@ -12,9 +12,11 @@ type TrailerProps = {
 }
 
 // Get YouTube thumbnail URL with fallback
+// Use hqdefault (480x360) instead of maxresdefault (1280x720) to reduce payload
+// Browsers will upscale if needed, and it's much smaller file size
 function getYouTubeThumbnail(videoId: string): string {
-  // Try maxresdefault first, fallback to hqdefault if not available
-  return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+  // Use hqdefault (480x360) - good quality at much smaller size than maxresdefault
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
 }
 
 // Lite YouTube Embed Component
@@ -25,11 +27,11 @@ function LiteYouTubeEmbed({ videoId, title }: { videoId: string; title: string }
 
   const thumbnailUrl = getYouTubeThumbnail(videoId)
   
-  // Fallback to hqdefault if maxresdefault fails to load
+  // Fallback to mqdefault (320x180) if hqdefault fails to load
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget
-    if (!target.src.includes('hqdefault')) {
-      target.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+    if (!target.src.includes('mqdefault')) {
+      target.src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
     }
   }
 
@@ -72,7 +74,7 @@ function LiteYouTubeEmbed({ videoId, title }: { videoId: string; title: string }
               alt={`${title} trailer thumbnail`}
               loading="lazy"
               decoding="async"
-              fetchPriority="auto"
+              fetchPriority="low"
               sizes="100vw"
               className="absolute inset-0 w-full h-full object-cover"
               onError={handleImageError}
@@ -164,7 +166,7 @@ export function Trailer({ trailer, title }: TrailerProps) {
               alt={`${title} trailer`}
               loading="lazy"
               decoding="async"
-              fetchPriority="auto"
+              fetchPriority="low"
               sizes="100vw"
               className="absolute inset-0 w-full h-full object-cover"
             />
