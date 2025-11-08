@@ -1,2 +1,2 @@
-export { HomePageContent } from './home-content'
+export { Home } from './home'
 

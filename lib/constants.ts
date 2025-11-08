@@ -9,6 +9,11 @@
 export const ANILIST_API_URL = 'https://graphql.anilist.co/'
 
 /**
+ * GitHub repository URL
+ */
+export const GITHUB_REPO_URL = 'https://github.com/neaL367/orbit'
+
+/**
  * Cache and revalidation constants (in milliseconds)
  */
 export const CACHE_TIMES = {

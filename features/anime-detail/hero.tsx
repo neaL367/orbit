@@ -20,7 +20,7 @@ export function Hero({ anime }: HeroProps) {
         <div className="relative w-full overflow-hidden">
             {/* Background Banner */}
             <div className="relative h-[350px] w-full">
-                <div className="relative max-w-[1600px] mx-auto">
+                <div className="relative max-w-[1680px] mx-auto">
                     <div className="absolute top-4 left-4 md:left-10 z-10 ">
                         <BackButton />
                     </div>

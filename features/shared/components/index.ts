@@ -3,5 +3,6 @@ export { BackButton } from './back-button'
 export { ErrorState } from './error-state'
 export { LoadingSkeleton } from './loading-skeleton'
 export { SectionHeader } from './section-header'
-export { Navbar } from './navbar'
+export { Header } from './header'
+export { Footer } from './footer'
 

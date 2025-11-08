@@ -1,9 +1,9 @@
 import "./globals.css";
 import { Geist } from "next/font/google";
-import { Suspense } from "react";
-import { Navbar } from "@/features/shared";
+import { Footer, Header } from "@/features/shared";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +14,7 @@ const geistSans = Geist({
 
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://orbit-git-dev-mess-projects.vercel.app`),
+  metadataBase: new URL(`https://orbit-eight-rosy.vercel.app`),
   title: {
     default: 'AnimeX - Discover Trending Anime',
     template: '%s | AnimeX',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'AnimeX',
     title: 'AnimeX - Discover Trending Anime',
     description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
-    
+
   },
   twitter: {
     title: 'AnimeX - Discover Trending Anime',
@@ -50,30 +50,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
         className={cn(geistSans.variable, 'antialiased dark bg-black')}
       >
-        <Suspense fallback={
-          <nav className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg">
-            <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between h-16">
-                <div className="text-xl font-bold text-white">AnimeX</div>
-              </div>
-            </div>
-          </nav>
-        }>
-          <Navbar />
-        </Suspense>
-        <main>
+        <Header />
+        <main className="min-h-[calc(100vh-4rem)]">
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );

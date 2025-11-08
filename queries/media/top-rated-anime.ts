@@ -4,9 +4,7 @@ export const TopRatedAnimeQuery = graphql(`
   query TopRatedAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
-        total
         currentPage
-        lastPage
         hasNextPage
         perPage
       }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import {
   getCurrentSeason,
@@ -26,7 +26,7 @@ import {
   SeasonalAnimeQuery,
 } from '@/queries/media'
 
-export function HomePageContent() {
+function HomeContent() {
   const dateValues = useMemo(() => ({
     currentSeason: getCurrentSeason(),
     currentYear: getCurrentYear(),
@@ -38,7 +38,6 @@ export function HomePageContent() {
 
   return (
     <div className="min-h-screen max-w-[1680px] space-y-12 mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-white">
-
       <UpcomingAiringCarousel />
 
       <AnimeSection
@@ -77,6 +76,14 @@ export function HomePageContent() {
         viewAllHref="/anime?sort=popular"
       />
     </div>
+  )
+}
+
+export function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   )
 }
 

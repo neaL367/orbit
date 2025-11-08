@@ -7,9 +7,9 @@ import { fetchGraphQLServer } from '@/lib/graphql'
  * Purpose: Proxy for client-side GraphQL requests
  * - Client components can't directly call external APIs (CORS)
  * - Client-side batcher sends batched requests here
- * - This route then uses the shared fetchGraphQLServer function
+ * - This route uses fetchGraphQLServer which handles caching automatically
  * 
- * Flow: Client Component → batchGraphQLRequest → /api/graphql → fetchGraphQLServer → AniList API
+ * Flow: Client Component → executeClientGraphQL → /api/graphql → fetchGraphQLServer → AniList API
  */
 export async function POST(request: NextRequest) {
   try {
@@ -28,28 +28,45 @@ export async function POST(request: NextRequest) {
 
     // Validate all requests
     for (const req of requests) {
-      if (!req.query) {
+      if (!req.query || typeof req.query !== 'string') {
         return NextResponse.json(
-          { error: 'Query is required for all requests' },
+          { error: 'Valid query string is required for all requests' },
           { status: 400 }
         )
       }
     }
 
-    // Use the shared fetchGraphQLServer function
-    // This ensures consistent caching behavior across server and client requests
+    // Execute all queries in parallel with automatic cache configuration
     const responses = await Promise.all(
       requests.map(async (req) => {
-        return fetchGraphQLServer(req.query, req.variables)
+        try {
+          const result = await fetchGraphQLServer(req.query, req.variables)
+          // Ensure GraphQL ExecutionResult format (data may be undefined/null, errors may be present)
+          return result
+        } catch (error) {
+          // Return error response in GraphQL ExecutionResult format for individual query in batch
+          return {
+            data: null,
+            errors: [{
+              message: error instanceof Error ? error.message : 'Unknown error'
+            }]
+          }
+        }
       })
     )
 
     // Return batch response as array if batch request, otherwise single response
     return NextResponse.json(isBatch ? responses : responses[0])
   } catch (error) {
-    console.error('GraphQL proxy error:', error)
+    console.error('GraphQL API route error:', error)
+    // Return error in GraphQL ExecutionResult format
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { 
+        data: null,
+        errors: [{
+          message: error instanceof Error ? error.message : 'Internal server error'
+        }]
+      },
       { status: 500 }
     )
   }

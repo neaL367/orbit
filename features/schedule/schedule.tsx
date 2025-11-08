@@ -51,14 +51,14 @@ function ScheduleContent() {
   const dayQueries = useQueries({
     queries: dayRanges.map(({ dayIndex, start, end }) => ({
       queryKey: ['ScheduleAnime', dayIndex, start, end],
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         const result = await execute(ScheduleAnimeQuery, {
           page: 1,
-          perPage: 500, // Large perPage since we're querying by day
+          perPage: 50,
           notYetAired: true,
           airingAt_greater: start,
           airingAt_lesser: end,
-        })
+        }, { signal })
         return result.data
       },
       staleTime: CACHE_TIMES.MEDIUM,
@@ -141,9 +141,20 @@ function ScheduleContent() {
 
 export function Schedule() {
   return (
-    <Suspense fallback={<ScheduleLoading />}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16" style={{ maxWidth: '1680px' }}>
+          {/* Header Section - Always Visible */}
+          <div className="mb-8">
+            <BackButton className="mb-6" />
+            <h1 className="text-4xl md:text-5xl font-bold mb-8">Anime Schedule</h1>
+          </div>
+          {/* Loading Skeleton - Content Only */}
+          <ScheduleLoading />
+        </div>
+      </div>
+    }>
       <ScheduleContent />
     </Suspense>
   )
 }
-

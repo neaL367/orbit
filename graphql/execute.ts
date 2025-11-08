@@ -1,10 +1,9 @@
 import type { ExecutionResult } from 'graphql'
 import type { TypedDocumentString } from './graphql'
 import { GRAPHQL_TIMEOUT } from '@/lib/constants'
-import { handleGraphQLErrors, isAbortError, createTimeoutError, batchGraphQLRequest, executeServerGraphQL } from '@/lib/graphql'
-
-// Lazy batcher import - only loads when actually needed (prevents preload warning)
-let batcherLoaded = false
+import { handleGraphQLErrors, isAbortError, createTimeoutError } from '@/lib/graphql/errors'
+import { executeClientGraphQL } from '@/lib/graphql/client'
+import { executeServerGraphQL } from '@/lib/graphql/server'
 
 /**
  * Execute GraphQL query on client side using batcher
@@ -14,17 +13,11 @@ async function executeClient<TResult>(
   variables: unknown,
   signal: AbortSignal
 ): Promise<ExecutionResult<TResult>> {
-  if (!batcherLoaded) {
-    // Lazy load batcher to prevent preload warning
-    await import('@/lib/graphql')
-    batcherLoaded = true
-  }
-  return batchGraphQLRequest(query, variables, signal) as Promise<ExecutionResult<TResult>>
+  return executeClientGraphQL<TResult>(query, variables, signal)
 }
 
 /**
  * Execute GraphQL query on server side
- * Uses shared server-side execution from lib/graphql
  */
 async function executeServer<TResult>(
   query: string,

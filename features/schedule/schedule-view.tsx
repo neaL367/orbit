@@ -6,8 +6,8 @@ import { DaySection } from './day-section'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/graphql/graphql'
 
-type WeekViewProps = {
-  schedules: AiringSchedule[]
+type ScheduleViewProps = {
+  data: AiringSchedule[]
 }
 
 const DAYS_OF_WEEK = [
@@ -20,8 +20,7 @@ const DAYS_OF_WEEK = [
   { index: 0, name: 'Sunday' },
 ] as const
 
-export function WeekView({ schedules }: WeekViewProps) {
-
+export function ScheduleView({ data }: ScheduleViewProps) {
   const schedulesByDay = useMemo(() => {
     const grouped: Record<number, Record<string, AiringSchedule[]>> = {
       1: {}, // Monday
@@ -33,19 +32,36 @@ export function WeekView({ schedules }: WeekViewProps) {
       0: {}, // Sunday
     }
 
-    // Process all schedules (deduplication by schedule ID is already done in content.tsx)
-    schedules.forEach((schedule) => {
+    // Track seen schedules per day to prevent duplicates within the same day
+    const seenPerDay: Record<number, Set<number>> = {
+      1: new Set(),
+      2: new Set(),
+      3: new Set(),
+      4: new Set(),
+      5: new Set(),
+      6: new Set(),
+      0: new Set(),
+    }
+
+    // Process all schedules (deduplication by schedule ID is already done in schedule.tsx)
+    data.forEach((schedule) => {
       const airingAt = schedule.airingAt
       const date = new Date(airingAt * 1000)
       const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, etc.
       const format = schedule.media?.format
       const formatKey = format ? String(format) : 'UNKNOWN'
 
+      // Skip if we've already seen this schedule ID for this day (extra safety check)
+      if (seenPerDay[dayOfWeek].has(schedule.id)) {
+        return
+      }
+
       // Group by format within each day
       if (!grouped[dayOfWeek][formatKey]) {
         grouped[dayOfWeek][formatKey] = []
       }
       grouped[dayOfWeek][formatKey].push(schedule)
+      seenPerDay[dayOfWeek].add(schedule.id)
     })
 
     // Sort each day's format groups by airing time
@@ -56,35 +72,23 @@ export function WeekView({ schedules }: WeekViewProps) {
     })
 
     return grouped
-  }, [schedules])
+  }, [data])
 
   const todayIndex = new Date().getDay()
 
-  // Get days to display: today, next 2 days, and previous days
-  const displayDays = useMemo(() => {
-    const todayIdx = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
-    if (todayIdx === -1) {
-      return { today: null, nextDays: [], previousDays: [] }
+  // Sort days so today appears first, then the rest in order
+  const sortedDays = useMemo(() => {
+    const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
+    if (todayDayIndex === -1) {
+      return DAYS_OF_WEEK
     }
-
-    // Get today
-    const today = DAYS_OF_WEEK[todayIdx]
-
-    // Get next 2 days
-    const nextDays: Array<{ index: number; name: string }> = []
-    for (let i = 1; i < 3; i++) {
-      const idx = (todayIdx + i) % DAYS_OF_WEEK.length
-      nextDays.push(DAYS_OF_WEEK[idx])
-    }
-
-    // Get previous days (for showing "No airings scheduled")
-    // Previous days are all days before today in the week
-    const previousDays: Array<{ index: number; name: string }> = []
-    for (let i = 0; i < todayIdx; i++) {
-      previousDays.push(DAYS_OF_WEEK[i])
-    }
-
-    return { today, nextDays, previousDays }
+    
+    // Reorder: today first, then remaining days
+    return [
+      DAYS_OF_WEEK[todayDayIndex],
+      ...DAYS_OF_WEEK.slice(todayDayIndex + 1),
+      ...DAYS_OF_WEEK.slice(0, todayDayIndex)
+    ]
   }, [todayIndex])
 
   return (
@@ -94,22 +98,12 @@ export function WeekView({ schedules }: WeekViewProps) {
         <UpcomingAiringCarousel hideViewAll />
       </div>
 
-      {/* Today - Always on top */}
-      {displayDays.today && (
-        <DaySection
-          dayName={displayDays.today.name}
-          isToday={true}
-          schedulesByFormat={schedulesByDay[displayDays.today.index]}
-          formatTime={formatTime}
-          getStreamingLinks={getStreamingLinks}
-        />
-      )}
-
-      {/* Next 2 Days */}
-      {displayDays.nextDays.map(({ index: dayIndex, name: dayName }) => (
+      {/* All Days of the Week - Today first */}
+      {sortedDays.map(({ index: dayIndex, name: dayName }) => (
         <DaySection
           key={dayIndex}
           dayName={dayName}
+          isToday={dayIndex === todayIndex}
           schedulesByFormat={schedulesByDay[dayIndex]}
           formatTime={formatTime}
           getStreamingLinks={getStreamingLinks}
