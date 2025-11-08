@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Clock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,9 +26,11 @@ type ScheduleCardProps = {
 export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }: ScheduleCardProps) {
   const router = useRouter()
   const now = useCurrentTime()
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   const title = getAnimeTitle(media)
   const coverImage = media.coverImage?.large || media.coverImage?.medium
+  const coverColor = media.coverImage?.color || '#000000'
   const coverImageSrcSet = useMemo(() => {
     const images = []
     if (media.coverImage?.medium) images.push(`${media.coverImage.medium} 300w`)
@@ -100,16 +102,32 @@ export function ScheduleCard({ schedule, media, formatTime, getStreamingLinks }:
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="relative w-full h-36 rounded-lg overflow-hidden ring-1 ring-zinc-800/50 group-hover:ring-zinc-700/50 transition-all">
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <img
-                    src={coverImage}
-                    srcSet={coverImageSrcSet}
-                    sizes="(max-width: 640px) 100vw"
-                    alt={title}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover object-[25%_25%] group-hover:scale-110 transition-transform duration-300"
+                  {/* Placeholder background */}
+                  <div 
+                    className="absolute inset-0 bg-zinc-800/50 transition-opacity duration-500"
+                    style={{ 
+                      backgroundColor: coverColor,
+                      opacity: imageLoaded ? 0 : 1
+                    }}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {coverImage && (
+                    <img
+                      src={coverImage}
+                      srcSet={coverImageSrcSet}
+                      sizes="(max-width: 640px) 100vw"
+                      alt={title}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={() => setImageLoaded(true)}
+                      onError={() => {
+                        setImageLoaded(true)
+                      }}
+                      className={`w-full h-full object-cover object-[25%_25%] group-hover:scale-110 transition-all duration-500 ${
+                        imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                      }`}
+                    />
+                  )}
                 </div>
               </Link>
             </>
