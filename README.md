@@ -112,71 +112,78 @@ npm start
 
 ```
 orbit/
-├── app/                          # Next.js App Router pages
-│   ├── anime/                   # Anime routes
-│   │   ├── [animeId]/          # Dynamic anime detail pages
-│   │   ├── layout.tsx          # Anime section layout
-│   │   └── page.tsx            # Anime listing page
-│   ├── api/                     # API routes
-│   │   └── graphql/            # GraphQL API endpoint (client-side proxy)
-│   ├── schedule/                # Anime schedule page
-│   ├── layout.tsx               # Root layout (Navbar + Footer)
-│   ├── page.tsx                 # Home page
-│   └── globals.css              # Global styles
-├── features/                     # Feature-based components (domain-driven)
-│   ├── anime-carousel/         # Upcoming airing anime carousel
-│   ├── anime-detail/           # Anime detail page components
-│   │   ├── anime-detail.tsx    # Main detail component
-│   │   ├── anime-detail-view.tsx
-│   │   ├── hero.tsx            # Banner and hero section
-│   │   ├── trailer.tsx         # Lazy-loaded video trailers
-│   │   ├── characters.tsx      # Character list
-│   │   ├── relations.tsx       # Related anime
-│   │   ├── recommendations.tsx # Recommendations
-│   │   └── ...                 # Other detail components
-│   ├── anime-filters/          # Filtering UI components
-│   ├── anime-list/             # Anime list with pagination
-│   ├── anime-section/          # Reusable anime sections
-│   ├── home/                   # Home page components
-│   ├── schedule/               # Schedule page components
-│   └── shared/                 # Shared feature components
-│       ├── components/         # Reusable UI components
-│       │   ├── navbar.tsx      # Navigation bar
-│       │   ├── footer.tsx      # Footer with API attribution
-│       │   ├── anime-card.tsx  # Anime card component
-│       │   └── ...             # Other shared components
-│       ├── providers/          # React Query providers
-│       └── utils/              # Utility functions
-├── components/                  # Shared UI components
-│   └── ui/                     # shadcn/ui component library
-├── hooks/                       # Custom React hooks
-│   ├── use-graphql.ts          # GraphQL query hook with React Query
-│   ├── use-anime-list.ts       # Anime list logic
-│   └── use-current-time.ts     # Real-time clock for schedules
-├── lib/                         # Utility libraries
-│   ├── graphql/                # GraphQL utilities
-│   │   ├── client.ts           # Client-side execution with batching
-│   │   ├── server.ts           # Server-side execution with caching
-│   │   ├── cache.ts            # Cache configuration
-│   │   └── errors.ts           # Error handling
-│   ├── constants.ts            # Application constants
-│   └── utils.ts                # General utilities (cn, etc.)
-├── graphql/                     # GraphQL utilities
-│   ├── execute.ts              # GraphQL execution logic
-│   ├── graphql.ts              # Generated TypeScript types
-│   └── gql.ts                  # GraphQL tag helper
-├── queries/                     # GraphQL queries and fragments
-│   └── media/                  # Anime-related queries
-│       ├── anime-by-id.ts      # Single anime query
-│       ├── trending-anime.ts   # Trending anime query
-│       ├── popular-anime.ts    # Popular anime query
-│       ├── top-rated-anime.ts  # Top-rated anime query
-│       ├── seasonal-anime.ts   # Seasonal anime query
-│       ├── search-anime.ts     # Search query
-│       ├── schedule-anime.ts   # Schedule query
-│       ├── upcoming-airing-anime.ts # Upcoming airing query
-│       └── README.md           # Query documentation
-└── schema.graphql               # GraphQL schema (for codegen)
+├── src/                         # Main application source code
+│   ├── app/                     # Next.js App Router (routing via folders)
+│   │   ├── anime/              # Anime routes
+│   │   │   ├── [animeId]/     # Dynamic anime detail pages
+│   │   │   ├── layout.tsx     # Anime section layout
+│   │   │   └── page.tsx       # Anime listing page
+│   │   ├── api/                # API routes
+│   │   │   └── graphql/       # GraphQL API endpoint
+│   │   ├── schedule/           # Anime schedule page
+│   │   ├── layout.tsx          # Root layout (Navbar + Footer)
+│   │   ├── page.tsx            # Home page
+│   │   └── globals.css         # Global styles
+│   ├── components/             # Reusable UI components (shared across features)
+│   │   └── ui/                # shadcn/ui component library
+│   ├── features/               # Feature-based components (domain-driven)
+│   │   ├── anime-carousel/    # Upcoming airing anime carousel
+│   │   ├── anime-detail/      # Anime detail page components
+│   │   │   ├── anime-detail.tsx
+│   │   │   ├── anime-detail-view.tsx
+│   │   │   ├── hero.tsx       # Banner and hero section
+│   │   │   ├── trailer.tsx    # Lazy-loaded video trailers
+│   │   │   ├── characters.tsx # Character list
+│   │   │   ├── relations.tsx  # Related anime
+│   │   │   ├── recommendations.tsx
+│   │   │   └── ...            # Other detail components
+│   │   ├── anime-filters/     # Filtering UI components
+│   │   │   └── use-anime-filters.ts  # Co-located hook
+│   │   ├── anime-list/        # Anime list with pagination
+│   │   │   └── use-anime-list.ts  # Co-located hook
+│   │   ├── anime-section/     # Reusable anime sections
+│   │   ├── home/              # Home page components
+│   │   ├── schedule/          # Schedule page components
+│   │   └── shared/            # Shared feature components
+│   │       ├── components/    # Reusable UI components
+│   │       │   ├── header.tsx # Navigation bar
+│   │       │   ├── footer.tsx # Footer with API attribution
+│   │       │   ├── anime-card.tsx
+│   │       │   └── ...        # Other shared components
+│   │       ├── providers/     # React Query providers
+│   │       └── utils/         # Utility functions
+│   ├── hooks/                  # Custom React hooks (shared)
+│   │   └── use-current-time.ts # Real-time clock for schedules
+│   ├── lib/                    # Helper functions, constants, types, and logic
+│   │   ├── constants.ts       # Application constants
+│   │   ├── utils.ts           # General utilities (cn, etc.)
+│   │   └── graphql/
+│   │       └── types/         # Generated GraphQL TypeScript types
+│   ├── services/               # Data fetching logic and API calls
+│   │   └── graphql/           # GraphQL service layer
+│   │       ├── client.ts      # Client-side execution with batching
+│   │       ├── server.ts      # Server-side execution with caching
+│   │       ├── cache.ts       # Cache configuration
+│   │       ├── errors.ts      # Error handling
+│   │       ├── execute.ts     # Unified execute function
+│   │       ├── hooks.ts       # React hooks (useGraphQL, useInfiniteGraphQL)
+│   │       └── queries/       # GraphQL query definitions
+│   │           ├── anime-by-id.ts
+│   │           ├── trending-anime.ts
+│   │           ├── popular-anime.ts
+│   │           ├── top-rated-anime.ts
+│   │           ├── seasonal-anime.ts
+│   │           ├── search-anime.ts
+│   │           ├── schedule-anime.ts
+│   │           └── upcoming-airing-anime.ts
+│   ├── store/                  # State management (Redux, Zustand, Context API)
+│   └── styles/                 # Centralized CSS or SASS files
+├── .env.*                      # Environment variables
+├── next.config.ts              # Next.js configuration
+├── package.json                # Project dependencies and scripts
+├── tsconfig.json               # TypeScript configuration
+├── codegen.ts                  # GraphQL Code Generator configuration
+└── schema.graphql              # GraphQL schema (for codegen)
 ```
 
 ## 🎯 Key Features
