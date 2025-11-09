@@ -6,25 +6,58 @@ import { executeClientGraphQL } from '@/lib/graphql/client'
 import { executeServerGraphQL } from '@/lib/graphql/server'
 
 /**
- * Execute GraphQL query on client side using batcher
+ * Creates an abort signal with timeout that composes with an optional external signal
+ * Works in both browser and Node.js environments
  */
-async function executeClient<TResult>(
-  query: string,
-  variables: unknown,
-  signal: AbortSignal
-): Promise<ExecutionResult<TResult>> {
-  return executeClientGraphQL<TResult>(query, variables, signal)
-}
+function createAbortSignalWithTimeout(
+  externalSignal?: AbortSignal
+): { signal: AbortSignal; cleanup: () => void } {
+  const controller = new AbortController()
+  // setTimeout returns number in browser, NodeJS.Timeout in Node.js
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
 
-/**
- * Execute GraphQL query on server side
- */
-async function executeServer<TResult>(
-  query: string,
-  variables: unknown,
-  signal: AbortSignal
-): Promise<ExecutionResult<TResult>> {
-  return executeServerGraphQL<TResult>(query, variables, signal)
+  // Set up timeout
+  timeoutId = setTimeout(() => {
+    controller.abort()
+  }, GRAPHQL_TIMEOUT)
+
+  // Compose with external signal if provided
+  if (externalSignal) {
+    // If external signal is already aborted, abort immediately
+    if (externalSignal.aborted) {
+      controller.abort()
+      clearTimeout(timeoutId)
+      return { signal: controller.signal, cleanup: () => {} }
+    }
+
+    // Listen to external signal and abort controller when it's aborted
+    const abortHandler = () => {
+      controller.abort()
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId)
+      }
+    }
+    externalSignal.addEventListener('abort', abortHandler)
+
+    return {
+      signal: controller.signal,
+      cleanup: () => {
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId)
+        }
+        externalSignal.removeEventListener('abort', abortHandler)
+      },
+    }
+  }
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId)
+      }
+    },
+  }
 }
 
 export async function execute<TResult, TVariables>(
@@ -45,32 +78,31 @@ export async function execute<TResult, TVariables>(
   const queryString = query.toString()
   const isClient = typeof window !== 'undefined'
 
-  // Create abort controller with timeout
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), GRAPHQL_TIMEOUT)
-  const finalSignal = options?.signal || controller.signal
-
-  if (options?.signal) {
-    options.signal.addEventListener('abort', () => clearTimeout(timeoutId))
-  }
+  // Create abort signal with timeout
+  const { signal, cleanup } = createAbortSignalWithTimeout(options?.signal)
 
   try {
+    // Execute query (client uses batcher, server uses direct fetch)
     const result = isClient
-      ? await executeClient<TResult>(queryString, variables, finalSignal)
-      : await executeServer<TResult>(queryString, variables, finalSignal)
+      ? await executeClientGraphQL<TResult>(queryString, variables, signal)
+      : await executeServerGraphQL<TResult>(queryString, variables, signal)
 
-    clearTimeout(timeoutId)
+    cleanup()
 
+    // Handle GraphQL errors
     if (result.errors && result.errors.length > 0) {
       handleGraphQLErrors(result)
     }
 
     return result
   } catch (error) {
-    clearTimeout(timeoutId)
-    if (isAbortError(error)) {
+    cleanup()
+
+    // Handle abort/timeout errors
+    if (isAbortError(error) || signal.aborted) {
       throw createTimeoutError()
     }
+
     throw error
   }
 }

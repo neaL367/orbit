@@ -1,6 +1,6 @@
 /**
  * Server-side GraphQL execution
- * Handles server-side requests with Next.js caching
+ * Handles server-side requests with Next.js caching and AniList rate limit tracking
  */
 
 import type { ExecutionResult } from 'graphql'
@@ -16,6 +16,60 @@ type CacheOptions = {
   tags?: string[]
 }
 
+export type AniListRateLimit = {
+  limit: number
+  remaining: number
+  resetTime: number
+  lastUpdated: number
+}
+
+// ============================================================================
+// AniList Rate Limit Tracking
+// ============================================================================
+
+// Global AniList rate limit tracker (shared across all requests)
+// NOTE: AniList API is currently in degraded state: 30 requests/minute (temporary)
+// Normal limit: 90 requests per minute
+// The actual limit is tracked from response headers and will auto-adjust
+let anilistRateLimit: AniListRateLimit = {
+  limit: 30,
+  remaining: 30,
+  resetTime: Date.now() + 60000,
+  lastUpdated: Date.now(),
+}
+
+function updateAniListRateLimit(headers: Headers): void {
+  const limit = headers.get('x-ratelimit-limit')
+  const remaining = headers.get('x-ratelimit-remaining')
+  const reset = headers.get('x-ratelimit-reset')
+
+  if (limit) anilistRateLimit.limit = parseInt(limit, 10)
+  if (remaining !== null) anilistRateLimit.remaining = parseInt(remaining, 10)
+  if (reset) anilistRateLimit.resetTime = parseInt(reset, 10) * 1000
+  anilistRateLimit.lastUpdated = Date.now()
+}
+
+export function getAniListRateLimit(): AniListRateLimit {
+  const now = Date.now()
+  
+  if (now > anilistRateLimit.resetTime) {
+    // Reset to current degraded state limit (30)
+    // Will be updated from headers on next request
+    anilistRateLimit = {
+      limit: 30,
+      remaining: 30,
+      resetTime: now + 60000,
+      lastUpdated: now,
+    }
+  }
+  
+  return { ...anilistRateLimit }
+}
+
+export function canMakeAniListRequest(): boolean {
+  return getAniListRateLimit().remaining > 0
+}
+
 // ============================================================================
 // Server-side Execution
 // ============================================================================
@@ -28,7 +82,6 @@ export async function fetchGraphQLServer<T>(
   variables?: unknown,
   options?: { signal?: AbortSignal } & CacheOptions
 ): Promise<ExecutionResult<T>> {
-  // Use provided cache config or auto-detect from query
   const cacheConfig = options?.tags && options?.revalidate !== undefined
     ? { tags: options.tags, revalidate: options.revalidate }
     : getCacheConfig(query, variables as Record<string, unknown>)
@@ -44,12 +97,29 @@ export async function fetchGraphQLServer<T>(
       variables: variables || undefined,
     }),
     signal: options?.signal,
-    cache: 'force-cache', // Explicitly opt into Data Cache
+    cache: 'force-cache',
     next: {
       revalidate: cacheConfig.revalidate,
       ...(cacheConfig.tags.length > 0 && { tags: cacheConfig.tags }),
     },
   })
+
+  updateAniListRateLimit(response.headers)
+
+  if (response.status === 429) {
+    const reset = response.headers.get('x-ratelimit-reset')
+    const result = await response.json().catch(() => ({
+      data: null,
+      errors: [{ message: 'Too Many Requests.', status: 429 }],
+    })) as ExecutionResult<T>
+
+    if (reset) {
+      anilistRateLimit.resetTime = parseInt(reset, 10) * 1000
+      anilistRateLimit.remaining = 0
+    }
+
+    return result
+  }
 
   if (!response.ok) {
     throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`)

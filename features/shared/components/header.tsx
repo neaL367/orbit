@@ -3,15 +3,14 @@
 import { usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense, useState, useEffect, useRef, startTransition } from 'react'
-import { Menu, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerClose } from '@/components/ui/drawer'
+// import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerClose } from '@/components/ui/drawer'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -38,8 +37,9 @@ const menuItems: MenuItem[] = [
 function HeaderContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [open, setOpen] = useState(false)
+  // const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const prevPathnameRef = useRef(pathname)
   const prevSearchParamsRef = useRef(searchParams.toString())
   const navRef = useRef<HTMLElement>(null)
@@ -68,13 +68,13 @@ function HeaderContent() {
       sessionStorage.removeItem('animeDetailTitle')
     }
     
-    if (prevPathname !== pathname || prevSearchParams !== searchParams.toString()) {
-      prevPathnameRef.current = pathname
-      prevSearchParamsRef.current = searchParams.toString()
-      startTransition(() => {
-        setOpen(false)
-      })
-    }
+    // if (prevPathname !== pathname || prevSearchParams !== searchParams.toString()) {
+    //   prevPathnameRef.current = pathname
+    //   prevSearchParamsRef.current = searchParams.toString()
+    //   startTransition(() => {
+    //     setOpen(false)
+    //   })
+    // }
   }, [pathname, searchParams])
 
   useEffect(() => {
@@ -217,7 +217,7 @@ function HeaderContent() {
               AnimeX
             </Link>
             
-            <div className="hidden sm:flex items-center gap-2 min-w-0" suppressHydrationWarning>
+            <div className="flex items-center gap-2 min-w-0 overflow-x-scroll md:overflow-x-visible scrollbar-hide">
               {isDetailPage ? (
                 <>
                   <BreadcrumbSeparator className="text-zinc-600 shrink-0">
@@ -290,8 +290,8 @@ function HeaderContent() {
                     <span className="mx-1">/</span>
                   </BreadcrumbSeparator>
                   <BreadcrumbItem className="flex items-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                    <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+                      <PopoverTrigger asChild>
                         <Button
                           className={cn(
                             'text-sm font-medium rounded-md px-2 py-1 h-auto transition-all duration-200 bg-transparent',
@@ -306,51 +306,48 @@ function HeaderContent() {
                           <span className="capitalize">{currentPageLabel}</span>
                           <ChevronDown className="h-3.5 w-3.5 shrink-0" />
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
+                      </PopoverTrigger>
+                      <PopoverContent 
                         align="start" 
-                        className="bg-zinc-900/95 backdrop-blur-xl border-transparent shadow-2xl min-w-[200px] p-1.5 gap-0.5"
+                        className="bg-zinc-900/95 backdrop-blur-xl border-transparent shadow-2xl max-w-[200px] p-1.5 gap-0.5"
                       >
                         {menuItems.map((item) => {
                           const active = isActive(item.href, item.sort)
                           return (
-                            <DropdownMenuItem 
-                              key={item.label} 
-                              asChild
-                              className="focus:bg-zinc-800/60 focus:text-white rounded-md transition-colors"
+                            <Link
+                              key={item.label}
+                              href={item.href as Route}
+                              onClick={() => setMenuOpen(false)}
+                              className={cn(
+                                'flex items-center w-full px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-200',
+                                'cursor-pointer outline-none',
+                                'focus:bg-zinc-800/60 focus:text-white',
+                                active 
+                                  ? 'bg-zinc-800/70 text-white shadow-sm' 
+                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                              )}
                             >
-                              <Link
-                                href={item.href as Route}
-                                className={cn(
-                                  'flex items-center w-full px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-200',
-                                  'cursor-pointer outline-none',
-                                  active 
-                                    ? 'bg-zinc-800/70 text-white shadow-sm' 
-                                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                                )}
-                              >
-                                <span className={cn(
-                                  'flex-1',
-                                  active && 'font-semibold'
-                                )}>
-                                  {item.label}
-                                </span>
-                                {active && (
-                                  <span className="ml-2 h-1.5 w-1.5 rounded-full bg-white/80" />
-                                )}
-                              </Link>
-                            </DropdownMenuItem>
+                              <span className={cn(
+                                'flex-1',
+                                active && 'font-semibold'
+                              )}>
+                                {item.label}
+                              </span>
+                              {active && (
+                                <span className="ml-2 h-1.5 w-1.5 rounded-full bg-white/80" />
+                              )}
+                            </Link>
                           )
                         })}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      </PopoverContent>
+                    </Popover>
                   </BreadcrumbItem>
                 </>
               )}
             </div>
           </div>
 
-          <Drawer open={open} onOpenChange={setOpen}>
+          {/* <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>
               <Button
                 variant="ghost"
@@ -389,7 +386,7 @@ function HeaderContent() {
                 })}
               </div>
             </DrawerContent>
-          </Drawer>
+          </Drawer> */}
         </div>
       </div>
     </nav>

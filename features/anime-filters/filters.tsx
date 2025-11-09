@@ -43,52 +43,52 @@ export function Filters({ className }: FiltersProps) {
 
   // Filter categories with icons
   const filterCategories = useMemo(() => [
-    { 
-      key: "genres" as const, 
-      label: "Genres", 
-      icon: Tags, 
-      options: genreOptions, 
-      selectedValues: selectedGenres, 
+    {
+      key: "genres" as const,
+      label: "Genres",
+      icon: Tags,
+      options: genreOptions,
+      selectedValues: selectedGenres,
       isMultiSelect: true,
       value: genres.length > 0 ? (genres.length === 1 ? genres[0] : `${genres.length} selected`) : "Select...",
       displayValue: genres.length > 0 ? (genres.length === 1 ? genres[0] : `${genres.length} selected`) : "Select...",
     },
-    { 
-      key: "year" as const, 
-      label: "Year", 
-      icon: Calendar, 
-      options: yearOptions, 
-      selectedValues: selectedYear, 
+    {
+      key: "year" as const,
+      label: "Year",
+      icon: Calendar,
+      options: yearOptions,
+      selectedValues: selectedYear,
       isMultiSelect: false,
       value: year || "",
       displayValue: year || "Select...",
     },
-    { 
-      key: "season" as const, 
-      label: "Season", 
-      icon: Clock, 
-      options: seasonOptions, 
-      selectedValues: selectedSeason, 
+    {
+      key: "season" as const,
+      label: "Season",
+      icon: Clock,
+      options: seasonOptions,
+      selectedValues: selectedSeason,
       isMultiSelect: false,
       value: season || "",
       displayValue: season ? (SEASONS.find((s) => s.value === season)?.label || season) : "Select...",
     },
-    { 
-      key: "format" as const, 
-      label: "Format", 
-      icon: Film, 
-      options: formatOptions, 
-      selectedValues: selectedFormat, 
+    {
+      key: "format" as const,
+      label: "Format",
+      icon: Film,
+      options: formatOptions,
+      selectedValues: selectedFormat,
       isMultiSelect: false,
       value: format || "",
       displayValue: format ? (FORMATS.find((f) => f.value === format)?.label || format) : "Select...",
     },
-    { 
-      key: "status" as const, 
-      label: "Status", 
-      icon: PlayCircle, 
-      options: statusOptions, 
-      selectedValues: selectedStatus, 
+    {
+      key: "status" as const,
+      label: "Status",
+      icon: PlayCircle,
+      options: statusOptions,
+      selectedValues: selectedStatus,
       isMultiSelect: false,
       value: status || "",
       displayValue: status ? (STATUSES.find((s) => s.value === status)?.label || status) : "Select...",
@@ -121,7 +121,7 @@ export function Filters({ className }: FiltersProps) {
   }
 
   return (
-    <div className={cn(className)}>
+    <div className={cn(className, 'flex flex-wrap  gap-2')}>
       <div className="flex items-center gap-2 flex-wrap">
         <Dropdown
           open={open}
@@ -149,19 +149,19 @@ export function Filters({ className }: FiltersProps) {
           )
         })}
 
-        {/* Clear Button */}
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearAllFilters}
-            className="h-8 ml-auto"
-          >
-            <FilterX className="mr-2 h-4 w-4" />
-            Clear
-          </Button>
-        )}
       </div>
+      {/* Clear Button */}
+      {hasActiveFilters && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearAllFilters}
+          className="h-8"
+        >
+          <FilterX className="mr-2 h-4 w-4" />
+          Clear
+        </Button>
+      )}
     </div>
   )
 }

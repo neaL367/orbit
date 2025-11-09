@@ -21,11 +21,11 @@ export function useAnimeFilters() {
     setPopoverOpen((prev) => ({ ...prev, [key]: isOpen }))
   }
 
-  // Generate years from 1940 to present
+  // Generate years from 1940 to next year
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear()
     const yearsList: number[] = []
-    for (let year = currentYear; year >= 1940; year--) {
+    for (let year = currentYear + 1; year >= 1940; year--) {
       yearsList.push(year)
     }
     return yearsList

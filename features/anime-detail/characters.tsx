@@ -13,7 +13,21 @@ type CharactersProps = {
 export function Characters({ characters }: CharactersProps) {
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   
-  const validCharacters = characters.filter((edge) => edge?.node).slice(0, 12)
+  // Filter valid characters, sort by role (MAIN first), then limit to 12
+  const validCharacters = characters
+    .filter((edge) => edge?.node)
+    .sort((a, b) => {
+      // Sort by role priority: MAIN > SUPPORTING > BACKGROUND
+      const rolePriority: Record<string, number> = {
+        MAIN: 0,
+        SUPPORTING: 1,
+        BACKGROUND: 2,
+      }
+      const aPriority = a?.role ? rolePriority[a.role] ?? 3 : 3
+      const bPriority = b?.role ? rolePriority[b.role] ?? 3 : 3
+      return aPriority - bPriority
+    })
+    .slice(0, 12)
 
   if (validCharacters.length === 0) return null
 
