@@ -17,5 +17,7 @@ export {
   fetchGraphQLServer,
   executeServerGraphQL,
   executeGraphQL,
+  getAniListRateLimit,
+  canMakeAniListRequest,
 } from './server'
 

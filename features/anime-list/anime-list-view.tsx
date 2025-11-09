@@ -50,7 +50,7 @@ export function AnimeListView({
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">{title}</h1>
           
-          <div className="my-6 flex items-center gap-4">
+          <div className="my-6 flex flex-wrap items-center gap-4">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <Input
