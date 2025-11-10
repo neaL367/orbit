@@ -2,7 +2,7 @@ import { graphql } from '@/lib/graphql/types/gql'
 
 export const AnimeByIdQuery = graphql(`
   query AnimeById($id: Int) {
-    Media(id: $id, type: ANIME) {
+    Media(id: $id, type: ANIME, isAdult: false) {
       id
       title {
         romaji
