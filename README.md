@@ -1,266 +1,197 @@
-# AnimeX - Anime Discovery Platform
+# Orbit - Anime Discovery Platform
 
-A modern, feature-rich anime browsing and discovery platform built with Next.js 16, featuring real-time data from AniList API, advanced filtering, and an intuitive user interface.
+Modern anime browsing platform built with Next.js 16, featuring real-time AniList API data, advanced filtering, and intuitive UI.
 
 ## ✨ Features
 
-### 🎬 Comprehensive Anime Discovery
-- **Trending Anime**: Discover what's popular right now
-- **Popular Anime**: Browse all-time popular series
-- **Top Rated**: Explore the highest-rated anime
-- **Seasonal Anime**: Find anime by season (Winter, Spring, Summer, Fall)
-- **Upcoming Airing**: Interactive carousel of upcoming episodes
-- **Real-time Schedule**: Weekly anime schedule with airing countdown timers
-- **Advanced Search**: Search anime by title with instant results
-
-### 🔍 Advanced Filtering System
-- **Multi-select Genre Filtering**: Filter by 50+ genres simultaneously
-- **Temporal Filters**: 
-  - Year selection (1940 to present)
-  - Season filtering (Winter, Spring, Summer, Fall)
-- **Format Filtering**: TV, Movie, OVA, ONA, Special
-- **Status Filtering**: Releasing, Finished, Not Yet Released, Cancelled
-- **URL-synced State**: Shareable, bookmarkable filter results
-- **Performance Optimized**: Debounced updates prevent excessive API calls
-
-### 📊 Rich Anime Detail Pages
-- **High-quality Media**: Banner images and cover art
-- **Interactive Trailers**: Lazy-loaded YouTube trailers (click-to-play)
-- **Character Information**: Characters with voice actors and roles
-- **Recommendations**: Personalized anime recommendations
-- **Related Content**: Related anime and franchise connections
-- **Streaming Information**: Direct links to streaming episodes
-- **External Links**: Links to official sources and resources
-- **Real-time Countdown**: Next episode airing countdown timers
-
-### 🎨 Modern UI/UX
-- **Dark Theme**: Beautiful dark mode interface
-- **Responsive Design**: Optimized for all devices
-- **Smooth Animations**: Polished transitions and interactions
-- **Loading States**: Skeleton loaders for better UX
-- **Error Handling**: User-friendly error messages with retry options
-- **Accessibility**: ARIA labels and keyboard navigation support
+- **Discovery**: Trending, Popular, Top Rated, Seasonal, Upcoming, Schedule, Search
+- **Filtering**: Multi-select genres, year, season, format, status with URL-synced state
+- **Details**: Rich media, trailers, characters, recommendations, streaming links
+- **Performance**: Intelligent caching, lazy loading, optimized queries
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 16](https://nextjs.org) with App Router
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: [shadcn/ui](https://ui.shadcn.com) (Radix UI primitives)
-- **Data Fetching**: 
-  - [@tanstack/react-query](https://tanstack.com/query) for server state management
-  - GraphQL with [AniList API](https://anilist.co)
-- **Code Generation**: [GraphQL Code Generator](https://the-guild.dev/graphql/codegen) for type-safe GraphQL queries
-- **Carousel**: [Embla Carousel](https://www.embla-carousel.com)
-- **Icons**: [Lucide React](https://lucide.dev)
-- **Debouncing**: [use-debounce](https://github.com/xnimorz/use-debounce)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Data**: React Query + GraphQL (AniList API)
+- **Codegen**: GraphQL Code Generator
+- **Icons**: Lucide React
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ or [Bun](https://bun.sh)
-- npm, yarn, pnpm, or bun
-
-### Installation
+## 🚀 Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/neaL367/orbit
-cd orbit
-
 # Install dependencies
-npm install
-# or
 bun install
-```
 
-### Code Generation
-
-This project uses GraphQL Code Generator to generate TypeScript types from GraphQL queries:
-
-```bash
-# Generate types
+# Generate GraphQL types
 bun run codegen
 
-# Watch mode for development
-bun run codegen:watch
-```
-
-### Development
-
-```bash
-# Run the development server
-npm run dev
-# or
+# Run development server
 bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### Building for Production
-
-```bash
-# Build the application
-npm run build
-
-# Start the production server
-npm start
 ```
 
 ## 📁 Project Structure
 
 ```
-orbit/
-├── src/                         # Main application source code
-│   ├── app/                     # Next.js App Router (routing via folders)
-│   │   ├── anime/              # Anime routes
-│   │   │   ├── [animeId]/     # Dynamic anime detail pages
-│   │   │   ├── layout.tsx     # Anime section layout
-│   │   │   └── page.tsx       # Anime listing page
-│   │   ├── api/                # API routes
-│   │   │   └── graphql/       # GraphQL API endpoint
-│   │   ├── schedule/           # Anime schedule page
-│   │   ├── layout.tsx          # Root layout (Navbar + Footer)
-│   │   ├── page.tsx            # Home page
-│   │   └── globals.css         # Global styles
-│   ├── components/             # Reusable UI components (shared across features)
-│   │   └── ui/                # shadcn/ui component library
-│   ├── features/               # Feature-based components (domain-driven)
-│   │   ├── anime-carousel/    # Upcoming airing anime carousel
-│   │   ├── anime-detail/      # Anime detail page components
-│   │   │   ├── anime-detail.tsx
-│   │   │   ├── anime-detail-view.tsx
-│   │   │   ├── hero.tsx       # Banner and hero section
-│   │   │   ├── trailer.tsx    # Lazy-loaded video trailers
-│   │   │   ├── characters.tsx # Character list
-│   │   │   ├── relations.tsx  # Related anime
-│   │   │   ├── recommendations.tsx
-│   │   │   └── ...            # Other detail components
-│   │   ├── anime-filters/     # Filtering UI components
-│   │   │   └── use-anime-filters.ts  # Co-located hook
-│   │   ├── anime-list/        # Anime list with pagination
-│   │   │   └── use-anime-list.ts  # Co-located hook
-│   │   ├── anime-section/     # Reusable anime sections
-│   │   ├── home/              # Home page components
-│   │   ├── schedule/          # Schedule page components
-│   │   └── shared/            # Shared feature components
-│   │       ├── components/    # Reusable UI components
-│   │       │   ├── header.tsx # Navigation bar
-│   │       │   ├── footer.tsx # Footer with API attribution
-│   │       │   ├── anime-card.tsx
-│   │       │   └── ...        # Other shared components
-│   │       ├── providers/     # React Query providers
-│   │       └── utils/         # Utility functions
-│   ├── hooks/                  # Custom React hooks (shared)
-│   │   └── use-current-time.ts # Real-time clock for schedules
-│   ├── lib/                    # Helper functions, constants, types, and logic
-│   │   ├── constants.ts       # Application constants
-│   │   ├── utils.ts           # General utilities (cn, etc.)
-│   │   └── graphql/
-│   │       └── types/         # Generated GraphQL TypeScript types
-│   ├── services/               # Data fetching logic and API calls
-│   │   └── graphql/           # GraphQL service layer
-│   │       ├── client.ts      # Client-side execution with batching
-│   │       ├── server.ts      # Server-side execution with caching
-│   │       ├── cache.ts       # Cache configuration
-│   │       ├── errors.ts      # Error handling
-│   │       ├── execute.ts     # Unified execute function
-│   │       ├── hooks.ts       # React hooks (useGraphQL, useInfiniteGraphQL)
-│   │       └── queries/       # GraphQL query definitions
-│   │           ├── anime-by-id.ts
-│   │           ├── trending-anime.ts
-│   │           ├── popular-anime.ts
-│   │           ├── top-rated-anime.ts
-│   │           ├── seasonal-anime.ts
-│   │           ├── search-anime.ts
-│   │           ├── schedule-anime.ts
-│   │           └── upcoming-airing-anime.ts
-│   ├── store/                  # State management (Redux, Zustand, Context API)
-│   └── styles/                 # Centralized CSS or SASS files
-├── .env.*                      # Environment variables
-├── next.config.ts              # Next.js configuration
-├── package.json                # Project dependencies and scripts
-├── tsconfig.json               # TypeScript configuration
-├── codegen.ts                  # GraphQL Code Generator configuration
-└── schema.graphql              # GraphQL schema (for codegen)
+src/
+├── app/                          # Next.js App Router
+│   ├── _components/              # Shared components
+│   │   ├── anime-card/          # Anime card component
+│   │   ├── carousel/            # Carousel components
+│   │   ├── home/                # Home page components
+│   │   ├── layout/              # Header & Footer
+│   │   └── providers/           # React Query providers
+│   ├── (pages)/                  # Route groups
+│   │   ├── anime/               # Anime listing & detail
+│   │   │   ├── _components/    # Filters, list, detail views
+│   │   │   ├── _hooks/         # useAnimeFilters, useAnimeList
+│   │   │   └── [animeId]/      # Dynamic detail pages
+│   │   └── schedule/            # Schedule page
+│   ├── api/graphql/              # GraphQL API route
+│   └── layout.tsx                # Root layout
+├── components/ui/                # shadcn/ui components
+├── hooks/                        # Shared React hooks
+├── lib/                          # Utilities & constants
+│   └── graphql/types/            # Generated GraphQL types
+└── services/graphql/             # GraphQL service layer
+    ├── client.ts                 # Client execution
+    ├── server.ts                 # Server execution
+    ├── hooks.ts                  # React hooks
+    └── queries/                  # GraphQL queries
 ```
 
-## 🎯 Key Features
+## 💻 Code Examples
 
-### Advanced Filtering System
-- **Multi-select Genre Filtering**: Filter by multiple genres simultaneously
-- **Temporal Filters**: Year selection (1940 to present) and season filtering
-- **Format & Status**: Filter by format and airing status
-- **Performance Optimized**: Debounced filter updates prevent excessive API calls
-- **URL-based State**: Filter state synced with URL parameters for shareable results
+### GraphQL Codegen Configuration
 
-### Performance Optimizations
-- **Intelligent Caching**: React Query with configurable stale times (5-10 minutes)
-- **Request Management**: Automatic request cancellation and deduplication
-- **GraphQL Batching**: Client-side request batching for multiple queries
-- **Server-side Caching**: Next.js Data Cache with tag-based revalidation
-- **Lazy Loading**: 
-  - YouTube trailers load only on user interaction (saves ~600KB+)
-  - Code splitting for optimal bundle sizes
-  - Lazy-loaded images for below-the-fold content
-- **Image Optimization**: 
-  - Priority loading for above-the-fold images
-  - Responsive image sets with srcset
-  - Proper fetchPriority and loading attributes
-- **Data Efficiency**: Deduplication of anime items across queries
-- **Infinite Scrolling**: Efficient "Load More" pagination with optimized query batching
+```typescript
+// codegen.ts
+import type { CodegenConfig } from '@graphql-codegen/cli'
 
-### GraphQL Architecture
-- **Type-safe Queries**: Generated TypeScript types from GraphQL schema
-- **Client-side Batching**: Automatic batching of multiple GraphQL requests
-- **Server-side Caching**: Next.js Data Cache with intelligent cache tags
-- **Error Handling**: Comprehensive error handling with retry logic
-- **Query Optimization**: Removed unreliable pagination fields, optimized queries
+const config: CodegenConfig = {
+  schema: 'https://graphql.anilist.co/',
+  documents: ['src/app/**/*.{ts,tsx}', 'src/services/graphql/queries/**/*.{ts,tsx}'],
+  generates: {
+    './src/lib/graphql/types/': {
+      preset: 'client',
+      config: { documentMode: 'string' }
+    },
+    './schema.graphql': {
+      plugins: ['schema-ast']
+    }
+  }
+}
 
-## 📚 API
+export default config
+```
 
-This project uses the [AniList GraphQL API](https://anilist.co/graphiql) for anime data.
+### Filter Hook Example
 
-### Attribution
+```typescript
+// src/app/(pages)/anime/_hooks/use-anime-filters.ts
+import { useRouter, useSearchParams } from "next/navigation"
+import { useDebouncedCallback } from "use-debounce"
 
-This project is powered by the [AniList API](https://anilist.co). AniList provides comprehensive anime and manga data through their GraphQL API.
+export function useAnimeFilters() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-## 🤝 Contributing
+  // Get filters from URL
+  const genres = searchParams.get("genres")?.split(",").filter(Boolean) || []
+  const year = searchParams.get("year") || ""
+  const season = searchParams.get("season") || ""
+  const format = searchParams.get("format") || ""
+  const status = searchParams.get("status") || ""
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+  // Debounced filter updates (300ms)
+  const updateFilters = useDebouncedCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) {
+        params.set(key, value)
+      } else {
+        params.delete(key)
+      }
+      params.delete("page") // Reset pagination
+      router.push(`/anime?${params.toString()}`)
+    },
+    300
+  )
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+  const toggleGenre = useDebouncedCallback(
+    (genre: string) => {
+      const newGenres = genres.includes(genre)
+        ? genres.filter((g) => g !== genre)
+        : [...genres, genre]
+      updateFilters("genres", newGenres.join(","))
+    },
+    300
+  )
 
-## 📝 License
+  return {
+    genres,
+    year,
+    season,
+    format,
+    status,
+    toggleGenre,
+    updateFilters,
+  }
+}
+```
 
-This project is open source and available under the [MIT License](LICENSE).
+### GraphQL Query Example
 
-## 🙏 Acknowledgments
+```typescript
+// src/services/graphql/queries/popular-anime.ts
+import { graphql } from '@/lib/graphql/types/gql'
 
-- [AniList](https://anilist.co) for providing the amazing API
-- [Next.js](https://nextjs.org) for the incredible framework
-- [shadcn/ui](https://ui.shadcn.com) for the beautiful components
-- All the open-source contributors and libraries that made this possible
+export const PopularAnimeQuery = graphql(`
+  query PopularAnime(
+    $page: Int
+    $perPage: Int
+    $genres: [String]
+    $format: MediaFormat
+    $status: MediaStatus
+  ) {
+    Page(page: $page, perPage: $perPage) {
+      pageInfo {
+        currentPage
+        hasNextPage
+      }
+      media(
+        type: ANIME
+        sort: POPULARITY_DESC
+        genre_in: $genres
+        format: $format
+        status: $status
+        isAdult: false
+      ) {
+        id
+        title {
+          romaji
+          english
+          userPreferred
+        }
+        coverImage {
+          large
+          extraLarge
+        }
+        averageScore
+        status
+        genres
+      }
+    }
+  }
+`)
+```
 
 ## 🔗 Links
 
-- **Live Demo**: [https://orbit-eight-rosy.vercel.app](https://orbit-eight-rosy.vercel.app)
-- **GitHub Repository**: [https://github.com/your-username/orbit](https://github.com/your-username/orbit)
-- **AniList API**: [https://anilist.co](https://anilist.co)
-- **AniList API Docs**: [https://anilist.github.io/ApiV2-GraphQL-Docs/](https://anilist.github.io/ApiV2-GraphQL-Docs/)
-
-## 📖 Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Query Documentation](https://tanstack.com/query/latest)
-- [AniList API Documentation](https://anilist.github.io/ApiV2-GraphQL-Docs/)
-- [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- **Live Demo**: [orbit-eight-rosy.vercel.app](https://orbit-eight-rosy.vercel.app)
+- **AniList API**: [anilist.co](https://anilist.co)
+- **API Docs**: [anilist.github.io/ApiV2-GraphQL-Docs](https://anilist.github.io/ApiV2-GraphQL-Docs/)
 
 ---
 
