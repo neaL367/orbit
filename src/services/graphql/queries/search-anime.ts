@@ -8,7 +8,7 @@ export const SearchAnimeQuery = graphql(`
         hasNextPage
         perPage
       }
-      media(type: ANIME, search: $search, genre_in: $genres, format: $format, status: $status, sort: POPULARITY_DESC) {
+      media(type: ANIME, search: $search, genre_in: $genres, format: $format, status: $status, sort: POPULARITY_DESC, isAdult: false) {
         id
         title {
           romaji
