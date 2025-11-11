@@ -35,6 +35,7 @@ export const ScheduleAnimeQuery = graphql(`
           }
           format
           status
+          isAdult
           externalLinks {
             id
             site

@@ -1,51 +1,92 @@
-'use client'
+"use client";
 
-import { notFound } from 'next/navigation'
-import { Suspense, use } from 'react'
-import { CACHE_TIMES } from '@/lib/constants'
-import { DetailView } from './view'
-import { Loading } from './loading'
-import { Error } from './error'
-import { useGraphQL } from '@/services/graphql/hooks'
-import { AnimeByIdQuery } from '@/services/graphql/queries/anime-by-id'
-import type { Media } from '@/lib/graphql/types/graphql'
+import { notFound, useRouter } from "next/navigation";
+import { Suspense, use, useEffect, useState } from "react";
+import { CACHE_TIMES } from "@/lib/constants";
+import { DetailView } from "./view";
+import { Age } from "../anime-detail-view/age/age";
+import { Loading } from "./loading";
+import { Error } from "./error";
+import { useGraphQL } from "@/services/graphql/hooks";
+import { AnimeByIdQuery } from "@/services/graphql/queries/anime-by-id";
+import type { Media } from "@/lib/graphql/types/graphql";
 
-function AnimeDetailContent({ params }: { params: Promise<{ animeId: string }> }) {
-  const { animeId: animeIdParam } = use(params)
-  const animeId = parseInt(animeIdParam, 10)
+function AnimeDetailContent({
+  params,
+}: {
+  params: Promise<{ animeId: string }>;
+}) {
+  const router = useRouter();
+  const { animeId: animeIdParam } = use(params);
+  const animeId = parseInt(animeIdParam, 10);
+
+  const [isAgeVerified, setIsAgeVerified] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("age_verified") === "true";
+    }
+    return false;
+  });
+  
+  useEffect(() => {
+    const sessionId = sessionStorage.getItem("session_id");
+    if (!sessionId) {
+      sessionStorage.setItem("session_id", crypto.randomUUID());
+      sessionStorage.removeItem("age_verified");
+    }
+  }, []);
 
   if (isNaN(animeId)) {
-    notFound()
+    notFound();
   }
 
   const { data, isLoading, error, refetch } = useGraphQL(
     AnimeByIdQuery,
     { id: animeId },
     {
-      staleTime: CACHE_TIMES.LONG, // 10 minutes - detail pages don't change often
-      retry: 2
-    }
-  )
+      staleTime: CACHE_TIMES.LONG,
+      retry: 2,
+    },
+  );
 
   if (isLoading) {
-    return <Loading />
+    return <Loading />;
   }
 
-  const mediaData = data as { Media?: Media } | undefined
-  const anime = mediaData?.Media
+  const mediaData = data as { Media?: Media } | undefined;
+  const anime = mediaData?.Media;
 
   if (error || !anime) {
-    return <Error onRetry={() => refetch()} />
+    return <Error onRetry={() => refetch()} />;
   }
 
-  return <DetailView data={anime} />
+  const handleAgeVerified = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("age_verified", "true");
+      setIsAgeVerified(true);
+    }
+  };
+
+  const handleAgeDeclined = () => {
+    router.back();
+  };
+
+  if (anime.isAdult && !isAgeVerified) {
+    return (
+      <Age onVerified={handleAgeVerified} onDeclined={handleAgeDeclined} />
+    );
+  }
+
+  return <DetailView data={anime} />;
 }
 
-export function AnimeDetail({ params }: { params: Promise<{ animeId: string }> }) {
+export function AnimeDetail({
+  params,
+}: {
+  params: Promise<{ animeId: string }>;
+}) {
   return (
     <Suspense>
       <AnimeDetailContent params={params} />
     </Suspense>
-  )
+  );
 }
-
