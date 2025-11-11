@@ -12,7 +12,6 @@ export const UpcomingAiringAnimeQuery = graphql(`
         type: ANIME
         sort: [POPULARITY_DESC, TRENDING_DESC]
         status: RELEASING
-        isAdult: false
       ) {
         id
         title {

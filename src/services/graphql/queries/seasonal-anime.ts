@@ -16,7 +16,6 @@ export const SeasonalAnimeQuery = graphql(`
         genre_in: $genres
         format: $format
         status: $status
-        isAdult: false
       ) {
         id
         title {

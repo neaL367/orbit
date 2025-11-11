@@ -4785,7 +4785,7 @@ export class TypedDocumentString<TResult, TVariables>
 
 export const AnimeByIdDocument = new TypedDocumentString(`
     query AnimeById($id: Int) {
-  Media(id: $id, type: ANIME, isAdult: false) {
+  Media(id: $id, type: ANIME) {
     id
     title {
       romaji
@@ -4969,7 +4969,6 @@ export const PopularAnimeDocument = new TypedDocumentString(`
       status: $status
       season: $season
       seasonYear: $seasonYear
-      isAdult: false
     ) {
       id
       title {
@@ -5108,7 +5107,6 @@ export const SearchAnimeDocument = new TypedDocumentString(`
       format: $format
       status: $status
       sort: POPULARITY_DESC
-      isAdult: false
     ) {
       id
       title {
@@ -5193,7 +5191,6 @@ export const SeasonalAnimeDocument = new TypedDocumentString(`
       genre_in: $genres
       format: $format
       status: $status
-      isAdult: false
     ) {
       id
       title {
@@ -5278,7 +5275,6 @@ export const TopRatedAnimeDocument = new TypedDocumentString(`
       status: $status
       season: $season
       seasonYear: $seasonYear
-      isAdult: false
     ) {
       id
       title {
@@ -5363,7 +5359,6 @@ export const TrendingAnimeDocument = new TypedDocumentString(`
       status: $status
       season: $season
       seasonYear: $seasonYear
-      isAdult: false
     ) {
       id
       title {
@@ -5440,12 +5435,7 @@ export const UpcomingAiringAnimeDocument = new TypedDocumentString(`
       hasNextPage
       perPage
     }
-    media(
-      type: ANIME
-      sort: [POPULARITY_DESC, TRENDING_DESC]
-      status: RELEASING
-      isAdult: false
-    ) {
+    media(type: ANIME, sort: [POPULARITY_DESC, TRENDING_DESC], status: RELEASING) {
       id
       title {
         romaji
