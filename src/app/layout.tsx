@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 import { Inter } from "next/font/google";
 import { Footer, Header } from "./_components/layout";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={cn(inter.variable, 'antialiased dark bg-black')}
       >
+        <Analytics />
         <Header />
         <main className="min-h-[calc(100vh-4rem)]">
           {children}
