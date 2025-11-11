@@ -8,7 +8,7 @@ export const TrendingAnimeQuery = graphql(`
         hasNextPage
         perPage
       }
-      media(type: ANIME, sort: TRENDING_DESC, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, isAdult: false) {
+      media(type: ANIME, sort: TRENDING_DESC, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear) {
         id
         title {
           romaji
