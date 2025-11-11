@@ -6,6 +6,11 @@ import { UpcomingAiringCarousel } from '@/app/_components/carousel'
 import { DaySection } from '../day-section'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
+import { Button } from '@/components/ui/button'
+import { useScrollToTop } from '@/app/_hooks/use-scroll-to-top'
+import { ArrowUp } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
 
 type ScheduleViewProps = {
   data: AiringSchedule[]
@@ -22,6 +27,8 @@ const DAYS_OF_WEEK = [
 ] as const
 
 export function ScheduleView({ data }: ScheduleViewProps) {
+  const { showScrollToTop, scrollToTop } = useScrollToTop(400);
+
   const schedulesByDay = useMemo(() => {
     const grouped: Record<number, Record<string, AiringSchedule[]>> = {
       1: {}, // Monday
@@ -118,6 +125,18 @@ export function ScheduleView({ data }: ScheduleViewProps) {
           />
         )
       })}
+      <Button
+        onClick={scrollToTop}
+        className={cn(
+          'fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 shadow-lg transition-all duration-300',
+          showScrollToTop
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        )}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5 text-white" />
+      </Button>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useMemo, useCallback, useState, useEffect } from 'react'
+import { Suspense, useMemo, useCallback, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useDebouncedCallback } from 'use-debounce'
 import { ArrowUp } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useAnimeList } from '../../_hooks/use-anime-list'
 import { ListView } from './view'
 import { Error, Loading } from './'
 import type { Route } from 'next'
+import { useScrollToTop } from '../../../../_hooks/use-scroll-to-top'
 
 type SortType = 'trending' | 'popular' | 'top-rated' | 'seasonal' | 'search'
 
@@ -44,41 +45,8 @@ function AnimeListContent() {
   const year = searchParams.get('year') || undefined
 
   const [searchInput, setSearchInput] = useState(searchQuery)
-  const [showScrollToTop, setShowScrollToTop] = useState(false)
-
-  // Update local state when URL search param changes
-  useEffect(() => {
-    setSearchInput(searchQuery)
-  }, [searchQuery])
-
-  // Handle scroll to top button visibility
-  useEffect(() => {
-    let ticking = false
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollY = window.scrollY || document.documentElement.scrollTop
-          setShowScrollToTop(scrollY > 400) // Show button after scrolling 400px
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
-
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
-  }, [])
-
+  const { showScrollToTop, scrollToTop } = useScrollToTop(400);
+  
   const {
     animeList,
     isLoading,

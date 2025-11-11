@@ -4703,7 +4703,7 @@ export type ScheduleAnimeQueryVariables = Exact<{
 }>;
 
 
-export type ScheduleAnimeQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', pageInfo?: { __typename?: 'PageInfo', currentPage?: number | null, hasNextPage?: boolean | null, perPage?: number | null } | null, airingSchedules?: Array<{ __typename?: 'AiringSchedule', id: number, airingAt: number, episode: number, timeUntilAiring: number, mediaId: number, media?: { __typename?: 'Media', id: number, format?: MediaFormat | null, status?: MediaStatus | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null, userPreferred?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null, extraLarge?: string | null, color?: string | null } | null, externalLinks?: Array<{ __typename?: 'MediaExternalLink', id: number, site: string, url?: string | null, type?: ExternalLinkType | null, language?: string | null, color?: string | null, icon?: string | null } | null> | null, streamingEpisodes?: Array<{ __typename?: 'MediaStreamingEpisode', title?: string | null, thumbnail?: string | null, url?: string | null, site?: string | null } | null> | null } | null } | null> | null } | null };
+export type ScheduleAnimeQuery = { __typename?: 'Query', Page?: { __typename?: 'Page', pageInfo?: { __typename?: 'PageInfo', currentPage?: number | null, hasNextPage?: boolean | null, perPage?: number | null } | null, airingSchedules?: Array<{ __typename?: 'AiringSchedule', id: number, airingAt: number, episode: number, timeUntilAiring: number, mediaId: number, media?: { __typename?: 'Media', id: number, format?: MediaFormat | null, status?: MediaStatus | null, isAdult?: boolean | null, title?: { __typename?: 'MediaTitle', romaji?: string | null, english?: string | null, native?: string | null, userPreferred?: string | null } | null, coverImage?: { __typename?: 'MediaCoverImage', large?: string | null, medium?: string | null, extraLarge?: string | null, color?: string | null } | null, externalLinks?: Array<{ __typename?: 'MediaExternalLink', id: number, site: string, url?: string | null, type?: ExternalLinkType | null, language?: string | null, color?: string | null, icon?: string | null } | null> | null, streamingEpisodes?: Array<{ __typename?: 'MediaStreamingEpisode', title?: string | null, thumbnail?: string | null, url?: string | null, site?: string | null } | null> | null } | null } | null> | null } | null };
 
 export type SearchAnimeQueryVariables = Exact<{
   page?: InputMaybe<Scalars['Int']['input']>;
@@ -5072,6 +5072,7 @@ export const ScheduleAnimeDocument = new TypedDocumentString(`
         }
         format
         status
+        isAdult
         externalLinks {
           id
           site
@@ -5435,7 +5436,12 @@ export const UpcomingAiringAnimeDocument = new TypedDocumentString(`
       hasNextPage
       perPage
     }
-    media(type: ANIME, sort: [POPULARITY_DESC, TRENDING_DESC], status: RELEASING) {
+    media(
+      type: ANIME
+      sort: [POPULARITY_DESC, TRENDING_DESC]
+      status: RELEASING
+      isAdult: false
+    ) {
       id
       title {
         romaji
