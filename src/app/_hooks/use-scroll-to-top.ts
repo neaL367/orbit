@@ -1,34 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
 
-export function useScrollToTop(threshold: number = 400) {
-  const [showScrollToTop, setShowScrollToTop] = useState(false);
+export function useScrollToTop(threshold = 400) {
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     let ticking = false;
-
-    const handleScroll = () => {
+    const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollY = window.scrollY || document.documentElement.scrollTop;
-          setShowScrollToTop(scrollY > threshold);
+        ticking = true;
+        requestAnimationFrame(() => {
+          setShow(window.scrollY > threshold);
           ticking = false;
         });
-        ticking = true;
       }
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [threshold]);
 
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
+  const scrollToTop = useCallback(
+    () => window.scrollTo({ top: 0, behavior: "smooth" }),
+    []
+  );
 
-  return { showScrollToTop, scrollToTop };
+  return { show, scrollToTop };
 }
