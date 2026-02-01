@@ -66,7 +66,11 @@ export function SectionView({
           const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
           return (
             <li key={anime.id}>
-              <AnimeCard anime={anime} rank={rank} />
+              <AnimeCard
+                anime={anime}
+                rank={rank}
+                loading={index < 2 ? "eager" : "lazy"}
+              />
             </li>
           )
         })}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle, getAnimeSubtitle, formatDate, formatTimeUntilAiring } from "@/lib/anime-utils"
 import { useCurrentTime } from "@/hooks/use-current-time"
@@ -12,30 +12,48 @@ type HeroContentProps = {
 }
 
 export function HeroContent({ anime }: HeroContentProps) {
+  // Determine quality levels for progressive loading
+  const lowResSrc = anime?.coverImage?.medium || undefined
+  const highResSrc = anime?.coverImage?.extraLarge || anime?.coverImage?.large || lowResSrc
+  const coverColor = anime?.coverImage?.color || "#0b0b0b"
+
+  // Generate srcset for cover image - hero displays at max ~288px width
+  const coverSrcSet = useMemo(() => {
+    const images = []
+    if (anime?.coverImage?.medium) images.push(`${anime.coverImage.medium} 230w`)
+    if (anime?.coverImage?.large) images.push(`${anime.coverImage.large} 460w`)
+    if (anime?.coverImage?.extraLarge) images.push(`${anime.coverImage.extraLarge} 700w`)
+    return images.length > 0 ? images.join(', ') : undefined
+  }, [anime])
+
   const [coverLoaded, setCoverLoaded] = useState(false)
+  const [placeholderLoaded, setPlaceholderLoaded] = useState(false)
+
+  const coverRef = useRef<HTMLImageElement>(null)
+  const placeholderRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (coverRef.current?.complete) {
+        setCoverLoaded(true)
+      }
+      if (placeholderRef.current?.complete) {
+        setPlaceholderLoaded(true)
+      }
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [])
   const now = useCurrentTime()
 
   const title = getAnimeTitle(anime)
   const subtitle = getAnimeSubtitle(anime)
-  // For hero cover, use medium as default to reduce initial payload (displayed at ~288px max on large screens)
-  const coverImage = anime?.coverImage?.medium || anime?.coverImage?.large || anime?.coverImage?.extraLarge
-  const coverColor = anime?.coverImage?.color || "#0b0b0b"
-  
-  // Generate srcset for cover image - hero displays at max ~288px width
-  const coverSrcSet = useMemo(() => {
-    const sizes = []
-    if (anime?.coverImage?.medium) sizes.push(`${anime.coverImage.medium} 200w`)
-    if (anime?.coverImage?.large) sizes.push(`${anime.coverImage.large} 300w`)
-    if (anime?.coverImage?.extraLarge) sizes.push(`${anime.coverImage.extraLarge} 400w`)
-    return sizes.length > 1 ? sizes.join(', ') : undefined
-  }, [anime])
   const score = anime?.averageScore ?? anime?.meanScore
   const popularity = anime?.popularity
   const duration = anime?.duration
   const episodes = anime?.episodes
   const nextAiring = anime?.nextAiringEpisode
   const releaseDate = anime?.startDate ? formatDate(anime.startDate) : null
-  
+
   // Calculate time until airing from airingAt timestamp
   const timeUntilAiring = useMemo(() => {
     if (!nextAiring?.airingAt) return null
@@ -43,7 +61,7 @@ export function HeroContent({ anime }: HeroContentProps) {
     const timeUntil = airingAt - now
     return timeUntil > 0 ? timeUntil : 0
   }, [nextAiring?.airingAt, now])
-  
+
   const timeUntilAiringFormatted = formatTimeUntilAiring(timeUntilAiring ?? undefined)
 
   return (
@@ -52,32 +70,50 @@ export function HeroContent({ anime }: HeroContentProps) {
       <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-10 items-start">
         {/* Cover Image */}
         <div className="shrink-0 w-full sm:w-52 md:w-60 lg:w-72 mx-auto lg:mx-0">
-          <div className="group relative w-full aspect-[2/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10 hover:ring-white/20 transition-all duration-300">
+          <div className="group relative w-full aspect-[2/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10 hover:ring-white/20 transition-all duration-300 bg-zinc-900">
             <div
               className="absolute inset-0 transition-opacity duration-500"
-              style={{ 
+              style={{
                 backgroundColor: coverColor,
                 opacity: coverLoaded ? 0 : 1
               }}
             />
-            {coverImage ? (
+
+            {/* 1. Low-Res Placeholder */}
+            {lowResSrc && !coverLoaded && (
               <img
-                src={coverImage}
+                ref={placeholderRef}
+                src={lowResSrc}
+                alt=""
+                aria-hidden="true"
+                referrerPolicy="no-referrer"
+                onLoad={() => setPlaceholderLoaded(true)}
+                className={cn(
+                  "absolute inset-0 w-full h-full object-cover blur-md transition-opacity duration-500",
+                  placeholderLoaded ? "opacity-50" : "opacity-0"
+                )}
+              />
+            )}
+
+            {/* 2. High-Res Image */}
+            {highResSrc && (
+              <img
+                ref={coverRef}
+                src={highResSrc}
                 srcSet={coverSrcSet}
-                sizes="(max-width: 640px) 200px, (max-width: 1024px) 250px, 300px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
                 alt={`${title} cover`}
                 loading="eager"
                 decoding="async"
-                fetchPriority="high"
                 referrerPolicy="no-referrer"
                 onLoad={() => setCoverLoaded(true)}
                 className={cn(
-                  "absolute inset-0 w-full h-full object-cover transition-all duration-500",
+                  "absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out",
                   coverLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105",
                   "group-hover:scale-105"
                 )}
               />
-            ) : null}
+            )}
             {/* Gradient overlay for depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
@@ -171,4 +207,3 @@ export function HeroContent({ anime }: HeroContentProps) {
     </div>
   )
 }
-

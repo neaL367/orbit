@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useMemo, useCallback, memo } from 'react'
+import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react'
 import { CarouselItem } from '@/components/ui/carousel'
 import { cn } from '@/lib/utils'
 import { getAnimeTitle, formatTimeUntilAiringDetailed } from '@/lib/utils/anime-utils'
@@ -24,7 +24,8 @@ function CarouselItemComponent({
   loadedImages,
 }: CarouselItemProps) {
   const now = useCurrentTime()
-  const [localImageLoaded, setLocalImageLoaded] = useState(false)
+  const [highResLoaded, setHighResLoaded] = useState(false)
+  const [lowResLoaded, setLowResLoaded] = useState(false)
 
   // Extract only necessary data from Media object
   const animeData = useMemo(() => {
@@ -38,14 +39,18 @@ function CarouselItemComponent({
   }, [anime])
 
   const title = animeData.title
-  // For carousel banners, use large as default (full width but optimized)
-  const bannerImage = animeData.bannerImage || animeData.coverImage?.large || animeData.coverImage?.medium
+
+  // High-res: banner or extraLarge/large cover
+  const highResSrc = animeData.bannerImage || animeData.coverImage?.extraLarge || animeData.coverImage?.large
+  // Low-res: medium cover (loads fast as placeholder)
+  const lowResSrc = animeData.coverImage?.medium || undefined
   const coverColor = animeData.coverImage?.color || '#1a1a1a'
+
   const nextEpisode = animeData.nextAiringEpisode
   const episodeNumber = nextEpisode?.episode || 0
 
-  // Generate srcset for banner image - carousel displays at full width (400-450px height)
-  const bannerSrcSet = useMemo(() => {
+  // Standard srcSet for high-res image (responsive fallback)
+  const srcSet = useMemo(() => {
     if (animeData.bannerImage) return undefined
     const sizes = []
     if (animeData.coverImage?.medium) sizes.push(`${animeData.coverImage.medium} 600w`)
@@ -65,20 +70,14 @@ function CarouselItemComponent({
 
   const isActive = current === index
   const isPriority = index === 0
-  const isImageLoaded = loadedImages.has(animeData.id) || localImageLoaded || isPriority || isActive
+  const isImageLoaded = loadedImages.has(animeData.id) || highResLoaded || isPriority || isActive
 
   const handleImageLoad = useCallback(() => {
-    if (!localImageLoaded) {
-      setLocalImageLoaded(true)
+    if (!highResLoaded) {
+      setHighResLoaded(true)
       onImageLoad(animeData.id)
     }
-  }, [animeData.id, onImageLoad, localImageLoaded])
-
-  const onRefChange = useCallback((img: HTMLImageElement | null) => {
-    if (img?.complete) {
-      handleImageLoad()
-    }
-  }, [handleImageLoad])
+  }, [animeData.id, onImageLoad, highResLoaded])
 
   const handleClick = useCallback(() => {
     const referrerData = {
@@ -90,6 +89,21 @@ function CarouselItemComponent({
     sessionStorage.setItem('animeDetailTitle', title)
   }, [title])
 
+  const highResRef = useRef<HTMLImageElement>(null)
+  const lowResRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (highResRef.current?.complete) {
+        handleImageLoad()
+      }
+      if (lowResRef.current?.complete) {
+        setLowResLoaded(true)
+      }
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [handleImageLoad])
+
   return (
     <CarouselItem className={cn("pl-0 w-full h-[400px] md:h-[450px] basis-full rounded-xl")}>
       <Link
@@ -98,7 +112,7 @@ function CarouselItemComponent({
         className="h-full block group"
         aria-label={`View details for ${title}`}
       >
-        <div className="relative w-full overflow-hidden h-full rounded-xl cursor-pointer">
+        <div className="relative w-full overflow-hidden h-full rounded-xl cursor-pointer bg-zinc-900">
           <div
             className="absolute inset-0 z-0 rounded-xl transition-opacity duration-500"
             style={{
@@ -107,23 +121,39 @@ function CarouselItemComponent({
             }}
           />
 
-          {bannerImage && (
+          {/* 1. Low-Res Placeholder */}
+          {lowResSrc && !highResLoaded && (
             <img
-              src={bannerImage}
-              srcSet={bannerSrcSet}
+              ref={lowResRef}
+              src={lowResSrc}
+              alt=""
+              aria-hidden="true"
+              referrerPolicy="no-referrer"
+              onLoad={() => setLowResLoaded(true)}
+              className={cn(
+                'absolute inset-0 w-full h-full object-cover blur-md transition-opacity duration-500 z-0 rounded-xl',
+                lowResLoaded ? 'opacity-40' : 'opacity-0'
+              )}
+            />
+          )}
+
+          {/* 2. High-Res Banner */}
+          {highResSrc && (
+            <img
+              ref={highResRef}
+              src={highResSrc}
+              srcSet={srcSet}
               sizes="100vw"
               alt={title}
               loading={isPriority ? "eager" : "lazy"}
               decoding="async"
-              fetchPriority={isPriority ? "high" : "auto"}
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
-              ref={onRefChange}
-              onError={() => setLocalImageLoaded(true)}
+              onError={() => setHighResLoaded(true)}
               className={cn(
                 'absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 rounded-xl',
                 'group-hover:scale-110',
-                isImageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+                highResLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
               )}
             />
           )}

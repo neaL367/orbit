@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useCallback, memo } from "react";
+import { useMemo, useState, useCallback, memo, useRef, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,16 @@ const CoverImage = memo(function CoverImage({
   title: string;
 }) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (imgRef.current?.complete) {
+        setLoaded(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="relative w-full h-36 rounded-lg overflow-hidden ring-1 ring-zinc-800/50 group-hover:ring-zinc-700/50 transition-all">
@@ -36,6 +46,7 @@ const CoverImage = memo(function CoverImage({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
       <img
+        ref={imgRef}
         src={coverImage}
         srcSet={coverSrcSet}
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -43,6 +54,7 @@ const CoverImage = memo(function CoverImage({
         loading="lazy"
         decoding="async"
         fetchPriority="low"
+        referrerPolicy="no-referrer"
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
         className={cn(

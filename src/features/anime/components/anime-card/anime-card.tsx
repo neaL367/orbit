@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState, memo, useCallback, useMemo } from "react";
+import { useState, memo, useCallback, useMemo, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -14,64 +14,91 @@ type AnimeCardProps = {
   anime: Media;
   rank?: number;
   loading?: "eager" | "lazy";
-  fetchPriority?: "high" | "auto" | "low";
 };
 
 const CoverImage = memo(function CoverImage({
-  src,
+  lowResSrc,
+  highResSrc,
   srcSet,
-  sizes,
   alt,
   coverColor,
   loading = "lazy",
-  fetchPriority = "low",
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw",
 }: {
-  src?: string;
+  lowResSrc?: string;
+  highResSrc?: string;
   srcSet?: string;
-  sizes?: string;
   alt: string;
   coverColor: string;
   loading?: "eager" | "lazy";
-  fetchPriority?: "high" | "auto" | "low";
+  sizes?: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
+  const [highResLoaded, setHighResLoaded] = useState(false);
+  const [lowResLoaded, setLowResLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
-  const onRefChange = useCallback((img: HTMLImageElement | null) => {
-    if (img?.complete) {
-      setLoaded(true)
-    }
-  }, [])
+  const highResRef = useRef<HTMLImageElement>(null);
+  const lowResRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (highResRef.current?.complete) {
+        setHighResLoaded(true);
+      }
+      if (lowResRef.current?.complete) {
+        setLowResLoaded(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg">
+    <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-zinc-900">
+      {/* 1. Base Placeholder Color */}
       <div
-        className="absolute inset-0 transition-opacity duration-200 ease-out"
+        className="absolute inset-0 transition-opacity duration-500 ease-out"
         style={{
           backgroundColor: coverColor,
-          opacity: loaded && !errored ? 0 : 1,
+          opacity: highResLoaded ? 0 : 1,
         }}
       />
 
-      {src && !errored && (
+      {/* 2. Low Resolution Image (Loads fast, blurred) */}
+      {lowResSrc && !errored && (
         <img
-          src={src}
+          ref={lowResRef}
+          src={lowResSrc}
+          alt=""
+          aria-hidden="true"
+          loading={loading}
+          referrerPolicy="no-referrer"
+          onLoad={() => setLowResLoaded(true)}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover blur-sm transition-opacity duration-500",
+            lowResLoaded && !highResLoaded ? "opacity-50" : "opacity-0"
+          )}
+        />
+      )}
+
+      {/* 3. High Resolution / Responsive Image */}
+      {highResSrc && !errored && (
+        <img
+          ref={highResRef}
+          src={highResSrc}
           srcSet={srcSet}
           sizes={sizes}
           alt={alt}
           loading={loading}
           decoding="async"
-          fetchPriority={fetchPriority}
           referrerPolicy="no-referrer"
-          onLoad={() => setLoaded(true)}
-          ref={onRefChange}
+          onLoad={() => setHighResLoaded(true)}
           onError={() => {
             setErrored(true);
-            setLoaded(true);
+            setHighResLoaded(true);
           }}
           className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ease-out",
-            loaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
+            "absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out",
+            highResLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
           )}
         />
       )}
@@ -83,7 +110,6 @@ function AnimeCardComponent({
   anime,
   rank,
   loading = "lazy",
-  fetchPriority = "low",
 }: AnimeCardProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -109,22 +135,18 @@ function AnimeCardComponent({
   }, [anime]);
 
   const title = cardData.title;
-  const coverImage =
-    cardData.coverImage?.medium ||
-    cardData.coverImage?.large ||
-    cardData.coverImage?.extraLarge ||
-    undefined;
+
+  // Use medium for low-res placeholder, large for high-res
+  const lowResSrc = cardData.coverImage?.medium || undefined;
+  const highResSrc = cardData.coverImage?.extraLarge || cardData.coverImage?.large || lowResSrc;
   const coverColor = cardData.coverImage?.color || "#1a1a1a";
 
-  const coverSrcSet = useMemo(() => {
-    const arr: string[] = [];
-    if (cardData.coverImage?.medium)
-      arr.push(`${cardData.coverImage.medium} 300w`);
-    if (cardData.coverImage?.large)
-      arr.push(`${cardData.coverImage.large} 500w`);
-    if (cardData.coverImage?.extraLarge)
-      arr.push(`${cardData.coverImage.extraLarge} 700w`);
-    return arr.length > 0 ? arr.join(", ") : undefined;
+  const srcSet = useMemo(() => {
+    const images = [];
+    if (cardData.coverImage?.medium) images.push(`${cardData.coverImage.medium} 230w`);
+    if (cardData.coverImage?.large) images.push(`${cardData.coverImage.large} 460w`);
+    if (cardData.coverImage?.extraLarge) images.push(`${cardData.coverImage.extraLarge} 700w`);
+    return images.length > 0 ? images.join(", ") : undefined;
   }, [cardData.coverImage]);
 
   const handleClick = useCallback(() => {
@@ -169,13 +191,12 @@ function AnimeCardComponent({
       >
         <div className="relative w-full">
           <CoverImage
-            src={coverImage}
-            srcSet={coverSrcSet}
-            sizes="(max-width: 640px) 300px, (max-width: 1024px) 400px, 500px"
+            lowResSrc={lowResSrc}
+            highResSrc={highResSrc}
+            srcSet={srcSet}
             alt={title}
             coverColor={coverColor}
             loading={loading}
-            fetchPriority={fetchPriority}
           />
 
           {rank !== undefined && (
