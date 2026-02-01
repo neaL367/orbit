@@ -17,10 +17,11 @@ function FooterContent() {
               href="https://anilist.co"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Visit AniList (opens in a new tab)"
               className="flex items-center gap-1.5 text-white hover:text-zinc-300 transition-colors font-medium"
             >
               <span>AniList</span>
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
             <span>API</span>
           </div>
@@ -31,11 +32,12 @@ function FooterContent() {
               href={GITHUB_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="View on GitHub (opens in a new tab)"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/50 hover:bg-zinc-800/60 hover:border-zinc-700/50 transition-all duration-200 text-sm font-medium text-zinc-300 hover:text-white"
             >
-              <Github className="h-4 w-4" />
+              <Github className="h-4 w-4" aria-hidden="true" />
               <span>View on GitHub</span>
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
             </Link>
           </div>
         </div>

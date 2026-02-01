@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useGraphQL } from '@/lib/graphql/hooks'
 import { CACHE_TIMES } from '@/lib/constants'

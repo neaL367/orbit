@@ -1,4 +1,4 @@
-import { Schedule } from './_components/schedule'
+import { Schedule } from '@/features/schedule/components/schedule'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

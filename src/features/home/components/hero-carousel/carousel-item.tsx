@@ -96,6 +96,7 @@ function CarouselItemComponent({
         href={`/anime/${animeData.id}`}
         onClick={handleClick}
         className="h-full block group"
+        aria-label={`View details for ${title}`}
       >
         <div className="relative w-full overflow-hidden h-full rounded-xl cursor-pointer">
           <div

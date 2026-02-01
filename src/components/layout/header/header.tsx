@@ -53,7 +53,7 @@ function HeaderContent() {
   useEffect(() => {
     const prevPathname = prevPathnameRef.current
     const prevSearchParams = prevSearchParamsRef.current
-    
+
     if (pathname.startsWith('/anime/') && !prevPathname.startsWith('/anime/')) {
       const referrerData = {
         pathname: prevPathname,
@@ -62,12 +62,12 @@ function HeaderContent() {
       }
       sessionStorage.setItem('animeDetailReferrer', JSON.stringify(referrerData))
     }
-    
+
     if (prevPathname.startsWith('/anime/') && !pathname.startsWith('/anime/')) {
       sessionStorage.removeItem('animeDetailReferrer')
       sessionStorage.removeItem('animeDetailTitle')
     }
-    
+
     // if (prevPathname !== pathname || prevSearchParams !== searchParams.toString()) {
     //   prevPathnameRef.current = pathname
     //   prevSearchParamsRef.current = searchParams.toString()
@@ -139,7 +139,7 @@ function HeaderContent() {
   }
 
   const currentPageLabel = getCurrentPageLabel()
-  
+
   const isCurrentPageActive = () => {
     if (pathname === '/') return true
     if (pathname === '/schedule') return true
@@ -152,16 +152,16 @@ function HeaderContent() {
   const getBackLink = (): Route | null => {
     if (!pathname.startsWith('/anime/')) return null
     if (typeof window === 'undefined') return '/' as Route
-    
+
     const referrer = sessionStorage.getItem('animeDetailReferrer')
     if (!referrer) return '/' as Route
-    
+
     try {
       const referrerData = JSON.parse(referrer)
-      
+
       if (referrerData.pathname === '/') return '/' as Route
       if (referrerData.pathname === '/schedule') return '/schedule' as Route
-      
+
       if (referrerData.pathname === '/anime') {
         if (referrerData.search) {
           return (`/anime?${referrerData.search}` as Route)
@@ -175,17 +175,17 @@ function HeaderContent() {
     } catch {
       // Invalid JSON
     }
-    
+
     return '/' as Route
   }
 
   const getAnimeTitleFromStorage = (): string | null => {
     if (!pathname.startsWith('/anime/')) return null
     if (typeof window === 'undefined') return null
-    
+
     const storedTitle = sessionStorage.getItem('animeDetailTitle')
     if (storedTitle) return storedTitle
-    
+
     const docTitle = document.title
     if (docTitle && docTitle !== 'Anime Not Found') {
       const titleMatch = docTitle.split(' | ')[0]
@@ -193,7 +193,7 @@ function HeaderContent() {
         return titleMatch
       }
     }
-    
+
     return null
   }
 
@@ -202,7 +202,7 @@ function HeaderContent() {
   const isDetailPage = pathname.startsWith('/anime/') && /^\d+$/.test(pathname.split('/')[2] || '')
 
   return (
-    <nav 
+    <nav
       ref={navRef}
       className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg"
       aria-hidden={false}
@@ -216,7 +216,7 @@ function HeaderContent() {
             >
               AnimeX
             </Link>
-            
+
             <div className="flex items-center gap-2 min-w-0 overflow-x-scroll md:overflow-x-visible scrollbar-hide">
               {isDetailPage ? (
                 <>
@@ -238,25 +238,25 @@ function HeaderContent() {
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  
+
                   <BreadcrumbSeparator className="text-zinc-600 shrink-0">
                     <span className="mx-1">/</span>
                   </BreadcrumbSeparator>
                   <BreadcrumbItem className="flex items-center">
-                    <BreadcrumbPage 
+                    <BreadcrumbPage
                       className="text-sm font-semibold text-zinc-300"
                     >
                       Anime
                     </BreadcrumbPage>
                   </BreadcrumbItem>
-                  
+
                   {mounted && animeTitle && (
                     <>
                       <BreadcrumbSeparator className="text-zinc-600 shrink-0">
                         <span className="mx-1">/</span>
                       </BreadcrumbSeparator>
                       <BreadcrumbItem className="flex items-center">
-                        <BreadcrumbPage 
+                        <BreadcrumbPage
                           className="text-sm font-semibold text-white truncate max-w-[300px]"
                           title={animeTitle}
                         >
@@ -286,7 +286,7 @@ function HeaderContent() {
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  
+
                   <BreadcrumbSeparator className="text-zinc-600 shrink-0">
                     <span className="mx-1">/</span>
                   </BreadcrumbSeparator>
@@ -299,17 +299,17 @@ function HeaderContent() {
                             'focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent',
                             'hover:text-white hover:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-white',
                             'inline-flex items-center gap-1.5 text-zinc-400',
-                            pathname === '/' 
-                              ? 'text-zinc-400' 
+                            pathname === '/'
+                              ? 'text-zinc-400'
                               : isCurrentPageActive() && 'text-white'
                           )}
                         >
                           <span className="capitalize">{currentPageLabel}</span>
-                          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                          <ChevronDown className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent 
-                        align="start" 
+                      <PopoverContent
+                        align="start"
                         className="bg-zinc-900/95 backdrop-blur-xl border-transparent shadow-2xl max-w-[200px] p-1.5 gap-0.5"
                       >
                         {menuItems.map((item) => {
@@ -319,12 +319,13 @@ function HeaderContent() {
                               key={item.label}
                               href={item.href as Route}
                               onClick={() => setMenuOpen(false)}
+                              aria-current={active ? 'page' : undefined}
                               className={cn(
                                 'flex items-center w-full px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-200',
                                 'cursor-pointer outline-none',
                                 'focus:bg-zinc-800/60 focus:text-white',
-                                active 
-                                  ? 'bg-zinc-800/70 text-white shadow-sm' 
+                                active
+                                  ? 'bg-zinc-800/70 text-white shadow-sm'
                                   : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                               )}
                             >

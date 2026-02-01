@@ -1,4 +1,4 @@
-"use client"
+
 
 import type { Route } from 'next'
 import { AnimeCard } from '@/features/anime/components/anime-card/anime-card'
@@ -60,13 +60,17 @@ export function SectionView({
   return (
     <section className="mb-12">
       <SectionHeader title={title} viewAllHref={viewAllHref as Route} />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
         {data.map((anime, index) => {
           if (!anime) return null
           const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
-          return <AnimeCard key={anime.id} anime={anime} rank={rank} />
+          return (
+            <li key={anime.id}>
+              <AnimeCard anime={anime} rank={rank} />
+            </li>
+          )
         })}
-      </div>
+      </ul>
     </section>
   )
 }
