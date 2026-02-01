@@ -4,11 +4,11 @@ import type { Media } from "@/lib/graphql/types/graphql"
 type RelationsProps = {
   relations: Array<{
     node?:
-      | ({
-          id: number
-          type?: string | null
-        } & Media)
-      | null
+    | ({
+      id: number
+      type?: string | null
+    } & Media)
+    | null
   } | null>
 }
 
@@ -28,7 +28,7 @@ export function Relations({ relations }: RelationsProps) {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
         {validRelations.map((relAnime) => (
-          <AnimeCard key={relAnime.id} anime={relAnime} loading="lazy" fetchPriority="low" />
+          <AnimeCard key={relAnime.id} anime={relAnime} loading="lazy" />
         ))}
       </div>
     </div>
