@@ -1,4 +1,4 @@
-import { AnimeList } from './_components/list'
+import { AnimeList } from '@/features/anime/components/anime-list'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

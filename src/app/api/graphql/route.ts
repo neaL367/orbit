@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchGraphQLServer, getAniListRateLimit, canMakeAniListRequest } from '@/services/graphql'
-import type { AniListRateLimit } from '@/services/graphql/server'
+import { fetchGraphQLServer, getAniListRateLimit, canMakeAniListRequest } from '@/lib/graphql'
+import type { AniListRateLimit } from '@/lib/graphql/server'
 
 /**
  * GraphQL API Route Handler

@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
   typedRoutes: true,
+  experimental: {
+    inlineCss: true,
+  },
   images: {
     unoptimized: true,
   },

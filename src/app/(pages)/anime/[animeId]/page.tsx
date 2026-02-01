@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { AnimeDetail } from './_components/detail'
-import { AnimeByIdQuery } from '@/services/graphql/queries/anime-by-id'
-import { getAnimeTitle } from '@/lib/anime-utils'
-import { executeGraphQL } from '@/services/graphql'
+import { AnimeDetail } from '@/features/anime/components/anime-detail'
+import { AnimeByIdQuery } from '@/lib/graphql/queries/anime-by-id'
+import { getAnimeTitle } from '@/lib/utils/anime-utils'
+import { executeGraphQL } from '@/lib/graphql'
 import type { Media, AnimeByIdQuery as AnimeByIdQueryType } from '@/lib/graphql/types/graphql'
 
 async function getAnimeById(animeId: number): Promise<Media | null> {

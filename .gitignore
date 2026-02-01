@@ -45,3 +45,6 @@ schema.graphql
 .vscode/
 
 src/lib/graphql/*
+
+.agent/
+.agents/
