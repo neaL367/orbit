@@ -37,6 +37,12 @@ const CoverImage = memo(function CoverImage({
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
+  const onRefChange = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete) {
+      setLoaded(true)
+    }
+  }, [])
+
   return (
     <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg">
       <div
@@ -58,6 +64,7 @@ const CoverImage = memo(function CoverImage({
           fetchPriority={fetchPriority}
           referrerPolicy="no-referrer"
           onLoad={() => setLoaded(true)}
+          ref={onRefChange}
           onError={() => {
             setErrored(true);
             setLoaded(true);
@@ -87,11 +94,11 @@ function AnimeCardComponent({
       title: getAnimeTitle(anime),
       coverImage: anime.coverImage
         ? {
-            medium: anime.coverImage.medium,
-            large: anime.coverImage.large,
-            extraLarge: anime.coverImage.extraLarge,
-            color: anime.coverImage.color,
-          }
+          medium: anime.coverImage.medium,
+          large: anime.coverImage.large,
+          extraLarge: anime.coverImage.extraLarge,
+          color: anime.coverImage.color,
+        }
         : null,
       episodes: anime.episodes,
       duration: anime.duration,

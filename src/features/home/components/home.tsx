@@ -26,7 +26,21 @@ import {
   SeasonalAnimeQuery,
 } from '@/lib/graphql/queries'
 
-function HomeContent() {
+type HomeProps = {
+  trendingInitial?: unknown
+  popularInitial?: unknown
+  seasonalInitial?: unknown
+  upcomingInitial?: unknown
+  topRatedInitial?: unknown
+}
+
+function HomeContent({
+  trendingInitial,
+  popularInitial,
+  seasonalInitial,
+  upcomingInitial,
+  topRatedInitial
+}: HomeProps) {
   const dateValues = useMemo(() => ({
     currentSeason: getCurrentSeason(),
     currentYear: getCurrentYear(),
@@ -45,6 +59,7 @@ function HomeContent() {
         query={TrendingAnimeQuery}
         variables={{ page: 1, perPage: 6 }}
         viewAllHref="/anime?sort=trending"
+        initialData={trendingInitial}
       />
 
       <AnimeSection
@@ -52,6 +67,7 @@ function HomeContent() {
         query={SeasonalAnimeQuery}
         variables={{ season: currentSeason, seasonYear: currentYear, page: 1, perPage: 6 }}
         viewAllHref={`/anime?sort=seasonal&season=${currentSeason}&year=${currentYear}`}
+        initialData={seasonalInitial}
       />
 
       <AnimeSection
@@ -59,6 +75,7 @@ function HomeContent() {
         query={SeasonalAnimeQuery}
         variables={{ season: nextSeason, seasonYear: nextSeasonYear, page: 1, perPage: 6 }}
         viewAllHref={`/anime?sort=seasonal&season=${nextSeason}&year=${nextSeasonYear}`}
+        initialData={upcomingInitial}
       />
 
       <AnimeSection
@@ -67,6 +84,7 @@ function HomeContent() {
         variables={{ page: 1, perPage: 6 }}
         viewAllHref="/anime?sort=top-rated"
         showRank={true}
+        initialData={topRatedInitial}
       />
 
       <AnimeSection
@@ -74,15 +92,16 @@ function HomeContent() {
         query={PopularAnimeQuery}
         variables={{ page: 1, perPage: 6 }}
         viewAllHref="/anime?sort=popular"
+        initialData={popularInitial}
       />
     </div>
   )
 }
 
-export function Home() {
+export function Home(props: HomeProps) {
   return (
     <Suspense>
-      <HomeContent />
+      <HomeContent {...props} />
     </Suspense>
   )
 }

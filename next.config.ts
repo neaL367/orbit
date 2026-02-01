@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   experimental: {
     inlineCss: true,
+    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
   },
   images: {
     unoptimized: true,

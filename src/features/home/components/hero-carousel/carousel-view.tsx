@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { Route } from "next"
 import { cn } from "@/lib/utils"
 import Autoplay from "embla-carousel-autoplay"
@@ -30,9 +30,9 @@ export function CarouselView({
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
 
-  const handleImageLoad = (id: number) => {
+  const handleImageLoad = useCallback((id: number) => {
     setLoadedImages((prev) => new Set(prev).add(id))
-  }
+  }, [])
 
   useEffect(() => {
     if (!api) return

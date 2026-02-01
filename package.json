@@ -5,10 +5,8 @@
   "scripts": {
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:watch": "graphql-codegen --config codegen.ts --watch",
-
     "dev": "bun run codegen && next dev",
     "build": "bun run codegen && next build",
-    
     "start": "next start",
     "lint": "eslint",
     "analyze": "ANALYZE=true npm run build"

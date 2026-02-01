@@ -1,22 +1,10 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { AnimeDetail } from '@/features/anime/components/anime-detail'
-import { AnimeByIdQuery } from '@/lib/graphql/queries/anime-by-id'
+import { AnimeDetail } from '@/features/anime/components/anime-detail/detail/detail'
+import { getCachedAnime } from '@/lib/graphql/server-cache'
 import { getAnimeTitle } from '@/lib/utils/anime-utils'
-import { executeGraphQL } from '@/lib/graphql'
-import type { Media, AnimeByIdQuery as AnimeByIdQueryType } from '@/lib/graphql/types/graphql'
-
-async function getAnimeById(animeId: number): Promise<Media | null> {
-  const result = await executeGraphQL<AnimeByIdQueryType>(
-    String(AnimeByIdQuery),
-    { id: animeId }
-  )
-
-  if (result.errors || !result.data?.Media) {
-    return null
-  }
-
-  return result.data.Media as Media
-}
+import type { Media } from '@/lib/graphql/types/graphql'
+import { Loading } from '@/features/anime/components/anime-detail/detail/loading'
 
 export async function generateMetadata({ params }: PageProps<'/anime/[animeId]'>): Promise<Metadata> {
   const { animeId } = await params
@@ -29,7 +17,8 @@ export async function generateMetadata({ params }: PageProps<'/anime/[animeId]'>
     }
   }
 
-  const anime = await getAnimeById(id)
+  const result = await getCachedAnime(id)
+  const anime = result.data?.Media as Media | undefined
 
   if (!anime) {
     return {
@@ -70,6 +59,19 @@ export async function generateMetadata({ params }: PageProps<'/anime/[animeId]'>
   }
 }
 
-export default async function AnimeDetailPage({ params }: PageProps<'/anime/[animeId]'>) {
-  return <AnimeDetail params={params} />
+async function AnimeDetailPageContent({ params }: { params: Promise<{ animeId: string }> }) {
+  const { animeId } = await params
+  const id = parseInt(animeId, 10)
+  const result = await getCachedAnime(id)
+
+  // Pass the full result (including data) to the client component
+  return <AnimeDetail animeId={animeId} initialData={result.data} />
+}
+
+export default function AnimeDetailPage({ params }: PageProps<'/anime/[animeId]'>) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <AnimeDetailPageContent params={params} />
+    </Suspense>
+  )
 }

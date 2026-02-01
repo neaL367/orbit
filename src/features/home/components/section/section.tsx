@@ -12,15 +12,17 @@ type AnimeSectionProps = {
   variables?: { page?: number; perPage?: number; season?: MediaSeason; seasonYear?: number }
   viewAllHref?: string
   showRank?: boolean
+  initialData?: unknown
 }
 
-export function AnimeSection({ title, query, variables, viewAllHref, showRank = false }: AnimeSectionProps) {
+export function AnimeSection({ title, query, variables, viewAllHref, showRank = false, initialData }: AnimeSectionProps) {
   const { data, isLoading, error, refetch } = useGraphQL(
-    query, 
+    query,
     variables || { page: 1, perPage: 5 },
     {
       staleTime: CACHE_TIMES.MEDIUM, // 5 minutes - home page sections update frequently
-      retry: 2
+      retry: 2,
+      initialData
     }
   )
 

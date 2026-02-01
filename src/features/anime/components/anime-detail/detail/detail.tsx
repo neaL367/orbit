@@ -1,7 +1,7 @@
 "use client";
 
 import { notFound, useRouter } from "next/navigation";
-import { Suspense, use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { CACHE_TIMES } from "@/lib/constants";
 import { DetailView } from "./view";
 import { Age } from "../anime-detail-view/age/age";
@@ -12,13 +12,14 @@ import { AnimeByIdQuery } from "@/lib/graphql/queries/anime-by-id";
 import type { Media } from "@/lib/graphql/types/graphql";
 
 function AnimeDetailContent({
-  params,
+  animeId,
+  initialData,
 }: {
-  params: Promise<{ animeId: string }>;
+  animeId: string;
+  initialData?: unknown;
 }) {
   const router = useRouter();
-  const { animeId: animeIdParam } = use(params);
-  const animeId = parseInt(animeIdParam, 10);
+  const id = parseInt(animeId, 10);
 
   const [isAgeVerified, setIsAgeVerified] = useState(() => {
     if (typeof window !== "undefined") {
@@ -26,7 +27,7 @@ function AnimeDetailContent({
     }
     return false;
   });
-  
+
   useEffect(() => {
     const sessionId = sessionStorage.getItem("session_id");
     if (!sessionId) {
@@ -35,16 +36,17 @@ function AnimeDetailContent({
     }
   }, []);
 
-  if (isNaN(animeId)) {
+  if (isNaN(id)) {
     notFound();
   }
 
   const { data, isLoading, error, refetch } = useGraphQL(
     AnimeByIdQuery,
-    { id: animeId },
+    { id: id },
     {
       staleTime: CACHE_TIMES.LONG,
       retry: 2,
+      initialData,
     },
   );
 
@@ -80,13 +82,15 @@ function AnimeDetailContent({
 }
 
 export function AnimeDetail({
-  params,
+  animeId,
+  initialData,
 }: {
-  params: Promise<{ animeId: string }>;
+  animeId: string;
+  initialData?: unknown;
 }) {
   return (
     <Suspense>
-      <AnimeDetailContent params={params} />
+      <AnimeDetailContent animeId={animeId} initialData={initialData} />
     </Suspense>
   );
 }

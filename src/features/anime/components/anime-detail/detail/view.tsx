@@ -1,15 +1,15 @@
-import {
-  Hero,
-  HeroContent,
-  Info,
-  Synopsis,
-  Recommendations,
-  Relations,
-  Trailer,
-  Characters,
-  StreamingEpisodes,
-} from '../sections'
+import dynamic from 'next/dynamic'
+import { Hero } from '../anime-detail-view/hero'
+import { HeroContent } from '../anime-detail-view/hero-content'
+import { Info } from '../anime-detail-view/info'
+import { Synopsis } from '../anime-detail-view/synopsis'
 import type { Media } from '@/lib/graphql/types/graphql'
+
+const Trailer = dynamic(() => import('../anime-detail-view/trailer').then(mod => mod.Trailer), { ssr: true })
+const Characters = dynamic(() => import('../anime-detail-view/characters').then(mod => mod.Characters), { ssr: true })
+const Recommendations = dynamic(() => import('../anime-detail-view/recommendations').then(mod => mod.Recommendations), { ssr: true })
+const Relations = dynamic(() => import('../anime-detail-view/relations').then(mod => mod.Relations), { ssr: true })
+const StreamingEpisodes = dynamic(() => import('../anime-detail-view/streaming-episodes').then(mod => mod.StreamingEpisodes), { ssr: true })
 
 type DetailViewProps = {
   data: Media

@@ -2,10 +2,15 @@
 
 import { addDays, format, fromUnixTime, getDay } from 'date-fns'
 import { useMemo } from 'react'
-import { UpcomingAiringCarousel } from '@/features/home/components/hero-carousel'
+import dynamic from 'next/dynamic'
 import { DaySection } from '../day-section'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
+
+const UpcomingAiringCarousel = dynamic(
+  () => import('@/features/home/components/hero-carousel').then((mod) => mod.UpcomingAiringCarousel),
+  { ssr: true }
+)
 import { Button } from '@/components/ui/button'
 import { useScrollToTop } from '@/hooks/use-scroll-to-top'
 import { ArrowUp } from 'lucide-react'

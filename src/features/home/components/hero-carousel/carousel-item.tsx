@@ -60,7 +60,7 @@ function CarouselItemComponent({
     const timeUntil = airingAt - now
     return timeUntil > 0 ? timeUntil : 0
   }, [nextEpisode, now])
-  
+
   const { days, hours, minutes, seconds } = formatTimeUntilAiringDetailed(timeUntilAiring)
 
   const isActive = current === index
@@ -68,9 +68,17 @@ function CarouselItemComponent({
   const isImageLoaded = loadedImages.has(animeData.id) || localImageLoaded || isPriority || isActive
 
   const handleImageLoad = useCallback(() => {
-    setLocalImageLoaded(true)
-    onImageLoad(animeData.id)
-  }, [animeData.id, onImageLoad])
+    if (!localImageLoaded) {
+      setLocalImageLoaded(true)
+      onImageLoad(animeData.id)
+    }
+  }, [animeData.id, onImageLoad, localImageLoaded])
+
+  const onRefChange = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete) {
+      handleImageLoad()
+    }
+  }, [handleImageLoad])
 
   const handleClick = useCallback(() => {
     const referrerData = {
@@ -84,15 +92,15 @@ function CarouselItemComponent({
 
   return (
     <CarouselItem className={cn("pl-0 w-full h-[400px] md:h-[450px] basis-full rounded-xl")}>
-      <Link 
-        href={`/anime/${animeData.id}`} 
+      <Link
+        href={`/anime/${animeData.id}`}
         onClick={handleClick}
         className="h-full block group"
       >
         <div className="relative w-full overflow-hidden h-full rounded-xl cursor-pointer">
           <div
             className="absolute inset-0 z-0 rounded-xl transition-opacity duration-500"
-            style={{ 
+            style={{
               backgroundColor: coverColor,
               opacity: isImageLoaded ? 0 : 1
             }}
@@ -109,6 +117,7 @@ function CarouselItemComponent({
               fetchPriority={isPriority ? "high" : "auto"}
               referrerPolicy="no-referrer"
               onLoad={handleImageLoad}
+              ref={onRefChange}
               onError={() => setLocalImageLoaded(true)}
               className={cn(
                 'absolute inset-0 w-full h-full object-cover transition-all duration-500 z-10 rounded-xl',
@@ -162,39 +171,39 @@ export const UpcomingAiringCarouselItem = memo(CarouselItemComponent, (prevProps
   // Compare index and current (affects rendering)
   if (prevProps.index !== nextProps.index) return false
   if (prevProps.current !== nextProps.current) return false
-  
+
   // Compare anime data
   const prev = prevProps.anime
   const next = nextProps.anime
-  
+
   if (prev.id !== next.id) return false
-  
+
   // Compare title
   const prevTitle = prev.title?.userPreferred || prev.title?.romaji || prev.title?.english
   const nextTitle = next.title?.userPreferred || next.title?.romaji || next.title?.english
   if (prevTitle !== nextTitle) return false
-  
+
   // Compare banner image
   if (prev.bannerImage !== next.bannerImage) return false
-  
+
   // Compare cover image URLs
   const prevCover = prev.coverImage?.large || prev.coverImage?.medium
   const nextCover = next.coverImage?.large || next.coverImage?.medium
   if (prevCover !== nextCover) return false
-  
+
   // Compare cover color
   if (prev.coverImage?.color !== next.coverImage?.color) return false
-  
+
   // Compare next airing episode
   if (prev.nextAiringEpisode?.episode !== next.nextAiringEpisode?.episode) return false
   if (prev.nextAiringEpisode?.airingAt !== next.nextAiringEpisode?.airingAt) return false
-  
+
   // Compare function references
   if (prevProps.onImageLoad !== nextProps.onImageLoad) return false
-  
+
   // Compare loadedImages Set (reference equality - should be stable)
   if (prevProps.loadedImages !== nextProps.loadedImages) return false
-  
+
   return true
 })
 
