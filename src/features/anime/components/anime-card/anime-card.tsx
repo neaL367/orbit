@@ -64,7 +64,7 @@ const CoverImage = memo(function CoverImage({
       />
 
       {/* 2. Low Resolution Image (Loads fast, blurred) */}
-      {lowResSrc && !errored && (
+      {lowResSrc && !errored ? (
         <img
           ref={lowResRef}
           src={lowResSrc}
@@ -78,10 +78,10 @@ const CoverImage = memo(function CoverImage({
             lowResLoaded && !highResLoaded ? "opacity-50" : "opacity-0"
           )}
         />
-      )}
+      ) : null}
 
       {/* 3. High Resolution / Responsive Image */}
-      {highResSrc && !errored && (
+      {highResSrc && !errored ? (
         <img
           ref={highResRef}
           src={highResSrc}
@@ -101,7 +101,7 @@ const CoverImage = memo(function CoverImage({
             highResLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
           )}
         />
-      )}
+      ) : null}
     </div>
   );
 });
@@ -199,7 +199,7 @@ function AnimeCardComponent({
             loading={loading}
           />
 
-          {rank !== undefined && (
+          {rank !== undefined ? (
             <div className="absolute top-0 left-0 z-20">
               <div
                 className="relative flex items-center justify-center min-w-[44px] h-11 px-3 rounded-br-2xl rounded-tl-lg transition-transform duration-150"
@@ -210,7 +210,7 @@ function AnimeCardComponent({
                 </span>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20 pointer-events-none" />
 
@@ -220,25 +220,25 @@ function AnimeCardComponent({
             </h3>
 
             <div className="hidden sm:flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs">
-              {episodes && (
+              {episodes ? (
                 <span className="text-white/95 font-semibold bg-white/10 px-2 py-0.5 rounded-md">
                   {episodes} ep
                 </span>
-              )}
-              {duration && (
+              ) : null}
+              {duration ? (
                 <span className="text-white/90 font-medium">{duration}m</span>
-              )}
-              {year && (
+              ) : null}
+              {year ? (
                 <span className="text-white/85 font-medium">{year}</span>
-              )}
-              {format && (
+              ) : null}
+              {format ? (
                 <span className="text-white/75 text-[10px] uppercase tracking-wider font-medium">
                   {format.replace(/_/g, " ")}
                 </span>
-              )}
+              ) : null}
             </div>
 
-            {genres.length > 0 && (
+            {genres.length > 0 ? (
               <div className="hidden sm:flex flex-wrap gap-1.5">
                 {genres.slice(0, 2).map((genre: string | null) => (
                   <Badge
@@ -253,7 +253,7 @@ function AnimeCardComponent({
                   </Badge>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </Card>

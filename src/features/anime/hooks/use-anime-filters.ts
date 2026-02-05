@@ -1,132 +1,89 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { useCallback, useMemo } from "react"
 import { useDebouncedCallback } from "use-debounce"
 import type { Route } from "next"
 
+/**
+ * Hook for managing anime filters with URL state synchronization.
+ * Supports genres (multi-select), year, season, format, and status (single-select).
+ */
 export function useAnimeFilters() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [open, setOpen] = useState(false)
-  const [popoverOpen, setPopoverOpen] = useState<Record<string, boolean>>({
-    genres: false,
-    year: false,
-    season: false,
-    format: false,
-    status: false,
-  })
 
-  const setPopoverOpenState = (key: string, isOpen: boolean) => {
-    setPopoverOpen((prev) => ({ ...prev, [key]: isOpen }))
-  }
-
-  // Generate years from 1940 to next year
-  const years = useMemo(() => {
-    const currentYear = new Date().getFullYear()
-    const yearsList: number[] = []
-    for (let year = currentYear + 1; year >= 1940; year--) {
-      yearsList.push(year)
+  const currentFilters = useMemo(() => {
+    return {
+      search: searchParams.get("search") || "",
+      genres: searchParams.get("genres")?.split(",").filter(Boolean) || [],
+      year: searchParams.get("year") || "",
+      season: searchParams.get("season") || "",
+      format: searchParams.get("format") || "",
+      status: searchParams.get("status") || "",
+      sort: searchParams.get("sort") || "trending",
+      page: parseInt(searchParams.get("page") || "1", 10),
     }
-    return yearsList
-  }, [])
-
-  // Get current filter values from URL
-  const genres = useMemo(() => {
-    return searchParams.get("genres")?.split(",").filter(Boolean) || []
   }, [searchParams])
 
-  const year = searchParams.get("year") || ""
-  const season = searchParams.get("season") || ""
-  const format = searchParams.get("format") || ""
-  const status = searchParams.get("status") || ""
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    return Array.from({ length: 60 }, (_, i) => (currentYear + 1 - i).toString())
+  }, [])
 
-  const selectedGenres = new Set(genres)
-  const selectedYear = year ? new Set([year]) : new Set<string>()
-  const selectedSeason = season ? new Set([season]) : new Set<string>()
-  const selectedFormat = format ? new Set([format]) : new Set<string>()
-  const selectedStatus = status ? new Set([status]) : new Set<string>()
+  const updateUrl = useDebouncedCallback((newFilters: Partial<typeof currentFilters>) => {
+    const params = new URLSearchParams(searchParams.toString())
 
-  const updateFilters = useDebouncedCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (value) {
-        params.set(key, value)
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          params.set(key, value.join(","))
+        } else {
+          params.delete(key)
+        }
+      } else if (value) {
+        params.set(key, value.toString())
       } else {
         params.delete(key)
       }
+    })
+
+    // Reset page on filter change unless explicitly setting page
+    if (!newFilters.page) {
       params.delete("page")
-      router.push(`/anime?${params.toString()}` as Route)
-    },
-    300,
-  )
+    }
 
-  const toggleGenre = useDebouncedCallback(
-    (genre: string) => {
-      const currentGenres = genres
-      const newGenres = currentGenres.includes(genre)
-        ? currentGenres.filter((g) => g !== genre)
-        : [...currentGenres, genre]
-      updateFilters("genres", newGenres.join(","))
-    },
-    300,
-  )
-
-  const clearAllFilters = useDebouncedCallback(() => {
-    const params = new URLSearchParams()
-    const sort = searchParams.get("sort")
-    if (sort) params.set("sort", sort)
-    router.push(`/anime?${params.toString()}` as Route)
-    setOpen(false)
+    router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
   }, 300)
 
-  const handleFilterSelect = (categoryKey: string, optionValue: string, isMultiSelect: boolean) => {
-    if (categoryKey === "genres") {
-      toggleGenre(optionValue)
-    } else {
-      let selectedValues: Set<string>
-      if (categoryKey === "year") {
-        selectedValues = selectedYear
-      } else if (categoryKey === "season") {
-        selectedValues = selectedSeason
-      } else if (categoryKey === "format") {
-        selectedValues = selectedFormat
-      } else {
-        selectedValues = selectedStatus
-      }
-      
-      const isSelected = selectedValues.has(optionValue)
-      updateFilters(categoryKey, isSelected ? "" : optionValue)
-      if (!isMultiSelect) {
-        setPopoverOpenState(categoryKey, false)
-      }
-    }
-  }
+  const setSearch = useCallback((term: string) => {
+    updateUrl({ search: term })
+  }, [updateUrl])
 
-  const handleClearFilter = (categoryKey: string) => {
-    updateFilters(categoryKey, "")
-    setPopoverOpenState(categoryKey, false)
-  }
+  const toggleGenre = useCallback((genre: string) => {
+    const newGenres = currentFilters.genres.includes(genre)
+      ? currentFilters.genres.filter((g) => g !== genre)
+      : [...currentFilters.genres, genre]
+    updateUrl({ genres: newGenres })
+  }, [currentFilters.genres, updateUrl])
+
+  const setFilter = useCallback((key: keyof typeof currentFilters, value: string) => {
+    updateUrl({ [key]: value === currentFilters[key] ? "" : value })
+  }, [currentFilters, updateUrl])
+
+  const clearFilters = useCallback(() => {
+    const params = new URLSearchParams()
+    if (currentFilters.sort) params.set("sort", currentFilters.sort)
+    router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
+  }, [currentFilters.sort, pathname, router])
 
   return {
+    filters: currentFilters,
     years,
-    genres,
-    year,
-    season,
-    format,
-    status,
-    selectedGenres,
-    selectedYear,
-    selectedSeason,
-    selectedFormat,
-    selectedStatus,
-    open,
-    setOpen,
-    popoverOpen,
-    setPopoverOpenState,
-    handleFilterSelect,
-    handleClearFilter,
-    clearAllFilters,
+    toggleGenre,
+    setFilter,
+    setSearch,
+    clearFilters,
   }
 }
-

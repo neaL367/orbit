@@ -1,5 +1,6 @@
 export { ErrorState } from './error-state'
 export { LoadingSkeleton } from './loading-skeleton'
 export { SectionHeader } from './section-header'
-
-
+export { IndexSectionHeader } from './index-section-header'
+export { IndexPanel } from './index-panel'
+export { IndexChip } from './index-chip'

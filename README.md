@@ -1,19 +1,19 @@
-# Orbit - Anime Discovery Platform
+# AnimeX - Anime Discovery Platform
 
-Modern anime browsing platform built with Next.js 16, featuring real-time AniList API data, advanced filtering, and intuitive UI.
+Modern anime browsing platform built with Next.js 16 and React 19, featuring real-time AniList API data, advanced streaming patterns, and intuitive UI.
 
 ## ✨ Features
 
 - **Discovery**: Trending, Popular, Top Rated, Seasonal, Upcoming, Schedule, Search
 - **Filtering**: Multi-select genres, year, season, format, status with URL-synced state
 - **Details**: Rich media, trailers, characters, recommendations, streaming links
-- **Performance**: Intelligent caching, lazy loading, optimized queries
+- **Performance**: Intelligent caching, lazy loading, optimized queries, and RSC streaming
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: Next.js 16 (App Router) + React 19
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
+- **Styling**: Tailwind CSS 4 + shadcn/ui
 - **Data**: React Query + GraphQL (AniList API)
 - **Codegen**: GraphQL Code Generator
 - **Icons**: Lucide React
@@ -33,98 +33,61 @@ bun dev
 
 ## 📁 Project Structure
 
+Orbit follows a **feature-based architecture** to ensure scalability and maintainability.
+
 ```
 src/
 ├── app/                           # Next.js App Router
 │   ├── (anime)/                   # Anime feature routes
-│   │   ├── anime/                # Anime list & filters
-│   │   └── schedule/             # Schedule page
-│   ├── api/graphql/              # GraphQL API route
- │   ├── layout.tsx                # Root layout
+│   ├── (pages)/                   # Page-level route definitions
+│   ├── api/graphql/              # GraphQL API proxy route
 │   └── globals.css               # Global styles
 │
 ├── components/                    # Shared UI components
-│   ├── ui/                       # shadcn/ui primitives (button, card, etc.)
-│   ├── shared/                   # Shared app components
-│   │   ├── error-state/
-│   │   ├── loading-skeleton/
-│   │   └── section-header/
+│   ├── ui/                       # shadcn/ui primitives (Radix UI)
+│   ├── shared/                   # Shared app-specific components
 │   └── layout/                   # Header & Footer
 │
-├── features/                      # Feature-based modules
-│   ├── anime/
-│   │   ├── components/           # Anime-specific components
-│   │   │   ├── anime-card/
-│   │   │   ├── anime-filters/
-│   │   │   ├── anime-list/
-│   │   │   └── anime-detail/
-│   │   ├── hooks/                # Anime-specific hooks
-│   │   │   ├── use-anime-filters.ts
-│   │   │   └── use-anime-list.ts
-│   │   └── services/             # Anime utilities
-│   │
-│   ├── home/
-│   │   └── components/
-│   │       ├── hero-carousel/
-│   │       └── section/
-│   │
-│   └── schedule/
-│       └── components/
-│           ├── day-section/
-│           └── schedule/
+├── features/                      # Domain-specific modules
+│   ├── anime/                     # Anime discovery and details
+│   │   ├── components/           # (anime-card, anime-list, filters)
+│   │   └── hooks/                # (use-anime-list)
+│   ├── home/                      # Homepage features
+│   │   └── components/           # (upcoming-carousel, anime-section)
+│   └── schedule/                  # Airing schedule features
 │
-├── lib/                          # Core utilities
-│   ├── utils/                   # General utilities (cn, anime-utils)
-│   ├── constants/               # App constants (cache, API)
-│   ├── graphql/                 # GraphQL infrastructure
-│   │   ├── client.ts            # Client execution
-│   │   ├── server.ts            # Server execution
-│   │   ├── execute.ts           # Unified execution
-│   │   ├── hooks.ts             # React hooks
-│   │   ├── cache.ts             # Cache configuration
-│   │   ├── errors.ts            # Error handling
-│   │   ├── queries/             # Query definitions
-│   │   └── types/               # Generated types
-│   └── providers/               # App-level providers (React Query)
+├── lib/                          # Core infrastructure
+│   ├── utils/                   # Shared utilities (cn, anime-utils)
+│   ├── graphql/                 # GraphQL client/server/cache
+│   └── providers/               # Context providers (React Query)
 │
-└── hooks/                        # Shared custom hooks
-    ├── use-current-time.ts
-    └── use-scroll-to-top.ts
+└── hooks/                        # Common React hooks
 ```
 
-## 🔄 Migration Status
+## ⚡ Performance Architecture
 
-This project has been refactored to follow a feature-based architecture. The following changes have been made:
+Following **Vercel's React Best Practices**, Orbit implements several high-performance patterns:
 
-### ✅ Completed
+### 📡 Streaming & Parallel Fetching
 
-- Created new feature-based folder structure (`features/anime`, `features/home`, `features/schedule`)
-- Moved all components from `app/_components` to appropriate feature folders
-- Reorganized GraphQL services from `services/graphql` to `lib/graphql`
-- Reorganized utilities into `lib/utils` and `lib/constants`
-- Updated `tsconfig.json` with new path aliases (`@/features/*`, `@/components/*`, `@/lib/*`, `@/hooks/*`)
-- Started updating import paths in feature components
+The homepage leverages React Server Components (RSC) to fetch data in parallel. Each section (Trending, Seasonal, etc.) is wrapped in a `Suspense` boundary, allowing the page shell to load instantly while content "streams" in.
 
-### 🚧 In Progress
+### 📦 Bundle Optimization
 
-- Updating all import paths from old structure to new structure
-- Removing old component folders after full migration
-- Updating route components to use new paths
+- **No Barrel Imports**: Imports are mapped directly to files to ensure optimal tree-shaking and avoid processing unnecessary modules.
+- **Dynamic Imports**: Heavy client components are loaded only when needed via `next/dynamic`.
 
-### Import Path Migration Guide
+### 🧪 Modern React 19 Patterns
 
-**Old Paths** → **New Paths**:
+- **Direct Ref Passing**: Eliminated legacy `forwardRef` in favor of React 19's native `ref` prop support.
+- **Hydration Safety**: Time-based elements use a "mount-only" strategy to prevent hydration mismatches between server and client.
 
-- `@/features/anime/components/anime-card`
-- `@/features/home/components/hero-carousel`
-- `@/features/home/components`
-- `@/components/layout`
-- `@/lib/providers`
-- `@/hooks/*`
-- `@/lib/graphql/*`
-- `@/components/shared`
-- `@/lib/utils/anime-utils`
-- `@/lib/constants`
+## 🔄 Recent Updates (v2.1)
+
+- **Cinematic Experience**: Added immersive banner headers with gradient overlays and "tactical" tech grids.
+- **Interactive Trailer Component**: Bespoke YouTube integration with custom play buttons, live status indicators, and accelerated loading patterns.
+- **Refined Styling**: Premium dark-mode aesthetics with glassmorphism, micro-interactions, and optimized transitions.
+- **Cleanup**: Removed dead code and optimized build processes.
 
 ## 🔗 Links
 
@@ -135,20 +98,12 @@ This project has been refactored to follow a feature-based architecture. The fol
 
 ## 📝 Development Notes
 
-### Performance Optimizations (Planned)
+### UI/UX Standards
 
-- Fix barrel exports (especially lucide-react)
-- Implement dynamic imports for heavy components
-- Defer analytics loading to post-hydration
-- Parallelize data fetching with Promise.all()
-
-### UI/UX Improvements (Planned)
-
-- Add comprehensive ARIA labels and roles
-- Ensure all interactive elements have proper focus states
-- Add support for `prefers-reduced-motion`
-- Ensure 44x44px minimum touch targets
+- **A11y**: Ensuring 44x44px touch targets and full keyboard navigation.
+- **Motion**: Support for `prefers-reduced-motion` and optimized CSS transitions.
+- **Responsiveness**: Mobile-first grid layouts with URL-synced filter state.
 
 ---
 
-**Note**: This project is actively being refactored to follow Next.js and React best practices. Some import paths may still reference the old structure during the transition period.
+**Note**: This project follows the latest Next.js and React 19 standards. Performance and code composition are prioritized to maintain a premium user experience.

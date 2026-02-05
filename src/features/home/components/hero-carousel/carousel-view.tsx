@@ -1,38 +1,32 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import type { Route } from "next"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import Autoplay from "embla-carousel-autoplay"
 import { Carousel, CarouselContent, type CarouselApi } from "@/components/ui/carousel"
-import { ErrorState, SectionHeader } from "@/components/shared"
+import { ErrorState } from "@/components/shared"
+import { AnimexSectionHeader } from "@/components/shared/animex-primitives"
+import { AnimexSkeleton } from "@/components/shared/animex-skeletons"
 import { UpcomingAiringCarouselItem } from "./carousel-item"
 import type { Media } from "@/lib/graphql/types/graphql"
 
 type CarouselViewProps = {
   data: Media[]
-  hideViewAll?: boolean
   className?: string
   error?: Error | null
   isLoading?: boolean
-  onRetry?: () => void
+  onRetryAction?: () => void
 }
 
 export function CarouselView({
   data,
-  hideViewAll = false,
   className,
   error,
   isLoading = false,
-  onRetry,
+  onRetryAction,
 }: CarouselViewProps) {
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
-
-  const handleImageLoad = useCallback((id: number) => {
-    setLoadedImages((prev) => new Set(prev).add(id))
-  }, [])
 
   useEffect(() => {
     if (!api) return
@@ -53,22 +47,19 @@ export function CarouselView({
 
   return (
     <div className={cn("w-full", className)}>
-      {/* SectionHeader - Always Visible */}
-      <SectionHeader
-        title="Upcoming Airing"
-        subtitle="Anime episodes coming soon"
-        viewAllHref={hideViewAll ? undefined : ("/schedule" as Route)}
+      <AnimexSectionHeader
+        title="Upcoming"
+        subtitle="Airing soon"
       />
 
-      {/* Content Section - Shows loading, error, or carousel */}
       {error ? (
         <ErrorState
-          message="Error loading upcoming anime"
-          onRetry={onRetry}
-          className="bg-zinc-900 rounded-xl"
+          message="System offline"
+          onRetry={onRetryAction}
+          className="bg-zinc-950 p-12 border-subtle"
         />
       ) : isLoading ? (
-        <div className="h-[400px] bg-zinc-900 rounded-xl animate-pulse" />
+        <AnimexSkeleton className="h-[400px] w-full" />
       ) : animeList.length === 0 ? (
         null
       ) : (
@@ -80,9 +71,8 @@ export function CarouselView({
           }}
           plugins={[
             Autoplay({
-              delay: 10000,
+              delay: 8000,
               stopOnInteraction: false,
-              stopOnMouseEnter: false,
             }),
           ]}
           className="w-full"
@@ -96,8 +86,6 @@ export function CarouselView({
                   anime={anime}
                   index={index}
                   current={current}
-                  onImageLoad={handleImageLoad}
-                  loadedImages={loadedImages}
                 />
               )
             })}
@@ -107,4 +95,3 @@ export function CarouselView({
     </div>
   )
 }
-

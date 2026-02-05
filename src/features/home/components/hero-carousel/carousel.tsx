@@ -7,12 +7,10 @@ import { extractMediaList } from "@/lib/anime-utils"
 import { CarouselView } from "./carousel-view"
 
 type UpcomingAiringCarouselProps = {
-  hideViewAll?: boolean
   className?: string
 }
 
-export function UpcomingAiringCarousel({
-  hideViewAll = false,
+export function UpcomingAiringCarouselClient({
   className,
 }: UpcomingAiringCarouselProps) {
   const { data, isLoading, error, refetch } = useGraphQL(
@@ -29,11 +27,10 @@ export function UpcomingAiringCarousel({
   return (
     <CarouselView
       data={allMedia}
-      hideViewAll={hideViewAll}
       className={className}
       error={error}
       isLoading={isLoading}
-      onRetry={() => refetch()}
+      onRetryAction={() => refetch()}
     />
   )
 }

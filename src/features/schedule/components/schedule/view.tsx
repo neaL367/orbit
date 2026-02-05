@@ -2,20 +2,9 @@
 
 import { addDays, format, fromUnixTime, getDay } from 'date-fns'
 import { useMemo } from 'react'
-import dynamic from 'next/dynamic'
-import { DaySection } from '../day-section'
+import { DaySection } from '../day-section/day-section'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
-
-const UpcomingAiringCarousel = dynamic(
-  () => import('@/features/home/components/hero-carousel').then((mod) => mod.UpcomingAiringCarousel),
-  { ssr: true }
-)
-import { Button } from '@/components/ui/button'
-import { useScrollToTop } from '@/hooks/use-scroll-to-top'
-import { ArrowUp } from 'lucide-react'
-import { cn } from '@/lib/utils'
-
 
 type ScheduleViewProps = {
   data: AiringSchedule[]
@@ -32,7 +21,6 @@ const DAYS_OF_WEEK = [
 ] as const
 
 export function ScheduleView({ data }: ScheduleViewProps) {
-  const { show, scrollToTop } = useScrollToTop(600);
 
   const schedulesByDay = useMemo(() => {
     const grouped: Record<number, Record<string, AiringSchedule[]>> = {
@@ -45,7 +33,6 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       0: {}, // Sunday
     }
 
-    // Track seen schedules per day to prevent duplicates within the same day
     const seenPerDay: Record<number, Set<number>> = {
       1: new Set(),
       2: new Set(),
@@ -56,20 +43,15 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       0: new Set(),
     }
 
-    // Process all schedules (deduplication by schedule ID is already done in schedule.tsx)
     data.forEach((schedule) => {
       const airingAt = schedule.airingAt
       const date = fromUnixTime(airingAt)
-      const dayOfWeek = getDay(date) // 0 = Sunday, 1 = Monday, etc.
+      const dayOfWeek = getDay(date)
       const format = schedule.media?.format
       const formatKey = format ? String(format) : 'UNKNOWN'
 
-      // Skip if we've already seen this schedule ID for this day (extra safety check)
-      if (seenPerDay[dayOfWeek].has(schedule.id)) {
-        return
-      }
+      if (seenPerDay[dayOfWeek].has(schedule.id)) return
 
-      // Group by format within each day
       if (!grouped[dayOfWeek][formatKey]) {
         grouped[dayOfWeek][formatKey] = []
       }
@@ -77,7 +59,6 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       seenPerDay[dayOfWeek].add(schedule.id)
     })
 
-    // Sort each day's format groups by airing time
     Object.keys(grouped).forEach((day) => {
       Object.keys(grouped[Number(day)]).forEach((format) => {
         grouped[Number(day)][format].sort((a, b) => a.airingAt - b.airingAt)
@@ -90,8 +71,6 @@ export function ScheduleView({ data }: ScheduleViewProps) {
   const today = new Date()
   const todayIndex = getDay(today)
 
-  // Sort days so today appears first, then the rest in order
-  // Direct computation without useMemo for React Compiler compatibility
   const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
   const sortedDays = todayDayIndex === -1
     ? DAYS_OF_WEEK
@@ -101,23 +80,16 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       ...DAYS_OF_WEEK.slice(0, todayDayIndex)
     ]
 
-  // Format date as "15th Jan" or "1st Jan" using date-fns
-  const formatDate = (date: Date): string => {
+  const formatDateLabel = (date: Date): string => {
     return format(date, 'do MMM')
   }
 
   return (
-    <div className="space-y-12">
-      {/* Upcoming Airing Carousel */}
-      <div className="mb-12">
-        <UpcomingAiringCarousel hideViewAll />
-      </div>
-
+    <div className="space-y-32">
       {/* All Days of the Week - Today first */}
       {sortedDays.map(({ index: dayIndex, name: dayName }, arrayIndex) => {
-        // Calculate date based on position in sorted array (today is index 0, tomorrow is index 1, etc.)
         const date = addDays(today, arrayIndex)
-        const dateString = formatDate(date)
+        const dateString = formatDateLabel(date)
         return (
           <DaySection
             key={dayIndex}
@@ -125,24 +97,12 @@ export function ScheduleView({ data }: ScheduleViewProps) {
             dateString={dateString}
             isToday={dayIndex === todayIndex}
             schedulesByFormat={schedulesByDay[dayIndex]}
-            formatTime={formatTime}
-            getStreamingLinks={getStreamingLinks}
+            formatTimeAction={formatTime}
+            getStreamingLinksAction={getStreamingLinks}
           />
         )
       })}
-      <Button
-        onClick={scrollToTop}
-        className={cn(
-          'fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 shadow-lg transition-all duration-300',
-          show
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 translate-y-4 pointer-events-none'
-        )}
-        aria-label="Scroll to top"
-      >
-        <ArrowUp className="h-5 w-5 text-white" />
-      </Button>
+
     </div>
   )
 }
-

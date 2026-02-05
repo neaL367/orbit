@@ -1,14 +1,14 @@
 "use client";
 
 import { useQueries } from "@tanstack/react-query";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
 import { ScheduleView } from "./view";
 import { ScheduleLoading } from "./loading";
-import { ScheduleAnimeQuery } from "@/lib/graphql/queries";
+import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime";
 import { execute } from "@/lib/graphql/execute";
 import { CACHE_TIMES } from "@/lib/constants";
 import type { AiringSchedule } from "@/lib/graphql/types/graphql";
-import { NsfwToggle } from "./nsfw";
+import { IndexSectionHeader } from "@/components/shared/index-section-header";
 
 function getDayRanges(): Array<{
   dayIndex: number;
@@ -41,12 +41,6 @@ function getDayRanges(): Array<{
 
 function ScheduleContent() {
   const dayRanges = useMemo(() => getDayRanges(), []);
-  const [nsfwEnabled, setNsfwEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("nsfw_enabled") === "true";
-    }
-    return false;
-  });
 
   const dayQueries = useQueries({
     queries: dayRanges.map(({ dayIndex, start, end }, index) => {
@@ -122,7 +116,7 @@ function ScheduleContent() {
           (schedule): schedule is AiringSchedule =>
             schedule !== null &&
             schedule.media !== null &&
-            (nsfwEnabled || !schedule.media?.isAdult),
+            !schedule.media?.isAdult
         );
         allSchedules.push(...validSchedules);
       }
@@ -147,35 +141,29 @@ function ScheduleContent() {
     }
 
     return Array.from(schedulesByMedia.values());
-  }, [dayQueries, nsfwEnabled]);
+  }, [dayQueries]);
 
   const isLoading = dayQueries.some((query) => query.isLoading);
   const error = dayQueries.find((query) => query.error)?.error;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div
-        className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16"
-        style={{ maxWidth: "1680px" }}
-      >
-        <div className="mb-8 flex justify-between items-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8">
-            Anime Schedule
-          </h1>
-          <NsfwToggle onChange={setNsfwEnabled} />
-        </div>
-
-        {error ? (
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold mb-4">Error loading schedule</h1>
-            <p className="text-zinc-400">Please try again later.</p>
-          </div>
-        ) : isLoading ? (
-          <ScheduleLoading />
-        ) : (
-          <ScheduleView data={schedules} />
-        )}
+    <div className="reveal">
+      <div className="mb-20">
+        <IndexSectionHeader
+          title="Transmission_Registry"
+          subtitle="Temporal_Log"
+        />
       </div>
+
+      {error ? (
+        <div className="border border-border p-12 text-center">
+          <span className="font-mono text-[10px] uppercase text-red-500">Registry_Sync_Failure</span>
+        </div>
+      ) : isLoading ? (
+        <ScheduleLoading />
+      ) : (
+        <ScheduleView data={schedules} />
+      )}
     </div>
   );
 }
@@ -184,18 +172,11 @@ export function Schedule() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black text-white">
-          <div
-            className="mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16"
-            style={{ maxWidth: "1680px" }}
-          >
-            <div className="mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold mb-8">
-                Anime Schedule
-              </h1>
-            </div>
-            <ScheduleLoading />
+        <div>
+          <div className="mb-20">
+            <IndexSectionHeader title="Transmission_Registry" subtitle="Temporal_Log" />
           </div>
+          <ScheduleLoading />
         </div>
       }
     >

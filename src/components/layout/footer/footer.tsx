@@ -2,43 +2,35 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Github, ExternalLink } from 'lucide-react'
-import { GITHUB_REPO_URL } from '@/lib/constants'
+import { ExternalLink } from 'lucide-react'
 
 function FooterContent() {
   return (
-    <footer className="border-t border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl">
-      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Left: AniList API Attribution */}
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <span>Powered by</span>
-            <Link
-              href="https://anilist.co"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit AniList (opens in a new tab)"
-              className="flex items-center gap-1.5 text-white hover:text-zinc-300 transition-colors font-medium"
-            >
-              <span>AniList</span>
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </Link>
-            <span>API</span>
+    <footer className="border-t border-border bg-background py-16">
+      <div className="container mx-auto px-6 md:px-12 lg:px-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
+          <div className="space-y-6">
+            <div className="font-mono text-xl font-bold uppercase tracking-tighter">
+              Anime<span className="text-muted-foreground/40">X</span>
+            </div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground max-w-xs leading-relaxed">
+              Autonomous search engine and indexing protocol for modern animation archives.
+              Operated by the community. No Tracking. No Cookies.
+            </p>
           </div>
 
-          {/* Right: GitHub Link */}
-          <div className="flex items-center gap-2">
-            <Link
-              href={GITHUB_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View on GitHub (opens in a new tab)"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/60 border border-zinc-800/50 hover:bg-zinc-800/60 hover:border-zinc-700/50 transition-all duration-200 text-sm font-medium text-zinc-300 hover:text-white"
-            >
-              <Github className="h-4 w-4" aria-hidden="true" />
-              <span>View on GitHub</span>
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </Link>
+          <div className="flex flex-col md:items-end gap-6 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+            <div className="flex gap-8">
+              <Link href="https://anilist.co" target="_blank" className="hover:text-foreground transition-colors flex items-center gap-2">
+                ANILIST_API <ExternalLink className="w-2.5 h-2.5" />
+              </Link>
+              <Link href="https://github.com/neaL367/orbit" target="_blank" className="hover:text-foreground transition-colors flex items-center gap-2">
+                SOURCE_CODE <ExternalLink className="w-2.5 h-2.5" />
+              </Link>
+            </div>
+            <div className="text-[8px] opacity-30">
+              EST. 2026 // SERIAL_NO: 77-00-AX-99
+            </div>
           </div>
         </div>
       </div>
@@ -53,4 +45,3 @@ export function Footer() {
     </Suspense>
   )
 }
-

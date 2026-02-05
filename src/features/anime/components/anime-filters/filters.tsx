@@ -1,168 +1,103 @@
 "use client"
 
-import { useMemo } from "react"
-import { FilterX, Tags, Calendar, Clock, Film, PlayCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { FilterButtonGroup, Dropdown, COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "./"
+import { COMMON_GENRES, FORMATS, SEASONS, STATUSES } from "./"
 import { useAnimeFilters } from "@/features/anime/hooks/use-anime-filters"
+import { AnimexPanel, AnimexChip } from "@/components/shared/animex-primitives"
 
-type FiltersProps = {
-  className?: string
-}
-
-export function Filters({ className }: FiltersProps) {
+export function Filters({ className }: { className?: string }) {
   const {
+    filters,
     years,
-    genres,
-    year,
-    season,
-    format,
-    status,
-    selectedGenres,
-    selectedYear,
-    selectedSeason,
-    selectedFormat,
-    selectedStatus,
-    open,
-    setOpen,
-    popoverOpen,
-    setPopoverOpenState,
-    handleFilterSelect,
-    handleClearFilter,
-    clearAllFilters,
+    toggleGenre,
+    setFilter,
+    clearFilters,
   } = useAnimeFilters()
 
-  const genreOptions = useMemo(() => COMMON_GENRES.map((genre) => ({ label: genre, value: genre })), [])
-  const yearOptions = useMemo(() => years.map((year) => ({ label: year.toString(), value: year.toString() })), [years])
-  const seasonOptions = useMemo(() => SEASONS.map((s) => ({ label: s.label, value: s.value })), [])
-  const formatOptions = useMemo(() => FORMATS.map((f) => ({ label: f.label, value: f.value })), [])
-  const statusOptions = useMemo(() => STATUSES.map((s) => ({ label: s.label, value: s.value })), [])
-
-  const hasActiveFilters = genres.length > 0 || year || season || format || status
-
-  // Filter categories with icons
-  const filterCategories = useMemo(() => [
-    {
-      key: "genres" as const,
-      label: "Genres",
-      icon: Tags,
-      options: genreOptions,
-      selectedValues: selectedGenres,
-      isMultiSelect: true,
-      value: genres.length > 0 ? (genres.length === 1 ? genres[0] : `${genres.length} selected`) : "Select...",
-      displayValue: genres.length > 0 ? (genres.length === 1 ? genres[0] : `${genres.length} selected`) : "Select...",
-    },
-    {
-      key: "year" as const,
-      label: "Year",
-      icon: Calendar,
-      options: yearOptions,
-      selectedValues: selectedYear,
-      isMultiSelect: false,
-      value: year || "",
-      displayValue: year || "Select...",
-    },
-    {
-      key: "season" as const,
-      label: "Season",
-      icon: Clock,
-      options: seasonOptions,
-      selectedValues: selectedSeason,
-      isMultiSelect: false,
-      value: season || "",
-      displayValue: season ? (SEASONS.find((s) => s.value === season)?.label || season) : "Select...",
-    },
-    {
-      key: "format" as const,
-      label: "Format",
-      icon: Film,
-      options: formatOptions,
-      selectedValues: selectedFormat,
-      isMultiSelect: false,
-      value: format || "",
-      displayValue: format ? (FORMATS.find((f) => f.value === format)?.label || format) : "Select...",
-    },
-    {
-      key: "status" as const,
-      label: "Status",
-      icon: PlayCircle,
-      options: statusOptions,
-      selectedValues: selectedStatus,
-      isMultiSelect: false,
-      value: status || "",
-      displayValue: status ? (STATUSES.find((s) => s.value === status)?.label || status) : "Select...",
-    },
-  ], [
-    genreOptions,
-    yearOptions,
-    seasonOptions,
-    formatOptions,
-    statusOptions,
-    selectedGenres,
-    selectedYear,
-    selectedSeason,
-    selectedFormat,
-    selectedStatus,
-    genres,
-    year,
-    season,
-    format,
-    status,
-  ])
-
-  const handleCategorySelect = (categoryKey: string) => {
-    setOpen(false)
-    setPopoverOpenState(categoryKey, true)
-  }
-
-  const handleOptionSelect = (categoryKey: string, optionValue: string, isMultiSelect: boolean) => {
-    handleFilterSelect(categoryKey, optionValue, isMultiSelect)
-  }
+  const hasActiveFilters = filters.genres.length > 0 || filters.year || filters.season || filters.format || filters.status
 
   return (
-    <div className={cn(className, 'flex flex-wrap  gap-2')}>
-      <div className="flex items-center gap-2 flex-wrap">
-        <Dropdown
-          open={open}
-          onOpenChange={setOpen}
-          categories={filterCategories}
-          onCategorySelect={handleCategorySelect}
-          onOptionSelect={handleOptionSelect}
-        />
-
-        {/* Filter Button Groups */}
-        {filterCategories.map((category) => {
-          const hasValue = category.value !== "" && (category.key !== "genres" || genres.length > 0)
-          const isOpen = popoverOpen[category.key] || false
-
-          return (
-            <FilterButtonGroup
-              key={category.key}
-              category={category}
-              hasValue={hasValue}
-              isOpen={isOpen}
-              onSelect={(key, value) => handleOptionSelect(key, value, category.isMultiSelect)}
-              onClear={handleClearFilter}
-              onOpenChange={(isOpen) => setPopoverOpenState(category.key, isOpen)}
+    <AnimexPanel className={cn("mb-20 bg-transparent p-0 border-none", className)}>
+      <div className="space-y-12">
+        {/* Genre selection as a clean list */}
+        <div className="flex flex-wrap gap-x-8 gap-y-4">
+          {COMMON_GENRES.slice(0, 15).map((genre) => (
+            <AnimexChip
+              key={genre}
+              label={genre}
+              active={filters.genres.includes(genre)}
+              onClick={() => toggleGenre(genre)}
             />
-          )
-        })}
+          ))}
+        </div>
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 pt-8 border-t border-white/5">
+          <div className="space-y-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/20">Year</span>
+            <div className="flex flex-col items-start gap-2">
+              {years.slice(0, 5).map((y) => (
+                <AnimexChip
+                  key={y}
+                  label={y.toString()}
+                  active={filters.year === y.toString()}
+                  onClick={() => setFilter("year", y.toString())}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/20">Season</span>
+            <div className="flex flex-col items-start gap-2">
+              {SEASONS.map((s) => (
+                <AnimexChip
+                  key={s.value}
+                  label={s.label}
+                  active={filters.season === s.value}
+                  onClick={() => setFilter("season", s.value)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/20">Format</span>
+            <div className="flex flex-col items-start gap-2">
+              {FORMATS.slice(0, 4).map((f) => (
+                <AnimexChip
+                  key={f.value}
+                  label={f.label}
+                  active={filters.format === f.value}
+                  onClick={() => setFilter("format", f.value)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-white/20">Status</span>
+            <div className="flex flex-col items-start gap-2">
+              {STATUSES.map((s) => (
+                <AnimexChip
+                  key={s.value}
+                  label={s.label}
+                  active={filters.status === s.value}
+                  onClick={() => setFilter("status", s.value)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-[9px] uppercase tracking-[0.4em] text-primary hover:underline underline-offset-8"
+          >
+            Reset Filters
+          </button>
+        )}
       </div>
-      {/* Clear Button */}
-      {hasActiveFilters && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={clearAllFilters}
-          className="h-8"
-        >
-          <FilterX className="mr-2 h-4 w-4" />
-          Clear
-        </Button>
-      )}
-    </div>
+    </AnimexPanel>
   )
 }
-

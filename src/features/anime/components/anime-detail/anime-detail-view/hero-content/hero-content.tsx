@@ -56,7 +56,7 @@ export function HeroContent({ anime }: HeroContentProps) {
 
   // Calculate time until airing from airingAt timestamp
   const timeUntilAiring = useMemo(() => {
-    if (!nextAiring?.airingAt) return null
+    if (!nextAiring?.airingAt || !now) return null
     const airingAt = nextAiring.airingAt
     const timeUntil = airingAt - now
     return timeUntil > 0 ? timeUntil : 0

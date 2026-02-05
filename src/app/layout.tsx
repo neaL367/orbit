@@ -1,67 +1,62 @@
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
-import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Footer, Header } from "@/components/layout";
+import { ScrollToTop } from "@/components/shared/scroll-to-top";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-const inter = Inter({
-  variable: "--font-inter",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: false,
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(`https://orbit-eight-rosy.vercel.app`),
+  metadataBase: new URL(`https://animex-index.vercel.app`),
   title: {
-    default: 'AnimeX - Discover Trending Anime',
+    default: 'AnimeX — Index',
     template: '%s | AnimeX',
   },
-  description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases. Explore the best anime content with AnimeX.',
-  keywords: ['anime', 'trending anime', 'popular anime', 'anime streaming', 'anime list', 'anime database'],
+  description: 'Precision anime discovery archive.',
+  keywords: ['anime', 'archive', 'index', 'discovery'],
   authors: [{ name: 'AnimeX' }],
   creator: 'AnimeX',
   publisher: 'AnimeX',
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: '/',
-    siteName: 'AnimeX',
-    title: 'AnimeX - Discover Trending Anime',
-    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
-
-  },
-  twitter: {
-    title: 'AnimeX - Discover Trending Anime',
-    description: 'Discover trending anime, popular series, top-rated shows, and seasonal releases.',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
 };
+
+import { Suspense } from "react";
+import { RouteScrollToTop } from "@/components/shared/route-scroll-to-top";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark scroll-smooth">
       <body
-        className={cn(inter.variable, 'antialiased dark bg-black')}
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          'antialiased font-sans bg-background text-foreground'
+        )}
       >
+        <Suspense fallback={null}>
+          <RouteScrollToTop />
+        </Suspense>
         <Analytics />
         <Header />
-        <main className="min-h-[calc(100vh-4rem)]">
-          {children}
+        <main className="min-h-screen pt-24 pb-20 relative px-6 md:px-12 lg:px-24">
+          <div className="max-w-[1400px] mx-auto">
+            {children}
+          </div>
         </main>
         <Footer />
+        <ScrollToTop />
       </body>
     </html>
   );

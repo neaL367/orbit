@@ -27,6 +27,7 @@ export const ScheduleAnimeQuery = graphql(`
             native
             userPreferred
           }
+          bannerImage
           coverImage {
             large
             medium

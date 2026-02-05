@@ -1,14 +1,15 @@
 import { cache } from 'react'
 import { executeGraphQL } from './server'
 import { AnimeByIdQuery } from './queries/anime-by-id'
-import { TrendingAnimeQuery, PopularAnimeQuery, SeasonalAnimeQuery, TopRatedAnimeQuery } from './queries'
+import { TrendingAnimeQuery, PopularAnimeQuery, SeasonalAnimeQuery, TopRatedAnimeQuery, UpcomingAiringAnimeQuery } from './queries'
 import { MediaSeason } from './types/graphql'
 import type {
     AnimeByIdQuery as AnimeByIdQueryType,
     TrendingAnimeQuery as TrendingAnimeQueryType,
     PopularAnimeQuery as PopularAnimeQueryType,
     SeasonalAnimeQuery as SeasonalAnimeQueryType,
-    TopRatedAnimeQuery as TopRatedAnimeQueryType
+    TopRatedAnimeQuery as TopRatedAnimeQueryType,
+    UpcomingAiringAnimeQuery as UpcomingAiringAnimeQueryType
 } from './types/graphql'
 
 /**
@@ -41,4 +42,8 @@ export const getCachedSeasonal = cache(async (season: MediaSeason, year: number,
 
 export const getCachedTopRated = cache(async (perPage: number = 6) => {
     return executeGraphQL<TopRatedAnimeQueryType>(TopRatedAnimeQuery.toString(), { page: 1, perPage })
+})
+
+export const getCachedUpcomingAiring = cache(async (perPage: number = 10) => {
+    return executeGraphQL<UpcomingAiringAnimeQueryType>(UpcomingAiringAnimeQuery.toString(), { page: 1, perPage })
 })

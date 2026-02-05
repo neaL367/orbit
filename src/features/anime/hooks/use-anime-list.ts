@@ -2,13 +2,11 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useInfiniteGraphQL } from '@/lib/graphql/hooks'
 import { CACHE_TIMES } from '@/lib/constants'
-import {
-  TrendingAnimeQuery,
-  PopularAnimeQuery,
-  TopRatedAnimeQuery,
-  SeasonalAnimeQuery,
-  SearchAnimeQuery,
-} from '@/lib/graphql/queries'
+import { TrendingAnimeQuery } from '@/lib/graphql/queries/trending-anime'
+import { PopularAnimeQuery } from '@/lib/graphql/queries/popular-anime'
+import { TopRatedAnimeQuery } from '@/lib/graphql/queries/top-rated-anime'
+import { SeasonalAnimeQuery } from '@/lib/graphql/queries/seasonal-anime'
+import { SearchAnimeQuery } from '@/lib/graphql/queries/search-anime'
 import {
   getCurrentSeason,
   getCurrentYear,
@@ -42,7 +40,7 @@ function buildGraphQLVariables(
   dateValues: { currentSeason: MediaSeason; currentYear: number }
 ) {
   const { search, season, year, genres, format, status } = filters
-  
+
   const genresArray = genres.length > 0 ? genres : undefined
   const formatValue = format ? (format as MediaFormat) : undefined
   const statusValue = status ? (status as MediaStatus) : undefined
@@ -85,20 +83,20 @@ function buildGraphQLVariables(
  */
 function flattenAnimeList(pages: unknown[]): Media[] {
   const mediaMap = new Map<number, Media>()
-  
+
   pages.forEach((page) => {
     const pageData = page as { Page?: { media?: Array<Media | null> } } | undefined
     const media = pageData?.Page?.media?.filter(
       (anime: Media | null): anime is Media => anime !== null && !anime.isAdult
     ) || []
-    
+
     media.forEach((anime) => {
       if (!mediaMap.has(anime.id)) {
         mediaMap.set(anime.id, anime)
       }
     })
   })
-  
+
   return Array.from(mediaMap.values())
 }
 
@@ -108,7 +106,7 @@ function flattenAnimeList(pages: unknown[]): Media[] {
 export function useAnimeList() {
   const searchParams = useSearchParams()
   const filters = useMemo(() => parseSearchParams(searchParams), [searchParams])
-  
+
   const dateValues = useMemo(() => ({
     currentSeason: getCurrentSeason(),
     currentYear: getCurrentYear(),
@@ -130,19 +128,19 @@ export function useAnimeList() {
     regularVariables,
     { ...queryOptions, enabled: filters.sort === 'trending' }
   )
-  
+
   const popularData = useInfiniteGraphQL(
     PopularAnimeQuery,
     regularVariables,
     { ...queryOptions, enabled: filters.sort === 'popular' }
   )
-  
+
   const topRatedData = useInfiniteGraphQL(
     TopRatedAnimeQuery,
     regularVariables,
     { ...queryOptions, enabled: filters.sort === 'top-rated' }
   )
-  
+
   const seasonalData = useInfiniteGraphQL(
     SeasonalAnimeQuery,
     seasonalVariables,

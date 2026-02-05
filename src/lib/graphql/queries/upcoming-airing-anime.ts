@@ -62,7 +62,6 @@ export const UpcomingAiringAnimeQuery = graphql(`
         hashtag
         synonyms
         siteUrl
-        isAdult
         nextAiringEpisode {
           airingAt
           timeUntilAiring
