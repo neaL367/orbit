@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   experimental: {
     inlineCss: true,
-    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
+    optimizePackageImports: ['lucide-react', 'date-fns'],
   },
   images: {
     unoptimized: true,
@@ -17,7 +17,6 @@ const nextConfig: NextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  productionBrowserSourceMaps: process.env.NODE_ENV === 'production',
 };
 
 export default nextConfig;

@@ -152,6 +152,7 @@ function ScheduleContent() {
         <IndexSectionHeader
           title="Transmission_Registry"
           subtitle="Temporal_Log"
+          as="h1"
         />
       </div>
 
@@ -174,7 +175,7 @@ export function Schedule() {
       fallback={
         <div>
           <div className="mb-20">
-            <IndexSectionHeader title="Transmission_Registry" subtitle="Temporal_Log" />
+            <IndexSectionHeader title="Transmission_Registry" subtitle="Temporal_Log" as="h1" />
           </div>
           <ScheduleLoading />
         </div>

@@ -46,14 +46,17 @@ export function DaySection({
   return (
     <section className="reveal">
       <div className="space-y-16">
-        <IndexSectionHeader
-          title={dayName}
-          subtitle={isToday ? `TODAY // ${dateString}` : dateString}
-          className={cn(
-            isToday && "text-foreground",
-            isToday && "after:absolute after:inset-0 after:bg-white/[0.02] after:-z-10 after:blur-xl"
-          )}
-        />
+        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-md pb-4 pt-2 -mx-4 px-4 border-b border-border/50">
+          <IndexSectionHeader
+            title={dayName}
+            subtitle={isToday ? `TODAY // ${dateString}` : dateString}
+            className={cn(
+              "mb-0",
+              isToday && "text-foreground",
+              isToday && "after:absolute after:inset-0 after:bg-white/[0.02] after:-z-10 after:blur-xl"
+            )}
+          />
+        </div>
 
         {!hasSchedules ? (
           <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground/30 py-8 border border-border border-dashed text-center">
@@ -78,8 +81,8 @@ export function DaySection({
                     </span>
                   </div>
 
-                  {/* Schedule Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {/* Schedule Cards Stack (Registry Flow) */}
+                  <div className="flex flex-col gap-2">
                     {schedules.map((schedule) => {
                       const media = schedule.media
                       if (!media) return null

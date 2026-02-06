@@ -73,10 +73,8 @@ export function useAnimeFilters() {
   }, [currentFilters, updateUrl])
 
   const clearFilters = useCallback(() => {
-    const params = new URLSearchParams()
-    if (currentFilters.sort) params.set("sort", currentFilters.sort)
-    router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
-  }, [currentFilters.sort, pathname, router])
+    router.push(pathname as Route, { scroll: false })
+  }, [pathname, router])
 
   return {
     filters: currentFilters,

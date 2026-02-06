@@ -5,17 +5,17 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
 import type { Media } from "@/lib/graphql/types/graphql"
-import { useImageLoaded } from "@/hooks/use-image-loaded"
+import { IndexImage } from "@/components/shared"
 
 interface PosterCardProps {
     anime: Media
     rank?: number
     priority?: boolean
+    className?: string
 }
 
-export const PosterCard = memo(function PosterCard({ anime, rank, priority = false }: PosterCardProps) {
+export const PosterCard = memo(function PosterCard({ anime, rank, priority = false, className }: PosterCardProps) {
     const [isHovered, setIsHovered] = useState(false)
-    const { loaded, onLoad, ref: imgRef } = useImageLoaded()
 
     const title = useMemo(() => getAnimeTitle(anime), [anime])
     const coverImage = anime.coverImage?.extraLarge || anime.coverImage?.large
@@ -26,31 +26,31 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
     return (
         <Link
             href={`/anime/${anime.id}`}
-            className="group relative block aspect-[2/3] w-full bg-secondary border border-border overflow-hidden transition-all duration-500"
+            className={cn(
+                "group relative block aspect-[2/3] w-full bg-secondary border border-border overflow-hidden transition-all duration-500",
+                className
+            )}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            {/* Background Color Placeholder */}
-            <div className="absolute inset-0 z-0 bg-neutral-900" />
-
             {/* Main Image */}
             {coverImage && (
-                <img
-                    ref={imgRef}
+                <IndexImage
                     src={coverImage}
                     alt={title}
-                    loading={priority ? "eager" : "lazy"}
-                    onLoad={onLoad}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                    priority={priority}
+                    showTechnicalDetails={false}
                     className={cn(
-                        "h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)]",
-                        isHovered ? "scale-[1.03] brightness-110" : "scale-100",
-                        loaded ? "opacity-100" : "opacity-0"
+                        "transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)]",
+                        isHovered ? "scale-[1.03] brightness-110" : "scale-100"
                     )}
                 />
             )}
 
             {/* Overlay for metadata */}
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-background/60 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
 
             {/* Rank Indicator */}
             {rank !== undefined && (
@@ -61,7 +61,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
 
             {/* Content */}
             <div className="absolute inset-x-0 bottom-0 z-20 p-4 space-y-1.5">
-                <h3 className="line-clamp-2 font-mono text-[13px] font-bold leading-tight uppercase tracking-tighter text-foreground group-hover:text-white transition-colors">
+                <h3 className="line-clamp-2 font-mono text-[13px] font-bold leading-tight uppercase tracking-tighter text-foreground transition-colors">
                     {title}
                 </h3>
                 <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -73,11 +73,11 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
 
             {/* Focused Notch */}
             <div className={cn(
-                "absolute top-0 right-0 w-[1.5px] h-0 bg-white transition-all duration-500 z-30",
+                "absolute top-0 right-0 w-[1.5px] h-0 bg-primary transition-all duration-500 z-30",
                 isHovered && "h-full"
             )} />
             <div className={cn(
-                "absolute bottom-0 right-0 w-0 h-[1.5px] bg-white transition-all duration-500 z-30",
+                "absolute bottom-0 right-0 w-0 h-[1.5px] bg-primary transition-all duration-500 z-30",
                 isHovered && "w-full"
             )} />
         </Link>

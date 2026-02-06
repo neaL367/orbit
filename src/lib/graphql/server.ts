@@ -51,7 +51,7 @@ function updateAniListRateLimit(headers: Headers): void {
 
 export function getAniListRateLimit(): AniListRateLimit {
   const now = Date.now()
-  
+
   if (now > anilistRateLimit.resetTime) {
     // Reset to current degraded state limit (30)
     // Will be updated from headers on next request
@@ -62,7 +62,7 @@ export function getAniListRateLimit(): AniListRateLimit {
       lastUpdated: now,
     }
   }
-  
+
   return { ...anilistRateLimit }
 }
 
@@ -157,7 +157,7 @@ export async function executeGraphQL<T = unknown>(
       variables,
       options
     )
-    
+
     if (result.errors && result.errors.length > 0) {
       return {
         errors: result.errors.map((e: { message: string }) => ({ message: e.message })),
@@ -166,9 +166,13 @@ export async function executeGraphQL<T = unknown>(
 
     return { data: result.data ?? undefined }
   } catch (error) {
-    console.error('GraphQL execution error:', error)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    // Don't log expected 404 errors as full console errors
+    if (!message.includes('404')) {
+      console.error('GraphQL execution error:', error)
+    }
     return {
-      errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }],
+      errors: [{ message }],
     }
   }
 }

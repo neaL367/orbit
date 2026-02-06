@@ -7,6 +7,7 @@ import { getAnimeTitle } from "@/lib/utils/anime-utils"
 import { useCurrentTime } from "@/hooks/use-current-time"
 import { useMemo, useState, useEffect } from "react"
 import Link from "next/link"
+import { IndexImage } from "@/components/shared"
 import { Zap } from "lucide-react"
 import type { Media } from "@/lib/graphql/types/graphql"
 
@@ -85,14 +86,18 @@ export function NextAiring({ className }: { className?: string }) {
                 {/* Background Image with Parallax-like feel */}
                 <div className="absolute inset-0 bg-secondary">
                     {bannerImage && (
-                        <img
+                        <IndexImage
                             key={activeSchedule.id} // Re-trigger animation on change
                             src={bannerImage}
                             alt="Background"
+                            fill
+                            priority
+                            sizes="100vw"
+                            showTechnicalDetails={false}
                             className="w-full h-full object-cover opacity-60 blur-sm scale-110 transition-all duration-[2000ms] animate-in fade-in zoom-in-105"
                         />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-transparent" />
                 </div>
 
@@ -131,9 +136,12 @@ export function NextAiring({ className }: { className?: string }) {
                     {/* Right Side Cover Art (Desktop) */}
                     <div className="hidden lg:block absolute right-24 top-1/2 -translate-y-1/2 h-[75%] aspect-[2/3] border border-border/50 bg-secondary/30 shrink-0 -rotate-2 transition-transform duration-700 hover:rotate-0 shadow-2xl shadow-black/80">
                         {activeSchedule.media?.coverImage?.extraLarge && (
-                            <img
+                            <IndexImage
                                 src={activeSchedule.media.coverImage.extraLarge}
                                 alt="Cover"
+                                fill
+                                sizes="(max-width: 1024px) 0px, 400px"
+                                showTechnicalDetails={false}
                                 className="w-full h-full object-cover brightness-100"
                             />
                         )}

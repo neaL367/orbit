@@ -1,69 +1,136 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { connection } from 'next/server'
 import { getCachedAnime } from '@/lib/graphql/server-cache'
 import { getAnimeTitle } from '@/lib/utils/anime-utils'
 import type { Media } from '@/lib/graphql/types/graphql'
 import { IndexSectionHeader } from '@/components/shared/index-section-header'
-import { ErrorState } from '@/components/shared'
 import { AnimeEpisodes } from "@/features/anime/components/anime-episodes"
 import { AnimeTrailer } from "@/features/anime/components/anime-trailer"
+import { IndexImage, BackButton } from "@/components/shared"
+import { AnimeDescription } from "@/features/anime/components/anime-description"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id: animeId } = await params
     const id = parseInt(animeId, 10)
 
-    if (isNaN(id)) return { title: '404_NOT_FOUND' }
+    if (isNaN(id)) notFound()
 
     const result = await getCachedAnime(id)
     const anime = result.data?.Media as Media | undefined
 
-    if (!anime) return { title: '404_NOT_FOUND' }
+    if (!anime) notFound()
 
     const title = getAnimeTitle(anime)
+    const description = anime.description?.replace(/<[^>]*>/g, '').substring(0, 160)
+    const image = anime.coverImage?.extraLarge || anime.bannerImage
+
     return {
         title: `${title} — Registry`,
-        description: anime.description?.replace(/<[^>]*>/g, '').substring(0, 160),
+        description,
+        alternates: {
+            canonical: `/anime/${id}`,
+        },
+        openGraph: {
+            title: `${title} — Registry`,
+            description,
+            url: `https://animex-index.vercel.app/anime/${id}`,
+            images: image ? [{ url: image }] : [],
+            type: 'video.tv_show',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${title} — Registry`,
+            description,
+            images: image ? [image] : [],
+        }
     }
 }
 
-async function AnimeDetailContent({ id }: { id: number }) {
+async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> }) {
+    const { id: idStr } = await params
+    const id = parseInt(idStr, 10)
+    await connection()
     const result = await getCachedAnime(id)
     const anime = result.data?.Media as Media | undefined
 
-    if (!anime) return <ErrorState message="Entry_Not_Found" />
+    if (!anime) notFound()
 
     const title = getAnimeTitle(anime)
 
     return (
-        <div className="space-y-16 reveal">
-            {/* Banner Section */}
-            {anime.bannerImage && (
-                <div className="relative w-full h-[25vh] md:h-[40vh] overflow-hidden border border-border/50 bg-secondary/5 group select-none">
-                    <img
+        <div className="space-y-16 reveal relative">
+            <div className="absolute top-4 left-4 z-50 md:top-8 md:left-8">
+                <BackButton />
+            </div>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': anime.format === 'MOVIE' ? 'Movie' : 'TVSeries',
+                        name: title,
+                        description: anime.description?.replace(/<[^>]*>/g, ''),
+                        image: anime.coverImage?.extraLarge || anime.bannerImage,
+                        genre: anime.genres,
+                        datePublished: anime.startDate?.year ? `${anime.startDate.year}-${anime.startDate.month || '01'}-${anime.startDate.day || '01'}` : undefined,
+                        aggregateRating: anime.averageScore ? {
+                            '@type': 'AggregateRating',
+                            ratingValue: anime.averageScore,
+                            bestRating: 100,
+                            worstRating: 0,
+                            ratingCount: anime.popularity,
+                        } : undefined,
+                    }),
+                }}
+            />
+            {/* Banner Section - Always render to preserve layout/back button zone */}
+            <div className="relative w-full h-[25vh] md:h-[40vh] overflow-hidden border border-border/50 bg-secondary/5 group select-none">
+                {anime.bannerImage ? (
+                    <IndexImage
                         src={anime.bannerImage}
                         alt="Banner"
+                        fill
+                        priority
+                        sizes="100vw"
+                        showTechnicalDetails={true}
                         className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-1000 scale-105"
                     />
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-
-                    {/* Tech Grid Overlay */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
-
-                    {/* Metadata Badge */}
-                    <div className="absolute bottom-4 right-4 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 border border-border/20 px-3 py-1 bg-background/80 backdrop-blur-md">
-                        VISUAL_DATA_LAYER_01
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-secondary/20">
+                        <div className="flex flex-col items-center gap-4 text-muted-foreground/20">
+                            <div className="w-16 h-16 border border-current flex items-center justify-center rounded-full">
+                                <div className="w-1 h-8 bg-current rotate-45" />
+                            </div>
+                            <span className="font-mono text-xs uppercase tracking-[0.5em]">No_Visual_Data</span>
+                        </div>
                     </div>
+                )}
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+
+                {/* Tech Grid Overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
+
+                {/* Metadata Badge */}
+                <div className="absolute bottom-4 right-4 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 border border-border/20 px-3 py-1 bg-background/80 backdrop-blur-md">
+                    {anime.bannerImage ? 'VISUAL_DATA_LAYER_01' : 'NO_SIGNAL_DETECTED'}
                 </div>
-            )}
+            </div>
 
             {/* Editorial Header */}
-            <header className="flex flex-col md:flex-row gap-12 border-b border-border pb-16">
+            <header className="flex flex-col md:flex-row gap-12 pb-16">
                 <div className="w-full md:w-80 shrink-0">
-                    <div className="aspect-[2/3] border border-border overflow-hidden">
-                        <img
+                    <div className="aspect-[2/3] border border-border overflow-hidden relative">
+                        <IndexImage
                             src={anime.coverImage?.extraLarge || ''}
                             alt={title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 320px"
+                            priority
+                            showTechnicalDetails={false}
                             className="w-full h-full object-cover transition-all duration-700"
                         />
                     </div>
@@ -74,7 +141,7 @@ async function AnimeDetailContent({ id }: { id: number }) {
                         <div className="bg-foreground text-background px-3 py-1 font-mono text-[10px] uppercase w-fit index-cut-tr">
                             ID: {anime.id} {'//'} {anime.status}
                         </div>
-                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-mono uppercase tracking-tighter leading-none">
+                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-mono uppercase tracking-tighter leading-none text-foreground">
                             {title}
                         </h1>
                         <div className="flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-8">
@@ -85,14 +152,11 @@ async function AnimeDetailContent({ id }: { id: number }) {
                         </div>
                     </div>
 
-                    <div
-                        className="prose prose-invert prose-sm max-w-2xl font-sans text-muted-foreground leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: anime.description || 'No_Data_Available' }}
-                    />
+                    <AnimeDescription description={anime.description} />
 
                     <div className="flex flex-wrap gap-2 pt-4">
                         {anime.genres?.map(genre => (
-                            <span key={genre} className="px-3 py-1 border border-border font-mono text-[9px] uppercase text-muted-foreground hover:bg-white/5 cursor-default transition-colors">
+                            <span key={genre} className="px-3 py-1 border border-border font-mono text-[9px] uppercase text-muted-foreground hover:bg-foreground/5 cursor-default transition-colors">
                                 {genre}
                             </span>
                         ))}
@@ -119,19 +183,19 @@ async function AnimeDetailContent({ id }: { id: number }) {
                         <div className="space-y-4 font-mono text-[10px] uppercase tracking-wider">
                             <div className="flex justify-between border-b border-border pb-2">
                                 <span className="text-muted-foreground">Average_Score</span>
-                                <span>{anime.averageScore ? `${anime.averageScore}%` : 'N/A'}</span>
+                                <span className="text-foreground">{anime.averageScore ? `${anime.averageScore}%` : 'N/A'}</span>
                             </div>
                             <div className="flex justify-between border-b border-border pb-2">
                                 <span className="text-muted-foreground">Popularity</span>
-                                <span>{anime.popularity?.toLocaleString() || 'N/A'}</span>
+                                <span className="text-foreground">{anime.popularity?.toLocaleString() || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between border-b border-border pb-2">
                                 <span className="text-muted-foreground">Source</span>
-                                <span>{anime.source?.replace(/_/g, " ") || 'Unknown'}</span>
+                                <span className="text-foreground">{anime.source?.replace(/_/g, " ") || 'Unknown'}</span>
                             </div>
                             <div className="flex justify-between border-b border-border pb-2">
                                 <span className="text-muted-foreground">Studio</span>
-                                <span>{anime.studios?.nodes?.[0]?.name || 'Unknown'}</span>
+                                <span className="text-foreground">{anime.studios?.nodes?.[0]?.name || 'Unknown'}</span>
                             </div>
                         </div>
                     </section>
@@ -159,7 +223,7 @@ async function AnimeDetailContent({ id }: { id: number }) {
                                             <a
                                                 key={edge.node.id}
                                                 href={`/anime/${edge.node.id}`}
-                                                className="block p-3 border border-border hover:border-foreground hover:bg-white/5 transition-all group"
+                                                className="block p-3 border border-border hover:border-foreground hover:bg-foreground/5 transition-all group"
                                             >
                                                 <span className="font-mono text-[9px] uppercase block text-muted-foreground mb-1 group-hover:text-primary transition-colors">
                                                     {edge.relationType?.replace(/_/g, ' ')}
@@ -190,9 +254,12 @@ async function AnimeDetailContent({ id }: { id: number }) {
                                         <div key={edge.node.id} className="flex h-28 border border-border/50 hover:border-border transition-colors group bg-secondary/10 hover:bg-secondary/30">
                                             {/* Character Image */}
                                             <div className="w-20 bg-secondary shrink-0 overflow-hidden relative border-r border-border/30">
-                                                <img
+                                                <IndexImage
                                                     src={edge.node.image?.large || ''}
                                                     alt={edge.node.name?.full || ''}
+                                                    fill
+                                                    sizes="80px"
+                                                    showTechnicalDetails={false}
                                                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                 />
                                             </div>
@@ -223,9 +290,12 @@ async function AnimeDetailContent({ id }: { id: number }) {
                                             {/* Voice Actor Image */}
                                             {voiceActor && (
                                                 <div className="w-20 bg-secondary shrink-0 overflow-hidden relative border-l border-border/30 transition-all">
-                                                    <img
+                                                    <IndexImage
                                                         src={voiceActor.image?.medium || ''}
                                                         alt={voiceActor.name?.full || ''}
+                                                        fill
+                                                        sizes="80px"
+                                                        showTechnicalDetails={false}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
@@ -256,12 +326,15 @@ async function AnimeDetailContent({ id }: { id: number }) {
                                         return (
                                             <a key={recAnime.id} href={`/anime/${recAnime.id}`} className="group space-y-2 block">
                                                 <div className="aspect-[2/3] border border-border overflow-hidden relative">
-                                                    <img
+                                                    <IndexImage
                                                         src={recAnime.coverImage?.large || ''}
                                                         alt={getAnimeTitle(recAnime)}
+                                                        fill
+                                                        sizes="(max-width: 640px) 50vw, 200px"
+                                                        showTechnicalDetails={false}
                                                         className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                     />
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                                    <div className="absolute inset-0 bg-transparent group-hover:bg-foreground/5 transition-colors" />
                                                 </div>
                                                 <div className="font-mono text-[10px] uppercase font-bold text-foreground truncate group-hover:underline underline-offset-4">
                                                     {getAnimeTitle(recAnime)}
@@ -279,13 +352,10 @@ async function AnimeDetailContent({ id }: { id: number }) {
     )
 }
 
-export default async function AnimeDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params
-    const animeId = parseInt(id, 10)
-
+export default function AnimeDetailPage({ params }: { params: Promise<{ id: string }> }) {
     return (
         <Suspense fallback={<div className="h-screen border border-border shimmer" />}>
-            <AnimeDetailContent id={animeId} />
+            <AnimeDetailContent params={params} />
         </Suspense>
     )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Play } from "lucide-react"
 
 interface AnimeTrailerProps {
@@ -27,9 +28,11 @@ export function AnimeTrailer({ videoId, thumbnail }: AnimeTrailerProps) {
                     >
                         {/* Thumbnail Image */}
                         <div className="absolute inset-0 bg-black">
-                            <img
+                            <Image
                                 src={poster}
                                 alt="Trailer Thumbnail"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 896px"
                                 className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover/btn:grayscale-0 group-hover/btn:opacity-80 transition-all duration-700 ease-out"
                             />
                         </div>

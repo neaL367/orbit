@@ -1,2 +1,0 @@
-export { Trailer } from './trailer'
-
