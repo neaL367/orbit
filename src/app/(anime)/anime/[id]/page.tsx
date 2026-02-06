@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { BASE_URL } from "@/lib/constants"
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { connection } from 'next/server'
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     const title = getAnimeTitle(anime)
     const description = anime.description?.replace(/<[^>]*>/g, '').substring(0, 160)
-    const image = anime.bannerImage || anime.coverImage?.extraLarge || anime.coverImage?.large || '/opengraph-image.png'
+    const image = anime.bannerImage || anime.coverImage?.extraLarge || anime.coverImage?.large || `${BASE_URL}/opengraph-image.png`
 
     return {
         title: `${title} — Registry`,
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         openGraph: {
             title: `${title} — Registry`,
             description,
-            url: `https://animex-index.vercel.app/anime/${id}`,
+            url: `${BASE_URL}/anime/${id}`,
             images: [{ url: image }],
             type: 'video.tv_show',
         },

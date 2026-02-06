@@ -4,6 +4,11 @@
  */
 
 /**
+ * Base URL application
+ */
+export const BASE_URL = 'https://animex-index.vercel.app'
+
+/**
  * AniList GraphQL API endpoint
  */
 export const ANILIST_API_URL = 'https://graphql.anilist.co/'
@@ -46,13 +51,13 @@ export const CACHE_TAGS = {
   ANIME_SEARCH: 'anime-search',
   ANIME_SCHEDULE: 'anime-schedule',
   ANIME_UPCOMING: 'anime-upcoming',
-  
+
   // Specific queries
   TRENDING: 'anime-trending',
   POPULAR: 'anime-popular',
   TOP_RATED: 'anime-top-rated',
   SEASONAL: 'anime-seasonal',
-  
+
   // Dynamic tags
   animeById: (id: number) => `anime-${id}`,
   animeBySeason: (season: string, year: number) => `anime-season-${season}-${year}`,

@@ -7,8 +7,9 @@ import { Footer, Header } from "@/components/layout";
 import { ScrollToTop } from "@/components/shared/scroll-to-top";
 import { QueryProviders } from "@/lib/providers";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { BASE_URL } from "@/lib/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://animex-index.vercel.app'),
+  metadataBase: new URL(BASE_URL),
   title: {
     default: 'AnimeX — Index',
     template: '%s | AnimeX',
@@ -50,13 +51,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://animex-index.vercel.app',
+    url: BASE_URL,
     siteName: 'AnimeX',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
     images: [
       {
-        url: '/opengraph-image.png',
+        url: `${BASE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: 'AnimeX Index',
@@ -67,10 +68,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
-    images: ['/opengraph-image.png'],
+    images: [`${BASE_URL}/opengraph-image.png`],
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
