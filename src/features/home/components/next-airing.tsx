@@ -1,20 +1,20 @@
 "use client"
 
+import Link from "next/link"
 import { useQueries } from "@tanstack/react-query"
+import { useMemo, useState, useEffect } from "react"
+import { Zap } from "lucide-react"
+import { IndexImage } from "@/components/shared"
 import { execute } from "@/lib/graphql/execute"
 import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
 import { useCurrentTime } from "@/hooks/use-current-time"
-import { useMemo, useState, useEffect } from "react"
-import Link from "next/link"
-import { IndexImage } from "@/components/shared"
-import { Zap } from "lucide-react"
 import type { Media } from "@/lib/graphql/types/graphql"
 
 export function NextAiring({ className }: { className?: string }) {
     const now = useCurrentTime()
     const [activeIndex, setActiveIndex] = useState(0)
-    const [progress, setProgress] = useState(0)
+
 
     // Get stable mount time to avoid partial refetches
     const [currentUnix] = useState(() => Math.floor(Date.now() / 1000))
@@ -35,28 +35,18 @@ export function NextAiring({ className }: { className?: string }) {
     const schedules = useMemo(() => data?.data?.Page?.airingSchedules || [], [data])
     const activeSchedule = schedules[activeIndex]
 
-    // Auto-rotate ticker with progress tracking
+    // Auto-rotate ticker
     useEffect(() => {
         if (schedules.length <= 1) return
 
-        const startTime = Date.now()
         const duration = 8000
-
-        // Update progress every 50ms
-        const progressInterval = setInterval(() => {
-            const elapsed = Date.now() - startTime
-            const newProgress = Math.min((elapsed / duration) * 100, 100)
-            setProgress(newProgress)
-        }, 50)
 
         // Rotate to next slide after duration
         const rotateTimeout = setTimeout(() => {
             setActiveIndex(prev => (prev + 1) % schedules.length)
-            setProgress(0)
         }, duration)
 
         return () => {
-            clearInterval(progressInterval)
             clearTimeout(rotateTimeout)
         }
     }, [schedules.length, activeIndex])
@@ -76,7 +66,9 @@ export function NextAiring({ className }: { className?: string }) {
         return `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
     }, [timeUntilSec])
 
-    if (isLoading || !activeSchedule) return null
+    if (isLoading || !activeSchedule) {
+        return <div className={`w-full relative border-b border-border bg-secondary/5 shimmer ${className || "h-[50vh] md:h-[60vh]"}`} />
+    }
 
     const bannerImage = activeSchedule.media?.bannerImage || activeSchedule.media?.coverImage?.extraLarge || activeSchedule.media?.coverImage?.large
 
@@ -166,10 +158,7 @@ export function NextAiring({ className }: { className?: string }) {
                             >
                                 {i === activeIndex && (
                                     <div
-                                        className="absolute inset-0 bg-primary transition-all duration-75 ease-linear"
-                                        style={{
-                                            width: `${progress}%`
-                                        }}
+                                        className="absolute inset-0 bg-primary origin-left animate-progress"
                                     />
                                 )}
                             </button>

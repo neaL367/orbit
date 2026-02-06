@@ -21,7 +21,7 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
       {variant === 'list' && (
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-24 border border-border shimmer flex gap-6 p-4">
+            <div key={i} className="h-28 border border-border shimmer flex gap-6 p-4">
               <div className="w-12 h-full bg-muted/20" />
               <div className="w-16 h-full bg-muted/20" />
               <div className="flex-1 space-y-2">
@@ -38,8 +38,6 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-3">
               <div className="aspect-[2/3] border border-border shimmer" />
-              <div className="h-3 w-3/4 bg-secondary shimmer" />
-              <div className="h-2 w-1/2 bg-secondary shimmer" />
             </div>
           ))}
         </div>

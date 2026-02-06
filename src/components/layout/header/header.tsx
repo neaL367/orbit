@@ -1,11 +1,11 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Suspense, useSyncExternalStore, useState, useEffect } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { Suspense, useSyncExternalStore, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Route } from 'next'
-import { Menu, X } from 'lucide-react'
 
 const menuItems = [
   { label: 'Trending', href: '/anime?sort=trending', sort: 'trending' },
@@ -27,13 +27,7 @@ function HeaderContent() {
     () => false
   )
 
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-  }, [isMenuOpen])
+
 
   const isActive = (href: string, sort?: string) => {
     if (href === '/') return pathname === '/'

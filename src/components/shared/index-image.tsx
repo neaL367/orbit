@@ -17,7 +17,7 @@ export function IndexImage({
     showTechnicalDetails = true,
     ...props
 }: IndexImageProps) {
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(!props.priority)
     const [registryId] = useState(() => `0x${Math.random().toString(16).slice(2, 8).toUpperCase()}`)
 
     return (
