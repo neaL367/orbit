@@ -58,9 +58,9 @@ function HeaderContent() {
               className="flex flex-col group z-[110]"
             >
               <span className="font-mono text-xl font-bold tracking-tighter uppercase leading-none">
-                Anime<span className="text-muted-foreground/40">X</span>
+                Anime<span className="text-muted-foreground">X</span>
               </span>
-              <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-muted-foreground/60 leading-none mt-1">
+              <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-muted-foreground leading-none mt-1">
                 Index_Archive
               </span>
             </Link>
@@ -84,7 +84,7 @@ function HeaderContent() {
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="hidden lg:flex items-center gap-6 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50">
+            <div className="hidden lg:flex items-center gap-6 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
               <div className="hidden sm:block">
                 REF_ID: <span className="text-foreground">AX-1903-22</span>
               </div>
@@ -115,7 +115,7 @@ function HeaderContent() {
       >
         <div className="flex flex-col h-full pt-28 px-8 gap-8">
           <div className="flex flex-col gap-6">
-            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 border-l border-border pl-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border-l border-border pl-4">
               System_Navigation
             </span>
             <nav className="flex flex-col gap-4">
@@ -142,7 +142,7 @@ function HeaderContent() {
 
           <div className="mt-auto pb-12 space-y-8">
             <div className="h-[1px] bg-border/50" />
-            <div className="flex flex-col gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50">
+            <div className="flex flex-col gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
               <div className="flex items-center justify-between">
                 <span>Core_Status</span>
                 <div className="flex items-center gap-2 text-foreground">

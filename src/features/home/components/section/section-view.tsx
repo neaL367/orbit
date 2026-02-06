@@ -91,6 +91,7 @@ export function SectionView({
                     src={data[0].bannerImage || data[0].coverImage?.extraLarge || ''}
                     alt={data[0].title?.romaji || ''}
                     fill
+                    priority
                     sizes="(max-width: 1024px) 100vw, 800px"
                     className="w-full h-full object-cover grayscale opacity-60 group-hover/feat:grayscale-0 group-hover/feat:opacity-100 group-hover/feat:scale-105 transition-all duration-700"
                   />
@@ -109,7 +110,7 @@ export function SectionView({
                     <span>{data[0].genres?.slice(0, 2).join(' / ')}</span>
                   </div>
                   {data[0].description && (
-                    <p className="text-muted-foreground/60 font-mono text-[11px] leading-relaxed line-clamp-4 max-w-md uppercase tracking-tight">
+                    <p className="text-muted-foreground font-mono text-[11px] leading-relaxed line-clamp-4 max-w-md uppercase tracking-tight">
                       {data[0].description.replace(/<[^>]*>?/gm, '')}
                     </p>
                   )}
@@ -165,12 +166,12 @@ export function SectionView({
                   <span className="w-1 h-[1px] bg-border" />
                   <span className="font-mono text-[9px] text-primary uppercase font-bold">{anime.status?.replace(/_/g, ' ')}</span>
                 </div>
-                <h4 className="font-mono text-[14px] font-bold uppercase truncate group-hover/list:underline underline-offset-4 decoration-1">
+                <h3 className="font-mono text-[14px] font-bold uppercase truncate group-hover/list:underline underline-offset-4 decoration-1">
                   {anime.title?.userPreferred || anime.title?.romaji}
-                </h4>
+                </h3>
                 <div className="flex gap-2 mt-2">
                   {anime.genres?.slice(0, 3).map(g => (
-                    <span key={g} className="font-mono text-[8px] uppercase px-2 py-0.5 border border-border text-muted-foreground/60">{g}</span>
+                    <span key={g} className="font-mono text-[8px] uppercase px-2 py-0.5 border border-border text-muted-foreground">{g}</span>
                   ))}
                 </div>
               </div>

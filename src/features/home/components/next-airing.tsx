@@ -113,7 +113,7 @@ export function NextAiring({ className }: { className?: string }) {
                             <h2 className="text-3xl md:text-5xl lg:text-7xl font-mono font-bold uppercase tracking-tighter leading-[0.9] text-foreground line-clamp-2 drop-shadow-lg">
                                 {title}
                             </h2>
-                            <div className="flex flex-wrap items-center gap-4 md:gap-6 font-mono text-[10px] md:text-[11px] uppercase tracking-widest text-muted-foreground/80">
+                            <div className="flex flex-wrap items-center gap-4 md:gap-6 font-mono text-[10px] md:text-[11px] uppercase tracking-widest text-muted-foreground">
                                 <span className="text-foreground">Ep_{activeSchedule.episode}</span>
                                 <span className="h-1 w-1 rounded-full bg-border" />
                                 <span>{activeSchedule.media?.format}</span>
@@ -160,6 +160,7 @@ export function NextAiring({ className }: { className?: string }) {
                                     e.preventDefault()
                                     setActiveIndex(i)
                                 }}
+                                aria-label={`Go to slide ${i + 1}`}
                                 className={`relative h-1.5 transition-all duration-300 overflow-hidden ${i === activeIndex ? 'w-12 bg-border' : 'w-3 bg-border hover:bg-muted-foreground'
                                     }`}
                             >

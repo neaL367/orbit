@@ -50,28 +50,27 @@
   --ring: #0A0A0B;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0A0A0B;
-    --foreground: #F2F2F2;
-    --card: #0F0F10;
-    --card-foreground: #F2F2F2;
-    --popover: #0F0F10;
-    --popover-foreground: #F2F2F2;
-    --primary: #FFFFFF;
-    --primary-foreground: #0A0A0B;
-    --secondary: #1A1A1B;
-    --secondary-foreground: #F2F2F2;
-    --muted: #1A1A1B;
-    --muted-foreground: #A1A1A1;
-    --accent: #FFFFFF;
-    --accent-foreground: #0A0A0B;
-    --destructive: #EF4444;
-    --border: #262626;
-    --input: #262626;
-    --ring: #FFFFFF;
-  }
+.dark {
+  --background: #0A0A0B;
+  --foreground: #F2F2F2;
+  --card: #0F0F10;
+  --card-foreground: #F2F2F2;
+  --popover: #0F0F10;
+  --popover-foreground: #F2F2F2;
+  --primary: #FFFFFF;
+  --primary-foreground: #0A0A0B;
+  --secondary: #1A1A1B;
+  --secondary-foreground: #F2F2F2;
+  --muted: #1A1A1B;
+  --muted-foreground: #A1A1A1;
+  --accent: #FFFFFF;
+  --accent-foreground: #0A0A0B;
+  --destructive: #EF4444;
+  --border: #262626;
+  --input: #262626;
+  --ring: #FFFFFF;
 }
+
 
 @layer base {
   * {

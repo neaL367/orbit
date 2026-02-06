@@ -11,7 +11,7 @@ function FooterContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-end">
           <div className="space-y-6">
             <div className="font-mono text-xl font-bold uppercase tracking-tighter">
-              Anime<span className="text-muted-foreground/40">X</span>
+              Anime<span className="text-muted-foreground">X</span>
             </div>
             <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground max-w-xs leading-relaxed">
               Autonomous search engine and indexing protocol for modern animation archives.
@@ -28,7 +28,7 @@ function FooterContent() {
                 SOURCE_CODE <ExternalLink className="w-2.5 h-2.5" />
               </Link>
             </div>
-            <div className="text-[8px] opacity-30">
+            <div className="text-[8px] text-muted-foreground">
               EST. 2026 // SERIAL_NO: 77-00-AX-99
             </div>
           </div>
