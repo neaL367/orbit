@@ -51,20 +51,11 @@ export const metadata: Metadata = {
     siteName: 'AnimeX',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'AnimeX Index',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
-    images: ['/og-image.png'],
   },
 };
 

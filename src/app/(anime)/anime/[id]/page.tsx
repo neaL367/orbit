@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     const title = getAnimeTitle(anime)
     const description = anime.description?.replace(/<[^>]*>/g, '').substring(0, 160)
-    const image = anime.coverImage?.extraLarge || anime.bannerImage
+    const image = anime.bannerImage || anime.coverImage?.extraLarge || anime.coverImage?.large || '/opengraph-image.png'
 
     return {
         title: `${title} — Registry`,
@@ -36,14 +36,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             title: `${title} — Registry`,
             description,
             url: `https://animex-index.vercel.app/anime/${id}`,
-            images: image ? [{ url: image }] : [],
+            images: [{ url: image }],
             type: 'video.tv_show',
         },
         twitter: {
             card: 'summary_large_image',
             title: `${title} — Registry`,
             description,
-            images: image ? [image] : [],
+            images: [image],
         }
     }
 }
