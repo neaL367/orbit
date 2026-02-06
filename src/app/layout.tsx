@@ -1,8 +1,11 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { Suspense } from "react";
+import { RouteScrollToTop } from "@/components/shared/route-scroll-to-top";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Footer, Header } from "@/components/layout";
 import { ScrollToTop } from "@/components/shared/scroll-to-top";
+import { QueryProviders } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -51,17 +54,23 @@ export const metadata: Metadata = {
     siteName: 'AnimeX',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'AnimeX Index',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'AnimeX — Index',
     description: 'Precision anime discovery archive. Registry for high-fidelity animation broadcasts.',
+    images: ['/opengraph-image.png'],
   },
 };
 
-import { Suspense } from "react";
-import { RouteScrollToTop } from "@/components/shared/route-scroll-to-top";
-import { QueryProviders } from "@/lib/providers";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
