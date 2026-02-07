@@ -121,7 +121,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               }),
             }}
           />
-          <main className="min-h-screen pt-24 pb-20 relative px-6 md:px-12 lg:px-24">
+          <main className="min-h-screen pb-20 relative px-6 md:px-12 lg:px-24">
             <div className="max-w-[1400px] mx-auto">
               {children}
             </div>

@@ -49,42 +49,9 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
 export default async function HomePage() {
   return (
     <div className="space-y-24">
-      {/* Hero / Intro (Minimalist) */}
-      <section className="py-12 md:py-24 border-b border-border relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full -z-10" />
-        <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[12rem] font-mono leading-[0.8] tracking-tighter uppercase mb-8 md:mb-12">
-          INDEX<span className="text-primary/10">X</span>
-        </h1>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 md:gap-10 font-mono text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-          <p className="max-w-md leading-relaxed">
-            Systemized registry for high-fidelity anime discovery.
-            Calibrated for deliberate exploration within the global archive.
-          </p>
-          <div className="flex flex-wrap gap-8 md:gap-16 border-l border-border pl-6 md:pl-8 relative">
-            <div className="absolute top-0 left-0 w-[1px] h-12 bg-gradient-to-b from-transparent via-primary to-transparent" />
-            <div className="space-y-1">
-              <span className="text-muted-foreground/50 text-[9px] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                CORE_STATUS
-              </span>
-              <span className="text-foreground block font-bold tracking-[0.2em] relative">
-                SYSCAL_LOCKED
-                <span className="absolute -top-1 -right-2 w-1 h-1 bg-foreground/50" />
-                <span className="absolute -bottom-1 -left-2 w-1 h-1 bg-foreground/50" />
-              </span>
-            </div>
-            <div className="space-y-1">
-              <span className="text-muted-foreground/50 text-[9px]">REGISTRY_SIZE</span>
-              <span className="text-foreground block font-bold tracking-[0.2em]">
-                24,812<span className="text-muted-foreground/30">_ENTRIES</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Suspense fallback={null}>
-        <NextAiring className="h-[40vh] md:h-[50vh]" />
+      {/* Primary Registry Hero (Integrated Next Airing) */}
+      <Suspense fallback={<div className="h-[70vh] md:h-[85vh] bg-secondary/5 shimmer" />}>
+        <NextAiring className="h-[70vh] md:h-[85vh]" />
       </Suspense>
 
       <div className="space-y-40">

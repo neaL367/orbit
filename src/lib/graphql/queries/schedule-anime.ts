@@ -1,7 +1,7 @@
 import { graphql } from '@/lib/graphql/types/gql'
 
 export const ScheduleAnimeQuery = graphql(`
-  query ScheduleAnime($page: Int, $perPage: Int, $notYetAired: Boolean, $airingAt_greater: Int, $airingAt_lesser: Int) {
+  query ScheduleAnimeHero($page: Int, $perPage: Int, $notYetAired: Boolean, $airingAt_greater: Int, $airingAt_lesser: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         currentPage
@@ -36,6 +36,8 @@ export const ScheduleAnimeQuery = graphql(`
           }
           format
           status
+          season
+          seasonYear
           isAdult
           externalLinks {
             id

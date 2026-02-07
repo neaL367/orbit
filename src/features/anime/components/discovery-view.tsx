@@ -76,13 +76,13 @@ export default function DiscoveryView() {
 
             {/* Search Sidebar/Rail */}
             <aside className={cn(
-                "w-full lg:w-72 shrink-0 transition-all duration-300",
+                "w-full lg:w-80 shrink-0 transition-all duration-300",
                 "fixed inset-0 bg-background/98 p-6 lg:relative lg:inset-auto lg:bg-transparent lg:p-0",
                 isFiltersOpen
                     ? "z-50 translate-y-0 opacity-100"
                     : "z-30 translate-y-4 opacity-0 pointer-events-none lg:z-30 lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto"
             )}>
-                <div className="sticky top-24 max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto space-y-8 pr-2 pb-10 scrollbar-hide hover:scrollbar-default transition-all">
+                <div className="sticky top-24 max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto space-y-12 pr-4 pb-10 scrollbar-hide hover:scrollbar-default transition-all">
                     {/* Parameters Header (Desktop Only) */}
                     <div className="hidden lg:flex justify-between items-center py-3 border-b border-border bg-background/95 backdrop-blur-md sticky top-0 z-50">
                         <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Parameters</span>
@@ -96,95 +96,125 @@ export default function DiscoveryView() {
                         )}
                     </div>
 
-                    {/* Search Input */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-1 h-1 bg-primary" />
-                            <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Discovery_Query</h4>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="SEARCH_DATABASE..."
-                            className="w-full bg-background border border-border px-4 py-2 font-mono text-[11px] uppercase text-foreground outline-none focus:border-foreground placeholder:text-muted-foreground/50 transition-colors"
-                            defaultValue={filters.search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
+                    {/* Search Module */}
+                    <div className="p-5 border border-border bg-white/[0.02] relative group transition-all hover:bg-white/[0.04]">
+                        <div className="absolute top-0 right-0 w-2 h-2 bg-primary/20" />
+                        <div className="absolute -top-px -left-px w-12 h-[1px] bg-primary/50" />
+                        <div className="absolute -top-px -left-px w-[1px] h-12 bg-primary/50" />
 
-                    {/* System Parameters (Sort) */}
-                    <div className="space-y-4">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 border-l border-border pl-3">System_Indices</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { label: 'Trending', value: 'trending' },
-                                { label: 'Seasonal', value: 'seasonal' },
-                                { label: 'Popular', value: 'popular' },
-                                { label: 'Top_Rated', value: 'top-rated' }
-                            ].map((item) => (
-                                <IndexChip
-                                    key={item.value}
-                                    label={item.label}
-                                    active={filters.sort === item.value}
-                                    onClick={() => setFilter("sort", item.value)}
-                                    className="w-full text-[9px]"
-                                />
-                            ))}
+                        <div className="space-y-4 relative z-10">
+                            <div className="flex items-center justify-between">
+                                <span className="font-mono text-[9px] uppercase tracking-[0.34em] text-muted-foreground/60 font-bold">Query_Database</span>
+                                <div className="flex gap-1">
+                                    <div className="w-1 h-1 bg-muted-foreground/30" />
+                                    <div className="w-1 h-1 bg-muted-foreground/30 animate-pulse" />
+                                </div>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="TYPE_QUERY_HERE..."
+                                className="w-full bg-background/50 border border-border/50 px-4 py-3 font-mono text-[11px] uppercase text-foreground outline-none focus:border-primary/50 placeholder:text-muted-foreground/30 transition-all backdrop-blur-sm"
+                                defaultValue={filters.search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
                         </div>
                     </div>
 
-                    {/* Genre Stack */}
-                    <div className="space-y-4">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 border-l border-border pl-3">Genres</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {COMMON_GENRES.map((genre) => (
-                                <IndexChip
-                                    key={genre}
-                                    label={genre}
-                                    active={filters.genres.includes(genre)}
-                                    onClick={() => toggleGenre(genre)}
-                                />
-                            ))}
+                    <div className="space-y-10 pl-1">
+                        {/* REGISTRY_SORT */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3">
+                                <span className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                                <h4 className="font-mono text-[10px] uppercase tracking-[0.25em] text-foreground font-bold">Registry_Sort</h4>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                {[
+                                    { label: 'Trending', value: 'trending' },
+                                    { label: 'Seasonal', value: 'seasonal' },
+                                    { label: 'Popular', value: 'popular' },
+                                    { label: 'Top_Rated', value: 'top-rated' }
+                                ].map((item) => (
+                                    <IndexChip
+                                        key={item.value}
+                                        label={item.label}
+                                        active={filters.sort === item.value}
+                                        onClick={() => setFilter("sort", item.value)}
+                                        className="w-full text-[9px] py-2"
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Temporal Frame */}
-                    <div className="space-y-4">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 border-l border-border pl-3">Frame</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <select
-                                title="Year"
-                                className="bg-background border border-border px-3 py-2 font-mono text-[11px] uppercase text-foreground outline-none focus:border-foreground"
-                                value={filters.year}
-                                onChange={(e) => setFilter("year", e.target.value)}
-                            >
-                                <option value="">Year</option>
-                                {years.map(y => <option key={y} value={y}>{y}</option>)}
-                            </select>
-                            <select
-                                title="Season"
-                                className="bg-background border border-border px-3 py-2 font-mono text-[11px] uppercase text-foreground outline-none focus:border-foreground"
-                                value={filters.season}
-                                onChange={(e) => setFilter("season", e.target.value)}
-                            >
-                                <option value="">Season</option>
-                                {SEASONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                            </select>
+                        {/* GENRE_TAGS */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3">
+                                <span className="w-1 h-1 bg-primary rotate-45" />
+                                <h4 className="font-mono text-[10px] uppercase tracking-[0.25em] text-foreground font-bold">Genre_Tags</h4>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {COMMON_GENRES.map((genre) => (
+                                    <IndexChip
+                                        key={genre}
+                                        label={genre}
+                                        active={filters.genres.includes(genre)}
+                                        onClick={() => toggleGenre(genre)}
+                                        className="text-[9px] py-1.5"
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Attributes */}
-                    <div className="space-y-4">
-                        <h4 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 border-l border-border pl-3">Attributes</h4>
-                        <div className="flex flex-col gap-1">
-                            {FORMATS.map(f => (
-                                <IndexChip
-                                    key={f.value}
-                                    label={f.label}
-                                    active={filters.format === f.value}
-                                    onClick={() => setFilter("format", f.value)}
-                                    className="w-full text-left"
-                                />
-                            ))}
+                        {/* TEMPORAL_FRAME */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3">
+                                <span className="w-2 h-[1px] bg-primary" />
+                                <h4 className="font-mono text-[10px] uppercase tracking-[0.25em] text-foreground font-bold">Temporal_Frame</h4>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                                <div className="group relative">
+                                    <select
+                                        title="Year"
+                                        className="w-full bg-background border border-border px-4 py-3 font-mono text-[10px] uppercase text-foreground outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+                                        value={filters.year}
+                                        onChange={(e) => setFilter("year", e.target.value)}
+                                    >
+                                        <option value="">[ YEAR_NULL ]</option>
+                                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-muted-foreground/50" />
+                                </div>
+                                <div className="group relative">
+                                    <select
+                                        title="Season"
+                                        className="w-full bg-background border border-border px-4 py-3 font-mono text-[10px] uppercase text-foreground outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+                                        value={filters.season}
+                                        onChange={(e) => setFilter("season", e.target.value)}
+                                    >
+                                        <option value="">[ SEASON_NULL ]</option>
+                                        {SEASONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-muted-foreground/50" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* SYSTEM_ATTRIBUTES */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 border border-primary" />
+                                <h4 className="font-mono text-[10px] uppercase tracking-[0.25em] text-foreground font-bold">System_Attributes</h4>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                {FORMATS.map(f => (
+                                    <IndexChip
+                                        key={f.value}
+                                        label={f.label}
+                                        active={filters.format === f.value}
+                                        onClick={() => setFilter("format", f.value)}
+                                        className="w-full text-left py-2 px-4 flex justify-between group"
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -192,7 +222,7 @@ export default function DiscoveryView() {
                     <div className="lg:hidden pt-8 border-t border-border mt-8">
                         <button
                             onClick={() => setIsFiltersOpen(false)}
-                            className="w-full font-mono text-[11px] font-bold uppercase tracking-widest py-4 border border-border hover:bg-white/5 transition-all text-muted-foreground flex items-center justify-center gap-2"
+                            className="w-full font-mono text-[11px] font-bold uppercase tracking-widest py-4 bg-foreground text-background index-cut-tr transition-all flex items-center justify-center gap-2"
                         >
                             Confirm_Parameters
                         </button>
@@ -201,7 +231,7 @@ export default function DiscoveryView() {
             </aside>
 
             {/* Main Results Grid */}
-            <main className="flex-1">
+            <main className="py-8 flex-1">
                 <IndexSectionHeader
                     title="Results"
                     subtitle={hasActiveFilters ? "Filtered_Archive" : "Global_Index"}

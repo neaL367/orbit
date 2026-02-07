@@ -1,8 +1,9 @@
 'use client'
 
 import { addDays, format, fromUnixTime, getDay } from 'date-fns'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { DaySection } from '../day-section/day-section'
+import { DaySelector } from '../day-selector/day-selector'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
 
@@ -21,6 +22,7 @@ const DAYS_OF_WEEK = [
 ] as const
 
 export function ScheduleView({ data }: ScheduleViewProps) {
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
   const schedulesByDay = useMemo(() => {
     const grouped: Record<number, Record<string, AiringSchedule[]>> = {
@@ -73,36 +75,50 @@ export function ScheduleView({ data }: ScheduleViewProps) {
 
   const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
   const sortedDays = todayDayIndex === -1
-    ? DAYS_OF_WEEK
+    ? DAYS_OF_WEEK.map(day => ({ ...day, isToday: false }))
     : [
-      DAYS_OF_WEEK[todayDayIndex],
-      ...DAYS_OF_WEEK.slice(todayDayIndex + 1),
-      ...DAYS_OF_WEEK.slice(0, todayDayIndex)
+      { ...DAYS_OF_WEEK[todayDayIndex], isToday: true },
+      ...DAYS_OF_WEEK.slice(todayDayIndex + 1).map(day => ({ ...day, isToday: false })),
+      ...DAYS_OF_WEEK.slice(0, todayDayIndex).map(day => ({ ...day, isToday: false }))
     ]
+
+  // Filter days based on selection
+  const displayedDays = selectedDay === null
+    ? sortedDays
+    : sortedDays.filter(day => day.index === selectedDay)
 
   const formatDateLabel = (date: Date): string => {
     return format(date, 'do MMM')
   }
 
   return (
-    <div className="space-y-32">
-      {/* All Days of the Week - Today first */}
-      {sortedDays.map(({ index: dayIndex, name: dayName }, arrayIndex) => {
-        const date = addDays(today, arrayIndex)
-        const dateString = formatDateLabel(date)
-        return (
-          <DaySection
-            key={dayIndex}
-            dayName={dayName}
-            dateString={dateString}
-            isToday={dayIndex === todayIndex}
-            schedulesByFormat={schedulesByDay[dayIndex]}
-            formatTimeAction={formatTime}
-            getStreamingLinksAction={getStreamingLinks}
-          />
-        )
-      })}
+    <div className="space-y-0">
+      {/* Day Selector */}
+      <DaySelector
+        days={sortedDays}
+        selectedDay={selectedDay}
+        onSelectDayAction={setSelectedDay}
+      />
 
+      {/* Day Sections */}
+      <div className="space-y-32 pt-12">
+        {displayedDays.map(({ index: dayIndex, name: dayName, isToday }, arrayIndex) => {
+          const offset = selectedDay === null ? arrayIndex : sortedDays.findIndex(d => d.index === dayIndex)
+          const date = addDays(today, offset)
+          const dateString = formatDateLabel(date)
+          return (
+            <DaySection
+              key={dayIndex}
+              dayName={dayName}
+              dateString={dateString}
+              isToday={isToday}
+              schedulesByFormat={schedulesByDay[dayIndex]}
+              formatTimeAction={formatTime}
+              getStreamingLinksAction={getStreamingLinks}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }

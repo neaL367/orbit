@@ -43,7 +43,7 @@ function HeaderContent() {
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 z-[110] h-16 bg-background/90 backdrop-blur-sm border-b border-border flex items-center">
+      <header className="sticky top-0 inset-x-0 z-[110] h-16 bg-background/90 backdrop-blur-sm border-b border-border flex items-center">
         <div className="container mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
           <div className="flex items-center gap-12">
             <Link

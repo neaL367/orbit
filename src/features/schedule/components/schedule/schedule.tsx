@@ -148,13 +148,14 @@ function ScheduleContent() {
 
   return (
     <div className="reveal">
-      <div className="mb-20">
+      {/* <div className="mb-8">
         <IndexSectionHeader
           title="Transmission_Registry"
           subtitle="Temporal_Log"
           as="h1"
+          className="mb-4"
         />
-      </div>
+      </div> */}
 
       {error ? (
         <div className="border border-border p-12 text-center">
@@ -174,9 +175,9 @@ export function Schedule() {
     <Suspense
       fallback={
         <div>
-          <div className="mb-20">
+          {/* <div className="mb-20">
             <IndexSectionHeader title="Transmission_Registry" subtitle="Temporal_Log" as="h1" />
-          </div>
+          </div> */}
           <ScheduleLoading />
         </div>
       }

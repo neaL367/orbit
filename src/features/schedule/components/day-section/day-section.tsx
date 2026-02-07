@@ -1,9 +1,20 @@
 'use client'
 
+import { useRef, useState, useEffect } from 'react'
 import { ScheduleCard } from '../schedule/card'
 import { cn } from '@/lib/utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
 import { IndexSectionHeader } from '@/components/shared/index-section-header'
+
+const FORMAT_ORDER = ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA', 'ONA'] as const
+const FORMAT_LABELS: Record<string, string> = {
+  TV: 'TV_BROADCAST',
+  TV_SHORT: 'TV_SHORT',
+  MOVIE: 'CINEMATIC',
+  OVA: 'OVA_DOC',
+  ONA: 'NET_ARCHIVE',
+  SPECIAL: 'RESERVED',
+}
 
 type DaySectionProps = {
   dayName: string
@@ -19,34 +30,61 @@ type DaySectionProps = {
   }>
 }
 
-const FORMAT_ORDER: string[] = ['TV', 'TV_SHORT', 'MOVIE', 'OVA', 'ONA', 'SPECIAL', 'MUSIC', 'UNKNOWN']
-const FORMAT_LABELS: Record<string, string> = {
-  TV: 'TV_BROADCAST',
-  TV_SHORT: 'TV_SHORT',
-  MOVIE: 'CINEMATIC',
-  OVA: 'OVAL_DOC',
-  ONA: 'NET_ARCHIVE',
-  SPECIAL: 'RESERVED',
-  MUSIC: 'AUDIO_VISUAL',
-  UNKNOWN: 'UNCLASSIFIED',
-}
-
 export function DaySection({
   dayName,
   dateString,
   isToday = false,
   schedulesByFormat,
   formatTimeAction,
-  getStreamingLinksAction
+  getStreamingLinksAction,
 }: DaySectionProps) {
+  const headerRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const [isStuck, setIsStuck] = useState(false)
+
+  // Detect when header becomes stuck (debounced for performance)
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    let rafId: number | null = null
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Use RAF to debounce updates for smooth scrolling
+        if (rafId) cancelAnimationFrame(rafId)
+        rafId = requestAnimationFrame(() => {
+          setIsStuck(!entry.isIntersecting)
+        })
+      },
+      { threshold: [1] }
+    )
+
+    observer.observe(sentinel)
+    return () => {
+      observer.disconnect()
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [])
+
   const totalSchedules = Object.values(schedulesByFormat).reduce((sum, schedules) => sum + schedules.length, 0)
   const hasSchedules = totalSchedules > 0
   const formats = FORMAT_ORDER.filter(format => schedulesByFormat[format] && schedulesByFormat[format].length > 0)
 
   return (
     <section className="reveal">
+      {/* Sentinel element to detect sticky state */}
+      <div ref={sentinelRef} className="h-px -mt-px" />
+
       <div className="space-y-16">
-        <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-md pb-4 pt-2 -mx-4 px-4 border-b border-border/50">
+        <div
+          ref={headerRef}
+          className={cn(
+            "sticky top-[120px] z-20 pb-4 pt-2 -mx-4 px-4 transition-all duration-300 backdrop-blur-sm",
+            isStuck ? "bg-background/90" : "bg-transparent",
+            "will-change-[background-color] contain-paint"
+          )}
+        >
           <IndexSectionHeader
             title={dayName}
             subtitle={isToday ? `TODAY // ${dateString}` : dateString}
