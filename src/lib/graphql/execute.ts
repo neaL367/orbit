@@ -1,9 +1,9 @@
 import type { ExecutionResult } from 'graphql'
 import type { TypedDocumentString } from '@/lib/graphql/types/graphql'
 import { GRAPHQL_TIMEOUT } from '@/lib/constants'
-import { handleGraphQLErrors, isAbortError, createTimeoutError } from './errors'
-import { executeClientGraphQL } from './client'
-import { executeServerGraphQL } from './server'
+import { handleGraphQLErrors, isAbortError, createTimeoutError } from './engine/errors'
+import { executeClientGraphQL } from './engine/fetch-client'
+import { executeServerGraphQL } from './engine/fetch-server'
 
 /**
  * Creates an abort signal with timeout that composes with an optional external signal
@@ -27,7 +27,7 @@ function createAbortSignalWithTimeout(
     if (externalSignal.aborted) {
       controller.abort()
       clearTimeout(timeoutId)
-      return { signal: controller.signal, cleanup: () => {} }
+      return { signal: controller.signal, cleanup: () => { } }
     }
 
     // Listen to external signal and abort controller when it's aborted

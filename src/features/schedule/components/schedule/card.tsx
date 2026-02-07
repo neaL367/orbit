@@ -5,7 +5,7 @@ import { useMemo, useCallback, memo } from "react";
 import { cn } from "@/lib/utils";
 import { getAnimeTitle, formatTimeUntilAiring } from "@/lib/utils/anime-utils";
 import { useCurrentTime } from "@/hooks/use-current-time";
-import { IndexImage } from "@/components/shared";
+import { IndexImage } from "@/components/shared/index-image";
 import type { AiringSchedule } from "@/lib/graphql/types/graphql";
 
 type ScheduleCardProps = {
@@ -44,13 +44,23 @@ function ScheduleCardComponent({
     router.push(`/anime/${media.id}`);
   }, [router, media.id]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick();
+    }
+  }, [handleCardClick]);
+
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-stretch sm:items-center gap-6 p-4 border border-border bg-background/50 hover:bg-white/[0.02] hover:border-foreground/30 transition-all duration-500 cursor-pointer overflow-hidden",
+        "group relative flex flex-col sm:flex-row items-stretch sm:items-center gap-6 p-4 border border-border bg-background/50 hover:bg-white/[0.02] hover:border-foreground/30 transition-all duration-500 cursor-pointer overflow-hidden outline-none focus-visible:ring-1 focus-visible:ring-primary",
         isAiringNow && "border-primary/50 bg-primary/[0.01]"
       )}
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Time Column */}
       <div className="sm:w-32 flex flex-col justify-center items-start sm:items-center py-2 border-b sm:border-b-0 sm:border-r border-border/50 shrink-0">

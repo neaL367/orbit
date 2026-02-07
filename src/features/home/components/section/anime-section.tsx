@@ -1,6 +1,6 @@
 import { extractMediaList } from '@/lib/utils/anime-utils'
 import { SectionView } from './section-view'
-import { getCachedTrending, getCachedPopular, getCachedSeasonal, getCachedTopRated } from '@/lib/graphql/server-cache'
+import { getCachedTrending, getCachedPopular, getCachedSeasonal, getCachedTopRated } from '@/lib/graphql/data'
 import { MediaSeason } from '@/lib/graphql/types/graphql'
 import { connection } from 'next/server'
 import { getCurrentSeason, getCurrentYear, getNextSeason, getNextSeasonYear } from '@/lib/utils'

@@ -8,7 +8,7 @@
     "dev": "bun run codegen && next dev",
     "build": "bun run codegen && next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "oxlint",
     "analyze": "ANALYZE=true bun run build"
   },
   "dependencies": {
@@ -34,8 +34,7 @@
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.0.1",
+    "oxlint": "^1.43.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   }

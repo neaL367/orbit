@@ -1,16 +1,19 @@
-import { Suspense } from 'react'
-import { BASE_URL } from "@/lib/constants"
-import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { connection } from 'next/server'
-import { getCachedAnime } from '@/lib/graphql/server-cache'
-import { getAnimeTitle } from '@/lib/utils/anime-utils'
-import type { Media } from '@/lib/graphql/types/graphql'
+import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 import { IndexSectionHeader } from '@/components/shared/index-section-header'
+import { AnimeDescription } from "@/features/anime/components/anime-description"
 import { AnimeEpisodes } from "@/features/anime/components/anime-episodes"
 import { AnimeTrailer } from "@/features/anime/components/anime-trailer"
-import { IndexImage, BackButton } from "@/components/shared"
-import { AnimeDescription } from "@/features/anime/components/anime-description"
+import { IndexImage } from "@/components/shared/index-image"
+import { BackButton } from "@/components/shared/back-button"
+
+import { getCachedAnime } from '@/lib/graphql/data'
+import { getAnimeTitle } from '@/lib/utils/anime-utils'
+import { BASE_URL } from "@/lib/constants"
+
+import type { Media } from '@/lib/graphql/types/graphql'
+import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id: animeId } = await params

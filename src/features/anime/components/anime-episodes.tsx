@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
 import { IndexSectionHeader } from "@/components/shared/index-section-header"
 import type { MediaStreamingEpisode } from "@/lib/graphql/types/graphql"
@@ -30,7 +31,12 @@ export function AnimeEpisodes({ episodes }: AnimeEpisodesProps) {
                     >
                         <div className="relative w-24 aspect-video bg-black/50 overflow-hidden shrink-0 border border-border/30">
                             {ep?.thumbnail ? (
-                                <img src={ep.thumbnail} alt={ep.title || ''} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <Image
+                                    src={ep.thumbnail}
+                                    alt={ep.title || ''}
+                                    fill
+                                    className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <span className="text-[9px] font-mono text-muted-foreground">NO_SIGNAL</span>

@@ -1,17 +1,17 @@
 "use client"
 
-import React, { useState } from 'react'
-import { cn } from "@/lib/utils"
-import { Filter, X } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import React, { useState } from 'react'
+import { Filter, X } from "lucide-react"
 
+import { COMMON_GENRES, SEASONS, FORMATS } from "@/features/anime/components/anime-filters/constants"
+import { IndexSectionHeader } from "@/components/shared/index-section-header"
 import { useAnimeFilters } from "@/features/anime/hooks/use-anime-filters"
 import { useAnimeList } from "@/features/anime/hooks/use-anime-list"
-import { IndexSectionHeader } from "@/components/shared/index-section-header"
 import { IndexChip } from "@/components/shared/index-chip"
-import { PosterCard } from "@/features/anime/components/poster-card/PosterCard"
-import { COMMON_GENRES, SEASONS, FORMATS } from "@/features/anime/components/anime-filters"
-import { ErrorState } from "@/components/shared"
+import { PosterCard } from "@/features/anime/components/poster-card/poster-card"
+import { ErrorState } from "@/components/shared/error-state"
+import { cn } from "@/lib/utils"
 
 export default function DiscoveryView() {
     const { filters, years, toggleGenre, setFilter, setSearch, clearFilters } = useAnimeFilters()

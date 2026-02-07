@@ -5,7 +5,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
 import type { Media } from "@/lib/graphql/types/graphql"
-import { IndexImage } from "@/components/shared"
+import { IndexImage } from "@/components/shared/index-image"
 
 interface PosterCardProps {
     anime: Media

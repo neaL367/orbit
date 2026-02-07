@@ -3,9 +3,10 @@ import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 import { RouteScrollToTop } from "@/components/shared/route-scroll-to-top";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Footer, Header } from "@/components/layout";
+import { Footer } from "@/components/layout/footer/footer";
+import { Header } from "@/components/layout/header/header";
 import { ScrollToTop } from "@/components/shared/scroll-to-top";
-import { QueryProviders } from "@/lib/providers";
+import { QueryProviders } from "@/providers";
 import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
@@ -99,10 +100,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 '@context': 'https://schema.org',
                 '@type': 'WebSite',
                 name: 'AnimeX',
-                url: 'https://animex-index.vercel.app',
+                url: BASE_URL,
                 potentialAction: {
                   '@type': 'SearchAction',
-                  target: 'https://animex-index.vercel.app/anime?search={search_term_string}',
+                  target: `${BASE_URL}/anime?search={search_term_string}`,
                   'query-input': 'required name=search_term_string',
                 },
               }),
@@ -115,8 +116,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
                 name: 'AnimeX',
-                url: 'https://animex-index.vercel.app',
-                logo: 'https://animex-index.vercel.app/logo.png',
+                url: BASE_URL,
+                logo: `${BASE_URL}/opengraph-image.png`, // Use OG image as logo fallback
               }),
             }}
           />

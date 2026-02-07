@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
+import { GITHUB_REPO_URL } from '@/lib/constants'
 
 function FooterContent() {
   return (
@@ -24,7 +25,7 @@ function FooterContent() {
               <Link href="https://anilist.co" target="_blank" className="hover:text-foreground transition-colors flex items-center gap-2">
                 ANILIST_API <ExternalLink className="w-2.5 h-2.5" />
               </Link>
-              <Link href="https://github.com/neaL367/orbit" target="_blank" className="hover:text-foreground transition-colors flex items-center gap-2">
+              <Link href={GITHUB_REPO_URL} target="_blank" className="hover:text-foreground transition-colors flex items-center gap-2">
                 SOURCE_CODE <ExternalLink className="w-2.5 h-2.5" />
               </Link>
             </div>

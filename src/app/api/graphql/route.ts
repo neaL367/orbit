@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
-import { NextRequest, NextResponse } from 'next/server'
-import { fetchGraphQLServer, getAniListRateLimit, canMakeAniListRequest } from '@/lib/graphql'
-import type { AniListRateLimit } from '@/lib/graphql/server'
+import { NextRequest, NextResponse, after } from 'next/server'
+import { fetchGraphQLServer } from '@/lib/graphql/engine/fetch-server'
+import { getAniListRateLimit, canMakeAniListRequest, type AniListRateLimit } from '@/lib/graphql/engine/rate-limit'
 
 /**
  * GraphQL API Route Handler
@@ -134,7 +134,7 @@ function cleanupRateLimits() {
 function has429Error(result: unknown): boolean {
   if (!result || typeof result !== 'object') return false
   if (!('errors' in result) || !Array.isArray(result.errors)) return false
-  
+
   return result.errors.some((e) => {
     return typeof e === 'object' && e !== null && 'status' in e && (e as { status?: number }).status === 429
   })
@@ -148,7 +148,7 @@ function create429Response(rateLimit: AniListRateLimit, isAniList: boolean) {
     'X-RateLimit-Reset': Math.floor(rateLimit.resetTime / 1000).toString(),
     'Retry-After': Math.max(retryAfter, 0).toString(),
   }
-  
+
   if (isAniList) {
     headers['X-AniList-RateLimit'] = 'true'
   }
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     }
 
     const isBatch = Array.isArray(body)
-    const requestsArray: Array<{ query: string; variables?: unknown }> = isBatch 
+    const requestsArray: Array<{ query: string; variables?: unknown }> = isBatch
       ? (body as Array<{ query: string; variables?: unknown }>)
       : [body as { query: string; variables?: unknown }]
 
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
 
     for (let index = 0; index < requestsArray.length; index++) {
       const req = requestsArray[index]
-      
+
       // Validate while processing
       if (!req || typeof req !== 'object' || !('query' in req) || typeof req.query !== 'string') {
         return NextResponse.json({ error: 'Valid query string is required' }, { status: 400 })
@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
 
       const cacheKey = generateCacheKey(req.query, req.variables)
       const existingIndices = cacheKeyToIndices.get(cacheKey)
-      
+
       if (existingIndices) {
         existingIndices.push(index)
       } else {
@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
 
     for (const req of uniqueRequests) {
       const cached = requestCache.get(req.cacheKey)
-      
+
       if (cached && now - cached.timestamp < DEDUPLICATION_CACHE_TTL) {
         // Cache hit
         cachedResults.set(req.cacheKey, cached.result)
@@ -334,7 +334,7 @@ export async function POST(request: NextRequest) {
 
     // Map results to original request order (single pass)
     const requestsCount = requestsArray.length
-    const responses: unknown[] = new Array(requestsCount)
+    const responses: unknown[] = Array.from({ length: requestsCount })
     for (const { cacheKey, indices } of uniqueRequests) {
       const result = resultMap.get(cacheKey) ?? {
         data: null,
@@ -345,13 +345,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Async cleanup (don't block response)
-    if (requestCache.size > 1000) {
-      setImmediate(() => cleanupCache())
-    }
-    if (rateLimitMap.size > 10000) {
-      setImmediate(() => cleanupRateLimits())
-    }
+    // Non-blocking cleanup (Next.js 15+ after() API)
+    after(() => {
+      if (requestCache.size > 1000) cleanupCache()
+      if (rateLimitMap.size > 10000) cleanupRateLimits()
+    })
 
     // Build response headers
     const executionTime = Date.now() - startTime

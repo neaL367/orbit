@@ -14,15 +14,6 @@ export function getAnimeTitle(anime: Media | null | undefined): string {
   )
 }
 
-/**
- * Extract subtitle (English title if different from main title)
- */
-export function getAnimeSubtitle(anime: Media | null | undefined): string | undefined {
-  if (!anime) return undefined
-  const title = getAnimeTitle(anime)
-  const english = anime.title?.english
-  return english && english !== title ? english : undefined
-}
 
 /**
  * Extract media list from GraphQL Page response
@@ -38,16 +29,6 @@ export function extractMediaList(
   )
 }
 
-/**
- * Convert hex color to rgba string
- */
-export function hexToRgba(hex: string | null | undefined, opacity: number = 1): string {
-  if (!hex || hex.length < 7) return `rgba(26, 26, 26, ${opacity})`
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`
-}
 
 /**
  * Format date object to YYYY-MM-DD string
@@ -70,11 +51,11 @@ export function formatDate(date?: {
  */
 export function formatTimeUntilAiring(seconds?: number): string | null {
   if (!seconds || seconds <= 0) return null
-  
+
   const now = new Date()
   const target = new Date(now.getTime() + seconds * 1000)
   const duration = intervalToDuration({ start: now, end: target })
-  
+
   if (duration.days && duration.days > 0) {
     return `${duration.days}d ${duration.hours || 0}h`
   }
@@ -84,27 +65,3 @@ export function formatTimeUntilAiring(seconds?: number): string | null {
   return `${duration.minutes || 0}m`
 }
 
-/**
- * Format time until airing with detailed breakdown (for carousels)
- */
-export function formatTimeUntilAiringDetailed(seconds?: number): {
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-} {
-  if (!seconds || seconds <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
-  }
-  
-  const now = new Date()
-  const target = new Date(now.getTime() + seconds * 1000)
-  const duration = intervalToDuration({ start: now, end: target })
-  
-  return {
-    days: duration.days ?? 0,
-    hours: duration.hours ?? 0,
-    minutes: duration.minutes ?? 0,
-    seconds: duration.seconds ?? 0,
-  }
-}

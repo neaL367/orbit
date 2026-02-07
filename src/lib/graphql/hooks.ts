@@ -8,7 +8,7 @@ import type { ExecutionResult } from 'graphql'
 import type { TypedDocumentString } from '@/lib/graphql/types/graphql'
 import { execute } from './execute'
 import { CACHE_TIMES } from '@/lib/constants'
-import { getQueryName } from './cache'
+import { getQueryName } from './engine/cache'
 
 // ============================================================================
 // Types

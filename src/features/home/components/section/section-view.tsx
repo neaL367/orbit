@@ -1,9 +1,9 @@
 import type { Route } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { PosterCard } from '@/features/anime/components/poster-card/PosterCard'
+import { PosterCard } from '@/features/anime/components/poster-card/poster-card'
 import { IndexSectionHeader } from '@/components/shared/index-section-header'
-import { ErrorState } from '@/components/shared'
+import { ErrorState } from '@/components/shared/error-state'
 import type { Media } from '@/lib/graphql/types/graphql'
 
 type SectionViewProps = {

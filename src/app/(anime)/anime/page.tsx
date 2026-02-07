@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import DiscoveryView from './DiscoveryView'
+import DiscoveryView from '@/features/anime/components/discovery-view'
 
 export const metadata: Metadata = {
     title: 'Discovery Registry — Database Exploration',
