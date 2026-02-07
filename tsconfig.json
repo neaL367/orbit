@@ -28,19 +28,19 @@
     ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "./*"
       ],
       "@/components/*": [
-        "./src/components/*"
+        "./components/*"
       ],
       "@/features/*": [
-        "./src/features/*"
+        "./features/*"
       ],
       "@/lib/*": [
-        "./src/lib/*"
+        "./lib/*"
       ],
       "@/hooks/*": [
-        "./src/hooks/*"
+        "./hooks/*"
       ]
     }
   },

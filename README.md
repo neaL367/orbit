@@ -37,7 +37,6 @@ bun dev
 AnimeX follows a **feature-based architecture** to ensure scalability and maintainability.
 
 ```
-src/
 ├── app/                           # Next.js App Router
 │   ├── (anime)/                   # Anime feature routes
 │   ├── (pages)/                   # Page-level route definitions
