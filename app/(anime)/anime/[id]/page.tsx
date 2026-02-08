@@ -145,10 +145,10 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                         <div className="bg-foreground text-background px-3 py-1 font-mono text-[10px] uppercase w-fit index-cut-tr">
                             ID: {anime.id} {'//'} {anime.status}
                         </div>
-                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-mono uppercase tracking-tighter leading-none text-foreground">
+                        <h1 className="text-3xl sm:text-5xl md:text-7xl font-mono uppercase tracking-tighter leading-none text-foreground break-all sm:break-words">
                             {title}
                         </h1>
-                        <div className="flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-8">
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground mr-0 sm:mr-8">
                             <span>{anime.format}</span>
                             <span>{anime.startDate?.year}</span>
                             <span>{anime.episodes} EP</span>
@@ -174,6 +174,7 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                     <IndexSectionHeader title="Visual_Preview" subtitle="Trailer_Link" />
                     <AnimeTrailer
                         videoId={anime.trailer.id}
+                        title={title}
                         thumbnail={anime.trailer.thumbnail || anime.bannerImage || anime.coverImage?.extraLarge}
                     />
                 </section>

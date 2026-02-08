@@ -78,31 +78,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  /* Custom Scrollbar - Firefox */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) var(--background);
-  }
-
-  /* Custom Scrollbar - Webkit */
-  *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 9999px;
-  }
-
-  *::-webkit-scrollbar-thumb:hover {
-    background: var(--muted-foreground);
-  }
 }
 
 @keyframes progress-bar {
@@ -169,6 +144,7 @@
   from {
     transform: translateY(-100%);
   }
+
   to {
     transform: translateY(100%);
   }
@@ -178,6 +154,7 @@
   from {
     transform: translateX(-100%);
   }
+
   to {
     transform: translateX(100%);
   }
@@ -197,4 +174,27 @@
       100% calc(100% - 8px),
       calc(100% - 8px) 100%,
       0 100%);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }

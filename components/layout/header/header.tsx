@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense, useSyncExternalStore, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SystemClock } from './system-clock'
 import type { Route } from 'next'
 
 const menuItems = [
@@ -27,8 +28,6 @@ function HeaderContent() {
     () => false
   )
 
-
-
   const isActive = (href: string, sort?: string) => {
     if (href === '/') return pathname === '/'
     if (href.startsWith('/anime')) {
@@ -44,36 +43,36 @@ function HeaderContent() {
   return (
     <>
       <header className="sticky top-0 inset-x-0 z-[110] h-14 sm:h-16 bg-background/80 backdrop-blur-xl border-b border-white/5 flex items-center shadow-[0_1px_0_0_rgba(255,255,255,0.03)]">
-        <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-24 flex justify-between items-center">
-          <div className="flex items-center gap-16">
+        <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
+          <div className="flex items-center gap-6 lg:gap-12 xl:gap-16">
             <Link
               href="/"
               onClick={() => setIsMenuOpen(false)}
-              className="flex flex-col group z-[110] relative"
+              className="flex flex-col group z-[110] relative flex-shrink-0"
             >
               {/* Logo Corner Decors */}
-              <div className="absolute -top-2 -left-3 w-2 h-2 border-t border-l border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute -bottom-2 -right-3 w-2 h-2 border-b border-r border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -top-1.5 -left-3 w-2 h-2 border-t border-l border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -bottom-1.5 -right-3 w-2 h-2 border-b border-r border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              <span className="font-mono text-lg sm:text-xl font-bold tracking-tighter uppercase leading-none">
+              <span className="font-mono text-lg sm:text-2xl font-bold tracking-tighter uppercase leading-none">
                 Anime<span className="text-primary italic">X</span>
               </span>
-              <span className="font-mono text-[6px] sm:text-[7px] uppercase tracking-[0.4em] sm:tracking-[0.5em] text-muted-foreground leading-none mt-1 sm:mt-1.5 opacity-60">
+              <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.5em] text-muted-foreground font-bold leading-none mt-1.5 sm:mt-2.5 opacity-60">
                 Index_Registry
               </span>
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
-              <span className="font-mono text-[7px] text-muted-foreground/30 uppercase tracking-widest mr-4">[ NAV_PTR ]</span>
-              <nav className="flex gap-1">
+              <span className="font-mono text-[9px] text-muted-foreground/30 uppercase tracking-widest mr-4 lg:mr-6 font-bold truncate hidden lg:inline">[ NAV_PTR ]</span>
+              <nav className="flex gap-1 xl:gap-2">
                 {menuItems.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href as Route}
                     className={cn(
-                      "font-mono text-[9px] uppercase tracking-widest transition-all duration-300 px-4 py-1.5 hover:bg-white/5",
+                      "font-mono text-[10px] lg:text-[12px] uppercase tracking-widest transition-all duration-300 px-3 lg:px-5 py-2 hover:bg-white/5 whitespace-nowrap",
                       isActive(item.href, item.sort)
-                        ? "text-primary font-bold bg-white/5"
+                        ? "text-primary font-bold bg-white/5 index-cut-tr"
                         : "text-muted-foreground/60 hover:text-foreground"
                     )}
                   >
@@ -84,20 +83,20 @@ function HeaderContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-8">
-            <div className="hidden lg:flex items-center gap-8 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 border-l border-white/10 pl-8">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[7px] opacity-40">System_Clock</span>
-                <span className="text-foreground tabular-nums">13:21:18:04</span>
+          <div className="flex items-center gap-4 lg:gap-10">
+            <div className="hidden lg:flex items-center gap-6 xl:gap-10 font-mono text-[11px] lg:text-[12px] uppercase tracking-widest text-muted-foreground/60 border-l border-white/10 pl-6 xl:pl-10">
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <span className="text-[9px] lg:text-[10px] opacity-40 font-bold">System_Clock</span>
+                <SystemClock />
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[7px] opacity-40">Access_Node</span>
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <span className="text-[9px] lg:text-[10px] opacity-40 font-bold">Access_Node</span>
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40"></span>
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
                   </span>
-                  <span className="text-foreground font-bold">ST_ONLINE</span>
+                  <span className="text-foreground font-bold">ONLINE</span>
                 </div>
               </div>
             </div>
@@ -105,10 +104,10 @@ function HeaderContent() {
             {/* Mobile Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 z-[110] text-foreground transition-colors border border-white/10 hover:bg-white/5"
+              className="md:hidden p-2 z-[110] text-foreground transition-colors border border-white/10 hover:bg-white/5 rounded-sm"
               aria-label="Toggle Menu"
             >
-              {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -121,7 +120,7 @@ function HeaderContent() {
           isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
         )}
       >
-        <div className="flex flex-col h-full pt-28 px-8 gap-8">
+        <div className="flex flex-col h-full pt-24 sm:pt-28 px-6 sm:px-8 gap-8">
           <div className="flex flex-col gap-6">
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border-l border-border pl-4">
               System_Navigation
@@ -133,7 +132,7 @@ function HeaderContent() {
                   href={item.href as Route}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    "font-mono text-2xl font-bold uppercase tracking-tighter transition-all duration-300 flex items-center justify-between group",
+                    "font-mono text-xl sm:text-2xl font-bold uppercase tracking-tighter transition-all duration-300 flex items-center justify-between group",
                     isActive(item.href, item.sort) ? "text-primary" : "text-foreground/60"
                   )}
                   style={{ transitionDelay: `${index * 50}ms` }}
@@ -148,19 +147,19 @@ function HeaderContent() {
             </nav>
           </div>
 
-          <div className="mt-auto pb-12 space-y-8">
+          <div className="mt-auto pb-10 sm:pb-12 space-y-6 sm:space-y-8">
             <div className="h-[1px] bg-border/50" />
-            <div className="flex flex-col gap-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+            <div className="flex flex-col gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground">
               <div className="flex items-center justify-between">
-                <span>Core_Status</span>
-                <div className="flex items-center gap-2 text-foreground">
+                <span className="font-bold">Core_Status</span>
+                <div className="flex items-center gap-2 text-foreground font-bold">
                   <span className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
                   <span>Synchronized</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span>Access_Token</span>
-                <span className="text-foreground">AX-5521-X</span>
+                <span className="font-bold">Access_Token</span>
+                <span className="text-foreground font-bold">AX-5521-X</span>
               </div>
             </div>
           </div>

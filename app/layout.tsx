@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
-import { RouteScrollToTop } from "@/components/shared/route-scroll-to-top";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/layout/footer/footer";
 import { Header } from "@/components/layout/header/header";
@@ -81,7 +80,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className="dark custom-scrollbar overflow-x-hidden">
       <body
         className={cn(
           geistSans.variable,
@@ -89,17 +88,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           'antialiased font-sans bg-background text-foreground relative'
         )}
       >
-        {/* Global Technical Decors */}
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
-          <div className="absolute top-0 left-24 w-[1px] h-full bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
-          <div className="absolute top-0 right-24 w-[1px] h-full bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
-          <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/5 to-transparent" />
-          <div className="absolute top-2/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/5 to-transparent" />
-        </div>
         <QueryProviders>
-          <Suspense fallback={null}>
-            <RouteScrollToTop />
-          </Suspense>
           <Analytics />
           <Header />
           <script

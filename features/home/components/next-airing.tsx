@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useQueries } from "@tanstack/react-query"
 import React, { useMemo, useState, useEffect, useRef } from "react"
 import { Zap } from "lucide-react"
-import { IndexImage } from "@/components/shared/index-image"
+
 import { execute } from "@/lib/graphql/execute"
 import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
@@ -93,7 +93,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
         if (schedules.length <= 1) return
 
         const duration = 8000
-        const transitionDuration = 1000
+
 
         // Start color transition
         setMixPercent(0)
@@ -128,7 +128,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
         return <div className={`w-full relative border-b border-border bg-secondary/5 shimmer ${className || "h-[50vh] md:h-[60vh]"}`} />
     }
 
-    const bannerImage = activeSchedule.media?.bannerImage || activeSchedule.media?.coverImage?.extraLarge || activeSchedule.media?.coverImage?.large
+
 
     const currentColors = colors[activeIndex] || { leftTop: '#1a1a1a', rightTop: '#1a1a1a', leftBottom: '#0a0a0a', rightBottom: '#0a0a0a' }
     const nextColors = colors[(activeIndex + 1) % schedules.length] || currentColors
@@ -261,27 +261,32 @@ export function NextAiring({ className, initialData }: { className?: string, ini
 
                                 <div key={activeSchedule.id} className="space-y-8 md:space-y-12 animate-in fade-in slide-in-from-left-8 duration-1000">
                                     <div className="space-y-4 md:space-y-6">
-                                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-mono font-bold uppercase tracking-tighter leading-[0.95] text-foreground drop-shadow-2xl line-clamp-3">
-                                            {title}
-                                        </h2>
+                                        <div className="min-h-[100px] md:min-h-[140px] lg:min-h-[180px] flex flex-col justify-end">
+                                            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-6xl font-mono font-bold uppercase tracking-tighter leading-[0.95] text-foreground drop-shadow-2xl line-clamp-3">
+                                                {title}
+                                            </h2>
+                                        </div>
 
-                                        {/* Structured Metadata Grid */}
-                                        <div className="flex flex-wrap items-center gap-y-4 gap-6 font-mono text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                                            <div className="flex flex-col gap-1 pr-6 border-r border-border/50">
-                                                <span className="text-[8px] opacity-40">Frequency</span>
-                                                <span className="text-foreground font-bold">EP_{activeSchedule.episode}</span>
+                                        {/* Ultra-Dense Telemetry Strip */}
+                                        <div className="flex flex-wrap items-center gap-x-10 gap-y-3 font-mono text-[11px] uppercase tracking-widest text-muted-foreground bg-white/[0.02] border border-white/5 px-5 py-4 index-cut-tr">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="opacity-30">EP//</span>
+                                                <span className="text-primary font-bold">{activeSchedule.episode}</span>
                                             </div>
-                                            <div className="flex flex-col gap-1 pr-6 border-r border-border/50">
-                                                <span className="text-[8px] opacity-40">Attribute</span>
+                                            <div className="w-[1px] h-3.5 bg-white/10 hidden sm:block" />
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="opacity-30">ATTR//</span>
                                                 <span className="text-foreground font-bold">{activeSchedule.media?.format}</span>
                                             </div>
-                                            <div className="flex flex-col gap-1 pr-6 border-r border-border/50">
-                                                <span className="text-[8px] opacity-40">Status_Code</span>
-                                                <span className="text-foreground font-bold">{activeSchedule.media?.status?.replace(/_/g, " ")}</span>
+                                            <div className="w-[1px] h-3.5 bg-white/10 hidden sm:block" />
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="opacity-30">STS//</span>
+                                                <span className="text-foreground/80 font-bold">{activeSchedule.media?.status?.replace(/_/g, " ")}</span>
                                             </div>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-[8px] opacity-40">System_ID</span>
-                                                <span className="text-foreground font-bold">0x{activeSchedule.media?.id?.toString(16).toUpperCase()}</span>
+                                            <div className="w-[1px] h-3.5 bg-white/10 hidden sm:block" />
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="opacity-30">HEX_PTR//</span>
+                                                <span className="text-primary/60 font-bold">0x{activeSchedule.media?.id?.toString(16).toUpperCase()}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -290,7 +295,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                     <div className="flex flex-col items-start gap-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 bg-primary rotate-45" />
-                                            <span className="font-mono text-[9px] uppercase text-muted-foreground tracking-[0.3em]">T-Minus_Synchronization</span>
+                                            <span className="font-mono text-[11px] uppercase text-muted-foreground/60 tracking-[0.3em] font-bold">T-Minus_Synchronization</span>
                                         </div>
 
                                         <div className="relative group/counter">
@@ -312,11 +317,11 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                                 </span>
                                             </div>
 
-                                            <div className="mt-2 flex justify-between font-mono text-[7px] uppercase tracking-widest text-muted-foreground px-1">
-                                                <span>DD</span>
-                                                <span>HH</span>
-                                                <span>MM</span>
-                                                <span>SS</span>
+                                            <div className="mt-3 flex justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 px-2 font-bold">
+                                                <span>Days</span>
+                                                <span>Hours</span>
+                                                <span>Mins</span>
+                                                <span>Secs</span>
                                             </div>
                                         </div>
                                     </div>
@@ -352,54 +357,54 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                             )
                                         })}
                                         <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[size:100%_2px,3px_100%] pointer-events-none" />
+                                        <div className="absolute -inset-2 border border-primary/10 -z-10 translate-x-4 translate-y-4" />
                                     </div>
-                                    <div className="absolute -inset-2 border border-primary/10 -z-10 translate-x-4 translate-y-4" />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Progress Indicators (Precision Style) */}
-                        <div className="absolute bottom-10 left-6 md:left-12 lg:left-24 right-6 md:right-12 lg:right-24 h-12 flex items-center justify-between z-20 pointer-events-none">
-                            <div className="flex gap-2 sm:gap-4 pointer-events-auto items-center">
-                                <span className="font-mono text-[7px] text-muted-foreground/60 tracking-widest hidden sm:block">INDEX_PTR:</span>
-                                {schedules.map((_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            setActiveIndex(i)
-                                        }}
-                                        aria-label={`Go to slide ${i + 1}`}
-                                        className={`group relative h-4 flex items-center justify-center transition-all ${i === activeIndex ? 'w-10 sm:w-16' : 'w-3 sm:w-4 hover:w-8'}`}
-                                    >
-                                        <div className={`h-[1px] w-full transition-all duration-500 ${i === activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                                        {i === activeIndex && (
-                                            <>
-                                                <div className="absolute left-0 w-0.5 sm:w-1 h-2 sm:h-3 bg-primary" />
-                                                <div className="absolute right-0 w-0.5 sm:w-1 h-2 sm:h-3 bg-primary" />
-                                                <div className="absolute inset-0 bg-primary/10 animate-pulse" />
-                                            </>
-                                        )}
-                                        <span className={`absolute -top-4 font-mono text-[6px] sm:text-[7px] transition-opacity duration-300 ${i === activeIndex ? 'opacity-100' : 'opacity-0'}`}>
-                                            0{i + 1}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="hidden md:flex items-center gap-4">
-                                <div className="flex flex-col items-end">
-                                    <span className="font-mono text-[7px] text-muted-foreground uppercase tracking-widest">Buffer_Status</span>
-                                    <span className="font-mono text-[8px] text-foreground font-bold italic">RE_SYNCHRONIZING...</span>
+                            {/* Progress Indicators (Precision Style) */}
+                            <div className="absolute bottom-10 left-6 md:left-12 lg:left-24 right-6 md:right-12 lg:right-24 h-12 flex items-center justify-between z-20 pointer-events-none">
+                                <div className="flex gap-2 sm:gap-4 pointer-events-auto items-center">
+                                    <span className="font-mono text-[7px] text-muted-foreground/60 tracking-widest hidden sm:block">INDEX_PTR:</span>
+                                    {schedules.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                setActiveIndex(i)
+                                            }}
+                                            aria-label={`Go to slide ${i + 1}`}
+                                            className={`group relative h-4 flex items-center justify-center transition-all ${i === activeIndex ? 'w-10 sm:w-16' : 'w-3 sm:w-4 hover:w-8'}`}
+                                        >
+                                            <div className={`h-[1px] w-full transition-all duration-500 ${i === activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                                            {i === activeIndex && (
+                                                <>
+                                                    <div className="absolute left-0 w-0.5 sm:w-1 h-2 sm:h-3 bg-primary" />
+                                                    <div className="absolute right-0 w-0.5 sm:w-1 h-2 sm:h-3 bg-primary" />
+                                                    <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+                                                </>
+                                            )}
+                                            <span className={`absolute -top-4 font-mono text-[6px] sm:text-[7px] transition-opacity duration-300 ${i === activeIndex ? 'opacity-100' : 'opacity-0'}`}>
+                                                0{i + 1}
+                                            </span>
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="w-32 h-[1px] bg-border relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-primary/20 animate-progress" />
+
+                                <div className="hidden md:flex items-center gap-4">
+                                    <div className="flex flex-col items-end">
+                                        <span className="font-mono text-[7px] text-muted-foreground uppercase tracking-widest">Buffer_Status</span>
+                                        <span className="font-mono text-[8px] text-foreground font-bold italic">RE_SYNCHRONIZING...</span>
+                                    </div>
+                                    <div className="w-32 h-[1px] bg-border relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-primary/20 animate-progress" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </Link>
                 </div>
-            </section>
-        </AmbientProvider>
+            </section >
+        </AmbientProvider >
     )
 }

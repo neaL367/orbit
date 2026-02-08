@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, memo, useCallback } from "react"
+import { useMemo, useState, memo, useCallback } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"

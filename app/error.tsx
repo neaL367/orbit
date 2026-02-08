@@ -16,7 +16,7 @@ export default function ErrorBoundary({
     }, [error])
 
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-12 reveal px-6">
+        <div className="h-screen flex flex-col items-center justify-center text-center space-y-12 reveal px-6">
             <div className="relative group">
                 <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full scale-150 opacity-50" />
                 <div className="relative p-8 border border-red-500/20 bg-background/50 backdrop-blur-sm index-cut-tr">

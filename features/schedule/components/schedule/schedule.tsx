@@ -8,7 +8,7 @@ import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime";
 import { execute } from "@/lib/graphql/execute";
 import { CACHE_TIMES } from "@/lib/constants";
 import type { AiringSchedule } from "@/lib/graphql/types/graphql";
-import { IndexSectionHeader } from "@/components/shared/index-section-header";
+
 
 function getDayRanges(): Array<{
   dayIndex: number;

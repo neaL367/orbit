@@ -34,7 +34,7 @@ export async function extractDominantColors(imageUrl: string): Promise<{
                 const rightBottom = getQuadrantColor(ctx, 25, 25, 35, 35)
 
                 resolve({ leftTop, rightTop, leftBottom, rightBottom })
-            } catch (e) {
+            } catch {
                 resolve(getDefaultColors())
             }
         }

@@ -29,11 +29,11 @@ export const FORMATS: { value: MediaFormat; label: string }[] = [
   { value: "SPECIAL" as MediaFormat, label: "Special" },
 ]
 
-export const SEASONS: { value: MediaSeason; label: string }[] = [
-  { value: "WINTER" as MediaSeason, label: "Winter" },
-  { value: "SPRING" as MediaSeason, label: "Spring" },
-  { value: "SUMMER" as MediaSeason, label: "Summer" },
-  { value: "FALL" as MediaSeason, label: "Fall" },
+export const SEASONS: { value: MediaSeason; label: string; code: string }[] = [
+  { value: "WINTER" as MediaSeason, label: "Winter", code: "WNT" },
+  { value: "SPRING" as MediaSeason, label: "Spring", code: "SPR" },
+  { value: "SUMMER" as MediaSeason, label: "Summer", code: "SMR" },
+  { value: "FALL" as MediaSeason, label: "Fall", code: "FAL" },
 ]
 
 export const STATUSES: { value: MediaStatus; label: string }[] = [
