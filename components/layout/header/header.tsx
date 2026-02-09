@@ -1,19 +1,19 @@
-'use client'
+"use client"
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense, useSyncExternalStore, useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Terminal, Globe, Cpu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SystemClock } from './system-clock'
 import type { Route } from 'next'
 
 const menuItems = [
-  { label: 'Trending', href: '/anime?sort=trending', sort: 'trending' },
-  { label: 'Popular', href: '/anime?sort=popular', sort: 'popular' },
-  { label: 'Seasonal', href: '/anime?sort=seasonal', sort: 'seasonal' },
-  { label: 'Top Rated', href: '/anime?sort=top-rated', sort: 'top-rated' },
-  { label: 'Schedule', href: '/schedule' },
+  { label: 'Trending', href: '/anime?sort=trending', sort: 'trending', code: 'TRX' },
+  { label: 'Popular', href: '/anime?sort=popular', sort: 'popular', code: 'POP' },
+  { label: 'Seasonal', href: '/anime?sort=seasonal', sort: 'seasonal', code: 'SEA' },
+  { label: 'Top Rated', href: '/anime?sort=top-rated', sort: 'top-rated', code: 'RTD' },
+  { label: 'Schedule', href: '/schedule', code: 'SCH' },
 ]
 
 const emptySubscriber = () => () => { }
@@ -32,19 +32,24 @@ function HeaderContent() {
     if (href === '/') return pathname === '/'
     if (href.startsWith('/anime')) {
       const currentSort = searchParams.get('sort')
-      if (sort) return pathname === '/anime' && currentSort === sort
-      return pathname === '/anime' && !currentSort
+      if (sort) return pathname === '/anime' && (currentSort === sort || (!currentSort && sort === 'trending'))
+      return pathname === '/anime'
     }
     return pathname === href
   }
 
-  if (!mounted) return <header className="h-16 border-b border-border" />
+  if (!mounted) return <header className="h-20 border-b border-white/5" />
 
   return (
     <>
-      <header className="sticky top-0 inset-x-0 z-[110] h-14 sm:h-16 bg-background/80 backdrop-blur-xl border-b border-white/5 flex items-center shadow-[0_1px_0_0_rgba(255,255,255,0.03)]">
+      <header className="sticky top-0 inset-x-0 z-[110] h-20 bg-background/60 backdrop-blur-2xl border-b border-white/5 flex items-center">
+        {/* Top Scanning Line */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-primary/10" />
+
         <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
-          <div className="flex items-center gap-6 lg:gap-12 xl:gap-16">
+
+          {/* Logo Section */}
+          <div className="flex items-center gap-12 xl:gap-20">
             <Link
               href="/"
               onClick={() => setIsMenuOpen(false)}
@@ -62,41 +67,64 @@ function HeaderContent() {
               </span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-1">
-              <span className="font-mono text-[9px] text-muted-foreground/30 uppercase tracking-widest mr-4 lg:mr-6 font-bold truncate hidden lg:inline">[ NAV_PTR ]</span>
-              <nav className="flex gap-1 xl:gap-2">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href as Route}
-                    className={cn(
-                      "font-mono text-[10px] lg:text-[12px] uppercase tracking-widest transition-all duration-300 px-3 lg:px-5 py-2 hover:bg-white/5 whitespace-nowrap",
-                      isActive(item.href, item.sort)
-                        ? "text-primary font-bold bg-white/5 index-cut-tr"
-                        : "text-muted-foreground/60 hover:text-foreground"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href as Route}
+                  className={cn(
+                    "relative group/nav px-5 py-3 transition-all duration-300",
+                    isActive(item.href, item.sort) ? "text-primary" : "text-muted-foreground/60 hover:text-foreground"
+                  )}
+                >
+                  <div className="flex flex-col items-center">
+                    <span className={cn(
+                      "font-mono text-[9px] font-black tracking-widest opacity-0 -translate-y-1 transition-all group-hover/nav:opacity-100 group-hover/nav:translate-y-0",
+                      isActive(item.href, item.sort) && "opacity-100 translate-y-0 text-primary/40"
+                    )}>
+                      {item.code}
+                    </span>
+                    <span className="font-mono text-[13px] font-black uppercase tracking-widest mt-0.5">
+                      {item.label}
+                    </span>
+                  </div>
+
+                  {/* Indicator Line */}
+                  {isActive(item.href, item.sort) && (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-primary shadow-[0_0_10px_var(--primary)]" />
+                  )}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          <div className="flex items-center gap-4 lg:gap-10">
-            <div className="hidden lg:flex items-center gap-6 xl:gap-10 font-mono text-[11px] lg:text-[12px] uppercase tracking-widest text-muted-foreground/60 border-l border-white/10 pl-6 xl:pl-10">
-              <div className="flex flex-col gap-0.5 sm:gap-1">
-                <span className="text-[9px] lg:text-[10px] opacity-40 font-bold">System_Clock</span>
-                <SystemClock />
+          {/* System Telemetry Section */}
+          <div className="flex items-center gap-8">
+            <div className="hidden xl:flex items-center gap-10">
+              <div className="flex flex-col items-end gap-1.5 border-r border-white/10 pr-10">
+                <div className="flex items-center gap-2 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">
+                  <Terminal className="w-2.5 h-2.5" />
+                  Kernel_Clock
+                </div>
+                <div className="font-mono text-[13px] font-black text-foreground/80 tracking-widest">
+                  <SystemClock />
+                </div>
               </div>
-              <div className="flex flex-col gap-0.5 sm:gap-1">
-                <span className="text-[9px] lg:text-[10px] opacity-40 font-bold">Access_Node</span>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
-                  </span>
-                  <span className="text-foreground font-bold">ONLINE</span>
+
+              <div className="flex flex-col items-end gap-1.5">
+                <div className="flex items-center gap-2 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">
+                  <Globe className="w-2.5 h-2.5" />
+                  Network_Link
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]" />
+                    <span className="font-mono text-[11px] font-black text-foreground uppercase tracking-widest">Active</span>
+                  </div>
+                  <div className="px-2 py-0.5 border border-white/5 bg-white/[0.03] rounded-sm font-mono text-[9px] font-black text-muted-foreground/40">
+                    AX-NODE_01
+                  </div>
                 </div>
               </div>
             </div>
@@ -104,10 +132,9 @@ function HeaderContent() {
             {/* Mobile Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 z-[110] text-foreground transition-colors border border-white/10 hover:bg-white/5 rounded-sm"
-              aria-label="Toggle Menu"
+              className="md:hidden p-3 text-foreground transition-all border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] rounded-md active:scale-95"
             >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -116,51 +143,56 @@ function HeaderContent() {
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-[105] bg-background/98 backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
-          isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+          "fixed inset-0 z-[105] bg-background/95 backdrop-blur-3xl transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)]",
+          isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
         )}
       >
-        <div className="flex flex-col h-full pt-24 sm:pt-28 px-6 sm:px-8 gap-8">
-          <div className="flex flex-col gap-6">
-            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border-l border-border pl-4">
-              System_Navigation
-            </span>
-            <nav className="flex flex-col gap-4">
+        {/* Background Grid for Mobile Menu */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#888_1px,transparent_1px),linear-gradient(to_bottom,#888_1px,transparent_1px)] bg-[size:40px_40px]" />
+        </div>
+
+        <div className="flex flex-col h-full pt-32 px-8 gap-12 max-w-lg mx-auto relative z-10">
+          <div className="space-y-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-primary/40 font-black">Main_Navigation</span>
+            <nav className="flex flex-col gap-2">
               {menuItems.map((item, index) => (
                 <Link
                   key={item.label}
                   href={item.href as Route}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    "font-mono text-xl sm:text-2xl font-bold uppercase tracking-tighter transition-all duration-300 flex items-center justify-between group",
-                    isActive(item.href, item.sort) ? "text-primary" : "text-foreground/60"
+                    "group relative flex items-center justify-between p-6 border border-white/5 transition-all duration-300",
+                    isActive(item.href, item.sort) ? "bg-primary border-primary" : "bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
                   )}
                   style={{ transitionDelay: `${index * 50}ms` }}
                 >
-                  <span>{item.label.replace(' ', '_')}</span>
-                  <div className={cn(
-                    "w-2 h-2 border-t border-r border-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0",
-                    isActive(item.href, item.sort) && "opacity-100 translate-x-0"
-                  )} />
+                  <div className="flex flex-col">
+                    <span className={cn("font-mono text-[10px] font-black opacity-40 mb-1", isActive(item.href, item.sort) && "text-primary-foreground")}>{item.code}</span>
+                    <span className={cn("font-mono text-2xl font-black uppercase tracking-tighter", isActive(item.href, item.sort) ? "text-primary-foreground" : "text-foreground")}>
+                      {item.label}
+                    </span>
+                  </div>
+                  <Terminal className={cn("w-6 h-6 transition-all", isActive(item.href, item.sort) ? "text-primary-foreground" : "text-muted-foreground/20 group-hover:text-primary/40 group-hover:translate-x-2")} />
                 </Link>
               ))}
             </nav>
           </div>
 
-          <div className="mt-auto pb-10 sm:pb-12 space-y-6 sm:space-y-8">
-            <div className="h-[1px] bg-border/50" />
-            <div className="flex flex-col gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground">
-              <div className="flex items-center justify-between">
-                <span className="font-bold">Core_Status</span>
-                <div className="flex items-center gap-2 text-foreground font-bold">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
-                  <span>Synchronized</span>
-                </div>
+          <div className="mt-auto pb-12 space-y-8">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 border border-white/5 bg-white/[0.01]">
+                <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Uptime</span>
+                <span className="font-mono text-xs font-black text-emerald-500">99.98%</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="font-bold">Access_Token</span>
-                <span className="text-foreground font-bold">AX-5521-X</span>
+              <div className="p-4 border border-white/5 bg-white/[0.01]">
+                <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Protocol</span>
+                <span className="font-mono text-xs font-black text-blue-500">HTTPS_V3</span>
               </div>
+            </div>
+            <div className="flex items-center gap-4 py-6 border-t border-white/10">
+              <Cpu className="w-5 h-5 text-primary/40" />
+              <span className="font-mono text-[10px] uppercase font-black tracking-[0.3em] text-muted-foreground">RegistryCore_v1.2.0</span>
             </div>
           </div>
         </div>
@@ -171,7 +203,7 @@ function HeaderContent() {
 
 export function Header() {
   return (
-    <Suspense fallback={<header className="h-16 border-b border-border" />}>
+    <Suspense fallback={<header className="h-20 border-b border-white/5" />}>
       <HeaderContent />
     </Suspense>
   )

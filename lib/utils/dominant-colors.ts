@@ -8,6 +8,11 @@ export async function extractDominantColors(imageUrl: string): Promise<{
     leftBottom: string
     rightBottom: string
 }> {
+    // Use proxy for external images to bypass CORS
+    const finalUrl = imageUrl.startsWith('http')
+        ? `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`
+        : imageUrl
+
     return new Promise((resolve) => {
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -43,7 +48,7 @@ export async function extractDominantColors(imageUrl: string): Promise<{
             resolve(getDefaultColors())
         }
 
-        img.src = imageUrl
+        img.src = finalUrl
     })
 }
 

@@ -37,16 +37,16 @@ export function BottomBar() {
                                 !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10"
                             )}
                         >
-                            {playing ? <Pause size={12} className="sm:size-4" /> : <Play size={12} className="sm:size-4 translate-x-0.5" />}
+                            {playing ? <Pause size={14} className="sm:size-5" /> : <Play size={14} className="sm:size-5 translate-x-0.5" />}
                         </button>
                         <button onClick={onRestart} className="hidden xs:flex w-7 h-7 sm:w-8 sm:h-8 items-center justify-center hover:bg-white/10 transition-colors text-muted-foreground hover:text-white">
-                            <RotateCcw size={11} className="sm:size-[14px]" />
+                            <RotateCcw size={12} className="sm:size-4" />
                         </button>
                     </div>
 
                     <div className="flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
                         <button onClick={() => onSetMuted(!muted)} className="text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center">
-                            {muted || volume === 0 ? <VolumeX size={12} className="sm:size-4" /> : <Volume2 size={12} className="sm:size-4" />}
+                            {muted || volume === 0 ? <VolumeX size={14} className="sm:size-5" /> : <Volume2 size={14} className="sm:size-5" />}
                         </button>
                         <div className="hidden sm:flex items-center gap-3">
                             <div
@@ -70,14 +70,14 @@ export function BottomBar() {
                                 <div className="absolute inset-x-0 bottom-0 h-full bg-white/20 pointer-events-none" />
                                 <div className="absolute inset-y-0 left-0 bg-white/60 group-hover/vol:bg-primary transition-colors" style={{ width: `${volume}%` }} />
                             </div>
-                            <span className="font-mono text-[9px] text-muted-foreground/60 w-8">{Math.round(volume)}%</span>
+                            <span className="font-mono text-[10px] sm:text-[12px] text-muted-foreground/60 w-10 font-bold">{Math.round(volume)}%</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:px-4 sm:border-l border-white/10 font-mono text-[8px] sm:text-[10px]">
-                        <span className="text-foreground font-bold">{formatTime(played * duration)}</span>
+                    <div className="flex items-center gap-2 sm:px-5 sm:border-l border-white/10 font-mono text-[10px] sm:text-[12px]">
+                        <span className="text-foreground font-black tracking-tighter">{formatTime(played * duration)}</span>
                         <span className="text-muted-foreground/40 sm:inline hidden">/</span>
-                        <span className="text-muted-foreground/60 sm:inline hidden">{formatTime(duration)}</span>
+                        <span className="text-muted-foreground/60 sm:inline hidden font-medium">{formatTime(duration)}</span>
                     </div>
                 </div>
 

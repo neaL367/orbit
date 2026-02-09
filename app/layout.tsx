@@ -80,7 +80,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark custom-scrollbar overflow-x-hidden">
+    <html lang="en" className="dark custom-scrollbar">
       <body
         className={cn(
           geistSans.variable,

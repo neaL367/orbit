@@ -20,9 +20,9 @@ export function AmbientBackground() {
         )}>
             <div
                 className={cn(
-                    "w-full h-full blur-[120px] saturate-[2] brightness-110 contrast-125 opacity-40 transition-opacity duration-1000",
+                    "w-full h-full blur-[80px] saturate-[2] brightness-110 contrast-125 opacity-40 transition-opacity duration-1000",
                 )}
-                style={{ transform: "translate3d(0,0,0)" }}
+                style={{ transform: "translate3d(0,0,0)", backfaceVisibility: "hidden" }}
             >
                 {/* API mounts iframe here */}
                 <div ref={ambientElementRef} className="w-full h-full" />

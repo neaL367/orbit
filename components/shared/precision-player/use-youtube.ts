@@ -138,7 +138,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
         try {
             if (typeof event.target.mute === 'function') event.target.mute();
             if (typeof event.target.setVolume === 'function') event.target.setVolume(0);
-            if (typeof event.target.setPlaybackQuality === 'function') event.target.setPlaybackQuality("hd1080");
+            if (typeof event.target.setPlaybackQuality === 'function') event.target.setPlaybackQuality("small");
         } catch { }
 
         const leader = playerRef.current;
@@ -192,17 +192,17 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                                     if (!m) {
                                         try {
                                             if (typeof target.unMute === 'function') target.unMute();
-                                            if (typeof target.setVolume === 'function') target.setVolume(v || 100);
+                                            if (typeof target.setVolume === 'function') target.setVolume(v ?? 26);
                                             console.log("[PrecisionPlayer] Restoration Pulse:", {
                                                 isMuted: target.isMuted(),
                                                 currentVol: target.getVolume(),
-                                                wantedVol: v || 100
+                                                wantedVol: v ?? 26
                                             });
-                                            if (target.getVolume() === 0 && (v || 100) > 0) {
-                                                const nudge = Math.max(1, (v || 100) - 2);
+                                            if (target.getVolume() === 0 && (v ?? 26) > 0) {
+                                                const nudge = Math.max(1, (v ?? 26) - 2);
                                                 target.setVolume(nudge);
                                                 setTimeout(() => {
-                                                    if (playerRef.current === target) target.setVolume(v || 100);
+                                                    if (playerRef.current === target) target.setVolume(v ?? 26);
                                                 }, 40);
                                             }
                                         } catch (e) { console.error("[PrecisionPlayer] Unmute error", e); }
@@ -251,7 +251,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                     try {
                         if (!m) {
                             if (typeof event.target.unMute === 'function') event.target.unMute();
-                            if (typeof event.target.setVolume === 'function') event.target.setVolume(v || 100);
+                            if (typeof event.target.setVolume === 'function') event.target.setVolume(v ?? 26);
                         }
                     } catch { }
                 }
@@ -331,6 +331,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                         disablekb: 1,
                         enablejsapi: 1,
                         mute: 1,
+                        suggestedQuality: 'small' // Optimization: Request low quality for blurred background
                     },
                     events: {
                         onReady: onAmbientReady,

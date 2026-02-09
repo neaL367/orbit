@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { PosterCard } from '@/features/anime/components/poster-card/poster-card'
 import { IndexSectionHeader } from '@/components/shared/index-section-header'
 import { ErrorState } from '@/components/shared/error-state'
+import { cn } from '@/lib/utils'
 import type { Media } from '@/lib/graphql/types/graphql'
 
 type SectionViewProps = {
@@ -35,11 +36,18 @@ export function SectionView({
 }: SectionViewProps) {
   if (isLoading) {
     return (
-      <div className="mb-20">
-        <div className="h-8 w-48 bg-secondary border border-border shimmer mb-12" />
+      <div className="mb-20 space-y-4">
+        <div className="flex items-center gap-2 mb-8">
+          <div className="w-1.5 h-1.5 bg-primary animate-pulse" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 animate-pulse">Initializing_Databank...</span>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] border border-border shimmer" />
+            <div key={i} className="aspect-[2/3] border border-white/5 bg-white/[0.01] relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 animate-shimmer" />
+              <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/10" />
+              <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/10" />
+            </div>
           ))}
         </div>
       </div>
@@ -48,12 +56,16 @@ export function SectionView({
 
   if (error) {
     return (
-      <section className="mb-20">
-        <IndexSectionHeader title={title} subtitle="Registry_Error" />
+      <section className="mb-20 border border-red-500/20 bg-red-500/5 p-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,0,0,0.05)_10px,rgba(255,0,0,0.05)_20px)] pointer-events-none" />
+        <IndexSectionHeader title="CRITICAL_FAILURE" subtitle="LINK_SEVERED" />
         <ErrorState
-          message="System Failed to Parse Feed"
+          message="Registry_Connection_Failed: 0xERR_TIMEOUT"
           onRetry={onRetry}
         />
+        <div className="absolute top-0 right-0 p-4 font-mono text-[9px] text-red-500/50 uppercase tracking-widest">
+          ERR_CODE: 503
+        </div>
       </section>
     )
   }
@@ -64,30 +76,31 @@ export function SectionView({
 
   return (
     <section className="mb-32 group/section reveal relative">
-      <div className="flex items-center justify-between gap-4 relative z-10">
+      <div className="flex items-end justify-between gap-4 relative z-10 mb-10 border-b border-white/10 pb-4">
         <IndexSectionHeader
           title={title}
           subtitle={subtitle || "General_Archive"}
-          className="flex-1 mb-8 sm:mb-12 md:mb-16"
+          className="flex-1 mb-0"
         />
         {viewAllHref && (
           <Link
             href={viewAllHref as Route}
-            className="font-mono text-[9px] uppercase tracking-[0.3em] text-primary/60 hover:text-primary transition-all mb-16 flex items-center gap-3 group/link"
+            className="hidden sm:flex font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-all items-center gap-3 group/link mb-1"
           >
-            <span className="opacity-40 group-hover/link:opacity-100 transition-opacity">0xACCESS</span>
-            <div className="w-8 h-[1px] bg-primary/20 group-hover:w-12 group-hover:bg-primary/60 transition-all" />
+            <span className="opacity-60 group-hover/link:opacity-100 transition-opacity">Access_Full_Log</span>
+            <div className="w-4 h-[1px] bg-primary/20 group-hover:bg-primary group-hover:w-8 transition-all" />
           </Link>
         )}
       </div>
 
       <div className="relative z-10">
         {variant === 'featured' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Main Feature */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
+            {/* 1. Primary Feature Module */}
             <div className="lg:col-span-7">
               {data[0] && (
-                <div className="relative group/feat overflow-hidden border border-white/5 bg-secondary/20">
+                <div className="relative group/feat overflow-hidden border border-white/5 bg-secondary/5 hover:border-primary/20 transition-all duration-700">
+                  {/* Visual Uplink Container */}
                   <div className="aspect-[16/9] w-full overflow-hidden relative">
                     <Image
                       src={data[0].bannerImage || data[0].coverImage?.extraLarge || ''}
@@ -95,143 +108,175 @@ export function SectionView({
                       fill
                       priority
                       sizes="(max-width: 1024px) 100vw, 800px"
-                      className="w-full h-full object-cover grayscale opacity-40 group-hover/feat:grayscale-0 group-hover/feat:opacity-100 group-hover/feat:scale-105 transition-all duration-1000 will-change-[transform,filter]"
+                      className="w-full h-full object-cover grayscale brightness-75 group-hover/feat:grayscale-0 group-hover/feat:scale-105 transition-all duration-[1.5s] ease-out will-change-transform"
                     />
-                    {/* Technical Overlay */}
-                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(var(--primary-rgb),0.15),transparent_70%)] pointer-events-none" />
+
+                    {/* Atmospheric Overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-100" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
+
+                    {/* Corner Bracket Decorations */}
+                    <div className="absolute top-4 left-4 w-6 h-6 border-t border-l border-primary/40 pointer-events-none group-hover/feat:scale-110 transition-transform" />
+                    <div className="absolute top-4 right-4 w-6 h-6 border-t border-r border-primary/40 pointer-events-none group-hover/feat:scale-110 transition-transform" />
+
+                    {/* Active Scanning Interface */}
                   </div>
 
-                  <div className="absolute top-0 right-0 p-4">
-                    <div className="flex flex-col items-end gap-1 font-mono text-[8px] text-white/20 uppercase tracking-widest">
-                      <span>DATA_STREAM_v.2</span>
-                      <span>REF: 0x{data[0].id}</span>
+                  {/* Top-Right Technical Registry */}
+                  <div className="absolute top-0 right-0 p-6 flex flex-col items-end gap-1 font-mono">
+                    <div className="flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/20">
+                      <span className="text-[8px] font-black text-primary uppercase tracking-[0.3em]">Registry_Pulse</span>
                     </div>
+                    <span className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-bold">ARC-0x{data[0].id}</span>
                   </div>
 
-                  <div className="absolute bottom-0 left-0 p-5 sm:p-8 md:p-10 space-y-4 sm:space-y-6 max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rotate-45 animate-pulse" />
-                        <span className="bg-primary/10 text-primary px-2 py-0.5 sm:px-3 sm:py-1 font-mono text-[8px] sm:text-[9px] font-black uppercase tracking-widest border border-primary/20 whitespace-nowrap">Core_Feature</span>
-                      </div>
-                      <span className="font-mono text-[8px] sm:text-[10px] text-muted-foreground/60 uppercase tracking-widest truncate">{data[0].format?.replace(/_/g, ' ')} // {data[0].season} {data[0].seasonYear}</span>
-                    </div>
+                  {/* Main Data Display */}
+                  <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 pointer-events-none">
+                    <div className="space-y-6 max-w-2xl relative z-10 pointer-events-auto">
+                      {/* Header Badge */}
+                      {/* <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent" />
+                        <span className="font-mono text-[9px] text-primary/60 uppercase tracking-[0.5em] font-bold">
+                          {data[0].season} // {data[0].seasonYear}
+                        </span>
+                      </div> */}
 
-                    <div className="space-y-2 sm:space-y-3">
-                      <h3 className="text-2xl sm:text-4xl md:text-5xl font-mono font-black uppercase leading-[0.9] tracking-tighter text-foreground group-hover/feat:text-primary transition-colors duration-500 line-clamp-2">
+                      {/* Title Display */}
+                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-mono font-black uppercase leading-[0.85] tracking-tighter text-foreground group-hover/feat:text-primary transition-colors duration-700 line-clamp-2 mix-blend-screen drop-shadow-2xl">
                         {data[0].title?.userPreferred || data[0].title?.romaji}
                       </h3>
-                      <div className="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-1 text-muted-foreground/60 font-mono text-[8px] sm:text-[10px] uppercase tracking-widest">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <span className="text-white/20">Status:</span>
-                          <span className="text-foreground">{data[0].status?.replace(/_/g, ' ')}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <span className="text-white/20">Genres:</span>
-                          <span className="text-foreground">{data[0].genres?.slice(0, 2).join(' / ')}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    {data[0].description && (
-                      <p className="text-muted-foreground/60 font-mono text-[10px] sm:text-[11px] leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-lg uppercase tracking-tight opacity-80">
-                        {data[0].description.replace(/<[^>]*>?/gm, '')}
-                      </p>
-                    )}
+                      {/* Precision Metadata Strip */}
+                      {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-px bg-white/10 border border-white/10 max-w-lg">
+                        {[
+                          { label: "STATUS", value: data[0].status?.replace(/_/g, ' ') },
+                          { label: "FORMAT", value: data[0].format?.replace(/_/g, ' '), highlight: true },
+                          { label: "AVERAGE", value: `${data[0].averageScore || '??'}%` }
+                        ].map((item, i) => (
+                          <div key={i} className="bg-background/80 backdrop-blur-md p-3 flex flex-col gap-1 hover:bg-white/5 transition-colors group/m">
+                            <span className="font-mono text-[8px] text-muted-foreground/50 uppercase tracking-widest">{item.label}</span>
+                            <span className={cn(
+                              "font-mono text-[10px] font-black uppercase tracking-wider truncate",
+                              item.highlight ? "text-primary" : "text-foreground"
+                            )}>{item.value}</span>
+                          </div>
+                        ))}
+                      </div> */}
 
-                    <div className="pt-2 sm:pt-4 flex flex-wrap items-center gap-4 sm:gap-6">
-                      <Link
-                        href={`/anime/${data[0].id}`}
-                        className="group/btn relative px-6 py-2.5 sm:px-8 sm:py-3 bg-foreground text-background font-mono text-[10px] sm:text-[11px] font-black uppercase tracking-widest overflow-hidden transition-all hover:pr-10 sm:hover:pr-12"
-                      >
-                        <span className="relative z-10 flex items-center gap-2">
-                          Examine_Dataset
-                        </span>
-                        <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/btn:opacity-100 transition-all group-hover:right-2 sm:group-hover:right-3">
-                          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-background rotate-45" />
-                        </div>
-                        <div className="absolute inset-y-0 left-0 w-[400%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-scan-vertical pointer-events-none" />
-                      </Link>
+                      {/* Narrative Log Preview */}
+                      {data[0].description && (
+                        <p className="text-muted-foreground/50 font-mono text-[11px] leading-relaxed line-clamp-2 uppercase tracking-wide max-w-xl border-l-[3px] border-primary/30 pl-4 py-1">
+                          {data[0].description.replace(/<[^>]*>?/gm, '')}
+                        </p>
+                      )}
 
-                      <div className="flex flex-col gap-0.5 sm:gap-1 font-mono text-[7px] sm:text-[8px] text-muted-foreground/40 uppercase tracking-widest">
-                        <span>Link_Established</span>
-                        <span className="text-primary/40">Secured_Channel</span>
+                      {/* Action Interface */}
+                      <div className="pt-4">
+                        <Link
+                          href={`/anime/${data[0].id}`}
+                          className="group/btn relative inline-flex items-center gap-4 px-10 py-4 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-primary  index-cut-tr"
+                        >
+                          Access_Archive
+                          <div className="w-1.5 h-1.5 bg-current rotate-45 transform group-hover/btn:translate-x-1 group-hover/btn:scale-125 transition-all" />
+                        </Link>
                       </div>
                     </div>
                   </div>
-
-                  {/* Corner Decoration */}
-                  <div className="absolute bottom-0 right-0 w-24 h-24 border-b border-r border-primary/10 pointer-events-none" />
                 </div>
               )}
             </div>
-            {/* Secondary Features */}
-            <div className="lg:col-span-5 grid grid-cols-2 gap-6">
-              {data.slice(1, 5).map((anime, index) => (
-                <PosterCard
-                  key={anime.id}
-                  anime={anime}
-                  rank={showRank ? (page - 1) * perPage + index + 2 : undefined}
-                  className="scale-95 lg:scale-100"
-                />
-              ))}
+
+            {/* 2. Secondary Registry Nodes */}
+            <div className="lg:col-span-5 flex flex-col gap-8">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border-l border-primary/40 self-start">
+                <span className="font-mono text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Secondary_Nodes [0x04]</span>
+              </div>
+              <div className="grid grid-cols-2 gap-6 content-start">
+                {data.slice(1, 5).map((anime, index) => (
+                  <PosterCard
+                    key={anime.id}
+                    anime={anime}
+                    rank={showRank ? (page - 1) * perPage + index + 2 : undefined}
+                    className="scale-95 lg:scale-100"
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {variant === 'list' && (
-          <div className="space-y-2 sm:space-y-3 relative">
+          <div className="space-y-4 relative">
             {data.slice(0, 5).map((anime, index) => (
               <Link
                 key={anime.id}
                 href={`/anime/${anime.id}`}
-                className="group/list flex items-center gap-4 sm:gap-8 p-4 sm:p-6 bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] hover:border-primary/20 transition-all relative overflow-hidden"
+                className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] hover:border-primary/20 transition-all relative overflow-hidden index-cut-tr"
               >
-                <div className="font-mono text-xl sm:text-3xl font-black text-white/5 group-hover/list:text-primary/10 transition-colors w-8 sm:w-16 shrink-0 tracking-tighter">
+                {/* Ranking / Index */}
+                <div className="font-mono text-2xl sm:text-4xl font-black text-white/[0.03] group-hover/list:text-primary/10 transition-colors w-12 sm:w-16 text-center shrink-0 tracking-tighter tabular-nums">
                   {(index + 1).toString().padStart(2, '0')}
                 </div>
-                <div className="w-12 h-16 sm:w-20 sm:h-24 border border-white/10 overflow-hidden shrink-0 relative bg-secondary">
+
+                {/* Cover Interface */}
+                <div className="w-14 h-20 sm:w-20 sm:h-28 border border-white/10 overflow-hidden shrink-0 relative bg-secondary group-hover:border-primary/40 transition-colors">
                   <Image
-                    src={anime.coverImage?.medium || ''}
+                    src={anime.coverImage?.large || anime.coverImage?.medium || ''}
                     alt={anime.title?.romaji || ''}
                     fill
-                    sizes="80px"
-                    className="w-full h-full object-cover grayscale opacity-60 group-hover/list:grayscale-0 group-hover/list:opacity-100 group-hover/list:scale-110 transition-all duration-700"
+                    sizes="100px"
+                    className="w-full h-full object-cover grayscale brightness-75 group-hover/list:grayscale-0 group-hover/list:brightness-100 group-hover/list:scale-110 transition-all duration-700"
                   />
-                </div>
-                <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
-                  <div className="flex items-center gap-2 sm:gap-4">
-                    <span className="font-mono text-[7px] sm:text-[9px] text-muted-foreground/60 uppercase tracking-widest truncate">{anime.season} {anime.seasonYear}</span>
-                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-primary/20 rotate-45 shrink-0" />
-                    <span className="font-mono text-[7px] sm:text-[9px] text-primary/80 uppercase font-black tracking-widest truncate">{anime.status?.replace(/_/g, ' ')}</span>
-                  </div>
-                  <h3 className="font-mono text-base sm:text-xl font-black uppercase tracking-tighter truncate group-hover/list:text-primary transition-colors">
-                    {anime.title?.userPreferred || anime.title?.romaji}
-                  </h3>
-                  <div className="hidden sm:flex gap-3">
-                    {anime.genres?.slice(0, 3).map(g => (
-                      <span key={g} className="font-mono text-[8px] uppercase tracking-[0.2em] px-2 py-0.5 bg-white/5 text-muted-foreground/80">{g}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="hidden sm:flex flex-col items-end gap-1.5 font-mono text-[9px] text-muted-foreground/40 uppercase tracking-[0.3em] whitespace-nowrap">
-                  <span className="text-foreground/60 font-black">{anime.format}</span>
-                  <span>{anime.episodes || '??'} SESSIONS</span>
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
 
-                {/* Technical Indicator */}
-                <div className="absolute top-0 right-0 p-1.5 sm:p-2 opacity-0 group-hover/list:opacity-100 transition-opacity">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 border-t border-r border-primary" />
+                {/* Data Pack */}
+                <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-2 min-w-0">
+                    <h3 className="font-mono text-sm sm:text-lg lg:text-xl font-black uppercase tracking-tight truncate group-hover/list:text-primary transition-colors pr-4">
+                      {anime.title?.userPreferred || anime.title?.romaji}
+                    </h3>
+
+                    <div className="flex flex-wrap gap-x-6 gap-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-[9px] text-white/20 uppercase font-bold tracking-widest hidden sm:block">GENRE//</span>
+                        <div className="flex gap-1.5 overflow-hidden">
+                          {anime.genres?.slice(0, 2).map(g => (
+                            <span key={g} className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 bg-white/5 text-muted-foreground/80 border border-white/5 group-hover/list:border-primary/20 transition-colors whitespace-nowrap">{g}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Technical Telemetry Row */}
+                  <div className="flex items-center gap-8 sm:gap-12 shrink-0 border-l border-white/5 sm:pl-10 h-12">
+                    <div className="flex flex-col items-end gap-1 font-mono">
+                      <span className="text-[8px] text-white/20 uppercase tracking-[0.3em] font-bold">FORMAT</span>
+                      <span className="text-[10px] text-foreground font-black group-hover/list:text-primary transition-colors">{anime.format || '??'}</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 font-mono">
+                      <span className="text-[8px] text-white/20 uppercase tracking-[0.3em] font-bold">SCORE</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-foreground font-black tracking-widest">{anime.averageScore ? `${anime.averageScore}%` : '---'}</span>
+                        <div className={cn("w-1.5 h-1.5 rotate-45", anime.averageScore && anime.averageScore > 75 ? "bg-primary animate-pulse" : "bg-white/10")} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 h-[1px] bg-primary/20 -translate-x-full group-hover/list:translate-x-0 transition-transform duration-700" />
+
+                {/* Background Decor */}
+                <div className="absolute top-0 right-0 w-32 h-[1px] bg-gradient-to-l from-primary/20 to-transparent opacity-0 group-hover/list:opacity-100 transition-opacity" />
+                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/list:opacity-100 transition-opacity">
+                  <span className="font-mono text-[8px] text-primary font-bold">0x{anime.id}</span>
+                </div>
               </Link>
             ))}
           </div>
         )}
 
         {variant === 'grid' && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-10">
             {data.map((anime, index) => {
               if (!anime) return null
               const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
@@ -249,8 +294,9 @@ export function SectionView({
       </div>
 
       {/* Decorative Module Brackets */}
-      <div className="absolute -top-6 -left-6 w-12 h-12 border-t border-l border-white/5 pointer-events-none group-hover/section:border-primary/20 transition-colors" />
-      <div className="absolute -top-6 right-0 font-mono text-[7px] text-white/10 uppercase tracking-[0.5em] pointer-events-none">
+      <div className="absolute -top-6 -left-2 w-4 h-4 border-t border-l border-white/10 pointer-events-none" />
+      <div className="absolute -top-6 -right-2 w-4 h-4 border-t border-r border-white/10 pointer-events-none" />
+      <div className="absolute -top-8 right-10 font-mono text-[8px] text-white/5 uppercase tracking-[0.5em] pointer-events-none hidden sm:block">
         MOD_CORE_PRTCL.0x{title.length}
       </div>
     </section>

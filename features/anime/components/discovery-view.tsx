@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils"
 export default function DiscoveryView() {
     const [openSections, setOpenSections] = useState({
         sort: true,
-        temporal: true,
-        genres: true,
-        attributes: true
+        temporal: false,
+        genres: false,
+        attributes: false
     })
 
     const toggleSection = (section: keyof typeof openSections) => {
@@ -37,6 +37,12 @@ export default function DiscoveryView() {
         }
     }, [searchParams, router])
 
+    const [mounted, setMounted] = React.useState(false)
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
+
     const activeFilterCount = (filters.genres.length > 0 ? 1 : 0) +
         (filters.year ? 1 : 0) +
         (filters.season ? 1 : 0) +
@@ -49,97 +55,96 @@ export default function DiscoveryView() {
         filters.search || filters.genres.length > 0 || filters.year || filters.season || filters.format || filters.status || filters.sort !== 'trending'
 
     return (
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-12 reveal relative">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 reveal relative min-h-screen">
             {/* Mobile Control Console */}
-            <div className="lg:hidden sticky top-16 z-40 bg-background/95 backdrop-blur-md border border-border px-4 py-4 flex items-center justify-between mb-4 group overflow-hidden">
+            <div className="lg:hidden sticky top-20 z-40 bg-background/80 backdrop-blur-xl border-y border-white/10 px-4 py-3 flex items-center justify-between mb-8 group overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 bg-white/[0.02] transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 <div className="flex flex-col gap-0.5 relative z-10">
-                    <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                        <span className="w-1 h-1 bg-primary animate-pulse" />
+                    <span className="font-mono text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
                         Control_Console
                     </span>
-                    {activeFilterCount > 0 && (
-                        <span className="font-mono text-[8px] uppercase text-primary font-bold">
+                    {mounted && activeFilterCount > 0 && (
+                        <span className="font-mono text-[8px] uppercase text-primary font-bold tracking-tight">
                             Active_Parameters: {activeFilterCount}
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-3 relative z-10">
-                    {hasActiveFilters && (
+                <div className="flex items-center gap-4 relative z-10">
+                    {mounted && hasActiveFilters && (
                         <button
                             onClick={clearFilters}
-                            className="font-mono text-[10px] uppercase text-muted-foreground hover:text-primary transition-colors pr-2 border-r border-border"
+                            className="font-mono text-[9px] uppercase text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1 group/reset"
                         >
-                            Reset
+                            <span className="w-2 h-[1px] bg-red-500/50 group-hover/reset:w-3 transition-all" />
+                            Flush
                         </button>
                     )}
                     <button
                         onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                        className="font-mono text-[10px] uppercase bg-foreground text-background px-4 py-2 index-cut-tr font-bold shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-2"
+                        className="font-mono text-[10px] uppercase bg-foreground text-background px-5 py-2 index-cut-tr font-black hover:bg-primary hover:text-primary-foreground transition-all flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                     >
                         {isFiltersOpen ? <X className="w-3 h-3" /> : <Filter className="w-3 h-3" />}
-                        {isFiltersOpen ? "CLOSE" : "FILTER"}
+                        {isFiltersOpen ? "SHUTDOWN" : "CONFIG"}
                     </button>
                 </div>
             </div>
 
             {/* Fixed Sidebar */}
             <aside className={cn(
-                "relative lg:w-64",
-                "fixed inset-0 bg-background/98 p-6 lg:relative lg:inset-auto lg:bg-transparent lg:p-0",
-                isFiltersOpen ? "z-50 translate-y-0 opacity-100" : "z-30 translate-y-4 opacity-0 pointer-events-none lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto"
+                "fixed inset-0 z-50 bg-background/95 backdrop-blur-md p-6 transition-all duration-300 lg:bg-transparent lg:p-0 lg:backdrop-blur-none", // Base & Mobile
+                "lg:sticky lg:top-32 lg:z-30 lg:w-64 lg:block lg:self-start", // Desktop Sticky
+                isFiltersOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none lg:opacity-100 lg:translate-y-0 lg:pointer-events-auto" // State
             )}>
-                <div className="sticky top-24 max-h-[calc(100vh-8rem)] lg:max-h-[calc(100vh-4rem)] flex flex-col gap-8 pr-2 pb-10 custom-scrollbar overflow-y-auto">
+                <div className="flex flex-col gap-8 h-full lg:h-auto overflow-y-auto lg:overflow-visible pb-20 lg:pb-0">
                     {/* Parameters Header (Desktop Only) */}
-                    <div className="hidden lg:flex justify-between items-end pb-4 border-b border-border/50">
-                        <div className="flex flex-col">
-                            <span className="font-mono text-[12px] uppercase tracking-[0.4em] text-primary/40 leading-none mb-2">System_Config</span>
-                            <span className="font-mono text-[18px] font-black uppercase tracking-widest text-foreground">Parameters</span>
+                    <div className="hidden lg:flex justify-between items-end pb-4 border-b border-white/10">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/30 leading-none font-bold">System_Config</span>
+                            <span className="font-mono text-[14px] font-black uppercase tracking-widest text-foreground">Parameters</span>
                         </div>
-                        {hasActiveFilters && (
+                        {mounted && hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className="font-mono text-[10px] uppercase text-primary hover:text-primary/70 transition-colors flex items-center gap-1 group pb-0.5"
+                                className="font-mono text-[9px] uppercase text-primary hover:text-red-500 transition-colors flex items-center gap-2 group pb-0.5"
                             >
-                                <span className="w-2 h-[1px] bg-primary group-hover:w-3 transition-all" />
+                                <span className="w-1.5 h-1.5 border border-primary/50 group-hover:border-red-500 transition-colors" />
                                 Flush_X
                             </button>
                         )}
                     </div>
 
                     {/* Search Module */}
-                    <div className="relative group overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/20 group-focus-within:bg-primary transition-colors" />
-                        <div className="pl-5 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="font-mono text-[12px] uppercase tracking-[0.2em] text-muted-foreground/50 font-bold">Query_Seeker</span>
-                            </div>
+                    <div className="relative group/search">
+                        <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-white/10 group-focus-within/search:bg-primary transition-colors" />
+                        <div className="pl-4 space-y-2">
+                            <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold block">Query_Seeker</label>
                             <input
                                 type="text"
-                                placeholder="TYPE_CMD..."
-                                className="w-full bg-transparent border-b border-border/30 px-0 py-3 font-mono text-[14px] uppercase text-foreground outline-none focus:border-primary/50 placeholder:text-muted-foreground/20 transition-all font-bold"
+                                placeholder="INPUT_CMD..."
+                                className="w-full bg-transparent border-b border-white/10 py-2 font-mono text-[12px] uppercase text-foreground outline-none focus:border-primary/50 placeholder:text-muted-foreground/50 transition-all font-bold tracking-wider"
                                 defaultValue={filters.search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {/* Sort Section */}
                         <div className="space-y-4">
                             <button
                                 onClick={() => toggleSection('sort')}
-                                className="w-full flex items-center justify-between group/header"
+                                className="w-full flex items-center justify-between group/header cursor-pointer select-none"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={cn("w-4 h-[1px] transition-all", openSections.sort ? "bg-primary w-5" : "bg-muted-foreground/30")} />
-                                    <h4 className={cn("font-mono text-[12px] uppercase tracking-[0.2em] font-bold transition-colors", openSections.sort ? "text-foreground" : "text-muted-foreground/40")}>Sort_Kernel</h4>
+                                    <div className={cn("w-1.5 h-1.5 border border-white/40 transition-colors group-hover/header:border-primary", openSections.sort ? "bg-primary border-primary" : "bg-transparent")} />
+                                    <h4 className={cn("font-mono text-[11px] uppercase tracking-[0.2em] font-black transition-colors", openSections.sort ? "text-foreground" : "text-muted-foreground")}>Sort_Kernel</h4>
                                 </div>
-                                <div className={cn("w-1.5 h-1.5 rotate-45 border-r border-b border-muted-foreground/30 transition-transform duration-300", openSections.sort ? "rotate-[45deg]" : "rotate-[-135deg]")} />
+                                <div className={cn("w-[2px] h-2 bg-white/20 transition-all group-hover/header:h-4 group-hover/header:bg-primary", openSections.sort ? "rotate-90" : "")} />
                             </button>
 
                             <div className={cn(
-                                "flex flex-col gap-1 overflow-hidden transition-all duration-300",
+                                "flex flex-col gap-1 pl-4 border-l border-white/5 transition-all duration-300 overflow-hidden",
                                 openSections.sort ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
                             )}>
                                 {[
@@ -152,17 +157,17 @@ export default function DiscoveryView() {
                                         key={item.value}
                                         onClick={() => setFilter("sort", item.value)}
                                         className={cn(
-                                            "flex items-center justify-between px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest border transition-all",
+                                            "flex items-center justify-between px-3 py-2 font-mono text-[10px] uppercase tracking-widest border border-transparent transition-all hover:bg-white/[0.02] cursor-pointer",
                                             filters.sort === item.value
-                                                ? "bg-primary/5 border-primary/50 text-foreground translate-x-1"
-                                                : "bg-transparent border-transparent text-muted-foreground/60 hover:text-foreground hover:bg-white/[0.02]"
+                                                ? "text-primary border-l-primary/50 bg-primary/5 translate-x-2"
+                                                : "text-muted-foreground hover:text-foreground"
                                         )}
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <div className={cn("w-1 h-1 rounded-full", filters.sort === item.value ? "bg-primary animate-pulse" : "bg-border")} />
+                                        <div className="flex items-center gap-3">
+                                            {filters.sort === item.value && <div className="w-1 h-1 bg-primary animate-pulse" />}
                                             {item.label}
                                         </div>
-                                        <span className="text-[9px] opacity-30">{item.code}</span>
+                                        <span className="text-[8px] opacity-20 font-bold">{item.code}</span>
                                     </button>
                                 ))}
                             </div>
@@ -172,41 +177,41 @@ export default function DiscoveryView() {
                         <div className="space-y-4">
                             <button
                                 onClick={() => toggleSection('temporal')}
-                                className="w-full flex items-center justify-between group/header"
+                                className="w-full flex items-center justify-between group/header cursor-pointer select-none"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={cn("w-4 h-[1px] transition-all", openSections.temporal ? "bg-primary w-5" : "bg-muted-foreground/30")} />
-                                    <h4 className={cn("font-mono text-[12px] uppercase tracking-[0.2em] font-bold transition-colors", openSections.temporal ? "text-foreground" : "text-muted-foreground/40")}>Time_Frame</h4>
+                                    <div className={cn("w-1.5 h-1.5 border border-white/40 transition-colors group-hover/header:border-primary", openSections.temporal ? "bg-primary border-primary" : "bg-transparent")} />
+                                    <h4 className={cn("font-mono text-[11px] uppercase tracking-[0.2em] font-black transition-colors", openSections.temporal ? "text-foreground" : "text-muted-foreground")}>Time_Frame</h4>
                                 </div>
-                                <div className={cn("w-1.5 h-1.5 rotate-45 border-r border-b border-muted-foreground/30 transition-transform duration-300", openSections.temporal ? "rotate-[45deg]" : "rotate-[-135deg]")} />
+                                <div className={cn("w-[2px] h-2 bg-white/20 transition-all group-hover/header:h-4 group-hover/header:bg-primary", openSections.temporal ? "rotate-90" : "")} />
                             </button>
 
                             <div className={cn(
-                                "grid grid-cols-2 gap-3 overflow-hidden transition-all duration-300",
+                                "grid grid-cols-2 gap-3 pl-4 border-l border-white/5 transition-all duration-300 overflow-hidden",
                                 openSections.temporal ? "max-h-32 opacity-100 mb-2" : "max-h-0 opacity-0"
                             )}>
                                 <div className="space-y-1.5">
-                                    <span className="font-mono text-[9px] text-muted-foreground/40 uppercase block ml-1">Year_P</span>
+                                    <span className="font-mono text-[10px] text-muted-foreground uppercase font-bold pl-1">Year_Var</span>
                                     <select
                                         title="Year"
-                                        className="w-full bg-secondary/50 border border-border/50 px-2 py-2.5 font-mono text-[11px] uppercase text-foreground outline-none hover:bg-secondary transition-all cursor-pointer font-bold"
+                                        className="w-full bg-secondary/50 border border-white/10 px-3 py-2.5 font-mono text-[12px] uppercase text-foreground outline-none hover:bg-secondary/80 hover:border-white/20 transition-all cursor-pointer font-bold focus:border-primary/50 rounded-sm"
                                         value={filters.year}
                                         onChange={(e) => setFilter("year", e.target.value)}
                                     >
-                                        <option value="">NULL</option>
-                                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                                        <option value="" className="bg-background text-foreground">ALL</option>
+                                        {years.map(y => <option key={y} value={y} className="bg-background text-foreground">{y}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <span className="font-mono text-[9px] text-muted-foreground/40 uppercase block ml-1">Cycle_P</span>
+                                    <span className="font-mono text-[10px] text-muted-foreground uppercase font-bold pl-1">Epoch_Var</span>
                                     <select
                                         title="Season"
-                                        className="w-full bg-secondary/50 border border-border/50 px-2 py-2.5 font-mono text-[11px] uppercase text-foreground outline-none hover:bg-secondary transition-all cursor-pointer font-bold"
+                                        className="w-full bg-secondary/50 border border-white/10 px-3 py-2.5 font-mono text-[12px] uppercase text-foreground outline-none hover:bg-secondary/80 hover:border-white/20 transition-all cursor-pointer font-bold focus:border-primary/50 rounded-sm"
                                         value={filters.season}
                                         onChange={(e) => setFilter("season", e.target.value)}
                                     >
-                                        <option value="">NULL</option>
-                                        {SEASONS.map(s => <option key={s.value} value={s.value}>{s.code || s.label.substring(0, 3)}</option>)}
+                                        <option value="" className="bg-background text-foreground">ALL</option>
+                                        {SEASONS.map(s => <option key={s.value} value={s.value} className="bg-background text-foreground">{s.code || s.label.substring(0, 3)}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -216,32 +221,32 @@ export default function DiscoveryView() {
                         <div className="space-y-4">
                             <button
                                 onClick={() => toggleSection('genres')}
-                                className="w-full flex items-center justify-between group/header"
+                                className="w-full flex items-center justify-between group/header cursor-pointer select-none"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={cn("w-4 h-[1px] transition-all", openSections.genres ? "bg-primary w-5" : "bg-muted-foreground/30")} />
-                                    <h4 className={cn("font-mono text-[12px] uppercase tracking-[0.2em] font-bold transition-colors", openSections.genres ? "text-foreground" : "text-muted-foreground/40")}>Genre_Pool</h4>
+                                    <div className={cn("w-1.5 h-1.5 border border-white/40 transition-colors group-hover/header:border-primary", openSections.genres ? "bg-primary border-primary" : "bg-transparent")} />
+                                    <h4 className={cn("font-mono text-[11px] uppercase tracking-[0.2em] font-black transition-colors", openSections.genres ? "text-foreground" : "text-muted-foreground")}>Genre_Pool</h4>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="font-mono text-[9px] opacity-20">{filters.genres.length}</span>
-                                    <div className={cn("w-1.5 h-1.5 rotate-45 border-r border-b border-muted-foreground/30 transition-transform duration-300", openSections.genres ? "rotate-[45deg]" : "rotate-[-135deg]")} />
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono text-[9px] text-primary">{filters.genres.length}</span>
+                                    <div className={cn("w-[2px] h-2 bg-white/20 transition-all group-hover/header:h-4 group-hover/header:bg-primary", openSections.genres ? "rotate-90" : "")} />
                                 </div>
                             </button>
 
                             <div className={cn(
-                                "flex flex-wrap gap-2 overflow-hidden transition-all duration-300",
-                                openSections.genres ? "max-h-[350px] opacity-100" : "max-h-0 opacity-0"
+                                "transition-all duration-300 relative overflow-hidden",
+                                openSections.genres ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
                             )}>
-                                <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="flex flex-wrap gap-1.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar pl-4 border-l border-white/5">
                                     {COMMON_GENRES.map((genre) => (
                                         <button
                                             key={genre}
                                             onClick={() => toggleGenre(genre)}
                                             className={cn(
-                                                "px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] border transition-all",
+                                                "px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] border transition-all cursor-pointer",
                                                 filters.genres.includes(genre)
-                                                    ? "bg-foreground text-background border-foreground font-black shadow-[2px_2px_0px_0px_rgba(var(--primary),0.2)]"
-                                                    : "bg-transparent text-muted-foreground/60 border-border/30 hover:border-border/80"
+                                                    ? "bg-primary/90 text-primary-foreground border-primary font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                                                    : "bg-white/[0.02] text-muted-foreground border-white/5 hover:border-white/20 hover:text-foreground"
                                             )}
                                         >
                                             {genre}
@@ -255,17 +260,17 @@ export default function DiscoveryView() {
                         <div className="space-y-4">
                             <button
                                 onClick={() => toggleSection('attributes')}
-                                className="w-full flex items-center justify-between group/header"
+                                className="w-full flex items-center justify-between group/header cursor-pointer select-none"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className={cn("w-4 h-[1px] transition-all", openSections.attributes ? "bg-primary w-5" : "bg-muted-foreground/30")} />
-                                    <h4 className={cn("font-mono text-[12px] uppercase tracking-[0.2em] font-bold transition-colors", openSections.attributes ? "text-foreground" : "text-muted-foreground/40")}>Attributes</h4>
+                                    <div className={cn("w-1.5 h-1.5 border border-white/40 transition-colors group-hover/header:border-primary", openSections.attributes ? "bg-primary border-primary" : "bg-transparent")} />
+                                    <h4 className={cn("font-mono text-[11px] uppercase tracking-[0.2em] font-black transition-colors", openSections.attributes ? "text-foreground" : "text-muted-foreground")}>Attributes</h4>
                                 </div>
-                                <div className={cn("w-1.5 h-1.5 rotate-45 border-r border-b border-muted-foreground/30 transition-transform duration-300", openSections.attributes ? "rotate-[45deg]" : "rotate-[-135deg]")} />
+                                <div className={cn("w-[2px] h-2 bg-white/20 transition-all group-hover/header:h-4 group-hover/header:bg-primary", openSections.attributes ? "rotate-90" : "")} />
                             </button>
 
                             <div className={cn(
-                                "flex flex-col gap-1 overflow-hidden transition-all duration-300",
+                                "flex flex-col gap-1 pl-4 border-l border-white/5 transition-all duration-300 overflow-hidden",
                                 openSections.attributes ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
                             )}>
                                 {FORMATS.map(f => (
@@ -273,20 +278,14 @@ export default function DiscoveryView() {
                                         key={f.value}
                                         onClick={() => setFilter("format", f.value)}
                                         className={cn(
-                                            "group flex items-center gap-3 px-2 py-1.5 transition-all text-left",
-                                            filters.format === f.value ? "translate-x-1" : "hover:bg-white/[0.02]"
+                                            "group flex items-center justify-between px-3 py-2 transition-all font-mono text-[10px] uppercase tracking-widest border border-transparent hover:bg-white/[0.02] cursor-pointer",
+                                            filters.format === f.value ? "text-primary border-l-primary/50 bg-primary/5 translate-x-2" : "text-muted-foreground"
                                         )}
                                     >
-                                        <div className={cn(
-                                            "w-1 h-3 transition-colors",
-                                            filters.format === f.value ? "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" : "bg-border/30 group-hover:bg-border"
-                                        )} />
-                                        <span className={cn(
-                                            "font-mono text-[11px] uppercase tracking-widest transition-colors",
-                                            filters.format === f.value ? "text-foreground font-bold" : "text-muted-foreground/60"
-                                        )}>
-                                            {f.label}
-                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn("w-1 h-1 transition-all", filters.format === f.value ? "bg-primary animate-pulse" : "bg-white/10 group-hover:bg-white/30")} />
+                                            <span className={cn("transition-colors", filters.format === f.value ? "font-bold text-foreground" : "")}>{f.label}</span>
+                                        </div>
                                     </button>
                                 ))}
                             </div>
@@ -294,10 +293,10 @@ export default function DiscoveryView() {
                     </div>
 
                     {/* Mobile Close Button */}
-                    <div className="lg:hidden pt-8 border-t border-border mt-8">
+                    <div className="lg:hidden mt-8 pt-6 border-t border-white/10">
                         <button
                             onClick={() => setIsFiltersOpen(false)}
-                            className="w-full font-mono text-[11px] font-bold uppercase tracking-widest py-4 bg-foreground text-background index-cut-tr transition-all flex items-center justify-center gap-2"
+                            className="w-full bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-widest py-3 hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center gap-2"
                         >
                             Sync_Config
                         </button>
@@ -315,11 +314,13 @@ export default function DiscoveryView() {
                                 {filters.sort === 'seasonal' ? "Seasonal_Registry" : "Global_Archive"}
                             </span>
                         </div>
-                        <h1 className="font-mono text-3xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-none">
-                            {filters.sort === 'seasonal'
-                                ? `${filters.season || dateValues?.currentSeason} ${filters.year || dateValues?.currentYear}`
-                                : filters.sort.replace('-', ' ')}
-                        </h1>
+                        {mounted && (
+                            <h1 className="font-mono text-3xl sm:text-5xl font-black uppercase tracking-tighter text-foreground leading-none animate-in fade-in slide-in-from-left-4 duration-500">
+                                {filters.sort === 'seasonal'
+                                    ? `${filters.season || dateValues?.currentSeason} ${filters.year || dateValues?.currentYear}`
+                                    : filters.sort.replace('-', ' ')}
+                            </h1>
+                        )}
                     </div>
 
                     <div className="flex flex-col items-end gap-1 font-mono text-[9px] text-muted-foreground/40 uppercase tracking-widest text-right">
@@ -331,8 +332,8 @@ export default function DiscoveryView() {
                     </div>
                 </div>
 
-                {filters.sort === 'seasonal' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 p-2 bg-secondary/10 border border-border/50 rounded-sm">
+                {filters.sort === 'seasonal' && mounted && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 p-2 bg-secondary/10 border border-border/50 rounded-sm animate-in fade-in duration-700">
                         <div className="flex items-center gap-3">
                             <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground ml-2">Temporal_Cycle:</span>
                             <div className="flex bg-background/50 p-1 border border-border/30">
@@ -377,15 +378,15 @@ export default function DiscoveryView() {
                 )}
 
                 {isError ? (
-                    <ErrorState message="Request Failed: Registry Temporarily Unreachable" />
-                ) : isLoading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <ErrorState key="error-state" message="Request Failed: Registry Temporarily Unreachable" />
+                ) : (isLoading && animeList.length === 0) ? (
+                    <div key="loading-skeleton" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {Array.from({ length: 12 }).map((_, i) => (
                             <div key={i} className="aspect-[2/3] border border-border shimmer" />
                         ))}
                     </div>
                 ) : (
-                    <div className="space-y-12">
+                    <div key="content-grid" className="space-y-12 animate-in fade-in duration-700">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
                             {animeList.map((anime, index) => (
                                 <PosterCard
@@ -398,7 +399,7 @@ export default function DiscoveryView() {
 
                         {/* Infinite Scroll Trigger */}
                         {hasNextPage && (
-                            <InfiniteScrollTrigger onIntersect={() => !isFetchingNextPage && fetchNextPage()} />
+                            <InfiniteScrollTrigger key="infinite-trigger" onIntersect={() => !isFetchingNextPage && fetchNextPage()} />
                         )}
 
                         {isFetchingNextPage && (

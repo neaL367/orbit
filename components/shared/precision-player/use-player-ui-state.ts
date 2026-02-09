@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 export function usePlayerUIState() {
     const [isMounted, setIsMounted] = useState(false);
     const [muted, setMuted] = useState(false);
-    const [volume, setVolume] = useState(100);
+    const [volume, setVolume] = useState(26);
     const [isMobile, setIsMobile] = useState(false);
     const [controlsVisible, setControlsVisible] = useState(true);
 
