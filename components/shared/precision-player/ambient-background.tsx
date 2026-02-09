@@ -15,17 +15,22 @@ export function AmbientBackground() {
 
     return (
         <div className={cn(
-            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[121%] h-[121%] -z-50 pointer-events-none select-none transition-opacity ease-in-out hidden md:block",
+            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] -z-50 pointer-events-none select-none transition-opacity ease-in-out hidden md:block",
             enabled ? "opacity-100 duration-1000" : cn("opacity-0", isEnded ? "duration-300" : "duration-2000")
         )}>
+
             <div
                 className={cn(
-                    "w-full h-full blur-[80px] saturate-[2] brightness-110 contrast-125 opacity-40 transition-opacity duration-1000",
+                    "w-full h-full blur-[64px] saturate-[1.8] brightness-110 contrast-110 opacity-45 transition-opacity duration-1000 scale-105",
                 )}
-                style={{ transform: "translate3d(0,0,0)", backfaceVisibility: "hidden" }}
+                style={{
+                    transform: "translate3d(0,0,0)",
+                    backfaceVisibility: "hidden",
+                    willChange: "transform, opacity"
+                }}
             >
                 {/* API mounts iframe here */}
-                <div ref={ambientElementRef} className="w-full h-full" />
+                <div ref={ambientElementRef} className="w-full h-full scale-105" />
             </div>
         </div>
     )

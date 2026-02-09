@@ -71,7 +71,7 @@ export function PlayerUI() {
             <div className="w-full h-full relative overflow-hidden bg-black aspect-video">
                 <div className={cn(
                     "w-full h-full relative overflow-hidden group/video",
-                    isMobile ? "contrast-100 brightness-100 saturate-100" : "contrast-[1.12] brightness-[1.025] saturate-[1.475]"
+                    isMobile ? "contrast-100 brightness-100 saturate-100" : "contrast-[1.12] brightness-[1.01] saturate-[1.475]"
                 )}>
                     {/* Main Player Display */}
                     <div
