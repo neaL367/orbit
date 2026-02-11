@@ -1,8 +1,26 @@
+import { memo } from "react"
 import { cn } from "@/lib/utils"
 import { TopBar } from "./top-bar"
 import { BottomBar } from "./bottom-bar"
 import { PauseMask } from "./pause-mask"
 import { usePrecisionPlayerState, usePrecisionPlayerHandlers, usePrecisionPlayerRefs } from "./context"
+
+const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElementRef }: any) => (
+    <div className="supersampled-container">
+        {!isTerminated && (
+            <div
+                ref={playerElementRef}
+                className={cn(
+                    "supersampled-frame pointer-events-none",
+                    !safeVideoId && "hidden",
+                    isFullscreen ? "max-h-screen" : ""
+                )}
+            />
+        )}
+    </div>
+));
+
+VideoLayer.displayName = "VideoLayer";
 
 export function PlayerUI() {
     const state = usePrecisionPlayerState()
@@ -18,129 +36,141 @@ export function PlayerUI() {
         controlsVisible,
         youtubeUIWait,
         isSyncing,
+        isFullscreen,
     } = state
 
-    const { playerElementRef } = refs
+    const { playerElementRef, containerRef } = refs
     const { handleMouseMove, handlePlayPause, onSetHasStarted } = handlers
 
     const safeVideoId = videoId ?? ""
 
-    if (isMobile) {
-        return (
-            <div className="relative w-full aspect-video border border-white/5 bg-black/80 flex flex-col items-center justify-center p-6 text-center shadow-2xl index-cut-tr overflow-hidden">
-                <style jsx global>{`
-                    .ytp-chrome-top, .ytp-chrome-bottom { display: none !important; }
-                `}</style>
-                <div className="absolute inset-0 pointer-events-none opacity-20">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 bg-[length:100%_2px,3px_100%]" />
-                </div>
-                <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-white/20 pointer-events-none" />
-                <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-white/20 pointer-events-none" />
-
-                <div className="relative z-10 flex flex-col items-center gap-4 max-w-xs animate-in fade-in zoom-in duration-500">
-                    <div className="w-16 h-16 border border-primary/20 rotate-45 flex items-center justify-center bg-primary/5">
-                        <div className="w-8 h-8 flex items-center justify-center -rotate-45">
-                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <h3 className="text-sm font-mono uppercase tracking-[0.2em] text-primary/80 font-bold">
-                            Mobile_Terminal_Offline
-                        </h3>
-                        <p className="text-[10px] uppercase tracking-widest text-primary/40 leading-relaxed">
-                            Precision uplink requires desktop interface.
-                            <br />
-                            Mobile protocol in development.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     return (
         <div
+            ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="group relative border border-white/5 shadow-2xl transition-all duration-300 ease-in-out w-full h-full index-cut-tr overflow-visible"
+            onTouchStart={handleMouseMove}
+            className={cn(
+                "group relative transition-all duration-300 ease-in-out w-full border-white/5",
+                isFullscreen
+                    ? "fixed !inset-0 !m-0 !p-0 z-[99999] bg-black h-screen w-screen overflow-hidden is-fullscreen"
+                    : "h-auto border shadow-2xl index-cut-tr aspect-video overflow-hidden"
+            )}
         >
+            <svg className="absolute w-0 h-0 pointer-events-none opacity-0" aria-hidden="true">
+                <filter id="precision-sharpen" colorInterpolationFilters="sRGB">
+                    {/* 1. Softened Tactical Sharpening (Prevents Halos) */}
+                    <feConvolveMatrix
+                        order="3"
+                        preserveAlpha="true"
+                        kernelMatrix="-0.1 -0.1 -0.1 -0.1 1.8 -0.1 -0.1 -0.1 -0.1"
+                    />
+
+                    {/* 2. Precision HDR Finish (Punchier Gamma) */}
+                    <feComponentTransfer>
+                        <feFuncR type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
+                        <feFuncG type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
+                        <feFuncB type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
+                    </feComponentTransfer>
+
+                    {/* 3. Anti-Banding Master Dither (Hides blocky artifacts) */}
+                    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" result="noise" />
+                    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0" result="dither" />
+                    <feComposite in="SourceGraphic" in2="dither" operator="over" />
+
+                    {/* 4. Balanced Vibrancy */}
+                    <feColorMatrix type="saturate" values="1.18" />
+                </filter>
+            </svg>
+
             <style jsx global>{`
-                .ytp-chrome-top, .ytp-chrome-bottom { display: none !important; }
+                .ytp-chrome-top, .ytp-chrome-bottom, .ytp-gradient-top, .ytp-gradient-bottom { 
+                    display: none !important; 
+                }
+                
+                /* Dynamic Tactical Scaling: 1.4x (Window) | 1.75x (Full) */
+                .supersampled-frame {
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    /* Fluid Math: 140% base, 175% on .is-fullscreen */
+                    width: 140% !important;
+                    height: 140% !important;
+                    transform: translate(-50%, -50%) scale(0.71428) translate3d(0,0,0);
+                    transform-origin: center center;
+                    filter: url(#precision-sharpen);
+                    backface-visibility: hidden;
+                    transform-style: preserve-3d;
+                    will-change: transform, filter;
+                    -webkit-font-smoothing: antialiased;
+                    image-rendering: -webkit-optimize-contrast;
+                    image-rendering: crisp-edges;
+                }
+
+                :global(.is-fullscreen) .supersampled-frame {
+                    width: 175% !important;
+                    height: 175% !important;
+                    transform: translate(-50%, -50%) scale(0.571428) translate3d(0,0,0) !important;
+                }
+                
+                .supersampled-frame iframe {
+                    width: 100% !important;
+                    height: 100% !important;
+                    border: 0;
+                }
+
+                .supersampled-container {
+                    /* Precision Aspect Lock: Centered 16:9 within parent */
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100%;
+                    height: auto;
+                    aspect-ratio: 16 / 9;
+                    max-width: 100%;
+                    max-height: 100%;
+                    overflow: hidden;
+                    contain: strict;
+                    background: black;
+                }
             `}</style>
 
-            {/* Container that maintains aspect-video but allows UI to breathe if needed on mobile */}
-            <div className="w-full h-full relative overflow-hidden bg-black aspect-video">
-                <div className={cn(
-                    "w-full h-full relative overflow-hidden group/video",
-                    isMobile ? "contrast-100 brightness-100 saturate-100" : "contrast-[1.12] brightness-[1.01] saturate-[1.475]"
-                )}>
-                    {/* Main Player Display */}
+            <div className={cn(
+                "w-full h-full relative overflow-hidden bg-black flex items-center justify-center",
+                isFullscreen ? "h-screen" : ""
+            )}>
+                <div className="w-full h-full relative overflow-hidden group/video">
                     <div
-                        className="w-full h-full origin-center relative z-10 pointer-events-auto"
+                        className={cn(
+                            "relative z-50 pointer-events-auto w-full h-full",
+                            isFullscreen && "flex items-center justify-center"
+                        )}
                         onClick={() => !hasStarted && onSetHasStarted(true)}
-                        onKeyUp={(e) => (e.key === "Enter" || e.key === " ") && !hasStarted && onSetHasStarted(true)}
-                        tabIndex={0}
-                        role="button"
                     >
                         <PauseMask />
 
+                        {/* Video Layer wrapper */}
                         <div className="absolute inset-0 z-20">
-                            {!isTerminated && (
-                                <div
-                                    ref={playerElementRef}
-                                    className={cn("w-full h-full pointer-events-none", !safeVideoId && "hidden")}
-                                />
-                            )}
-                        </div>
-
-                        {hasStarted && isPlayerReady && (
-                            <div
-                                className={cn("absolute inset-0 z-30 cursor-pointer", isMobile && "touch-manipulation")}
-                                onClick={handlePlayPause}
-                                onKeyUp={(e) => (e.key === "Enter" || e.key === " ") && handlePlayPause()}
-                                tabIndex={0}
-                                role="button"
+                            <VideoLayer
+                                isTerminated={isTerminated}
+                                safeVideoId={safeVideoId}
+                                isFullscreen={isFullscreen}
+                                playerElementRef={playerElementRef}
                             />
+                        </div>
+
+                        {/* Overlay elements... */}
+                        {hasStarted && isPlayerReady && (
+                            <div className="absolute inset-0 z-30 cursor-pointer" onClick={handlePlayPause} />
                         )}
 
-                        {!isMobile && (
-                            <div className="absolute inset-0 pointer-events-none z-20">
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.4)_120%)] mix-blend-multiply opacity-80" />
-                                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-20 bg-[length:100%_2px,3px_100%] opacity-20" />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Tactical Loading Mask (Uplink) */}
-                    {hasStarted && !isTerminated && (
+                        {/* UI Controls */}
                         <div className={cn(
-                            "absolute inset-0 z-[45] bg-black flex flex-col items-center justify-center gap-4 transition-all duration-700 ease-in-out",
-                            (isSyncing || youtubeUIWait) ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"
+                            "absolute inset-0 z-[60] flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
+                            controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
                         )}>
-                            <div className="relative w-12 h-12 flex items-center justify-center">
-                                <div className="absolute inset-0 border border-primary/20 rotate-45 animate-pulse" />
-                                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                            </div>
-                            <div className="flex flex-col items-center gap-1 font-mono">
-                                <span className="text-[10px] uppercase tracking-[0.5em] text-primary font-bold animate-pulse">
-                                    {isSyncing ? "Syncing_Feed" : "Establishing_Uplink"}
-                                </span>
-                                <span className="text-[8px] uppercase tracking-widest text-primary/40">
-                                    {isSyncing ? "Phase_Shift: Active" : "Encryption_Pass: 01"}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* UI overlay controls - Using flex-col and flex-1 to ensure BottomBar has enough space */}
-                    <div className={cn(
-                        "absolute inset-0 z-50 flex flex-col justify-between transition-all duration-500 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
-                        controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100 visible" : "opacity-0 invisible"
-                    )}>
-                        <div className="pointer-events-auto flex-shrink-0">
-                            <TopBar />
-                        </div>
-                        <div className="pointer-events-auto flex-shrink-0 mt-auto">
-                            <BottomBar />
+                            <div className="pointer-events-auto"><TopBar /></div>
+                            <div className="pointer-events-auto mt-auto"><BottomBar /></div>
                         </div>
                     </div>
                 </div>

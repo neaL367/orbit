@@ -1,4 +1,4 @@
-import { Play, Pause, Volume2, VolumeX, RotateCcw } from "lucide-react"
+import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, Minimize } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SeekBar } from "./seek-bar"
 import { usePrecisionPlayerState, usePrecisionPlayerHandlers } from "./context"
@@ -6,19 +6,22 @@ import { usePrecisionPlayerState, usePrecisionPlayerHandlers } from "./context"
 export function BottomBar() {
     const {
         playing, muted, volume, played, duration,
-        isBuffer, isPlayerReady
+        isBuffer, isPlayerReady, isFullscreen
     } = usePrecisionPlayerState()
 
     const {
         handlePlayPause, onSetMuted, onSetVolume,
-        onRestart, formatTime
+        onRestart, formatTime, toggleFullscreen
     } = usePrecisionPlayerHandlers()
 
     return (
         <div
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            className="bg-black/95 border-t border-white/10 z-30 transition-all duration-300 p-2 sm:p-4 lg:p-6"
+            className={cn(
+                "bg-black/95 border-t border-white/10 z-30 transition-all duration-300",
+                "p-2 sm:p-4 lg:p-6"
+            )}
         >
             <div className="flex items-center gap-2 sm:gap-4 mb-0.5 sm:mb-2 ml-1 sm:ml-0">
                 <div className="flex-1">
@@ -44,7 +47,7 @@ export function BottomBar() {
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
+                    <div className="hidden xs:flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
                         <button onClick={() => onSetMuted(!muted)} className="text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center">
                             {muted || volume === 0 ? <VolumeX size={14} className="sm:size-5" /> : <Volume2 size={14} className="sm:size-5" />}
                         </button>
@@ -87,6 +90,13 @@ export function BottomBar() {
                             <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-primary font-bold">BUF</span>
                         </div>
                     )}
+                    <button
+                        onClick={toggleFullscreen}
+                        className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white"
+                        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                    >
+                        {isFullscreen ? <Minimize size={14} className="sm:size-5" /> : <Maximize size={14} className="sm:size-5" />}
+                    </button>
                 </div>
             </div>
         </div>

@@ -84,8 +84,10 @@ export function SeekBar() {
                 step="any"
                 value={played}
                 onMouseDown={handleSeekMouseDown}
+                onTouchStart={handleSeekMouseDown}
                 onChange={handleSeekChange}
                 onMouseUp={handleSeekMouseUp}
+                onTouchEnd={handleSeekMouseUp}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-[40]"
             />
 

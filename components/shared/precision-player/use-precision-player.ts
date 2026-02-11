@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from "react";
+import { useRef, useCallback, useMemo, useEffect } from "react";
 import { usePlayerUIState } from "./use-player-ui-state";
 import { useYouTube } from "./use-youtube";
 
@@ -23,17 +23,32 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         isMobile,
         controlsVisible,
         setControlsVisible,
+        isFullscreen,
     } = usePlayerUIState();
 
     const videoId = useMemo(() => {
-        if (propVideoId) return propVideoId;
+        const extractId = (str: string) => {
+            const match =
+                str.match(/[?&]v=([^&]+)/) ||
+                str.match(
+                    /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/
+                );
+            return (match?.[1] ?? match?.[2] ?? null) || null;
+        };
+
+        if (propVideoId) {
+            // If it's already a short ID (11 chars typically), use it. 
+            // Otherwise, try to extract from it as if it were a URL.
+            if (propVideoId.length === 11 && !propVideoId.includes('/') && !propVideoId.includes('?')) {
+                return propVideoId;
+            }
+            const extracted = extractId(propVideoId);
+            if (extracted) return extracted;
+            return propVideoId; // Fallback to original
+        }
+
         if (!url) return null;
-        const match =
-            url.match(/[?&]v=([^&]+)/) ||
-            url.match(
-                /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/
-            );
-        return (match?.[1] ?? match?.[2] ?? null) || null;
+        return extractId(url);
     }, [url, propVideoId]);
 
     const thumbnailUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : null;
@@ -92,8 +107,82 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
 
     const onSetVolume = useCallback((val: number) => {
         setVolume(val);
-        setPlayerVolume(val);
+        // Quadratic Volume Scaling for natural hearing response
+        const naturalVolume = Math.pow(val / 100, 2) * 100;
+        setPlayerVolume(naturalVolume);
     }, [setPlayerVolume, setVolume]);
+
+    const toggleFullscreen = useCallback(() => {
+        if (!containerRef.current) return;
+
+        const doc = document as any;
+        const container = containerRef.current as any;
+
+        if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+            try {
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+                else if (container.mozRequestFullScreen) container.mozRequestFullScreen();
+                else if (container.msRequestFullscreen) container.msRequestFullscreen();
+            } catch (err) {
+                console.error("Fullscreen request failed", err);
+            }
+        } else {
+            try {
+                if (doc.exitFullscreen) doc.exitFullscreen();
+                else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+                else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+                else if (doc.msExitFullscreen) doc.msExitFullscreen();
+            } catch (err) {
+                console.error("Exit fullscreen failed", err);
+            }
+        }
+    }, [containerRef]);
+
+    // Tactical Keyboard System
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if user is typing in an input
+            if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
+
+            switch (e.key.toLowerCase()) {
+                case " ":
+                case "k":
+                    e.preventDefault();
+                    handlePlayPause();
+                    break;
+                case "f":
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case "m":
+                    e.preventDefault();
+                    onSetMuted(!muted);
+                    break;
+                case "arrowleft":
+                case "j":
+                    e.preventDefault();
+                    seekTo(Math.max(0, (played * duration) - 5));
+                    break;
+                case "arrowright":
+                case "l":
+                    e.preventDefault();
+                    seekTo(Math.min(duration, (played * duration) + 5));
+                    break;
+                case ",": // Frame backward (~1/24s)
+                    e.preventDefault();
+                    seekTo(Math.max(0, (played * duration) - (1 / 24)));
+                    break;
+                case ".": // Frame forward (~1/24s)
+                    e.preventDefault();
+                    seekTo(Math.min(duration, (played * duration) + (1 / 24)));
+                    break;
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [handlePlayPause, toggleFullscreen, onSetMuted, muted, played, duration, seekTo]);
 
     const formatTime = useCallback((s: number) => {
         if (isNaN(s)) return "00:00";
@@ -114,7 +203,8 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         onRestart: restart,
         formatTime,
         handleSeekMouseDown,
-        handleSeekMouseUp
+        handleSeekMouseUp,
+        toggleFullscreen,
     }), [
         handleMouseMove,
         handlePlayPause,
@@ -125,7 +215,8 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         restart,
         formatTime,
         handleSeekMouseDown,
-        handleSeekMouseUp
+        handleSeekMouseUp,
+        toggleFullscreen,
     ]);
 
     const refs = useMemo(() => ({
@@ -151,8 +242,9 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
             videoId,
             isMobile,
             controlsVisible,
+            isFullscreen,
             thumbnailUrl,
-            visualPlaying: (playing || isBuffer) && !isSyncing && !youtubeUIWait,
+            visualPlaying: (playing || isBuffer || isSyncing || youtubeUIWait) && !isEnded && !isTerminated,
             youtubeUIWait,
             isPlayerReady,
             title,

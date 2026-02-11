@@ -11,7 +11,7 @@ export function AmbientBackground() {
     const { ambientElementRef } = usePrecisionPlayerRefs()
 
     // Ensuring the ambient layer is only visible during active playback prevents end-screen glitches
-    const enabled = isMounted && hasStarted && !isMobile && !isTerminated && !!videoId && !isSyncing && !youtubeUIWait && !isEnded && (playing || isBuffer)
+    const enabled = isMounted && hasStarted && !isTerminated && !!videoId && !isSyncing && !youtubeUIWait && !isEnded && (playing || isBuffer)
 
     return (
         <div className={cn(

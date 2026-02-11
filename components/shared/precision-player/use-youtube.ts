@@ -91,6 +91,18 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
         leaderReadyRef.current = true;
         setIsPlayerReady(true);
 
+        // Ensure the iframe has the necessary attributes for fullscreen
+        try {
+            const iframe = event.target.getIframe();
+            if (iframe) {
+                iframe.setAttribute('allowfullscreen', 'true');
+                iframe.setAttribute('webkitallowfullscreen', 'true');
+                iframe.setAttribute('mozallowfullscreen', 'true');
+            }
+        } catch (e) {
+            console.warn("[PrecisionPlayer] Failed to apply fullscreen attributes to iframe", e);
+        }
+
         const dur = event.target.getDuration();
         if (dur) setDuration(dur);
         else if (currentDur) setDuration(currentDur);
@@ -112,7 +124,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
             } catch (_e) { }
 
             if (typeof event.target.playVideo === 'function') event.target.playVideo();
-            if (typeof event.target.setPlaybackQuality === 'function') event.target.setPlaybackQuality("hd1080");
+            if (typeof event.target.setPlaybackQuality === 'function') event.target.setPlaybackQuality("highres");
         } else {
             console.log("[PrecisionPlayer] Player ready in paused state.");
             if (currentMuted) {
@@ -178,69 +190,44 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                             const { muted: m, volume: v } = syncStateRef.current;
                             const target = event.target;
 
-                            // 1. Precise Sync: Bring the video back to the exact start/resume point
-                            // We do this BEFORE revealing, so the "drift" is hidden under the mask.
-                            if (typeof target.seekTo === 'function') target.seekTo(syncCaptureTimeRef.current, true);
+                            if (playerRef.current !== target || !target.getIframe()) return;
 
-                            // 2. Surgical Reveal: Give the silent seek a moment to settle before fading/unmuting
-                            setTimeout(() => {
+                            // 1. Instant Audio Restoration (No seek-back jump)
+                            const restoreSound = () => {
                                 if (playerRef.current !== target || !target.getIframe()) return;
+                                if (!m) {
+                                    try {
+                                        if (typeof target.unMute === 'function') target.unMute();
+                                        if (typeof target.setVolume === 'function') target.setVolume(v ?? 26);
+                                    } catch (e) { }
+                                }
+                            };
 
-                                // 3. Aggressive Sound Restore
-                                const restoreSound = () => {
-                                    if (playerRef.current !== target || !target.getIframe()) return;
-                                    if (!m) {
-                                        try {
-                                            if (typeof target.unMute === 'function') target.unMute();
-                                            if (typeof target.setVolume === 'function') target.setVolume(v ?? 26);
-                                            console.log("[PrecisionPlayer] Restoration Pulse:", {
-                                                isMuted: target.isMuted(),
-                                                currentVol: target.getVolume(),
-                                                wantedVol: v ?? 26
-                                            });
-                                            if (target.getVolume() === 0 && (v ?? 26) > 0) {
-                                                const nudge = Math.max(1, (v ?? 26) - 2);
-                                                target.setVolume(nudge);
-                                                setTimeout(() => {
-                                                    if (playerRef.current === target) target.setVolume(v ?? 26);
-                                                }, 40);
-                                            }
-                                        } catch (e) { console.error("[PrecisionPlayer] Unmute error", e); }
-                                    } else {
-                                        console.log("[PrecisionPlayer] Restoration: Staying muted");
-                                    }
-                                };
+                            restoreSound();
+                            const pulse = (delay: number) => {
+                                const t = setTimeout(restoreSound, delay);
+                                restorationTimeoutsRef.current.push(t);
+                            };
 
-                                restoreSound();
-                                const pulse = (delay: number) => {
-                                    const t = setTimeout(restoreSound, delay);
-                                    restorationTimeoutsRef.current.push(t);
-                                };
+                            pulse(100);
+                            pulse(500);
 
-                                pulse(100);
-                                pulse(500);
-                                pulse(1500);
-                                pulse(3000);
+                            // 2. Sequential UI Reveal
+                            setYoutubeUIWait(false); // Mask starts fading out (800ms)
 
-                                // 4. Sequential UI Reveal
-                                setYoutubeUIWait(false); // Mask starts fading out (800ms)
+                            setTimeout(() => {
+                                setIsSyncing(false); // Controls finally appear
+                                uiWaitTimeoutRef.current = null;
 
-                                setTimeout(() => {
-                                    setIsSyncing(false); // Controls finally appear
-                                    uiWaitTimeoutRef.current = null;
-                                    console.log("[PrecisionPlayer] Uplink fully established.");
-
-                                    // Start ambient feed ONLY after reveal
-                                    if (ambientPlayerRef.current) {
-                                        try {
-                                            if (typeof ambientPlayerRef.current.mute === 'function') ambientPlayerRef.current.mute();
-                                            if (typeof ambientPlayerRef.current.setVolume === 'function') ambientPlayerRef.current.setVolume(0);
-                                            if (typeof ambientPlayerRef.current.playVideo === 'function') ambientPlayerRef.current.playVideo();
-                                        } catch { }
-                                    }
-                                }, 800);
-                            }, 150);
-                        }, 3800);
+                                if (ambientPlayerRef.current) {
+                                    try {
+                                        if (typeof ambientPlayerRef.current.mute === 'function') ambientPlayerRef.current.mute();
+                                        if (typeof ambientPlayerRef.current.setVolume === 'function') ambientPlayerRef.current.setVolume(0);
+                                        if (typeof ambientPlayerRef.current.playVideo === 'function') ambientPlayerRef.current.playVideo();
+                                    } catch { }
+                                }
+                            }, 800);
+                        }, 1200);
                     }
                 } else {
                     setIsSyncing(false);
@@ -302,6 +289,17 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
         if (hasStarted) {
             setIsSyncing(true);
             setYoutubeUIWait(true); // Set true immediately to prevent flashing
+
+            // Safety Fallback: Force clear syncing after 8 seconds if stuck
+            const fallbackTimeout = setTimeout(() => {
+                const { isSyncing: s, youtubeUIWait: w } = syncStateRef.current;
+                if (s || w) {
+                    console.warn("[PrecisionPlayer] Safety fallback triggered: Clearing stuck sync state.");
+                    setIsSyncing(false);
+                    setYoutubeUIWait(false);
+                }
+            }, 8000);
+            restorationTimeoutsRef.current.push(fallbackTimeout);
         }
         setIsPlayerReady(false);
         leaderReadyRef.current = false;
@@ -312,32 +310,70 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
         const createPlayers = () => {
             if (!isEffectMounted || playerRef.current || !playerElementRef.current) return;
 
-            playerRef.current = new (window.YT.Player as any)(playerElementRef.current, {
-                videoId,
-                playerVars: { autoplay: 1, controls: 0, disablekb: 1, enablejsapi: 1, playsinline: 1, rel: 0, mute: 1 },
-                events: {
-                    onReady: onLeaderReady,
-                    onStateChange: onPlayerStateChange,
-                    onError: () => setIsTerminated(true),
-                },
-            });
+            // Critical Guard: Ensure videoId is present and looks valid (11 chars is standard)
+            const cleanVideoId = (videoId || "").trim();
+            if (!cleanVideoId || cleanVideoId.length < 5) {
+                console.warn("[PrecisionPlayer] Aborting player creation: Invalid videoId", cleanVideoId);
+                return;
+            }
 
-            if (ambientElementRef.current) {
-                ambientPlayerRef.current = new (window.YT.Player as any)(ambientElementRef.current, {
-                    videoId,
+            console.log("[PrecisionPlayer] Attempting player creation with ID:", cleanVideoId);
+
+            try {
+                playerRef.current = new (window.YT.Player as any)(playerElementRef.current, {
+                    videoId: cleanVideoId,
                     playerVars: {
                         autoplay: 1,
                         controls: 0,
                         disablekb: 1,
                         enablejsapi: 1,
+                        playsinline: 1,
+                        rel: 0,
                         mute: 1,
-                        suggestedQuality: 'small' // Optimization: Request low quality for blurred background
+                        fs: 1,
+                        modestbranding: 1,
+                        vq: 'highres',
+                        playlist: cleanVideoId
                     },
                     events: {
-                        onReady: onAmbientReady,
-                        onError: () => { ambientReadyRef.current = false; },
+                        onReady: onLeaderReady,
+                        onStateChange: onPlayerStateChange,
+                        onError: (e: any) => {
+                            console.error("[PrecisionPlayer] Leader Player Error:", e.data);
+                            setIsTerminated(true);
+                        },
                     },
                 });
+            } catch (err) {
+                console.error("[PrecisionPlayer] Fatal error during player creation:", err);
+                setIsTerminated(true);
+                return;
+            }
+
+            if (ambientElementRef.current) {
+                try {
+                    ambientPlayerRef.current = new (window.YT.Player as any)(ambientElementRef.current, {
+                        videoId: cleanVideoId,
+                        playerVars: {
+                            autoplay: 1,
+                            controls: 0,
+                            disablekb: 1,
+                            enablejsapi: 1,
+                            mute: 1,
+                            suggestedQuality: 'small'
+                        },
+                        events: {
+                            onReady: onAmbientReady,
+                            onError: (e: any) => {
+                                console.warn("[PrecisionPlayer] Ambient Player Error:", e.data);
+                                ambientReadyRef.current = false;
+                            },
+                        },
+                    });
+                } catch (err) {
+                    console.error("[PrecisionPlayer] Ambient player creation error:", err);
+                    ambientReadyRef.current = false;
+                }
             }
         };
 
@@ -375,7 +411,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
 
     const handlePlayPause = useCallback(() => {
         const player = playerRef.current;
-        if (!player) return;
+        if (!player || isSyncing || youtubeUIWait) return;
 
         if (playing) {
             if (typeof player.pauseVideo === 'function') player.pauseVideo();
@@ -383,12 +419,13 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
             console.log("[PrecisionPlayer] Manual Resume");
             if (typeof player.playVideo === 'function') player.playVideo();
         }
-    }, [playing]);
+    }, [playing, isSyncing, youtubeUIWait]);
 
     const seekTo = useCallback((time: number) => {
+        if (isSyncing || youtubeUIWait) return;
         if (typeof playerRef.current?.seekTo === 'function') playerRef.current.seekTo(time, true);
         if (typeof ambientPlayerRef.current?.seekTo === 'function') ambientPlayerRef.current.seekTo(time, true);
-    }, []);
+    }, [isSyncing, youtubeUIWait]);
 
     const setMute = useCallback((val: boolean) => {
         const leader = playerRef.current;
@@ -427,6 +464,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
             player.loadVideoById({
                 videoId: videoId,
                 startSeconds: 0,
+                suggestedQuality: 'highres'
             });
 
             if (ambient) {
@@ -458,6 +496,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
             setPlaying(true);
             setIsSyncing(true);
             setYoutubeUIWait(true);
+
             // If the player was somehow pre-initialized, capture its state
             if (playerRef.current) {
                 syncCaptureTimeRef.current = playerRef.current.getCurrentTime() || 0;

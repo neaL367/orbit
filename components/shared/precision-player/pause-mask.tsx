@@ -28,7 +28,7 @@ export function PauseMask() {
             className={cn(
                 "absolute inset-0 bg-black z-50 flex flex-col items-center justify-center overflow-hidden transition-opacity",
                 visualPlaying
-                    ? "opacity-0 pointer-events-none duration-700 delay-300"
+                    ? "opacity-0 pointer-events-none duration-500 delay-0"
                     : "opacity-100 pointer-events-auto duration-0 delay-0"
             )}
         >
