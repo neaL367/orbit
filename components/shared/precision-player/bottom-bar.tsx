@@ -47,13 +47,13 @@ export function BottomBar() {
                         </button>
                     </div>
 
-                    <div className="hidden xs:flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
+                    <div className="flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
                         <button onClick={() => onSetMuted(!muted)} className="text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center">
                             {muted || volume === 0 ? <VolumeX size={14} className="sm:size-5" /> : <Volume2 size={14} className="sm:size-5" />}
                         </button>
                         <div className="hidden sm:flex items-center gap-3">
                             <div
-                                className="w-16 lg:w-20 h-1 bg-white/10 relative group/vol overflow-hidden cursor-pointer touch-none"
+                                className="w-16 lg:w-24 h-5 relative group/vol cursor-pointer flex items-center"
                                 onMouseDown={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const updateVolume = (clientX: number) => {
@@ -70,10 +70,24 @@ export function BottomBar() {
                                     window.addEventListener('mouseup', onMouseUp);
                                 }}
                             >
-                                <div className="absolute inset-x-0 bottom-0 h-full bg-white/20 pointer-events-none" />
-                                <div className="absolute inset-y-0 left-0 bg-white/60 group-hover/vol:bg-primary transition-colors" style={{ width: `${volume}%` }} />
+                                {/* Track Background */}
+                                <div className="absolute inset-x-0 h-[2px] bg-white/10 rounded-full" />
+
+                                {/* Active Fill */}
+                                <div
+                                    className="absolute inset-y-0 left-0 h-[2px] bg-primary transition-all duration-75 my-auto"
+                                    style={{ width: `${volume}%` }}
+                                >
+                                    {/* Handle Glow */}
+                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
+                                </div>
+
+                                {/* Interaction Trigger */}
+                                <div className="absolute inset-0 z-10" />
                             </div>
-                            <span className="font-mono text-[10px] sm:text-[12px] text-muted-foreground/60 w-10 font-bold">{Math.round(volume)}%</span>
+                            <span className="font-mono text-[10px] sm:text-[11px] text-primary font-black tabular-nums min-w-[32px]">
+                                {Math.round(volume).toString().padStart(2, '0')}%
+                            </span>
                         </div>
                     </div>
 

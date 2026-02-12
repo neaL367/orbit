@@ -323,7 +323,7 @@ export default function DiscoveryView() {
                         )}
                     </div>
 
-                    <div className="flex flex-col items-end gap-1 font-mono text-[9px] text-muted-foreground/40 uppercase tracking-widest text-right">
+                    <div className="flex flex-col items-end gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-widest text-right">
                         <span className="flex items-center gap-2">
                             <span className="w-1 h-1 bg-green-500 rounded-full" />
                             Registry_Status: Active
@@ -345,7 +345,7 @@ export default function DiscoveryView() {
                                             "px-3 py-1 font-mono text-[9px] uppercase tracking-tighter transition-all",
                                             (filters.season || dateValues?.currentSeason) === s.value
                                                 ? "bg-primary text-primary-foreground font-black"
-                                                : "text-muted-foreground/60 hover:text-foreground"
+                                                : "text-muted-foreground hover:text-foreground"
                                         )}
                                     >
                                         {s.code}

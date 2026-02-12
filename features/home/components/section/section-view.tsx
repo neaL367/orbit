@@ -189,7 +189,7 @@ export function SectionView({
             {/* 2. Secondary Registry Nodes */}
             <div className="lg:col-span-5 flex flex-col gap-8">
               <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border-l border-primary/40 self-start">
-                <span className="font-mono text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Secondary_Nodes [0x04]</span>
+                <span className="font-mono text-[9px] font-black text-muted-foreground uppercase tracking-widest">Secondary_Nodes [0x04]</span>
               </div>
               <div className="grid grid-cols-2 gap-6 content-start">
                 {data.slice(1, 5).map((anime, index) => (
@@ -252,11 +252,11 @@ export function SectionView({
                   {/* Technical Telemetry Row */}
                   <div className="flex items-center gap-8 sm:gap-12 shrink-0 border-l border-white/5 sm:pl-10 h-12">
                     <div className="flex flex-col items-end gap-1 font-mono">
-                      <span className="text-[8px] text-white/20 uppercase tracking-[0.3em] font-bold">FORMAT</span>
+                      <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">FORMAT</span>
                       <span className="text-[10px] text-foreground font-black group-hover/list:text-primary transition-colors">{anime.format || '??'}</span>
                     </div>
                     <div className="flex flex-col items-end gap-1 font-mono">
-                      <span className="text-[8px] text-white/20 uppercase tracking-[0.3em] font-bold">SCORE</span>
+                      <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">SCORE</span>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] text-foreground font-black tracking-widest">{anime.averageScore ? `${anime.averageScore}%` : '---'}</span>
                         <div className={cn("w-1.5 h-1.5 rotate-45", anime.averageScore && anime.averageScore > 75 ? "bg-primary animate-pulse" : "bg-white/10")} />
@@ -276,7 +276,7 @@ export function SectionView({
         )}
 
         {variant === 'grid' && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
             {data.map((anime, index) => {
               if (!anime) return null
               const rank = showRank ? (page - 1) * perPage + index + 1 : undefined

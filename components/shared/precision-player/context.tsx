@@ -18,14 +18,16 @@ export function PrecisionPlayerProvider({
     videoId,
     title,
     id,
+    autoPlay,
 }: {
     children: React.ReactNode
     url?: string
     videoId?: string
     title?: string
     id?: string
+    autoPlay?: boolean
 }) {
-    const { state, handlers, refs } = usePrecisionPlayer({ url, videoId, title, id })
+    const { state, handlers, refs } = usePrecisionPlayer({ url, videoId, title, id, autoPlay })
 
     return (
         <RefsContext.Provider value={refs}>

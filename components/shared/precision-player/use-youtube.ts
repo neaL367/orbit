@@ -6,11 +6,12 @@ interface UseYouTubeProps {
     isMounted: boolean;
     muted: boolean;
     volume: number;
+    autoPlay?: boolean;
 }
 
-export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProps) {
-    const [hasStarted, setHasStarted] = useState(false);
-    const [playing, setPlaying] = useState(false);
+export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false }: UseYouTubeProps) {
+    const [hasStarted, setHasStarted] = useState(autoPlay);
+    const [playing, setPlaying] = useState(autoPlay);
     const [played, setPlayed] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isBuffer, setIsBuffer] = useState(false);
@@ -45,42 +46,44 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
     const startProgressLoop = useCallback(() => {
         if (progressInterval.current) clearInterval(progressInterval.current);
 
+        let lastAmbientSync = 0;
+
         progressInterval.current = setInterval(() => {
             const leader = playerRef.current;
             const follower = ambientPlayerRef.current;
 
             if (!leaderReadyRef.current || !leader) return;
 
-            const leaderTime = typeof leader.getCurrentTime === 'function' ? leader.getCurrentTime() : 0;
-            const followerTime = (follower && typeof follower.getCurrentTime === 'function') ? follower.getCurrentTime() : leaderTime;
-            const dur = leader.getDuration() ?? 0;
+            try {
+                // 1. High-frequency UI Progress update (10Hz)
+                const leaderTime = leader.getCurrentTime();
+                const dur = leader.getDuration();
 
-            if (dur > 0) {
-                setDuration(dur);
-                // We update setPlayed even during sync/wait so the UI progress 
-                // moves smoothly while the video plays under the mask.
-                setPlayed(leaderTime / dur);
-            }
-
-            // Only sync ambient if it's actually ready
-            if (follower && ambientReadyRef.current) {
-                const drift = leaderTime - followerTime;
-                const abs = Math.abs(drift);
-
-                if (abs > 0.75) {
-                    if (typeof follower.seekTo === 'function') follower.seekTo(leaderTime, true);
-                    return;
+                if (dur > 0) {
+                    setDuration(dur);
+                    setPlayed(leaderTime / dur);
                 }
 
-                if (abs > 0.12) {
-                    if (typeof follower.seekTo === 'function') follower.seekTo(followerTime + drift * 0.35, true);
-                }
+                // 2. Low-frequency Ambient Sync (2Hz)
+                const now = Date.now();
+                if (follower && ambientReadyRef.current && (now - lastAmbientSync > 500)) {
+                    lastAmbientSync = now;
+                    const followerTime = follower.getCurrentTime();
+                    const drift = leaderTime - followerTime;
+                    const abs = Math.abs(drift);
 
-                try {
-                    const rate = typeof leader.getPlaybackRate === 'function' ? leader.getPlaybackRate() : 1;
-                    if (rate && typeof follower.setPlaybackRate === 'function') follower.setPlaybackRate(rate);
-                } catch { }
-            }
+                    if (abs > 1.5) {
+                        follower.seekTo(leaderTime, true);
+                    } else if (abs > 0.4) {
+                        follower.seekTo(followerTime + drift * 0.4, true);
+                    }
+
+                    const rate = leader.getPlaybackRate();
+                    if (rate !== follower.getPlaybackRate()) {
+                        follower.setPlaybackRate(rate);
+                    }
+                }
+            } catch (err) { }
         }, 100);
     }, []);
 
@@ -226,8 +229,8 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                                         if (typeof ambientPlayerRef.current.playVideo === 'function') ambientPlayerRef.current.playVideo();
                                     } catch { }
                                 }
-                            }, 800);
-                        }, 1200);
+                            }, 300);
+                        }, 100);
                     }
                 } else {
                     setIsSyncing(false);
@@ -280,7 +283,15 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
                 if (typeof ambient?.pauseVideo === 'function') ambient.pauseVideo();
                 break;
         }
-    }, []);
+    }, [clearRestorationTimeouts, startProgressLoop]);
+
+    useEffect(() => {
+        if (playing) {
+            startProgressLoop();
+        } else {
+            if (progressInterval.current) clearInterval(progressInterval.current);
+        }
+    }, [playing, startProgressLoop]);
 
     useEffect(() => {
         console.log("[PrecisionPlayer] Init Effect Triggered", { hasStarted, videoId, isMounted });
@@ -407,7 +418,7 @@ export function useYouTube({ videoId, isMounted, muted, volume }: UseYouTubeProp
             progressInterval.current = null;
             setIsPlayerReady(false);
         };
-    }, [hasStarted, videoId, isMounted, onLeaderReady, onAmbientReady, clearRestorationTimeouts]);
+    }, [hasStarted, videoId, isMounted, onLeaderReady, onAmbientReady, clearRestorationTimeouts, onPlayerStateChange]);
 
     const handlePlayPause = useCallback(() => {
         const player = playerRef.current;

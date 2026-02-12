@@ -103,7 +103,10 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       {/* Day Sections */}
       <div className="space-y-32 pt-12">
         {displayedDays.map(({ index: dayIndex, name: dayName, isToday }, arrayIndex) => {
-          const offset = selectedDay === null ? arrayIndex : sortedDays.findIndex(d => d.index === dayIndex)
+          // Calculate the correct offset from "Today" based on the sorted list
+          // This ensures the date is always correct regardless of filtering
+          const offset = sortedDays.findIndex(d => d.index === dayIndex)
+
           const date = addDays(today, offset)
           const dateString = formatDateLabel(date)
           return (
@@ -115,6 +118,7 @@ export function ScheduleView({ data }: ScheduleViewProps) {
               schedulesByFormat={schedulesByDay[dayIndex]}
               formatTimeAction={formatTime}
               getStreamingLinksAction={getStreamingLinks}
+              priority={arrayIndex === 0}
             />
           )
         })}

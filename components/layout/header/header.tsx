@@ -46,7 +46,7 @@ function HeaderContent() {
         {/* Top Scanning Line */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-primary/10" />
 
-        <div className="w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
+        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
 
           {/* Logo Section */}
           <div className="flex items-center gap-12 xl:gap-20">
@@ -62,20 +62,20 @@ function HeaderContent() {
               <span className="font-mono text-lg sm:text-2xl font-bold tracking-tighter uppercase leading-none">
                 Anime<span className="text-primary italic">X</span>
               </span>
-              <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.5em] text-muted-foreground font-bold leading-none mt-1.5 sm:mt-2.5 opacity-60">
+              <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.5em] text-muted-foreground font-bold leading-none mt-1.5 sm:mt-2.5">
                 Index_Registry
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1">
               {menuItems.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href as Route}
                   className={cn(
                     "relative group/nav px-5 py-3 transition-all duration-300",
-                    isActive(item.href, item.sort) ? "text-primary" : "text-muted-foreground/60 hover:text-foreground"
+                    isActive(item.href, item.sort) ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <div className="flex flex-col items-center">
@@ -132,7 +132,8 @@ function HeaderContent() {
             {/* Mobile Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-3 text-foreground transition-all border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] rounded-md active:scale-95"
+              aria-label="Toggle menu"
+              className="lg:hidden p-3 text-foreground transition-all border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] rounded-md active:scale-95"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>

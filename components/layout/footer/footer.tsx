@@ -8,7 +8,7 @@ import { GITHUB_REPO_URL } from '@/lib/constants'
 function FooterContent() {
   return (
     <footer className="border-t border-border bg-background py-10 sm:py-16">
-      <div className="container mx-auto px-4 sm:px-6 md:px-12 lg:px-24">
+      <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-8 relative">
           {/* Vertical Decor Lines */}
           <div className="hidden lg:block absolute left-1/3 top-0 w-[1px] h-full bg-gradient-to-b from-border/50 via-border/10 to-transparent" />

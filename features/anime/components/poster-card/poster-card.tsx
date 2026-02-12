@@ -73,7 +73,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                         showTechnicalDetails={false}
                         className={cn(
                             "transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                            isHovered ? "scale-110 brightness-[0.7] saturate-[1.2] blur-[2px]" : "scale-100 brightness-[0.9]"
+                            isHovered ? "scale-105 brightness-110 saturate-120 blur-0 grayscale-0" : "scale-100 brightness-[0.8] grayscale-[0.4]"
                         )}
                     />
                 </div>

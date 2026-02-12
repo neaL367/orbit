@@ -28,6 +28,7 @@ type DaySectionProps = {
     icon?: string | null
     color?: string | null
   }>
+  priority?: boolean
 }
 
 export function DaySection({
@@ -37,6 +38,7 @@ export function DaySection({
   schedulesByFormat,
   formatTimeAction,
   getStreamingLinksAction,
+  priority = false,
 }: DaySectionProps) {
   const headerRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -102,7 +104,7 @@ export function DaySection({
           </div>
         ) : (
           <div className="space-y-20">
-            {formats.map((format) => {
+            {formats.map((format, formatIndex) => {
               const schedules = schedulesByFormat[format] || []
               if (schedules.length === 0) return null
 
@@ -121,7 +123,7 @@ export function DaySection({
 
                   {/* Schedule Cards Stack (Registry Flow) */}
                   <div className="flex flex-col gap-2">
-                    {schedules.map((schedule) => {
+                    {schedules.map((schedule, index) => {
                       const media = schedule.media
                       if (!media) return null
 
@@ -132,6 +134,7 @@ export function DaySection({
                           media={media}
                           formatTimeAction={formatTimeAction}
                           getStreamingLinksAction={getStreamingLinksAction}
+                          priority={priority && formatIndex === 0 && index < 6}
                         />
                       )
                     })}

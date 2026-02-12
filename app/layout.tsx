@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         className={cn(
           geistSans.variable,
           geistMono.variable,
-          'antialiased font-sans bg-background text-foreground relative'
+          'antialiased font-sans bg-background text-foreground relative overflow-x-hidden'
         )}
       >
         <QueryProviders>
@@ -120,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }}
           />
           <main className="min-h-screen pb-20 relative px-6 md:px-12 lg:px-24">
-            <div className="max-w-[1400px] mx-auto">
+            <div className="max-w-[1600px] mx-auto">
               {children}
             </div>
           </main>

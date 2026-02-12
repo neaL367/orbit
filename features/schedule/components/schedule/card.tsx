@@ -18,6 +18,7 @@ type ScheduleCardProps = {
     icon?: string | null;
     color?: string | null;
   }>;
+  priority?: boolean;
 };
 
 function ScheduleCardComponent({
@@ -25,6 +26,7 @@ function ScheduleCardComponent({
   media,
   formatTimeAction,
   getStreamingLinksAction,
+  priority = false,
 }: ScheduleCardProps) {
   const router = useRouter();
   const now = useCurrentTime();
@@ -82,6 +84,7 @@ function ScheduleCardComponent({
             sizes="100px"
             showTechnicalDetails={false}
             className="w-full h-full object-cover active group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+            priority={priority}
           />
         )}
         {isAiringNow && (

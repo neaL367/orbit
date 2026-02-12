@@ -31,6 +31,10 @@ export function PauseMask() {
                     ? "opacity-0 pointer-events-none duration-500 delay-0"
                     : "opacity-100 pointer-events-auto duration-0 delay-0"
             )}
+            style={{
+                willChange: "opacity",
+                transform: "translate3d(0,0,0)"
+            }}
         >
             {/* Tactical Backdrop */}
             {thumbnailUrl && (

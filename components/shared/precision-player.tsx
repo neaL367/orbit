@@ -10,6 +10,7 @@ interface PrecisionPlayerProps {
     videoId?: string
     title?: string
     id?: string
+    autoPlay?: boolean
 }
 
 function PrecisionPlayerContent() {

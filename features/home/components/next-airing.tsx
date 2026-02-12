@@ -199,7 +199,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                         src={scheduleImage}
                                         alt=""
                                         fill
-                                        className="object-cover opacity-20 blur-[60px] scale-110 saturate-[2]"
+                                        className="object-cover opacity-40 md:opacity-20 blur-[30px] md:blur-[60px] scale-110 saturate-[2]"
                                         loading="eager"
                                         priority={true}
                                     />
@@ -212,7 +212,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
 
                     {/* Interactive Content Container */}
                     <div className="absolute inset-0 flex items-center px-6 md:px-12 lg:px-24 pt-8 md:pt-0 pb-20 md:pb-0">
-                        <div className="max-w-4xl lg:max-w-md xl:max-w-2xl 2xl:max-w-3xl w-full space-y-8 md:space-y-10 z-10 transition-all duration-500">
+                        <div className="max-w-4xl md:max-w-[50%] lg:max-w-md xl:max-w-2xl 2xl:max-w-3xl w-full space-y-8 md:space-y-10 z-10 transition-all duration-500">
                             {/* Technical Header */}
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-3 text-primary">
@@ -294,7 +294,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                         </div>
 
                         {/* Right Side Cover (Desktop) */}
-                        <div className="hidden lg:block absolute right-24 top-1/2 -translate-y-1/2 h-[75%] aspect-[2/3] transition-all duration-1000 group-hover:scale-105">
+                        <div className="hidden md:block absolute right-4 lg:right-24 top-1/2 -translate-y-1/2 h-[60%] md:h-[65%] lg:h-[75%] aspect-[2/3] transition-all duration-1000 group-hover:scale-105">
                             <div className="relative w-full h-full">
                                 <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b border-l border-primary/40" />
                                 <div className="w-full h-full border border-primary/20 bg-secondary/30 relative z-10 overflow-hidden shadow-2xl transition-all duration-700 group-hover:border-primary/50">
@@ -330,6 +330,7 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                             e.preventDefault()
                                             setActiveIndex(i)
                                         }}
+                                        aria-label={`Select item ${i + 1}`}
                                         className={`group relative h-4 flex items-center justify-center transition-all ${i === activeIndex ? 'w-10 sm:w-16' : 'w-3 sm:w-4 hover:w-8'}`}
                                     >
                                         <div className={`h-[1px] w-full transition-all duration-500 ${i === activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'}`} />

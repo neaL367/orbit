@@ -7,9 +7,10 @@ interface UsePrecisionPlayerProps {
     videoId?: string;
     title?: string;
     id?: string;
+    autoPlay?: boolean;
 }
 
-export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "player" }: UsePrecisionPlayerProps) {
+export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "player", autoPlay }: UsePrecisionPlayerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
     const isSeekingRef = useRef(false);
@@ -75,7 +76,7 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         restart,
         handleSeekMouseDown: youtubeHandleSeekMouseDown,
         handleSeekMouseUp: youtubeHandleSeekMouseUp,
-    } = useYouTube({ videoId, isMounted, muted, volume });
+    } = useYouTube({ videoId, isMounted, muted, volume, autoPlay });
 
     const handleSeekMouseDown = useCallback(() => {
         isSeekingRef.current = true;

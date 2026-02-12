@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { TopBar } from "./top-bar"
 import { BottomBar } from "./bottom-bar"
 import { PauseMask } from "./pause-mask"
+import { VolumeUI } from "./volume-ui"
 import { usePrecisionPlayerState, usePrecisionPlayerHandlers, usePrecisionPlayerRefs } from "./context"
 
 const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElementRef }: any) => (
@@ -17,10 +18,121 @@ const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElemen
                 )}
             />
         )}
+        <div className="precision-dither-overlay" />
     </div>
 ));
 
 VideoLayer.displayName = "VideoLayer";
+
+const PrecisionFilters = memo(({ isFullscreen }: { isFullscreen: boolean }) => (
+    <>
+        <svg className="absolute w-0 h-0 pointer-events-none opacity-0" aria-hidden="true">
+            <filter id="precision-ultrasharpen" colorInterpolationFilters="sRGB">
+                <feConvolveMatrix
+                    order="3"
+                    kernelMatrix="-0.3 -0.3 -0.3 -0.3 3.4 -0.3 -0.3 -0.3 -0.3"
+                    preserveAlpha="true"
+                    result="sharpened"
+                />
+                <feComponentTransfer in="sharpened">
+                    <feFuncR type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
+                    <feFuncG type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
+                    <feFuncB type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
+                </feComponentTransfer>
+            </filter>
+            <filter id="imax-grain">
+                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" result="noise" />
+                <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.1 0" />
+            </filter>
+        </svg>
+
+        <style jsx global>{`
+            :root {
+                --ps-scale-window: 1.5;
+                --ps-scale-full: 2.25;
+            }
+
+            .ytp-chrome-top, .ytp-chrome-bottom, .ytp-gradient-top, .ytp-gradient-bottom { 
+                display: none !important; 
+            }
+
+            .supersampled-frame {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                width: calc(var(--ps-scale-window) * 100%) !important;
+                height: calc(var(--ps-scale-window) * 100%) !important;
+                transform: translate3d(-50%, -50%, 0) scale(calc(1 / var(--ps-scale-window))) !important;
+                transform-origin: center center;
+                backface-visibility: hidden;
+                will-change: transform;
+                contain: strict;
+            }
+
+            .precision-frame-cut {
+                clip-path: polygon(
+                    8px 0, calc(100% - 24px) 0, 100% 24px, 
+                    100% calc(100% - 8px), calc(100% - 8px) 100%, 
+                    24px 100%, 0 calc(100% - 24px), 
+                    0 8px
+                );
+            }
+
+            .supersampled-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate3d(-50%, -50%, 0);
+                width: 100%;
+                height: 100%;
+                aspect-ratio: 16 / 9;
+                overflow: hidden;
+                contain: strict;
+                isolation: isolate;
+                background: black;
+            }
+
+            .supersampled-frame iframe {
+                width: 100% !important;
+                height: 100% !important;
+                border: 0;
+                transform: scale(1.08) !important;
+                filter: url(#precision-ultrasharpen) contrast(1.04) brightness(1) saturate(1.4);
+                image-rendering: -webkit-optimize-contrast;
+            }
+            
+            .precision-dither-overlay {
+                position: absolute;
+                inset: -5px;
+                z-index: 20;
+                pointer-events: none;
+                filter: url(#imax-grain);
+                mix-blend-mode: overlay;
+                opacity: 0.12;
+                animation: dither-cycle 0.1s steps(2) infinite;
+            }
+
+            @keyframes dither-cycle {
+                0% { transform: translate(0,0); }
+                50% { transform: translate(1px, 1px); }
+                100% { transform: translate(0,0); }
+            }
+
+            .supersampled-container::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.3) 100%);
+                backdrop-filter: brightness(1.02);
+                opacity: 0.4;
+                z-index: 10;
+            }
+        `}</style>
+    </>
+));
+
+PrecisionFilters.displayName = "PrecisionFilters";
 
 export function PlayerUI() {
     const state = usePrecisionPlayerState()
@@ -50,90 +162,18 @@ export function PlayerUI() {
             onMouseMove={handleMouseMove}
             onTouchStart={handleMouseMove}
             className={cn(
-                "group relative transition-all duration-300 ease-in-out w-full border-white/5",
+                "group relative transition-[border-color,opacity] duration-300 ease-in-out w-full border-white/5",
                 isFullscreen
-                    ? "fixed !inset-0 !m-0 !p-0 z-[99999] bg-black h-screen w-screen overflow-hidden is-fullscreen"
-                    : "h-auto border shadow-2xl index-cut-tr aspect-video overflow-hidden"
+                    ? "fixed !inset-0 !m-0 !p-0 z-[99999] bg-black h-dvh w-dvw overflow-hidden is-fullscreen"
+                    : "h-auto border shadow-2xl aspect-video overflow-hidden precision-frame-cut"
             )}
+            style={{
+                transform: isFullscreen ? 'none' : 'translate3d(0,0,0)',
+                perspective: '1000px',
+                backfaceVisibility: 'hidden'
+            }}
         >
-            <svg className="absolute w-0 h-0 pointer-events-none opacity-0" aria-hidden="true">
-                <filter id="precision-sharpen" colorInterpolationFilters="sRGB">
-                    {/* 1. Softened Tactical Sharpening (Prevents Halos) */}
-                    <feConvolveMatrix
-                        order="3"
-                        preserveAlpha="true"
-                        kernelMatrix="-0.1 -0.1 -0.1 -0.1 1.8 -0.1 -0.1 -0.1 -0.1"
-                    />
-
-                    {/* 2. Precision HDR Finish (Punchier Gamma) */}
-                    <feComponentTransfer>
-                        <feFuncR type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
-                        <feFuncG type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
-                        <feFuncB type="gamma" amplitude="1.08" exponent="1.08" offset="-0.005" />
-                    </feComponentTransfer>
-
-                    {/* 3. Anti-Banding Master Dither (Hides blocky artifacts) */}
-                    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" result="noise" />
-                    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0" result="dither" />
-                    <feComposite in="SourceGraphic" in2="dither" operator="over" />
-
-                    {/* 4. Balanced Vibrancy */}
-                    <feColorMatrix type="saturate" values="1.18" />
-                </filter>
-            </svg>
-
-            <style jsx global>{`
-                .ytp-chrome-top, .ytp-chrome-bottom, .ytp-gradient-top, .ytp-gradient-bottom { 
-                    display: none !important; 
-                }
-                
-                /* Dynamic Tactical Scaling: 1.4x (Window) | 1.75x (Full) */
-                .supersampled-frame {
-                    position: absolute !important;
-                    top: 50% !important;
-                    left: 50% !important;
-                    /* Fluid Math: 140% base, 175% on .is-fullscreen */
-                    width: 140% !important;
-                    height: 140% !important;
-                    transform: translate(-50%, -50%) scale(0.71428) translate3d(0,0,0);
-                    transform-origin: center center;
-                    filter: url(#precision-sharpen);
-                    backface-visibility: hidden;
-                    transform-style: preserve-3d;
-                    will-change: transform, filter;
-                    -webkit-font-smoothing: antialiased;
-                    image-rendering: -webkit-optimize-contrast;
-                    image-rendering: crisp-edges;
-                }
-
-                :global(.is-fullscreen) .supersampled-frame {
-                    width: 175% !important;
-                    height: 175% !important;
-                    transform: translate(-50%, -50%) scale(0.571428) translate3d(0,0,0) !important;
-                }
-                
-                .supersampled-frame iframe {
-                    width: 100% !important;
-                    height: 100% !important;
-                    border: 0;
-                }
-
-                .supersampled-container {
-                    /* Precision Aspect Lock: Centered 16:9 within parent */
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 100%;
-                    height: auto;
-                    aspect-ratio: 16 / 9;
-                    max-width: 100%;
-                    max-height: 100%;
-                    overflow: hidden;
-                    contain: strict;
-                    background: black;
-                }
-            `}</style>
+            <PrecisionFilters isFullscreen={isFullscreen} />
 
             <div className={cn(
                 "w-full h-full relative overflow-hidden bg-black flex items-center justify-center",
@@ -150,7 +190,7 @@ export function PlayerUI() {
                         <PauseMask />
 
                         {/* Video Layer wrapper */}
-                        <div className="absolute inset-0 z-20">
+                        <div className="absolute inset-0 z-20 overflow-hidden">
                             <VideoLayer
                                 isTerminated={isTerminated}
                                 safeVideoId={safeVideoId}
@@ -163,12 +203,19 @@ export function PlayerUI() {
                         {hasStarted && isPlayerReady && (
                             <div className="absolute inset-0 z-30 cursor-pointer" onClick={handlePlayPause} />
                         )}
+                        <VolumeUI />
 
                         {/* UI Controls */}
-                        <div className={cn(
-                            "absolute inset-0 z-[60] flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
-                            controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
-                        )}>
+                        <div
+                            className={cn(
+                                "absolute inset-0 z-[60] flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
+                                controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
+                            )}
+                            style={{
+                                willChange: "opacity",
+                                transform: "translate3d(0,0,0)"
+                            }}
+                        >
                             <div className="pointer-events-auto"><TopBar /></div>
                             <div className="pointer-events-auto mt-auto"><BottomBar /></div>
                         </div>
