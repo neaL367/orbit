@@ -6,7 +6,14 @@ import { PauseMask } from "./pause-mask"
 import { VolumeUI } from "./volume-ui"
 import { usePrecisionPlayerState, usePrecisionPlayerHandlers, usePrecisionPlayerRefs } from "./context"
 
-const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElementRef }: any) => (
+interface VideoLayerProps {
+    isTerminated: boolean;
+    safeVideoId: string;
+    isFullscreen: boolean;
+    playerElementRef: React.RefObject<HTMLDivElement | null>;
+}
+
+const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElementRef }: VideoLayerProps) => (
     <div className="supersampled-container">
         {!isTerminated && (
             <div
@@ -24,7 +31,7 @@ const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElemen
 
 VideoLayer.displayName = "VideoLayer";
 
-const PrecisionFilters = memo(({ isFullscreen }: { isFullscreen: boolean }) => (
+const PrecisionFilters = memo(() => (
     <>
         <svg className="absolute w-0 h-0 pointer-events-none opacity-0" aria-hidden="true">
             <filter id="precision-ultrasharpen" colorInterpolationFilters="sRGB">
@@ -140,7 +147,6 @@ export function PlayerUI() {
     const refs = usePrecisionPlayerRefs()
 
     const {
-        isMobile,
         hasStarted,
         isPlayerReady,
         isTerminated,
@@ -173,7 +179,7 @@ export function PlayerUI() {
                 backfaceVisibility: 'hidden'
             }}
         >
-            <PrecisionFilters isFullscreen={isFullscreen} />
+            <PrecisionFilters />
 
             <div className={cn(
                 "w-full h-full relative overflow-hidden bg-black flex items-center justify-center",
@@ -186,6 +192,15 @@ export function PlayerUI() {
                             isFullscreen && "flex items-center justify-center"
                         )}
                         onClick={() => !hasStarted && onSetHasStarted(true)}
+                        onKeyDown={(e) => {
+                            if (!hasStarted && (e.key === 'Enter' || e.key === ' ')) {
+                                e.preventDefault();
+                                onSetHasStarted(true);
+                            }
+                        }}
+                        tabIndex={hasStarted ? -1 : 0}
+                        role={hasStarted ? undefined : "button"}
+                        aria-label={hasStarted ? undefined : "Initialize Player"}
                     >
                         <PauseMask />
 
@@ -201,7 +216,19 @@ export function PlayerUI() {
 
                         {/* Overlay elements... */}
                         {hasStarted && isPlayerReady && (
-                            <div className="absolute inset-0 z-30 cursor-pointer" onClick={handlePlayPause} />
+                            <div
+                                className="absolute inset-0 z-30 cursor-pointer"
+                                onClick={handlePlayPause}
+                                onKeyDown={(e) => {
+                                    if (e.key === ' ' || e.key === 'k') {
+                                        e.preventDefault();
+                                        handlePlayPause();
+                                    }
+                                }}
+                                tabIndex={0}
+                                role="button"
+                                aria-label="Toggle Play/Pause"
+                            />
                         )}
                         <VolumeUI />
 

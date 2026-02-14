@@ -24,6 +24,15 @@ export function AnimeTrailer({ videoId, title, thumbnail }: AnimeTrailerProps) {
         <div
             className="w-full relative group/trailer cursor-pointer"
             onClick={() => !hasInteracted && setHasInteracted(true)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (!hasInteracted) setHasInteracted(true);
+                }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`Play trailer for ${title || 'anime'}`}
         >
             {!hasInteracted ? (
                 <div

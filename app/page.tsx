@@ -73,6 +73,7 @@ export default async function HomePage() {
         <Suspense fallback={<SectionSkeleton variant="grid" />}>
           <AnimeSection
             type="seasonal"
+            title="Seasonal"
             subtitle="Current_Cycle"
             viewAllHref="/anime?sort=seasonal"
             variant="grid"
@@ -82,7 +83,8 @@ export default async function HomePage() {
         <Suspense fallback={<SectionSkeleton variant="list" />}>
           <AnimeSection
             type="upcoming"
-            subtitle="Upcoming_Cycle"
+            title="Upcoming"
+            subtitle="Future_Log"
             viewAllHref="/anime?sort=seasonal"
             variant="list"
             perPage={5}

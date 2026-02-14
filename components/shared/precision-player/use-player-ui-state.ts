@@ -8,7 +8,6 @@ export function usePlayerUIState() {
     const [controlsVisible, setControlsVisible] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isFakeFullscreen, setIsFakeFullscreen] = useState(false);
-    const [isEnhanced, setIsEnhanced] = useState(true);
 
     useEffect(() => {
         setIsMounted(true);
@@ -19,8 +18,7 @@ export function usePlayerUIState() {
         window.addEventListener("resize", handleResize);
 
         const handleFullscreenChange = () => {
-            const doc = document as any;
-            setIsFullscreen(!!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement));
+            setIsFullscreen(!!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement));
         };
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         document.addEventListener("webkitfullscreenchange", handleFullscreenChange);

@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Suspense, useSyncExternalStore, useState } from 'react'
-import { Menu, X, Terminal, Globe, Cpu } from 'lucide-react'
+import { Suspense, useSyncExternalStore, useState, useEffect } from 'react'
+import { Menu, X, Terminal, Cpu, Search, Command } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SystemClock } from './system-clock'
+import { CommandPalette } from './command-palette'
 import type { Route } from 'next'
 
 const menuItems = [
@@ -22,6 +23,10 @@ function HeaderContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
   const mounted = useSyncExternalStore(
     emptySubscriber,
     () => true,
@@ -38,93 +43,138 @@ function HeaderContent() {
     return pathname === href
   }
 
+  // Autohide Logic: Track scroll telemetry
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+
+      // Show if scrolling up or at the top of the registry
+      if (currentScrollY < lastScrollY || currentScrollY < 100 || isMenuOpen) {
+        setIsVisible(true)
+      }
+      // Hide if scrolling down past threshold
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false)
+      }
+
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY, isMenuOpen])
+
+  // Sync Telemetry with document
+  useEffect(() => {
+    document.documentElement.style.setProperty('--nav-visible', isVisible ? '1' : '0')
+    if (isSearchOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }, [isVisible, isSearchOpen])
+
+  // Global Command Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsSearchOpen(prev => !prev)
+      }
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   if (!mounted) return <header className="h-20 border-b border-white/5" />
 
   return (
     <>
-      <header className="sticky top-0 inset-x-0 z-[110] h-20 bg-background/60 backdrop-blur-2xl border-b border-white/5 flex items-center">
+      <header className={cn(
+        "sticky top-0 inset-x-0 z-110 h-20 bg-background/60 backdrop-blur-2xl border-b border-white/5 flex items-center transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
+        isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+      )}>
         {/* Top Scanning Line */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-primary/10" />
+        <div className="absolute top-0 left-0 w-full h-px bg-primary/10" />
 
-        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24 flex justify-between items-center">
+        <div className="w-full h-full px-6 flex items-center relative">
 
-          {/* Logo Section */}
-          <div className="flex items-center gap-12 xl:gap-20">
+          {/* ZONE 01: IDENTITY (Left Anchor) */}
+          <div className="flex items-center z-10">
             <Link
               href="/"
               onClick={() => setIsMenuOpen(false)}
-              className="flex flex-col group z-[110] relative flex-shrink-0"
+              className="flex flex-col group relative"
             >
-              {/* Logo Corner Decors */}
-              <div className="absolute -top-1.5 -left-3 w-2 h-2 border-t border-l border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="absolute -bottom-1.5 -right-3 w-2 h-2 border-b border-r border-primary/40 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <span className="font-mono text-lg sm:text-2xl font-bold tracking-tighter uppercase leading-none">
+              <div className="absolute -top-1 -left-2 w-1.5 h-1.5 border-t border-l border-primary/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="font-mono text-xl font-bold tracking-tighter uppercase leading-none">
                 Anime<span className="text-primary italic">X</span>
               </span>
-              <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.5em] text-muted-foreground font-bold leading-none mt-1.5 sm:mt-2.5">
-                Index_Registry
+              <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-muted-foreground/60 font-black leading-none mt-1">
+                INDEX_REGISTRY
               </span>
             </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href as Route}
-                  className={cn(
-                    "relative group/nav px-5 py-3 transition-all duration-300",
-                    isActive(item.href, item.sort) ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <div className="flex flex-col items-center">
-                    <span className={cn(
-                      "font-mono text-[9px] font-black tracking-widest opacity-0 -translate-y-1 transition-all group-hover/nav:opacity-100 group-hover/nav:translate-y-0",
-                      isActive(item.href, item.sort) && "opacity-100 translate-y-0 text-primary/40"
-                    )}>
-                      {item.code}
-                    </span>
-                    <span className="font-mono text-[13px] font-black uppercase tracking-widest mt-0.5">
-                      {item.label}
-                    </span>
-                  </div>
-
-                  {/* Indicator Line */}
-                  {isActive(item.href, item.sort) && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-primary shadow-[0_0_10px_var(--primary)]" />
-                  )}
-                </Link>
-              ))}
-            </nav>
           </div>
 
-          {/* System Telemetry Section */}
-          <div className="flex items-center gap-8">
-            <div className="hidden xl:flex items-center gap-10">
-              <div className="flex flex-col items-end gap-1.5 border-r border-white/10 pr-10">
-                <div className="flex items-center gap-2 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">
-                  <Terminal className="w-2.5 h-2.5" />
-                  Kernel_Clock
-                </div>
-                <div className="font-mono text-[13px] font-black text-foreground/80 tracking-widest">
+          {/* ZONE 02: NAVIGATION (Absolute Center) */}
+          <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1">
+            {menuItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href as Route}
+                className={cn(
+                  "relative group/nav px-4 py-2 transition-all duration-300",
+                  isActive(item.href, item.sort) ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="font-mono text-[12px] font-black uppercase tracking-[0.2em]">
+                  {item.label}
+                </span>
+                {isActive(item.href, item.sort) && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-px bg-primary shadow-[0_0_8px_var(--primary)]" />
+                )}
+              </Link>
+            ))}
+          </nav>
+
+          {/* ZONE 03: COMMAND & TELEMETRY Section */}
+          <div className="flex items-center gap-6 xl:gap-10 ml-auto">
+            {/* Minimal Search Trigger */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="hidden xl:flex items-center gap-3 px-3 py-1.5 bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/3 transition-all index-cut-tr group/search"
+            >
+              <Search className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50">Command_Inquiry</span>
+              <div className="flex items-center gap-1 border border-white/10 px-1 py-0.5 rounded-sm">
+                <Command className="w-2.5 h-2.5 text-muted-foreground/30" />
+                <span className="font-mono text-[8px] font-bold text-muted-foreground/30">K</span>
+              </div>
+            </button>
+
+            <div className="hidden xl:block h-8 w-px bg-white/10" />
+
+            {/* Condensed Telemetry */}
+            <div className="hidden lg:flex items-center gap-6">
+              <div className="flex flex-col items-end">
+                <span className="font-mono text-[7px] font-black text-muted-foreground/30 uppercase tracking-widest leading-none mb-1">
+                  SYS_CLK
+                </span>
+                <div className="font-mono text-[11px] font-black text-foreground/70 tracking-tighter text-right">
                   <SystemClock />
                 </div>
               </div>
 
-              <div className="flex flex-col items-end gap-1.5">
-                <div className="flex items-center gap-2 font-mono text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/30">
-                  <Globe className="w-2.5 h-2.5" />
-                  Network_Link
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]" />
-                    <span className="font-mono text-[11px] font-black text-foreground uppercase tracking-widest">Active</span>
-                  </div>
-                  <div className="px-2 py-0.5 border border-white/5 bg-white/[0.03] rounded-sm font-mono text-[9px] font-black text-muted-foreground/40">
-                    AX-NODE_01
-                  </div>
+              <div className="flex flex-col items-end">
+                <span className="font-mono text-[7px] font-black text-muted-foreground/30 uppercase tracking-widest leading-none mb-1">
+                  LNK_STT
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="font-mono text-[9px] font-black text-foreground/50 uppercase tracking-widest">ACTIVE</span>
                 </div>
               </div>
             </div>
@@ -132,10 +182,9 @@ function HeaderContent() {
             {/* Mobile Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-              className="lg:hidden p-3 text-foreground transition-all border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] rounded-md active:scale-95"
+              className="lg:hidden p-2 text-foreground/60 transition-all border border-white/5 bg-white/2 hover:bg-white/5 rounded-md active:scale-95 ml-4"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -144,17 +193,49 @@ function HeaderContent() {
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
-          "fixed inset-0 z-[105] bg-background/95 backdrop-blur-3xl transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)]",
+          "fixed inset-0 z-105 bg-background/95 backdrop-blur-3xl transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)]",
           isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
         )}
       >
-        {/* Background Grid for Mobile Menu */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#888_1px,transparent_1px),linear-gradient(to_bottom,#888_1px,transparent_1px)] bg-[size:40px_40px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#888_1px,transparent_1px),linear-gradient(to_bottom,#888_1px,transparent_1px)] bg-size-[40px_40px]" />
         </div>
 
         <div className="flex flex-col h-full pt-32 px-8 gap-12 max-w-lg mx-auto relative z-10">
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <div className="flex flex-col gap-4 mb-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-primary/40 font-black flex items-center gap-2">
+                <Search className="w-3 h-3" />
+                Archive_Inquiry
+              </span>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    id="mobile-search"
+                    placeholder="LOCATE_DATA..."
+                    className="w-full bg-white/3 border border-white/5 px-4 py-4 font-mono text-[11px] uppercase tracking-widest text-foreground outline-none focus:border-primary/40 focus:bg-white/5 transition-all index-cut-tr"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = (e.target as HTMLInputElement).value;
+                        if (val) window.location.href = `/anime?search=${encodeURIComponent(val)}`;
+                      }
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    const input = document.getElementById('mobile-search') as HTMLInputElement;
+                    if (input?.value) window.location.href = `/anime?search=${encodeURIComponent(input.value)}`;
+                  }}
+                  className="px-8 py-4 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:bg-primary index-cut-tr flex items-center gap-2"
+                >
+                  GO
+                  <div className="w-1 h-1 bg-current rotate-45" />
+                </button>
+              </div>
+            </div>
+
             <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-primary/40 font-black">Main_Navigation</span>
             <nav className="flex flex-col gap-2">
               {menuItems.map((item, index) => (
@@ -164,7 +245,7 @@ function HeaderContent() {
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
                     "group relative flex items-center justify-between p-6 border border-white/5 transition-all duration-300",
-                    isActive(item.href, item.sort) ? "bg-primary border-primary" : "bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
+                    isActive(item.href, item.sort) ? "bg-primary border-primary" : "bg-white/2 hover:bg-white/5 hover:border-white/10"
                   )}
                   style={{ transitionDelay: `${index * 50}ms` }}
                 >
@@ -182,11 +263,11 @@ function HeaderContent() {
 
           <div className="mt-auto pb-12 space-y-8">
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 border border-white/5 bg-white/[0.01]">
+              <div className="p-4 border border-white/5 bg-white/1">
                 <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Uptime</span>
                 <span className="font-mono text-xs font-black text-emerald-500">99.98%</span>
               </div>
-              <div className="p-4 border border-white/5 bg-white/[0.01]">
+              <div className="p-4 border border-white/5 bg-white/1">
                 <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Protocol</span>
                 <span className="font-mono text-xs font-black text-blue-500">HTTPS_V3</span>
               </div>
@@ -198,6 +279,12 @@ function HeaderContent() {
           </div>
         </div>
       </div>
+
+      <CommandPalette
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        menuItems={menuItems}
+      />
     </>
   )
 }

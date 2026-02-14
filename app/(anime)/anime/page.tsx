@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function DiscoveryPage() {
     return (
-        <Suspense fallback={<div className="h-screen w-full shimmer" />}>
+        <Suspense fallback={<div className="h-dvh w-full shimmer" />}>
             <DiscoveryView />
         </Suspense>
     )

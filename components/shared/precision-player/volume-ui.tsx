@@ -1,10 +1,9 @@
 import { useRef, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { usePrecisionPlayerState, usePrecisionPlayerHandlers } from "./context"
+import { usePrecisionPlayerState } from "./context"
 
 export function VolumeUI() {
     const { volume, muted, playing } = usePrecisionPlayerState()
-    const { onSetVolume } = usePrecisionPlayerHandlers()
     const [isVisible, setIsVisible] = useState(false)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const prevVolume = useRef(volume)
@@ -45,29 +44,32 @@ export function VolumeUI() {
                 </div>
 
                 <div
-                    className="bg-primary/95 border border-white/20 backdrop-blur-xl px-2 py-1 flex flex-col items-center min-w-[54px]"
+                    className="bg-primary/95 border border-white/20 backdrop-blur-xl px-2 py-1 flex flex-col items-center min-w-[54px] relative"
                     style={{ clipPath: 'polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%)' }}
                 >
-                    <span className="font-mono text-[8px] font-black text-black leading-none opacity-60">AUD_GAIN</span>
                     <span className="font-mono text-[16px] font-bold text-black leading-none mt-1">
                         {muted ? "00" : Math.round(volume).toString().padStart(2, '0')}
                     </span>
+                    <div className="w-full h-[1px] bg-black/10 my-1" />
+                    <span className="font-mono text-[5px] text-black/40 font-black uppercase">Ref: 0xPrecision</span>
                 </div>
             </div>
 
-            {/* Tactical Status Lines */}
-            <div className="flex flex-col gap-0.5">
-                {[...Array(3)].map((_, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            "w-4 h-0.5 bg-primary/40",
-                            i === 1 && "w-6",
-                            isVisible && playing ? "animate-pulse" : ""
-                        )}
-                        style={{ animationDelay: `${i * 100}ms` }}
-                    />
-                ))}
+            {/* Tactical Status Lines & IMAX Badge */}
+            <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col gap-0.5">
+                    {[...Array(3)].map((_, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "w-4 h-0.5 bg-primary/40",
+                                i === 1 && "w-6",
+                                isVisible && playing ? "animate-pulse" : ""
+                            )}
+                            style={{ animationDelay: `${i * 100}ms` }}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     )

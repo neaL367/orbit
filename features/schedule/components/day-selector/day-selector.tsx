@@ -53,26 +53,31 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
             <div
                 ref={headerRef}
                 className={cn(
-                    "sticky top-16 z-30 pt-4 pb-0 transition-all duration-300 backdrop-blur-sm",
-                    "-mx-6 md:-mx-12 lg:-mx-24 px-6 md:px-12 lg:px-24",
-                    isStuck ? "bg-background/90" : "bg-transparent",
-                    "will-change-[background-color] contain-paint"
+                    "sticky z-40 pt-6 transition-all duration-500",
+                    isStuck ? "bg-background border-b border-white/5 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" : "bg-transparent py-6",
+                    "will-change-[padding,background-color,top] select-none"
                 )}
+                style={{
+                    top: `calc(var(--nav-visible, 1) * 80px)`
+                }}
             >
-                <div className="max-w-[1400px] mx-auto">
-                    <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide pb-4">
+                <div className="max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24">
+                    <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide no-scrollbar -mx-4 px-4">
                         {/* All Days Button */}
                         <button
                             onClick={() => onSelectDayAction(null)}
                             className={cn(
-                                "relative px-4 py-2 border font-mono text-[10px] uppercase transition-all shrink-0 font-bold whitespace-nowrap",
+                                "flex flex-col items-start gap-1 p-3 border transition-all duration-300 min-w-[100px]",
                                 selectedDay === null
-                                    ? "bg-foreground text-background border-foreground shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]"
-                                    : "border-border hover:bg-white/[0.04] text-muted-foreground hover:text-foreground"
+                                    ? "bg-primary border-primary text-background shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                                    : "border-white/10 hover:border-white/30 text-muted-foreground hover:text-foreground bg-white/2"
                             )}
                         >
-                            All Days
+                            <span className="font-mono text-[8px] uppercase tracking-tighter opacity-60">REGISTRY//</span>
+                            <span className="font-mono text-[11px] font-black uppercase tracking-widest whitespace-nowrap">Global_Log</span>
                         </button>
+
+                        <div className="w-px h-8 bg-white/5 mx-2 shrink-0" />
 
                         {/* Day Tabs */}
                         {days.map(({ index: dayIndex, name: dayName, isToday }) => (
@@ -80,20 +85,28 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
                                 key={dayIndex}
                                 onClick={() => onSelectDayAction(dayIndex)}
                                 className={cn(
-                                    "relative px-4 py-2 border font-mono text-[10px] uppercase transition-all shrink-0 font-bold flex items-center gap-2 whitespace-nowrap",
+                                    "flex flex-col items-start gap-1 p-3 border transition-all duration-300 min-w-[110px] relative overflow-hidden group",
                                     selectedDay === dayIndex
-                                        ? "bg-foreground text-background border-foreground shadow-[2px_2px_0px_0px_rgba(255,255,255,0.1)]"
+                                        ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                                         : isToday
-                                            ? "border-primary/50 text-primary hover:bg-primary/10"
-                                            : "border-border hover:bg-white/[0.04] text-muted-foreground hover:text-foreground"
+                                            ? "border-primary/40 text-primary hover:bg-primary/5 hover:border-primary"
+                                            : "border-white/10 hover:border-white/30 text-muted-foreground hover:text-foreground bg-white/1"
                                 )}
                             >
-                                {isToday && (
-                                    <span className="w-1 h-1 bg-primary animate-pulse rounded-full" />
-                                )}
-                                {dayName}
-                                {isToday && selectedDay !== dayIndex && (
-                                    <span className="text-[7px] opacity-50">NOW</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-mono text-[8px] uppercase tracking-tighter opacity-60">
+                                        {isToday ? "ACTIVE_CYCLE//" : "TEMPORAL//"}
+                                    </span>
+                                    {isToday && (
+                                        <div className="w-1 h-1 bg-primary animate-pulse rounded-full" />
+                                    )}
+                                </div>
+                                <span className="font-mono text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                                    {dayName}
+                                </span>
+
+                                {selectedDay === dayIndex && (
+                                    <div className="absolute top-0 right-0 w-4 h-4 bg-primary/20 rotate-45 translate-x-3 -translate-y-3" />
                                 )}
                             </button>
                         ))}

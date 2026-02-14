@@ -23,6 +23,14 @@ export function TopBar() {
 
             <div className="hidden sm:flex flex-col items-end gap-0.5 sm:gap-1.5 font-mono text-[8px] sm:text-[10px] text-muted-foreground/60 uppercase ml-4 flex-shrink-0">
                 <div className="flex items-center gap-2 sm:gap-2.5">
+                    <span className="opacity-40">AUDIO//</span>
+                    <span className="text-primary font-bold">L-PCM 24-bit / 48kHz</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                    <span className="opacity-40">UPLINK//</span>
+                    <span className="text-foreground font-bold">READY</span>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-2.5">
                     <span className="opacity-40">ID//</span>
                     <span className="text-foreground font-bold truncate max-w-[80px] sm:max-w-none">{id}</span>
                 </div>

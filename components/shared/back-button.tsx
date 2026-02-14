@@ -16,7 +16,7 @@ export function BackButton({ className, label = "Return" }: BackButtonProps) {
         <button
             onClick={() => router.back()}
             className={cn(
-                "group flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors z-50",
+                "group flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors z-50 hover:cursor-pointer",
                 className
             )}
         >

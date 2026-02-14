@@ -1,15 +1,13 @@
-import { getUnixTime } from 'date-fns'
 import { useState, useEffect } from "react"
+import { getUnixTime } from 'date-fns'
 
 
 export function useCurrentTime() {
   const [now, setNow] = useState<number | null>(null)
 
   useEffect(() => {
-    // Set initial time on client mount
-    setTimeout(() => {
-      setNow(getUnixTime(new Date()))
-    }, 0)
+    // Set initial time on client mount immediately
+    setNow(getUnixTime(new Date()))
 
     const interval = setInterval(() => {
       setNow(getUnixTime(new Date()))

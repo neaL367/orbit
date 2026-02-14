@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { YTPlayer, YTEvent, YTOnStateChangeEvent, YTPlayerState } from "./types";
+import { ExtendedPlayer, YTEvent, YTOnStateChangeEvent, YTPlayerState } from "./types";
 
 interface UseYouTubeProps {
     videoId: string | null;
@@ -21,8 +21,8 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     const [isEnded, setIsEnded] = useState(false);
     const [youtubeUIWait, setYoutubeUIWait] = useState(false);
 
-    const playerRef = useRef<YTPlayer | null>(null);
-    const ambientPlayerRef = useRef<YTPlayer | null>(null);
+    const playerRef = useRef<ExtendedPlayer | null>(null);
+    const ambientPlayerRef = useRef<ExtendedPlayer | null>(null);
     const playerElementRef = useRef<HTMLDivElement>(null);
     const ambientElementRef = useRef<HTMLDivElement>(null);
     const progressInterval = useRef<NodeJS.Timeout | null>(null);
@@ -30,7 +30,6 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     const ambientReadyRef = useRef(false);
     const uiWaitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const restorationTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-    const syncCaptureTimeRef = useRef<number>(0);
 
     const clearRestorationTimeouts = useCallback(() => {
         restorationTimeoutsRef.current.forEach(clearTimeout);
@@ -49,100 +48,59 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         let lastAmbientSync = 0;
 
         progressInterval.current = setInterval(() => {
-            const leader = playerRef.current;
-            const follower = ambientPlayerRef.current;
+            const player = playerRef.current;
+            const ambient = ambientPlayerRef.current;
 
-            if (!leaderReadyRef.current || !leader) return;
+            if (!leaderReadyRef.current || !player) return;
 
             try {
-                // 1. High-frequency UI Progress update (10Hz)
-                const leaderTime = leader.getCurrentTime();
-                const dur = leader.getDuration();
+                const currentTime = player.getCurrentTime();
+                const dur = player.getDuration();
 
                 if (dur > 0) {
                     setDuration(dur);
-                    setPlayed(leaderTime / dur);
+                    setPlayed(currentTime / dur);
                 }
 
-                // 2. Low-frequency Ambient Sync (2Hz)
+                // Sync Ambient Slave
                 const now = Date.now();
-                if (follower && ambientReadyRef.current && (now - lastAmbientSync > 500)) {
+                if (ambient && ambientReadyRef.current && (now - lastAmbientSync > 500)) {
                     lastAmbientSync = now;
-                    const followerTime = follower.getCurrentTime();
-                    const drift = leaderTime - followerTime;
-                    const abs = Math.abs(drift);
-
-                    if (abs > 1.5) {
-                        follower.seekTo(leaderTime, true);
-                    } else if (abs > 0.4) {
-                        follower.seekTo(followerTime + drift * 0.4, true);
-                    }
-
-                    const rate = leader.getPlaybackRate();
-                    if (rate !== follower.getPlaybackRate()) {
-                        follower.setPlaybackRate(rate);
+                    const ambientTime = ambient.getCurrentTime();
+                    const drift = currentTime - ambientTime;
+                    if (Math.abs(drift) > 1.5) {
+                        ambient.seekTo(currentTime, true);
                     }
                 }
-            } catch (err) { }
+            } catch { }
         }, 100);
     }, []);
 
     const onLeaderReady = useCallback((event: YTEvent) => {
-        const { volume: currentVol, muted: currentMuted, played: currentPlayed, duration: currentDur, playing: currentPlaying } = syncStateRef.current;
-        console.log("[PrecisionPlayer] Leader Ready Event", { currentVol, currentMuted, currentPlayed, currentPlaying });
+        const { volume: currentVol, muted: currentMuted, played: currentPlayed, playing: currentPlaying } = syncStateRef.current;
+        console.log("[PrecisionPlayer] Leader Ready", { currentVol, currentMuted });
 
         leaderReadyRef.current = true;
-        setIsPlayerReady(true);
-
-        // Ensure the iframe has the necessary attributes for fullscreen
-        try {
-            const iframe = event.target.getIframe();
-            if (iframe) {
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.setAttribute('webkitallowfullscreen', 'true');
-                iframe.setAttribute('mozallowfullscreen', 'true');
-            }
-        } catch (e) {
-            console.warn("[PrecisionPlayer] Failed to apply fullscreen attributes to iframe", e);
-        }
 
         const dur = event.target.getDuration();
         if (dur) setDuration(dur);
-        else if (currentDur) setDuration(currentDur);
 
-        const startPoint = currentPlayed * (dur || currentDur || 0);
-        syncCaptureTimeRef.current = startPoint;
+        const startPoint = currentPlayed * (dur || 0);
 
         if (currentPlaying) {
-            console.log("[PrecisionPlayer] Auto-starting video under mask (Strict Silence)...");
             setYoutubeUIWait(true);
             setIsSyncing(true);
-
             if (typeof event.target.seekTo === 'function') event.target.seekTo(startPoint, true);
-
-            // Hard mute and zero volume for the Uplink phase
-            try {
-                if (typeof event.target.mute === 'function') event.target.mute();
-                if (typeof event.target.setVolume === 'function') event.target.setVolume(0);
-            } catch (_e) { }
-
-            if (typeof event.target.playVideo === 'function') event.target.playVideo();
-            if (typeof event.target.setPlaybackQuality === 'function') event.target.setPlaybackQuality("highres");
-        } else {
-            console.log("[PrecisionPlayer] Player ready in paused state.");
+            if (typeof event.target.setVolume === 'function') event.target.setVolume(currentVol);
             if (currentMuted) {
                 if (typeof event.target.mute === 'function') event.target.mute();
             } else {
                 if (typeof event.target.unMute === 'function') event.target.unMute();
             }
-
-            if (typeof event.target.seekTo === 'function') event.target.seekTo(startPoint, true);
-            if (typeof event.target.pauseVideo === 'function') event.target.pauseVideo();
-            setIsSyncing(false);
-            setYoutubeUIWait(false);
+            if (typeof event.target.playVideo === 'function') event.target.playVideo();
         }
 
-        if (leaderReadyRef.current && ambientReadyRef.current) {
+        if (leaderReadyRef.current) {
             startProgressLoop();
         }
     }, [startProgressLoop]);
@@ -168,7 +126,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         const state = event.data as number;
         const { isSyncing: currentSync, youtubeUIWait: currentWait } = syncStateRef.current;
 
-        console.log("[PrecisionPlayer] State Change Event:", state, { isSyncing: currentSync, youtubeUIWait: currentWait });
+        console.log("[PrecisionPlayer] State Change:", state);
 
         switch (state) {
             case YTPlayerState.PLAYING:
@@ -179,83 +137,38 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
 
                 if (currentSync || currentWait) {
                     if (uiWaitTimeoutRef.current) {
-                        console.log("[PrecisionPlayer] Uplink wait already in progress...");
+                        console.log("[PrecisionPlayer] UI wait already in progress...");
                     } else {
-                        console.log("[PrecisionPlayer] Starting Uplink wait...");
-                        // Hard silence during the wait phase
-                        try {
-                            if (typeof event.target.mute === 'function') event.target.mute();
-                            if (typeof event.target.setVolume === 'function') event.target.setVolume(0);
-                        } catch { }
-
+                        console.log("[PrecisionPlayer] Starting UI wait timeout...");
                         clearRestorationTimeouts();
                         uiWaitTimeoutRef.current = setTimeout(() => {
-                            const { muted: m, volume: v } = syncStateRef.current;
-                            const target = event.target;
-
-                            if (playerRef.current !== target || !target.getIframe()) return;
-
-                            // 1. Instant Audio Restoration (No seek-back jump)
-                            const restoreSound = () => {
-                                if (playerRef.current !== target || !target.getIframe()) return;
-                                if (!m) {
-                                    try {
-                                        if (typeof target.unMute === 'function') target.unMute();
-                                        if (typeof target.setVolume === 'function') target.setVolume(v ?? 26);
-                                    } catch (e) { }
-                                }
-                            };
-
-                            restoreSound();
-                            const pulse = (delay: number) => {
-                                const t = setTimeout(restoreSound, delay);
-                                restorationTimeoutsRef.current.push(t);
-                            };
-
-                            pulse(100);
-                            pulse(500);
-
-                            // 2. Sequential UI Reveal
-                            setYoutubeUIWait(false); // Mask starts fading out (800ms)
+                            setYoutubeUIWait(false);
+                            setIsPlayerReady(true);
 
                             setTimeout(() => {
-                                setIsSyncing(false); // Controls finally appear
+                                setIsSyncing(false);
                                 uiWaitTimeoutRef.current = null;
 
                                 if (ambientPlayerRef.current) {
                                     try {
-                                        if (typeof ambientPlayerRef.current.mute === 'function') ambientPlayerRef.current.mute();
-                                        if (typeof ambientPlayerRef.current.setVolume === 'function') ambientPlayerRef.current.setVolume(0);
                                         if (typeof ambientPlayerRef.current.playVideo === 'function') ambientPlayerRef.current.playVideo();
                                     } catch { }
                                 }
                             }, 300);
-                        }, 100);
+                        }, 800);
                     }
                 } else {
                     setIsSyncing(false);
                     setYoutubeUIWait(false);
-
-                    // Ensure volume is restored if it was zeroed during a cancelled uplink
-                    const { muted: m, volume: v } = syncStateRef.current;
-                    try {
-                        if (!m) {
-                            if (typeof event.target.unMute === 'function') event.target.unMute();
-                            if (typeof event.target.setVolume === 'function') event.target.setVolume(v ?? 26);
-                        }
-                    } catch { }
                 }
 
                 if (ambient && !currentSync && !currentWait) {
                     try {
-                        if (typeof ambient.mute === 'function') ambient.mute();
-                        if (typeof ambient.setVolume === 'function') ambient.setVolume(0);
                         if (typeof ambient.playVideo === 'function') ambient.playVideo();
                     } catch { }
                 }
                 break;
             case YTPlayerState.PAUSED:
-                console.log("[PrecisionPlayer] State: PAUSED");
                 setPlaying(false);
                 setIsBuffer(false);
                 setIsEnded(false);
@@ -265,7 +178,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                 }
                 clearRestorationTimeouts();
                 setYoutubeUIWait(false);
-                setIsSyncing(false); // Clear syncing on pause to avoid re-triggering wait loops
+                setIsSyncing(false);
                 if (typeof ambient?.pauseVideo === 'function') ambient.pauseVideo();
                 break;
             case YTPlayerState.BUFFERING:
@@ -283,7 +196,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                 if (typeof ambient?.pauseVideo === 'function') ambient.pauseVideo();
                 break;
         }
-    }, [clearRestorationTimeouts, startProgressLoop]);
+    }, [clearRestorationTimeouts]);
 
     useEffect(() => {
         if (playing) {
@@ -294,18 +207,17 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     }, [playing, startProgressLoop]);
 
     useEffect(() => {
-        console.log("[PrecisionPlayer] Init Effect Triggered", { hasStarted, videoId, isMounted });
+        console.log("[PrecisionPlayer] Init Effect", { hasStarted, videoId, isMounted });
         if (!hasStarted || !videoId || !isMounted) return;
 
         if (hasStarted) {
             setIsSyncing(true);
-            setYoutubeUIWait(true); // Set true immediately to prevent flashing
+            setYoutubeUIWait(true);
 
-            // Safety Fallback: Force clear syncing after 8 seconds if stuck
             const fallbackTimeout = setTimeout(() => {
                 const { isSyncing: s, youtubeUIWait: w } = syncStateRef.current;
                 if (s || w) {
-                    console.warn("[PrecisionPlayer] Safety fallback triggered: Clearing stuck sync state.");
+                    console.warn("[PrecisionPlayer] Safety fallback: Clearing stuck sync state.");
                     setIsSyncing(false);
                     setYoutubeUIWait(false);
                 }
@@ -321,17 +233,11 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         const createPlayers = () => {
             if (!isEffectMounted || playerRef.current || !playerElementRef.current) return;
 
-            // Critical Guard: Ensure videoId is present and looks valid (11 chars is standard)
             const cleanVideoId = (videoId || "").trim();
-            if (!cleanVideoId || cleanVideoId.length < 5) {
-                console.warn("[PrecisionPlayer] Aborting player creation: Invalid videoId", cleanVideoId);
-                return;
-            }
-
-            console.log("[PrecisionPlayer] Attempting player creation with ID:", cleanVideoId);
+            if (!cleanVideoId || cleanVideoId.length < 5) return;
 
             try {
-                playerRef.current = new (window.YT.Player as any)(playerElementRef.current, {
+                playerRef.current = new window.YT.Player(playerElementRef.current!, {
                     videoId: cleanVideoId,
                     playerVars: {
                         autoplay: 1,
@@ -339,31 +245,21 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                         disablekb: 1,
                         enablejsapi: 1,
                         playsinline: 1,
-                        rel: 0,
-                        mute: 1,
-                        fs: 1,
-                        modestbranding: 1,
-                        vq: 'highres',
-                        playlist: cleanVideoId
+                        mute: muted ? 1 : 0,
+                        vq: 'hd1080',
                     },
                     events: {
                         onReady: onLeaderReady,
                         onStateChange: onPlayerStateChange,
                         onError: (e: any) => {
-                            console.error("[PrecisionPlayer] Leader Player Error:", e.data);
+                            console.error("[PrecisionPlayer] Error:", e.data);
                             setIsTerminated(true);
                         },
                     },
                 });
-            } catch (err) {
-                console.error("[PrecisionPlayer] Fatal error during player creation:", err);
-                setIsTerminated(true);
-                return;
-            }
 
-            if (ambientElementRef.current) {
-                try {
-                    ambientPlayerRef.current = new (window.YT.Player as any)(ambientElementRef.current, {
+                if (ambientElementRef.current) {
+                    ambientPlayerRef.current = new window.YT.Player(ambientElementRef.current, {
                         videoId: cleanVideoId,
                         playerVars: {
                             autoplay: 1,
@@ -375,16 +271,12 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                         },
                         events: {
                             onReady: onAmbientReady,
-                            onError: (e: any) => {
-                                console.warn("[PrecisionPlayer] Ambient Player Error:", e.data);
-                                ambientReadyRef.current = false;
-                            },
                         },
                     });
-                } catch (err) {
-                    console.error("[PrecisionPlayer] Ambient player creation error:", err);
-                    ambientReadyRef.current = false;
                 }
+            } catch (err) {
+                console.error("[PrecisionPlayer] Creation failed:", err);
+                setIsTerminated(true);
             }
         };
 
@@ -408,50 +300,47 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                 try { playerRef.current.destroy(); } catch { }
                 playerRef.current = null;
             }
-            clearRestorationTimeouts();
             if (ambientPlayerRef.current) {
                 try { ambientPlayerRef.current.destroy(); } catch { }
                 ambientPlayerRef.current = null;
             }
+            clearRestorationTimeouts();
 
             if (progressInterval.current) clearInterval(progressInterval.current);
             progressInterval.current = null;
             setIsPlayerReady(false);
         };
-    }, [hasStarted, videoId, isMounted, onLeaderReady, onAmbientReady, clearRestorationTimeouts, onPlayerStateChange]);
+    }, [hasStarted, videoId, isMounted, muted, onLeaderReady, onAmbientReady, clearRestorationTimeouts, onPlayerStateChange]);
 
     const handlePlayPause = useCallback(() => {
+        if (isSyncing || youtubeUIWait) return;
         const player = playerRef.current;
-        if (!player || isSyncing || youtubeUIWait) return;
+        const ambient = ambientPlayerRef.current;
+
+        if (!player) return;
 
         if (playing) {
-            if (typeof player.pauseVideo === 'function') player.pauseVideo();
+            player.pauseVideo();
+            ambient?.pauseVideo();
         } else {
-            console.log("[PrecisionPlayer] Manual Resume");
-            if (typeof player.playVideo === 'function') player.playVideo();
+            player.playVideo();
+            ambient?.playVideo();
         }
     }, [playing, isSyncing, youtubeUIWait]);
 
     const seekTo = useCallback((time: number) => {
         if (isSyncing || youtubeUIWait) return;
-        if (typeof playerRef.current?.seekTo === 'function') playerRef.current.seekTo(time, true);
-        if (typeof ambientPlayerRef.current?.seekTo === 'function') ambientPlayerRef.current.seekTo(time, true);
+        playerRef.current?.seekTo(time, true);
+        ambientPlayerRef.current?.seekTo(time, true);
     }, [isSyncing, youtubeUIWait]);
 
     const setMute = useCallback((val: boolean) => {
-        const leader = playerRef.current;
-        const follower = ambientPlayerRef.current;
-        if (val) {
-            if (typeof leader?.mute === 'function') leader.mute();
-            if (typeof follower?.mute === 'function') follower.mute();
-        } else {
-            if (typeof leader?.unMute === 'function') leader.unMute();
-            if (typeof follower?.unMute === 'function') follower.unMute();
-        }
+        if (val) playerRef.current?.mute();
+        else playerRef.current?.unMute();
     }, []);
 
     const setPlayerVolume = useCallback((val: number) => {
-        if (typeof playerRef.current?.setVolume === 'function') playerRef.current.setVolume(val);
+        playerRef.current?.setVolume(val);
     }, []);
 
     const restart = useCallback(() => {
@@ -460,7 +349,6 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
 
         if (!player || !videoId) return;
 
-        // 1. Reset UI state immediately for responsive feel
         setPlayed(0);
         setPlaying(true);
         setIsBuffer(true);
@@ -469,36 +357,9 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         setIsSyncing(true);
         setYoutubeUIWait(true);
 
-        // 2. Use "Nuclear" option: reload the video to force a fresh start
-        try {
-            // Using loadVideoById is the most robust way to restart an ended video
-            player.loadVideoById({
-                videoId: videoId,
-                startSeconds: 0,
-                suggestedQuality: 'highres'
-            });
-
-            if (ambient) {
-                if (typeof ambient.loadVideoById === 'function') {
-                    ambient.loadVideoById({
-                        videoId: videoId,
-                        startSeconds: 0,
-                    });
-                }
-                // Ensure ambient is muted as it might reset on load
-                setTimeout(() => {
-                    try {
-                        if (typeof ambient.mute === 'function') ambient.mute();
-                        if (typeof ambient.setVolume === 'function') ambient.setVolume(0);
-                    } catch { }
-                }, 500);
-            }
-        } catch (err) {
-            console.error("[useYouTubeLogic] Error during robust restart:", err);
-            // Fallback to basic seek/play if loader fails
-            player.seekTo(0, true);
-            player.playVideo();
-        }
+        const settings = { videoId, startSeconds: 0 };
+        player.loadVideoById(settings as any);
+        ambient?.loadVideoById({ videoId, startSeconds: 0 } as any);
     }, [videoId]);
 
     const onSetHasStarted = useCallback((val: boolean) => {
@@ -507,11 +368,6 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
             setPlaying(true);
             setIsSyncing(true);
             setYoutubeUIWait(true);
-
-            // If the player was somehow pre-initialized, capture its state
-            if (playerRef.current) {
-                syncCaptureTimeRef.current = playerRef.current.getCurrentTime() || 0;
-            }
         }
     }, []);
 

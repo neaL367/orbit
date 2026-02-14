@@ -3,7 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
-  reactCompiler: true,
+  reactCompiler: {
+    compilationMode: 'annotation',
+  },
   typedRoutes: true,
   experimental: {
     inlineCss: true,
@@ -16,6 +18,10 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
     } : false,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+    tsconfigPath: 'tsconfig.json',
   },
   async headers() {
     return [

@@ -8,11 +8,6 @@ export type YTPlayer = YT.Player;
 export type YTEvent = YT.PlayerEvent;
 export type YTOnStateChangeEvent = YT.OnStateChangeEvent;
 
-/**
- * We define the enum locally to avoid ReferenceError: YT is not defined
- * during module evaluation, as the YT global is only available after 
- * the YouTube IFrame API script is loaded.
- */
 export enum YTPlayerState {
     UNSTARTED = -1,
     ENDED = 0,
@@ -22,10 +17,44 @@ export enum YTPlayerState {
     CUED = 5,
 }
 
+// Extend official types to support vq and suggestedQuality which are unofficial but functional
+export interface ExtendedPlayerVars extends YT.PlayerVars {
+    vq?: string;
+    suggestedQuality?: string;
+}
+
+export interface ExtendedPlayerOptions extends YT.PlayerOptions {
+    playerVars?: ExtendedPlayerVars;
+}
+
+export interface ExtendedPlayer extends YT.Player {
+    setPlaybackQuality(quality: string): void;
+}
+
 declare global {
     interface Window {
-        YT: typeof YT;
+        YT: {
+            Player: {
+                new(elt: HTMLElement | string, options: ExtendedPlayerOptions): ExtendedPlayer;
+            };
+        };
         onYouTubeIframeAPIReady: () => void;
+        webkitAudioContext: typeof AudioContext;
+    }
+
+    interface Document {
+        webkitFullscreenElement?: Element;
+        mozFullScreenElement?: Element;
+        msFullscreenElement?: Element;
+        webkitExitFullscreen?: () => Promise<void>;
+        mozCancelFullScreen?: () => Promise<void>;
+        msExitFullscreen?: () => Promise<void>;
+    }
+
+    interface HTMLElement {
+        webkitRequestFullscreen?: () => Promise<void>;
+        mozRequestFullScreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
     }
 }
 

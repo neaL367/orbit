@@ -47,7 +47,7 @@ export async function AnimeSection({
     season: initialSeason,
     year: initialYear,
     perPage = 6,
-    variant = 'grid'
+    variant = 'grid',
 }: AnimeSectionServerProps) {
     let season = initialSeason
     let year = initialYear

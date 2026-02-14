@@ -114,10 +114,9 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
     }, [setPlayerVolume, setVolume]);
 
     const toggleFullscreen = useCallback(() => {
-        if (!containerRef.current) return;
-
-        const doc = document as any;
-        const container = containerRef.current as any;
+        const doc = document;
+        const container = containerRef.current;
+        if (!container) return;
 
         if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
             try {

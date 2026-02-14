@@ -1,13 +1,42 @@
-/**
- * Extract dominant colors from an image URL using canvas
- * Uses advanced color extraction with saturation boost and perceptual brightness
- */
+const COLOR_CACHE_KEY = 'orbit_color_cache'
+
+type ColorCache = Record<string, {
+    leftTop: string
+    rightTop: string
+    leftBottom: string
+    rightBottom: string
+}>
+
+function getCache(): ColorCache {
+    if (typeof window === 'undefined') return {}
+    try {
+        const cached = sessionStorage.getItem(COLOR_CACHE_KEY)
+        return cached ? JSON.parse(cached) : {}
+    } catch {
+        return {}
+    }
+}
+
+function setCache(url: string, colors: ColorCache[string]) {
+    if (typeof window === 'undefined') return
+    try {
+        const cache = getCache()
+        cache[url] = colors
+        sessionStorage.setItem(COLOR_CACHE_KEY, JSON.stringify(cache))
+    } catch { }
+}
+
+
 export async function extractDominantColors(imageUrl: string): Promise<{
     leftTop: string
     rightTop: string
     leftBottom: string
     rightBottom: string
 }> {
+    // Check cache first
+    const cache = getCache()
+    if (cache[imageUrl]) return cache[imageUrl]
+
     // Use proxy for external images to bypass CORS
     const finalUrl = imageUrl.startsWith('http')
         ? `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`
@@ -33,12 +62,15 @@ export async function extractDominantColors(imageUrl: string): Promise<{
 
             try {
                 // Sample colors from 4 quadrants with overlap for smoother gradients
-                const leftTop = getQuadrantColor(ctx, 0, 0, 35, 35)
-                const rightTop = getQuadrantColor(ctx, 25, 0, 35, 35)
-                const leftBottom = getQuadrantColor(ctx, 0, 25, 35, 35)
-                const rightBottom = getQuadrantColor(ctx, 25, 25, 35, 35)
+                const colors = {
+                    leftTop: getQuadrantColor(ctx, 0, 0, 35, 35),
+                    rightTop: getQuadrantColor(ctx, 25, 0, 35, 35),
+                    leftBottom: getQuadrantColor(ctx, 0, 25, 35, 35),
+                    rightBottom: getQuadrantColor(ctx, 25, 25, 35, 35)
+                }
 
-                resolve({ leftTop, rightTop, leftBottom, rightBottom })
+                setCache(imageUrl, colors)
+                resolve(colors)
             } catch {
                 resolve(getDefaultColors())
             }

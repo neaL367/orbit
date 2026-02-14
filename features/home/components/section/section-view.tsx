@@ -1,3 +1,4 @@
+"use client"
 import type { Route } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -18,7 +19,7 @@ type SectionViewProps = {
   isLoading?: boolean
   error?: Error | null
   variant?: 'grid' | 'featured' | 'list' | 'compact'
-  onRetry?: () => void
+  onRetryAction?: () => void
 }
 
 export function SectionView({
@@ -32,7 +33,7 @@ export function SectionView({
   variant = 'grid',
   isLoading = false,
   error = null,
-  onRetry,
+  onRetryAction,
 }: SectionViewProps) {
   if (isLoading) {
     return (
@@ -43,8 +44,8 @@ export function SectionView({
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] border border-white/5 bg-white/[0.01] relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 animate-shimmer" />
+            <div key={i} className="aspect-[2/3] border border-white/5 bg-white/1 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-linear-to-b from-transparent via-white/5 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000 animate-shimmer" />
               <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/10" />
               <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/10" />
             </div>
@@ -61,7 +62,7 @@ export function SectionView({
         <IndexSectionHeader title="CRITICAL_FAILURE" subtitle="LINK_SEVERED" />
         <ErrorState
           message="Registry_Connection_Failed: 0xERR_TIMEOUT"
-          onRetry={onRetry}
+          onRetryAction={onRetryAction}
         />
         <div className="absolute top-0 right-0 p-4 font-mono text-[9px] text-red-500/50 uppercase tracking-widest">
           ERR_CODE: 503
@@ -76,21 +77,24 @@ export function SectionView({
 
   return (
     <section className="mb-32 group/section reveal relative">
-      <div className="flex items-end justify-between gap-4 relative z-10 mb-10 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10 mb-10 border-b border-white/5 pb-6">
         <IndexSectionHeader
           title={title}
           subtitle={subtitle || "General_Archive"}
           className="flex-1 mb-0"
         />
-        {viewAllHref && (
-          <Link
-            href={viewAllHref as Route}
-            className="hidden sm:flex font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-primary transition-all items-center gap-3 group/link mb-1"
-          >
-            <span className="opacity-60 group-hover/link:opacity-100 transition-opacity">Access_Full_Log</span>
-            <div className="w-4 h-[1px] bg-primary/20 group-hover:bg-primary group-hover:w-8 transition-all" />
-          </Link>
-        )}
+
+        <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto pb-1">
+          {viewAllHref && (
+            <Link
+              href={viewAllHref as Route}
+              className="group/btn relative inline-flex items-center gap-4 px-8 py-3 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-primary index-cut-tr shadow-[4px_4px_0_0_rgba(255,255,255,0.05)] active:translate-x-px active:translate-y-px active:shadow-none"
+            >
+              ACCESS_REGISTRY
+              <div className="w-1.5 h-1.5 bg-current rotate-45 transform group-hover/btn:translate-x-1.5 transition-all" />
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="relative z-10">
@@ -211,7 +215,7 @@ export function SectionView({
               <Link
                 key={anime.id}
                 href={`/anime/${anime.id}`}
-                className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] hover:border-primary/20 transition-all relative overflow-hidden index-cut-tr"
+                className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/1 border border-white/5 hover:bg-white/3 hover:border-primary/20 transition-all relative overflow-hidden index-cut-tr"
               >
                 {/* Ranking / Index */}
                 <div className="font-mono text-2xl sm:text-4xl font-black text-white/[0.03] group-hover/list:text-primary/10 transition-colors w-12 sm:w-16 text-center shrink-0 tracking-tighter tabular-nums">
