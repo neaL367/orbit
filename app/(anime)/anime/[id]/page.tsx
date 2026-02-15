@@ -6,7 +6,7 @@ import { AnimeDescription } from "@/features/anime/components/anime-description"
 import { AnimeEpisodes } from "@/features/anime/components/anime-episodes"
 import { AnimeTrailer } from "@/features/anime/components/anime-trailer"
 import { IndexImage } from "@/components/shared/index-image"
-import { BackButton } from "@/components/shared/back-button"
+import { AnimeRegistryNav } from "@/components/shared/anime-registry-nav"
 
 import { getCachedAnime } from '@/lib/graphql/data'
 import { getAnimeTitle } from '@/lib/utils/anime-utils'
@@ -65,57 +65,7 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
 
     return (
         <>
-            {/* Registry Navigation Bar (Schedule-Inspired) */}
-            <div
-                className="fixed left-0 right-0 z-100 transition-all duration-700 ease-out group/ctx-nav bg-transparent border-b border-transparent [&.scrolled]:bg-background/70 [&.scrolled]:backdrop-blur-xl [&.scrolled]:border-white/5 [&.scrolled]:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
-                id="registry-nav"
-                style={{ top: 'calc(var(--nav-visible, 1) * 80px)' }}
-                suppressHydrationWarning
-            >
-                {/* Content Container */}
-                <div className="max-w-[1790px] mx-auto w-full px-6 md:px-12 lg:px-24 py-4 relative z-10">
-                    <div className="flex items-center gap-6">
-                        {/* Navigation Action - Always Visible */}
-                        <div className="flex items-center gap-4">
-                            <BackButton />
-                            <div className="hidden md:block w-px h-8 bg-white/10 group-[.scrolled]/ctx-nav:bg-primary/20 transition-colors" />
-                        </div>
-
-                        {/* Title Section - Fades in on scroll */}
-                        <div className="flex-1 flex items-center gap-4 opacity-0 translate-x-4 group-[.scrolled]/ctx-nav:opacity-100 group-[.scrolled]/ctx-nav:translate-x-0 transition-all duration-700 pointer-events-none group-[.scrolled]/ctx-nav:pointer-events-auto">
-                            <div className="hidden md:flex items-center gap-4">
-                                <div className="w-10 h-12 border border-primary/20 bg-secondary/20 relative overflow-hidden shrink-0">
-                                    {anime.coverImage?.large && (
-                                        <img src={anime.coverImage.large} alt="" className="w-full h-full object-cover opacity-60 grayscale" />
-                                    )}
-                                </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-primary/40 leading-none">
-                                        REGISTRY_ENTRY // {anime.id}
-                                    </span>
-                                    <h2 className="font-mono text-sm font-black uppercase tracking-tighter truncate max-w-[300px] lg:max-w-md text-foreground">
-                                        {title}
-                                    </h2>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Separator Line */}
-                        <div className="flex-1 h-px bg-white/5 group-[.scrolled]/ctx-nav:bg-primary/10 transition-all duration-700 opacity-0 group-[.scrolled]/ctx-nav:opacity-100" />
-
-                        {/* Technical Metadata */}
-                        <div className="flex flex-col items-end shrink-0 opacity-0 translate-x-4 group-[.scrolled]/ctx-nav:opacity-100 group-[.scrolled]/ctx-nav:translate-x-0 transition-all duration-700">
-                            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground/40 leading-none">
-                                {anime.status}
-                            </span>
-                            <div className="flex gap-1 mt-1.5 opacity-40 group-[.scrolled]/ctx-nav:opacity-100 transition-opacity">
-                                <div className="w-12 h-0.5 bg-primary/20" />
-                                <div className="w-4 h-0.5 bg-primary" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimeRegistryNav anime={anime} title={title} />
 
             <div className="reveal relative pb-20">
 
@@ -142,7 +92,7 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                 />
 
                 {/* Immersive Hero Section */}
-                <div className="w-screen relative left-1/2 -translate-x-1/2 h-[75dvh] group select-none overflow-hidden">
+                <div className="w-screen relative left-1/2 -translate-x-1/2 h-[50dvh] group select-none overflow-hidden">
                     {/* Background Ambient Component */}
                     <div className="absolute inset-0 z-0">
                         {anime.bannerImage || anime.coverImage?.extraLarge ? (
@@ -503,26 +453,6 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                     </div>
                 </main>
 
-                {/* Scroll Interaction Script */}
-                <script dangerouslySetInnerHTML={{
-                    __html: `
-                    (function() {
-                        const handleScroll = () => {
-                            const nav = document.getElementById('registry-nav');
-                            if (!nav) return;
-                            
-                            const isScrolled = window.scrollY > 150;
-                            if (isScrolled) {
-                                nav.classList.add('scrolled');
-                            } else {
-                                nav.classList.remove('scrolled');
-                            }
-                        };
-                        window.addEventListener('scroll', handleScroll, { passive: true });
-                        handleScroll();
-                    })();
-                `
-                }} />
             </div >
         </>
 

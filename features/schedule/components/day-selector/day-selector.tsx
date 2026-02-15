@@ -53,9 +53,9 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
             <div
                 ref={headerRef}
                 className={cn(
-                    "sticky z-40 pt-6 transition-all duration-500",
+                    "sticky z-40 pt-6 transition-all duration-500 will-change-transform",
                     isStuck ? "bg-background border-b border-white/5 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.5)]" : "bg-transparent py-6",
-                    "will-change-[padding,background-color,top] select-none"
+                    "select-none"
                 )}
                 style={{
                     top: `calc(var(--nav-visible, 1) * 80px)`

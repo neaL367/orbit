@@ -10,22 +10,23 @@ interface VideoLayerProps {
     isTerminated: boolean;
     safeVideoId: string;
     isFullscreen: boolean;
+    isMobile: boolean; // Added isMobile
     playerElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
-const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, playerElementRef }: VideoLayerProps) => (
-    <div className="supersampled-container">
+const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, isMobile, playerElementRef }: VideoLayerProps) => (
+    <div className={cn(isMobile ? "w-full h-full bg-black relative" : "supersampled-container")}>
         {!isTerminated && (
             <div
                 ref={playerElementRef}
                 className={cn(
-                    "supersampled-frame pointer-events-none",
+                    isMobile ? "w-full h-full relative z-10" : "supersampled-frame pointer-events-none",
                     !safeVideoId && "hidden",
                     isFullscreen ? "max-h-screen" : ""
                 )}
             />
         )}
-        <div className="precision-dither-overlay" />
+        {!isMobile && <div className="precision-dither-overlay" />}
     </div>
 ));
 
@@ -155,31 +156,31 @@ export function PlayerUI() {
         youtubeUIWait,
         isSyncing,
         isFullscreen,
+        isMobile,
     } = state
 
-    const { playerElementRef, containerRef } = refs
+    const { playerElementRef } = refs
     const { handleMouseMove, handlePlayPause, onSetHasStarted } = handlers
 
     const safeVideoId = videoId ?? ""
 
     return (
         <div
-            ref={containerRef}
             onMouseMove={handleMouseMove}
             onTouchStart={handleMouseMove}
             className={cn(
                 "group relative transition-[border-color,opacity] duration-300 ease-in-out w-full border-white/5",
                 isFullscreen
-                    ? "fixed !inset-0 !m-0 !p-0 z-[99999] bg-black h-dvh w-dvw overflow-hidden is-fullscreen"
+                    ? "fixed inset-0! m-0! p-0! z-99999 bg-black h-dvh w-dvw overflow-hidden is-fullscreen"
                     : "h-auto border shadow-2xl aspect-video overflow-hidden precision-frame-cut"
             )}
             style={{
-                transform: isFullscreen ? 'none' : 'translate3d(0,0,0)',
-                perspective: '1000px',
-                backfaceVisibility: 'hidden'
+                transform: isFullscreen || isMobile ? 'none' : 'translate3d(0,0,0)',
+                perspective: isMobile ? 'none' : '1000px',
+                backfaceVisibility: isMobile ? 'visible' : 'hidden'
             }}
         >
-            <PrecisionFilters />
+            {!isMobile && <PrecisionFilters />}
 
             <div className={cn(
                 "w-full h-full relative overflow-hidden bg-black flex items-center justify-center",
@@ -189,6 +190,7 @@ export function PlayerUI() {
                     <div
                         className={cn(
                             "relative z-50 pointer-events-auto w-full h-full",
+                            !hasStarted && "cursor-pointer",
                             isFullscreen && "flex items-center justify-center"
                         )}
                         onClick={() => !hasStarted && onSetHasStarted(true)}
@@ -202,22 +204,24 @@ export function PlayerUI() {
                         role={hasStarted ? undefined : "button"}
                         aria-label={hasStarted ? undefined : "Initialize Player"}
                     >
-                        <PauseMask />
+                        {/* Only show custom overlays on desktop */}
+                        {!isMobile && <PauseMask />}
 
                         {/* Video Layer wrapper */}
-                        <div className="absolute inset-0 z-20 overflow-hidden">
+                        <div className={cn("absolute inset-0 overflow-hidden", isMobile ? "z-50" : "z-20")}>
                             <VideoLayer
                                 isTerminated={isTerminated}
                                 safeVideoId={safeVideoId}
                                 isFullscreen={isFullscreen}
+                                isMobile={isMobile}
                                 playerElementRef={playerElementRef}
                             />
                         </div>
 
-                        {/* Overlay elements... */}
-                        {hasStarted && isPlayerReady && (
+                        {/* Custom Overlay elements (Desktop only) */}
+                        {!isMobile && hasStarted && isPlayerReady && (
                             <div
-                                className="absolute inset-0 z-30 cursor-pointer"
+                                className="absolute inset-0 z-30 cursor-default"
                                 onClick={handlePlayPause}
                                 onKeyDown={(e) => {
                                     if (e.key === ' ' || e.key === 'k') {
@@ -230,22 +234,25 @@ export function PlayerUI() {
                                 aria-label="Toggle Play/Pause"
                             />
                         )}
-                        <VolumeUI />
 
-                        {/* UI Controls */}
-                        <div
-                            className={cn(
-                                "absolute inset-0 z-[60] flex flex-col justify-between transition-opacity duration-500 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
-                                controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
-                            )}
-                            style={{
-                                willChange: "opacity",
-                                transform: "translate3d(0,0,0)"
-                            }}
-                        >
-                            <div className="pointer-events-auto"><TopBar /></div>
-                            <div className="pointer-events-auto mt-auto"><BottomBar /></div>
-                        </div>
+                        {!isMobile && <VolumeUI />}
+
+                        {/* UI Controls (Desktop only) */}
+                        {!isMobile && (
+                            <div
+                                className={cn(
+                                    "absolute inset-0 z-60 flex flex-col justify-between transition-opacity duration-500 bg-linear-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
+                                    controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
+                                )}
+                                style={{
+                                    willChange: "opacity",
+                                    transform: "translate3d(0,0,0)"
+                                }}
+                            >
+                                <div className="pointer-events-auto"><TopBar /></div>
+                                <div className="pointer-events-auto mt-auto"><BottomBar /></div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

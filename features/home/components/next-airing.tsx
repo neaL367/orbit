@@ -14,10 +14,15 @@ import { extractDominantColors } from "@/lib/utils/dominant-colors"
 import type { ScheduleAnimeHeroQuery, Media } from "@/lib/graphql/types/graphql"
 
 type ColorPalette = {
-    leftTop: string
-    rightTop: string
-    leftBottom: string
-    rightBottom: string
+    topLeft: string
+    topCenter: string
+    topRight: string
+    midLeft: string
+    midCenter: string
+    midRight: string
+    bottomLeft: string
+    bottomCenter: string
+    bottomRight: string
 }
 
 export function NextAiring({ className, initialData }: { className?: string, initialData?: { data?: ScheduleAnimeHeroQuery } }) {
@@ -64,7 +69,11 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                     schedule?.media?.coverImage?.large
 
                 if (!imageUrl) {
-                    return { leftTop: '#2a2a35', rightTop: '#252530', leftBottom: '#20202a', rightBottom: '#1a1a25' }
+                    return {
+                        topLeft: '#2a2a35', topCenter: '#2a2a35', topRight: '#252530',
+                        midLeft: '#20202a', midCenter: '#2a2a35', midRight: '#1a1a25',
+                        bottomLeft: '#20202a', bottomCenter: '#1a1a25', bottomRight: '#1a1a25'
+                    }
                 }
 
                 // Check cache first
@@ -72,16 +81,22 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                     return colorCache.current.get(imageUrl)!
                 }
 
-                // Extract and cache
+                // Extract and cache extractDominantColors now returns 9 zones
                 const colors = await extractDominantColors(imageUrl)
-                colorCache.current.set(imageUrl, colors)
-                return colors
+                // Cast to local type if needed, though structure should match
+                const typedColors = colors as unknown as ColorPalette
+                colorCache.current.set(imageUrl, typedColors)
+                return typedColors
             })
         ).then(extractedColors => {
             // Fill remaining slots with default colors if needed
             const allColors = [...extractedColors]
             while (allColors.length < schedules.length) {
-                allColors.push({ leftTop: '#2a2a35', rightTop: '#252530', leftBottom: '#20202a', rightBottom: '#1a1a25' })
+                allColors.push({
+                    topLeft: '#2a2a35', topCenter: '#2a2a35', topRight: '#252530',
+                    midLeft: '#20202a', midCenter: '#2a2a35', midRight: '#1a1a25',
+                    bottomLeft: '#20202a', bottomCenter: '#1a1a25', bottomRight: '#1a1a25'
+                })
             }
             setColors(allColors)
         })
@@ -120,61 +135,48 @@ export function NextAiring({ className, initialData }: { className?: string, ini
 
 
 
-    const currentColors = colors[activeIndex] || { leftTop: '#1a1a1a', rightTop: '#1a1a1a', leftBottom: '#0a0a0a', rightBottom: '#0a0a0a' }
+    const currentColors = colors[activeIndex] || {
+        topLeft: '#1a1a1a', topCenter: '#1a1a1a', topRight: '#1a1a1a',
+        midLeft: '#0a0a0a', midCenter: '#1a1a1a', midRight: '#0a0a0a',
+        bottomLeft: '#0a0a0a', bottomCenter: '#0a0a0a', bottomRight: '#0a0a0a'
+    }
+
     return (
         <section
             className={`w-screen relative left-1/2 -translate-x-1/2 z-0 group ${className || "min-h-[550px] md:h-[70vh]"} overflow-hidden bg-background flex flex-col`}
             style={{
-                '--current-left-top': currentColors.leftTop,
-                '--current-right-top': currentColors.rightTop,
-                '--current-left-bottom': currentColors.leftBottom,
-                '--current-right-bottom': currentColors.rightBottom,
+                '--current-top-left': currentColors.topLeft,
+                '--current-top-center': currentColors.topCenter,
+                '--current-top-right': currentColors.topRight,
+                '--current-mid-left': currentColors.midLeft,
+                '--current-mid-center': currentColors.midCenter,
+                '--current-mid-right': currentColors.midRight,
+                '--current-bottom-left': currentColors.bottomLeft,
+                '--current-bottom-center': currentColors.bottomCenter,
+                '--current-bottom-right': currentColors.bottomRight,
             } as React.CSSProperties}
         >
             {/* 1. Precision Ambient Base (High Intensity) */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden will-change-transform translate-z-0 bg-black">
-                {/* Quad-Quadrant Ambient Field */}
-                <div className="absolute inset-[-40%] blur-[140px] saturate-[2.5] brightness-[1.1] transition-opacity duration-1000">
-                    {/* Top Left */}
-                    <div
-                        className="absolute top-0 left-0 w-1/2 h-1/2 opacity-70 transition-colors duration-2000 ease-in-out"
-                        style={{ backgroundColor: currentColors.leftTop }}
-                    />
-                    {/* Top Right */}
-                    <div
-                        className="absolute top-0 right-0 w-1/2 h-1/2 opacity-70 transition-colors duration-2000 ease-in-out"
-                        style={{ backgroundColor: currentColors.rightTop }}
-                    />
-                    {/* Bottom Left */}
-                    <div
-                        className="absolute bottom-0 left-0 w-1/2 h-1/2 opacity-70 transition-colors duration-2000 ease-in-out"
-                        style={{ backgroundColor: currentColors.leftBottom }}
-                    />
-                    {/* Bottom Right */}
-                    <div
-                        className="absolute bottom-0 right-0 w-1/2 h-1/2 opacity-70 transition-colors duration-2000 ease-in-out"
-                        style={{ backgroundColor: currentColors.rightBottom }}
-                    />
+                {/* 9-Zone Ambient Field (Alive & Breathing) */}
+                <div className="absolute inset-[-40%] blur-[100px] sm:blur-[140px] saturate-[2.5] brightness-[1.15] transition-opacity duration-1000 will-change-opacity translate-z-0">
+                    <div className="w-full h-full grid grid-cols-3 grid-rows-3 opacity-80">
+                        {/* Row 1 */}
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topLeft }} />
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topCenter }} />
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topRight }} />
+
+                        {/* Row 2 */}
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.midLeft }} />
+                        <div className="transition-colors duration-2000 ease-in-out scale-150 z-10 rounded-full blur-xl" style={{ backgroundColor: currentColors.midCenter }} />
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.midRight }} />
+
+                        {/* Row 3 */}
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomLeft }} />
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomCenter }} />
+                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomRight }} />
+                    </div>
                 </div>
-
-                {/* IMAX Stadium Vignette - Deep immersion */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.2) 40%,rgba(0,0,0,0.6) 80%,#000 100%)] mix-blend-multiply opacity-80" />
-
-                {/* 70mm Physics Grain Overlay */}
-                <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none">
-                    <div className="w-full h-full animate-[grain_0.6s_steps(4)_infinite] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-                </div>
-
-                {/* Atmosphere Gradients - Precision Depth */}
-                <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
-                <div className="absolute inset-0 bg-linear-to-r from-background/40 via-transparent to-transparent" />
-            </div>
-
-            {/* 2. Technical Detail Layer */}
-            <div className="absolute inset-0 z-5 pointer-events-none opacity-40">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.6)_140%)]" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-size-[100%_4px]" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-size-[4vw_100%]" />
             </div>
 
             {/* 3. Main Interface Logic */}
@@ -317,7 +319,6 @@ export function NextAiring({ className, initialData }: { className?: string, ini
                                                 </div>
                                             )
                                         })}
-                                        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.4)_50%,transparent_100%),linear-gradient(to_right,transparent_0%,rgba(255,255,255,0.05)_50%,transparent_100%)] bg-size-[100%_2px,3px_100%] opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                     <div className="absolute -inset-4 border border-primary/5 -z-10 translate-x-4 translate-y-4" />
                                 </div>

@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ExtendedPlayer, YTEvent, YTOnStateChangeEvent, YTPlayerState } from "./types";
+import { ExtendedPlayer, YTEvent, YTOnStateChangeEvent, YTPlayerState, YTOnErrorEvent } from "./types";
 
 interface UseYouTubeProps {
     videoId: string | null;
     isMounted: boolean;
     muted: boolean;
     volume: number;
+    isMobile?: boolean; // Added isMobile
     autoPlay?: boolean;
 }
 
-export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false }: UseYouTubeProps) {
+export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false, autoPlay = false }: UseYouTubeProps) {
     const [hasStarted, setHasStarted] = useState(autoPlay);
     const [playing, setPlaying] = useState(autoPlay);
     const [played, setPlayed] = useState(0);
@@ -25,7 +26,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     const ambientPlayerRef = useRef<ExtendedPlayer | null>(null);
     const playerElementRef = useRef<HTMLDivElement>(null);
     const ambientElementRef = useRef<HTMLDivElement>(null);
-    const progressInterval = useRef<NodeJS.Timeout | null>(null);
+    const progressInterval = useRef<number | null>(null);
     const leaderReadyRef = useRef(false);
     const ambientReadyRef = useRef(false);
     const uiWaitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,37 +44,43 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     }, [played, duration, volume, muted, playing, isSyncing, youtubeUIWait]);
 
     const startProgressLoop = useCallback(() => {
-        if (progressInterval.current) clearInterval(progressInterval.current);
+        if (progressInterval.current) cancelAnimationFrame(progressInterval.current);
 
         let lastAmbientSync = 0;
 
-        progressInterval.current = setInterval(() => {
+        const loop = () => {
             const player = playerRef.current;
             const ambient = ambientPlayerRef.current;
 
-            if (!leaderReadyRef.current || !player) return;
+            if (!leaderReadyRef.current || !player) {
+                progressInterval.current = requestAnimationFrame(loop);
+                return;
+            }
 
             try {
                 const currentTime = player.getCurrentTime();
                 const dur = player.getDuration();
 
                 if (dur > 0) {
-                    setDuration(dur);
+                    setDuration(prev => prev === dur ? prev : dur);
                     setPlayed(currentTime / dur);
                 }
 
-                // Sync Ambient Slave
+                // Sync Ambient Slave (Telemetry sync optimized for 60Hz visual stability)
                 const now = Date.now();
                 if (ambient && ambientReadyRef.current && (now - lastAmbientSync > 500)) {
                     lastAmbientSync = now;
                     const ambientTime = ambient.getCurrentTime();
                     const drift = currentTime - ambientTime;
-                    if (Math.abs(drift) > 1.5) {
+                    if (Math.abs(drift) > 0.5) {
                         ambient.seekTo(currentTime, true);
                     }
                 }
             } catch { }
-        }, 100);
+            progressInterval.current = requestAnimationFrame(loop);
+        };
+
+        progressInterval.current = requestAnimationFrame(loop);
     }, []);
 
     const onLeaderReady = useCallback((event: YTEvent) => {
@@ -87,17 +94,32 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
 
         const startPoint = currentPlayed * (dur || 0);
 
+        if (typeof event.target.setVolume === 'function') {
+            const naturalVolume = Math.pow(currentVol / 100, 2) * 100;
+            event.target.setVolume(naturalVolume);
+        }
+        if (currentMuted) {
+            if (typeof event.target.mute === 'function') event.target.mute();
+        } else {
+            if (typeof event.target.unMute === 'function') event.target.unMute();
+        }
+
         if (currentPlaying) {
             setYoutubeUIWait(true);
             setIsSyncing(true);
             if (typeof event.target.seekTo === 'function') event.target.seekTo(startPoint, true);
-            if (typeof event.target.setVolume === 'function') event.target.setVolume(currentVol);
-            if (currentMuted) {
-                if (typeof event.target.mute === 'function') event.target.mute();
-            } else {
-                if (typeof event.target.unMute === 'function') event.target.unMute();
+
+            // High Fidelity Quality Lock
+            if (typeof event.target.setPlaybackQuality === 'function') {
+                event.target.setPlaybackQuality('highres');
             }
+
             if (typeof event.target.playVideo === 'function') event.target.playVideo();
+        } else {
+            // Even if not playing, prime the quality
+            if (typeof event.target.setPlaybackQuality === 'function') {
+                event.target.setPlaybackQuality('highres');
+            }
         }
 
         if (leaderReadyRef.current) {
@@ -134,6 +156,22 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                 setIsBuffer(false);
                 setIsTerminated(false);
                 setIsEnded(false);
+
+                // Persistent Content Enforcement (Defeats YouTube's internal 100% reset & Low-Res fallback)
+                const enforce = () => {
+                    if (event.target && typeof event.target.setVolume === 'function') {
+                        const { volume: v, muted: m } = syncStateRef.current;
+                        const naturalV = Math.pow(v / 100, 2) * 100;
+                        event.target.setVolume(naturalV);
+                        if (m) event.target.mute(); else event.target.unMute();
+                    }
+                    if (event.target && typeof event.target.setPlaybackQuality === 'function') {
+                        event.target.setPlaybackQuality('highres');
+                    }
+                };
+
+                enforce(); // Immediate
+                [100, 300, 800, 1500].forEach(delay => setTimeout(enforce, delay));
 
                 if (currentSync || currentWait) {
                     if (uiWaitTimeoutRef.current) {
@@ -202,7 +240,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         if (playing) {
             startProgressLoop();
         } else {
-            if (progressInterval.current) clearInterval(progressInterval.current);
+            if (progressInterval.current) cancelAnimationFrame(progressInterval.current);
         }
     }, [playing, startProgressLoop]);
 
@@ -241,17 +279,20 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                     videoId: cleanVideoId,
                     playerVars: {
                         autoplay: 1,
-                        controls: 0,
-                        disablekb: 1,
+                        controls: isMobile ? 1 : 0,
+                        disablekb: isMobile ? 0 : 1,
                         enablejsapi: 1,
                         playsinline: 1,
                         mute: muted ? 1 : 0,
-                        vq: 'hd1080',
+                        vq: 'hd2160', // Request 4K for maximum audio bitrate (Opus 251) + 60FPS support
+                        suggestedQuality: 'hd2160',
+                        rel: 0,
+                        modestbranding: 1,
                     },
                     events: {
                         onReady: onLeaderReady,
                         onStateChange: onPlayerStateChange,
-                        onError: (e: any) => {
+                        onError: (e: YTOnErrorEvent) => {
                             console.error("[PrecisionPlayer] Error:", e.data);
                             setIsTerminated(true);
                         },
@@ -267,7 +308,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
                             disablekb: 1,
                             enablejsapi: 1,
                             mute: 1,
-                            suggestedQuality: 'small'
+                            suggestedQuality: 'small' // 'small' is optimal for blurred ambient (fastest decode)
                         },
                         events: {
                             onReady: onAmbientReady,
@@ -306,11 +347,11 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
             }
             clearRestorationTimeouts();
 
-            if (progressInterval.current) clearInterval(progressInterval.current);
+            if (progressInterval.current) cancelAnimationFrame(progressInterval.current);
             progressInterval.current = null;
             setIsPlayerReady(false);
         };
-    }, [hasStarted, videoId, isMounted, muted, onLeaderReady, onAmbientReady, clearRestorationTimeouts, onPlayerStateChange]);
+    }, [hasStarted, videoId, isMounted, muted, onLeaderReady, onAmbientReady, clearRestorationTimeouts, onPlayerStateChange, isMobile]);
 
     const handlePlayPause = useCallback(() => {
         if (isSyncing || youtubeUIWait) return;
@@ -340,7 +381,8 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
     }, []);
 
     const setPlayerVolume = useCallback((val: number) => {
-        playerRef.current?.setVolume(val);
+        const naturalVolume = Math.pow(val / 100, 2) * 100;
+        playerRef.current?.setVolume(naturalVolume);
     }, []);
 
     const restart = useCallback(() => {
@@ -357,9 +399,17 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         setIsSyncing(true);
         setYoutubeUIWait(true);
 
-        const settings = { videoId, startSeconds: 0 };
-        player.loadVideoById(settings as any);
-        ambient?.loadVideoById({ videoId, startSeconds: 0 } as any);
+        const settings = {
+            videoId,
+            startSeconds: 0,
+            suggestedQuality: 'highres'
+        };
+        player.loadVideoById(settings as YT.VideoByIdSettings);
+        ambient?.loadVideoById({
+            videoId,
+            startSeconds: 0,
+            suggestedQuality: 'small'
+        } as YT.VideoByIdSettings);
     }, [videoId]);
 
     const onSetHasStarted = useCallback((val: boolean) => {
@@ -393,7 +443,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, autoPlay = false
         setPlayerVolume,
         restart,
         handleSeekMouseDown: () => {
-            if (progressInterval.current) clearInterval(progressInterval.current);
+            if (progressInterval.current) cancelAnimationFrame(progressInterval.current);
         },
         handleSeekMouseUp: () => {
             startProgressLoop();

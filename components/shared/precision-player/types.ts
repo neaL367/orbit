@@ -7,6 +7,7 @@ export type YTPlayer = YT.Player;
 // Use the official event types
 export type YTEvent = YT.PlayerEvent;
 export type YTOnStateChangeEvent = YT.OnStateChangeEvent;
+export type YTOnErrorEvent = YT.OnErrorEvent;
 
 export enum YTPlayerState {
     UNSTARTED = -1,

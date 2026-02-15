@@ -31,8 +31,8 @@ export function SeekBar() {
             {/* Background Track Area */}
             <div className="absolute inset-x-0 h-[2px] bg-white/10 group-hover/seek:bg-white/15 transition-colors overflow-visible flex items-center">
                 {/* Start/End Markers */}
-                <div className="absolute left-0 h-2 w-[1px] bg-white/20 -top-[3px]" />
-                <div className="absolute right-0 h-2 w-[1px] bg-white/20 -top-[3px]" />
+                <div className="absolute left-0 h-2 w-px bg-white/20 -top-[3px]" />
+                <div className="absolute right-0 h-2 w-px bg-white/20 -top-[3px]" />
 
                 {/* Buffer Layer */}
                 <div
@@ -50,7 +50,7 @@ export function SeekBar() {
 
                 {/* Played Progress Layer - The Main Beam */}
                 <div
-                    className="absolute inset-y-0 bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)] transition-all duration-75"
+                    className="absolute inset-y-0 bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]"
                     style={{ width: `${played * 100}%` }}
                 >
                     {/* Leading Edge Glow */}
@@ -72,7 +72,7 @@ export function SeekBar() {
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-t-[3px] border-t-primary/20" />
                     </div>
                     {/* Ghost playhead line - Dashed for target prediction feel */}
-                    <div className="w-[1px] h-6 border-l border-dashed border-white/40 absolute bottom-[-8px]" />
+                    <div className="w-px h-6 border-l border-dashed border-white/40 absolute bottom-[-8px]" />
                 </div>
             )}
 
@@ -88,12 +88,12 @@ export function SeekBar() {
                 onChange={handleSeekChange}
                 onMouseUp={handleSeekMouseUp}
                 onTouchEnd={handleSeekMouseUp}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-[40]"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40"
             />
 
             {/* Kinetic Playhead UI (The real position) - Enhanced Technical Look */}
             <div
-                className="absolute h-4 w-[2px] bg-primary z-20 pointer-events-none transition-all duration-100 flex flex-col items-center shadow-[0_0_8px_rgba(var(--primary),0.8)]"
+                className="absolute h-4 w-[2px] bg-primary z-20 pointer-events-none flex flex-col items-center shadow-[0_0_8px_rgba(var(--primary),0.8)]"
                 style={{ left: `${played * 100}%` }}
             >
                 {/* Top Marker */}

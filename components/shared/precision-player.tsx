@@ -14,17 +14,20 @@ interface PrecisionPlayerProps {
 }
 
 function PrecisionPlayerContent() {
-    const { isMounted } = usePrecisionPlayerState();
-    const { containerRef } = usePrecisionPlayerRefs();
+    const { isMounted } = usePrecisionPlayerState()
+    const { containerRef } = usePrecisionPlayerRefs()
 
-    if (!isMounted) return <div className="w-full aspect-video bg-black/50 animate-pulse" />;
+    if (!isMounted) return <div className="w-full aspect-video bg-black/50 animate-pulse" />
 
     return (
-        <div ref={containerRef} className="relative w-full aspect-video">
+        <div ref={containerRef} className="relative w-full">
             <AmbientBackground />
-            <PlayerUI />
+
+            <div className="relative z-10 w-full aspect-video overflow-hidden precision-frame-cut shadow-2xl border border-white/5">
+                <PlayerUI />
+            </div>
         </div>
-    );
+    )
 }
 
 export function PrecisionPlayer(props: PrecisionPlayerProps) {
@@ -32,7 +35,7 @@ export function PrecisionPlayer(props: PrecisionPlayerProps) {
         <PrecisionPlayerProvider {...props}>
             <Script
                 src="https://www.youtube.com/iframe_api"
-                strategy="lazyOnload"
+                strategy="afterInteractive"
                 id="youtube-api-script"
             />
             <PrecisionPlayerContent />

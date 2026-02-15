@@ -1,38 +1,60 @@
 const COLOR_CACHE_KEY = 'orbit_color_cache'
 
-type ColorCache = Record<string, {
-    leftTop: string
-    rightTop: string
-    leftBottom: string
-    rightBottom: string
-}>
+type ColorPalette = {
+    topLeft: string
+    topCenter: string
+    topRight: string
+    midLeft: string
+    midCenter: string
+    midRight: string
+    bottomLeft: string
+    bottomCenter: string
+    bottomRight: string
+}
 
-function getCache(): ColorCache {
+// In-memory cache to avoid repeated JSON.parse/sessionStorage hits
+let memoryCache: Record<string, ColorPalette> = {}
+let isCacheLoaded = false
+
+function getCache(): Record<string, ColorPalette> {
     if (typeof window === 'undefined') return {}
+    if (isCacheLoaded) return memoryCache
+
     try {
         const cached = sessionStorage.getItem(COLOR_CACHE_KEY)
-        return cached ? JSON.parse(cached) : {}
+        memoryCache = cached ? JSON.parse(cached) : {}
+        isCacheLoaded = true
+        return memoryCache
     } catch {
         return {}
     }
 }
 
-function setCache(url: string, colors: ColorCache[string]) {
+function setCache(url: string, colors: ColorPalette) {
     if (typeof window === 'undefined') return
+    memoryCache[url] = colors
+    isCacheLoaded = true
     try {
-        const cache = getCache()
-        cache[url] = colors
-        sessionStorage.setItem(COLOR_CACHE_KEY, JSON.stringify(cache))
+        sessionStorage.setItem(COLOR_CACHE_KEY, JSON.stringify(memoryCache))
     } catch { }
 }
 
+function getDefaultColors(): ColorPalette {
+    const defaultColor = '#000000' // Or any other default color
+    return {
+        topLeft: defaultColor,
+        topCenter: defaultColor,
+        topRight: defaultColor,
+        midLeft: defaultColor,
+        midCenter: defaultColor,
+        midRight: defaultColor,
+        bottomLeft: defaultColor,
+        bottomCenter: defaultColor,
+        bottomRight: defaultColor,
+    }
+}
 
-export async function extractDominantColors(imageUrl: string): Promise<{
-    leftTop: string
-    rightTop: string
-    leftBottom: string
-    rightBottom: string
-}> {
+export async function extractDominantColors(imageUrl: string): Promise<ColorPalette> {
     // Check cache first
     const cache = getCache()
     if (cache[imageUrl]) return cache[imageUrl]
@@ -55,18 +77,39 @@ export async function extractDominantColors(imageUrl: string): Promise<{
                 return
             }
 
-            // Use a small canvas for performance
-            canvas.width = 60
-            canvas.height = 60
-            ctx.drawImage(img, 0, 0, 60, 60)
+            // Use a small canvas for performance - 40x40 is plenty for ambient sampling
+            canvas.width = 40
+            canvas.height = 40
+            ctx.drawImage(img, 0, 0, 40, 40)
 
             try {
-                // Sample colors from 4 quadrants with overlap for smoother gradients
-                const colors = {
-                    leftTop: getQuadrantColor(ctx, 0, 0, 35, 35),
-                    rightTop: getQuadrantColor(ctx, 25, 0, 35, 35),
-                    leftBottom: getQuadrantColor(ctx, 0, 25, 35, 35),
-                    rightBottom: getQuadrantColor(ctx, 25, 25, 35, 35)
+                // Sample colors from 9 zones (3x3 grid) for higher fidelity
+                // Grid layout:
+                // [0] [1] [2]  (Top)
+                // [3] [4] [5]  (Middle)
+                // [6] [7] [8]  (Bottom)
+                const gridW = Math.floor(canvas.width / 3)
+                const gridH = Math.floor(canvas.height / 3)
+
+                // Helper to get zone color safely
+                const getZone = (col: number, row: number) =>
+                    getQuadrantColor(ctx, col * gridW, row * gridH, gridW, gridH)
+
+                const colors: ColorPalette = {
+                    // Top row
+                    topLeft: getZone(0, 0),
+                    topCenter: getZone(1, 0),
+                    topRight: getZone(2, 0),
+
+                    // Middle row
+                    midLeft: getZone(0, 1),
+                    midCenter: getZone(1, 1),
+                    midRight: getZone(2, 1),
+
+                    // Bottom row
+                    bottomLeft: getZone(0, 2),
+                    bottomCenter: getZone(1, 2),
+                    bottomRight: getZone(2, 2),
                 }
 
                 setCache(imageUrl, colors)
@@ -84,9 +127,6 @@ export async function extractDominantColors(imageUrl: string): Promise<{
     })
 }
 
-/**
- * Extract dominant color from a quadrant using median cut algorithm
- */
 function getQuadrantColor(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -94,97 +134,79 @@ function getQuadrantColor(
     width: number,
     height: number
 ): string {
-    const imageData = ctx.getImageData(x, y, width, height)
-    const data = imageData.data
+    const { data } = ctx.getImageData(x, y, width, height)
 
-    // Collect color samples (skip very dark and very bright pixels)
-    const colors: Array<[number, number, number]> = []
+    let rSum = 0, gSum = 0, bSum = 0, wSum = 0
 
-    for (let i = 0; i < data.length; i += 16) { // Sample every 4th pixel
+    // Sample every 3rd pixel
+    for (let i = 0; i < data.length; i += 12) {
         const r = data[i]
         const g = data[i + 1]
         const b = data[i + 2]
         const a = data[i + 3]
 
-        // Skip transparent pixels
-        if (a < 128) continue
+        // Soft alpha weight instead of hard threshold
+        const alphaWeight = a / 255
+        if (alphaWeight < 0.1) continue
 
-        // Skip near-black and near-white pixels (they don't contribute to ambient feel)
-        const brightness = (r + g + b) / 3
-        if (brightness < 15 || brightness > 240) continue
+        // brightness 0..255
+        const br = (r + g + b) / 3
 
-        colors.push([r, g, b])
+        // Weight:
+        // - don’t let near-black dominate
+        // - keep highlights, but not overpowering
+        // A smooth “bell-ish” weight is more stable than hard skipping.
+        const shadowCut = smoothstep(8, 40, br)      // 0 in deep shadow → 1 by ~40
+        const highlightSoft = 1 - smoothstep(235, 255, br) // 1 until ~235 → 0 by 255
+
+        // Combine weights
+        const w = alphaWeight * shadowCut * (0.55 + 0.45 * highlightSoft)
+
+        if (w <= 0) continue
+
+        rSum += r * w
+        gSum += g * w
+        bSum += b * w
+        wSum += w
     }
 
-    if (colors.length === 0) {
-        return getDefaultColor()
-    }
+    if (wSum <= 0) return getDefaultColor()
 
-    // Get dominant color using median cut
-    const dominantColor = medianCut(colors, 1)[0]
+    const rr = Math.round(rSum / wSum)
+    const gg = Math.round(gSum / wSum)
+    const bb = Math.round(bSum / wSum)
 
-    // Convert to ambient color with enhancements
-    return toAmbientColor(dominantColor)
+    return toAmbientColor([rr, gg, bb])
 }
 
-/**
- * Simplified median cut algorithm to find dominant colors
- */
-function medianCut(
-    colors: Array<[number, number, number]>,
-    depth: number
-): Array<[number, number, number]> {
-    if (depth === 0 || colors.length === 0) {
-        // Return average color
-        const r = colors.reduce((sum, c) => sum + c[0], 0) / colors.length
-        const g = colors.reduce((sum, c) => sum + c[1], 0) / colors.length
-        const b = colors.reduce((sum, c) => sum + c[2], 0) / colors.length
-        return [[Math.round(r), Math.round(g), Math.round(b)]]
-    }
-
-    // Find channel with greatest range
-    const rRange = Math.max(...colors.map(c => c[0])) - Math.min(...colors.map(c => c[0]))
-    const gRange = Math.max(...colors.map(c => c[1])) - Math.min(...colors.map(c => c[1]))
-    const bRange = Math.max(...colors.map(c => c[2])) - Math.min(...colors.map(c => c[2]))
-
-    const maxRange = Math.max(rRange, gRange, bRange)
-    const channelIndex = maxRange === rRange ? 0 : maxRange === gRange ? 1 : 2
-
-    // Sort by the channel with greatest range
-    colors.sort((a, b) => a[channelIndex] - b[channelIndex])
-
-    // Split at median
-    const mid = Math.floor(colors.length / 2)
-
-    return [
-        ...medianCut(colors.slice(0, mid), depth - 1),
-        ...medianCut(colors.slice(mid), depth - 1)
-    ]
+function smoothstep(edge0: number, edge1: number, x: number) {
+    const t = clamp((x - edge0) / (edge1 - edge0), 0, 1)
+    return t * t * (3 - 2 * t)
 }
 
-/**
- * Convert RGB color to ambient-optimized hex color
- * Applies saturation boost, darkness, and ensures visual appeal
- */
+function clamp(v: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, v))
+}
+
 function toAmbientColor([r, g, b]: [number, number, number]): string {
-    // Convert to HSL for better color manipulation
+    // Convert to HSL for controlled “YouTube-ish” vibes
     const hsl = rgbToHsl(r, g, b)
 
-    // Boost saturation for more vibrant ambient colors (but not too much)
-    hsl.s = Math.min(1, hsl.s * 1.4)
+    // Dynamic saturation boost: boost low-sat more, high-sat less
+    const satBoost = 1.15 + (1 - hsl.s) * 0.35
+    hsl.s = Math.min(1, hsl.s * satBoost)
 
-    // Darken for ambient effect while maintaining color character
-    // Use a curve that preserves more saturation in darker tones
-    hsl.l = hsl.l * 0.35
+    // Don’t crush luminance.
+    // Keep midtones, gently darken highlights, and ensure a nice minimum.
+    // (Your old 0.35 basically forced everything into the same dark band.)
+    const l = hsl.l
+    // Filmic curve-ish: keep midtones more than highlights
+    hsl.l = clamp(0.14 + (l * 0.60), 0.14, 0.62)
 
-    // Ensure minimum brightness to avoid pure black
-    hsl.l = Math.max(0.12, hsl.l)
-
-    // Convert back to RGB
     const rgb = hslToRgb(hsl.h, hsl.s, hsl.l)
-
     return rgbToHex(rgb.r, rgb.g, rgb.b)
 }
+
 
 /**
  * Convert RGB to HSL color space
@@ -258,18 +280,6 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
  */
 function rgbToHex(r: number, g: number, b: number): string {
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
-}
-
-/**
- * Get default fallback colors with subtle variation
- */
-function getDefaultColors() {
-    return {
-        leftTop: '#2a2a35',
-        rightTop: '#252530',
-        leftBottom: '#20202a',
-        rightBottom: '#1a1a25'
-    }
 }
 
 /**

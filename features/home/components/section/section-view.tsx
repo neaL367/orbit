@@ -77,14 +77,14 @@ export function SectionView({
 
   return (
     <section className="mb-32 group/section reveal relative">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10 mb-10 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10 mb-12 border-b border-white/5 pb-8">
         <IndexSectionHeader
           title={title}
           subtitle={subtitle || "General_Archive"}
           className="flex-1 mb-0"
         />
 
-        <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto pb-1">
+        <div className="flex items-center gap-4 sm:gap-6 self-start sm:self-auto">
           {viewAllHref && (
             <Link
               href={viewAllHref as Route}
@@ -99,7 +99,7 @@ export function SectionView({
 
       <div className="relative z-10">
         {variant === 'featured' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
             {/* 1. Primary Feature Module */}
             <div className="lg:col-span-7">
               {data[0] && (
@@ -146,7 +146,7 @@ export function SectionView({
                       </div> */}
 
                       {/* Title Display */}
-                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-mono font-black uppercase leading-[0.85] tracking-tighter text-foreground group-hover/feat:text-primary transition-colors duration-700 line-clamp-2 mix-blend-screen drop-shadow-2xl">
+                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-mono font-black uppercase leading-[0.9] tracking-tighter text-foreground group-hover/feat:text-primary transition-colors duration-700 line-clamp-2 mix-blend-screen drop-shadow-2xl">
                         {data[0].title?.userPreferred || data[0].title?.romaji}
                       </h3>
 
@@ -201,7 +201,7 @@ export function SectionView({
                     key={anime.id}
                     anime={anime}
                     rank={showRank ? (page - 1) * perPage + index + 2 : undefined}
-                    className="scale-95 lg:scale-100"
+                    className="w-full"
                   />
                 ))}
               </div>

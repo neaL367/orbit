@@ -76,7 +76,7 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         restart,
         handleSeekMouseDown: youtubeHandleSeekMouseDown,
         handleSeekMouseUp: youtubeHandleSeekMouseUp,
-    } = useYouTube({ videoId, isMounted, muted, volume, autoPlay });
+    } = useYouTube({ videoId, isMounted, muted, volume, isMobile, autoPlay });
 
     const handleSeekMouseDown = useCallback(() => {
         isSeekingRef.current = true;
@@ -88,30 +88,35 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         youtubeHandleSeekMouseUp();
     }, [youtubeHandleSeekMouseUp]);
 
-    const handleMouseMove = useCallback(() => {
+    const showControls = useCallback(() => {
         setControlsVisible(true);
         if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
         if (playing) hideControlsTimeout.current = setTimeout(() => setControlsVisible(false), 3000);
     }, [playing, setControlsVisible]);
+
+    const handleMouseMove = useCallback(() => {
+        showControls();
+    }, [showControls]);
 
     const handleSeekChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const val = parseFloat(e.target.value);
         const time = val * duration;
         setPlayed(val);
         seekTo(time);
-    }, [duration, setPlayed, seekTo]);
+        showControls();
+    }, [duration, setPlayed, seekTo, showControls]);
 
     const onSetMuted = useCallback((val: boolean) => {
         setMuted(val);
         setMute(val);
-    }, [setMute, setMuted]);
+        showControls();
+    }, [setMute, setMuted, showControls]);
 
     const onSetVolume = useCallback((val: number) => {
         setVolume(val);
-        // Quadratic Volume Scaling for natural hearing response
-        const naturalVolume = Math.pow(val / 100, 2) * 100;
-        setPlayerVolume(naturalVolume);
-    }, [setPlayerVolume, setVolume]);
+        setPlayerVolume(val);
+        showControls();
+    }, [setPlayerVolume, setVolume, showControls]);
 
     const toggleFullscreen = useCallback(() => {
         const doc = document;
@@ -193,26 +198,36 @@ export function usePrecisionPlayer({ url, videoId: propVideoId, title, id = "pla
         return h ? `${h}:${m.toString().padStart(2, "0")}:${sec}` : `${m}:${sec}`;
     }, []);
 
+    const onPlayPause = useCallback(() => {
+        handlePlayPause();
+        showControls();
+    }, [handlePlayPause, showControls]);
+
+    const onRestart = useCallback(() => {
+        restart();
+        showControls();
+    }, [restart, showControls]);
+
     const handlers = useMemo(() => ({
         handleMouseMove,
-        handlePlayPause,
+        handlePlayPause: onPlayPause,
         handleSeekChange,
         onSetMuted,
         onSetVolume,
         onSetHasStarted: setHasStarted,
-        onRestart: restart,
+        onRestart,
         formatTime,
         handleSeekMouseDown,
         handleSeekMouseUp,
         toggleFullscreen,
     }), [
         handleMouseMove,
-        handlePlayPause,
+        onPlayPause,
         handleSeekChange,
         onSetMuted,
         onSetVolume,
         setHasStarted,
-        restart,
+        onRestart,
         formatTime,
         handleSeekMouseDown,
         handleSeekMouseUp,
