@@ -42,19 +42,37 @@ export function BottomBar() {
                         >
                             {playing ? <Pause size={14} className="sm:size-5" /> : <Play size={14} className="sm:size-5 translate-x-0.5" />}
                         </button>
-                        <button onClick={onRestart} className="hidden xs:flex w-7 h-7 sm:w-8 sm:h-8 items-center justify-center hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer">
+                        <button
+                            disabled={!isPlayerReady}
+                            onClick={onRestart}
+                            className={cn(
+                                "hidden xs:flex w-7 h-7 sm:w-8 sm:h-8 items-center justify-center transition-colors text-muted-foreground hover:text-white",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                            )}
+                        >
                             <RotateCcw size={12} className="sm:size-4" />
                         </button>
                     </div>
 
                     <div className="flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
-                        <button onClick={() => onSetMuted(!muted)} className="text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center cursor-pointer">
+                        <button
+                            disabled={!isPlayerReady}
+                            onClick={() => onSetMuted(!muted)}
+                            className={cn(
+                                "text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                            )}
+                        >
                             {muted || volume === 0 ? <VolumeX size={14} className="sm:size-5" /> : <Volume2 size={14} className="sm:size-5" />}
                         </button>
                         <div className="hidden sm:flex items-center gap-3">
                             <div
-                                className="w-16 lg:w-24 h-5 relative group/vol cursor-pointer flex items-center"
+                                className={cn(
+                                    "w-16 lg:w-24 h-5 relative group/vol flex items-center transition-opacity",
+                                    !isPlayerReady ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"
+                                )}
                                 onMouseDown={(e) => {
+                                    if (!isPlayerReady) return;
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const updateVolume = (clientX: number) => {
                                         const val = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
@@ -105,8 +123,12 @@ export function BottomBar() {
                         </div>
                     )}
                     <button
+                        disabled={!isPlayerReady}
                         onClick={toggleFullscreen}
-                        className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                        className={cn(
+                            "flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 transition-colors text-muted-foreground hover:text-white",
+                            !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                        )}
                         title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                     >
                         {isFullscreen ? <Minimize size={14} className="sm:size-5" /> : <Maximize size={14} className="sm:size-5" />}

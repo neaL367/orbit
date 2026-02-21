@@ -11,7 +11,7 @@ export function ScrollToTop() {
         <button
             onClick={scrollToTop}
             className={cn(
-                "fixed bottom-12 right-12 z-[100] p-4 border border-border bg-background/80 backdrop-blur-sm transition-all duration-500",
+                "fixed bottom-32 right-12 z-[100] p-4 border border-border bg-background/80 backdrop-blur-sm transition-all duration-500",
                 show
                     ? "opacity-100 translate-y-0"
                     : "opacity-0 translate-y-4 pointer-events-none"

@@ -4,14 +4,14 @@ import { usePrecisionPlayerState, usePrecisionPlayerRefs } from "./context"
 
 const AmbientLayer = memo(({ ambientElementRef }: { ambientElementRef: React.RefObject<HTMLDivElement | null> }) => (
     <div
-        className="w-full h-full blur-[120px] saturate-[2] brightness-110 contrast-125 opacity-40 transition-opacity duration-1000 will-change-transform"
+        className="w-full h-full blur-[140px] saturate-[1.8] brightness-105 contrast-110 opacity-40 transition-all duration-1200 ease-out will-change-transform"
         style={{
             transform: "translate3d(0,0,0)",
             backfaceVisibility: "hidden"
         }}
     >
         {/* API mounts iframe here */}
-        <div ref={ambientElementRef} className="w-full h-full" />
+        <div ref={ambientElementRef} className="w-full h-full scale-[1.1]" />
     </div>
 ))
 

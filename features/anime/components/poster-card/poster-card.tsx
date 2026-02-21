@@ -31,7 +31,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
         <Link
             href={`/anime/${anime.id}`}
             className={cn(
-                "group relative block aspect-[2/3] w-full bg-secondary border border-white/5 overflow-hidden transition-all duration-700 hover:border-primary/50 rounded-sm shadow-xl",
+                "group relative block aspect-2/3 w-full bg-secondary border border-white/5 overflow-hidden transition-all duration-700 hover:border-primary/50 rounded-sm shadow-xl",
                 className
             )}
             onMouseEnter={handleMouseEnter}
@@ -80,23 +80,32 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
             )}
 
             {/* Solid Mask for text legibility */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/90 to-transparent z-10" />
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black via-black/90 to-transparent z-10" />
 
             {/* Information Layer */}
             <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-5 space-y-3 sm:space-y-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-[1px] bg-primary group-hover:w-10 transition-all duration-700" />
+                        <div className="w-4 h-px bg-primary group-hover:w-10 transition-all duration-700" />
                         <span className="font-mono text-[8px] text-primary/80 tracking-[0.4em] uppercase font-black">SUBJECT_DATA</span>
                     </div>
                     <h3 className="line-clamp-2 font-mono text-sm sm:text-base font-black leading-[1.1] uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors duration-500">
                         {title}
                     </h3>
+
+                    {/* Quick Scan Genres */}
+                    <div className="flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+                        {anime.genres?.slice(0, 3).map((genre) => (
+                            <span key={genre} className="font-mono text-[7px] uppercase tracking-widest text-white/40 border border-white/10 px-1.5 py-0.5 whitespace-nowrap">
+                                {genre}
+                            </span>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/40 border-t border-white/10 pt-3 sm:pt-4">
                     <span className="text-white/80 font-black">{anime.format?.replace(/_/g, " ")}</span>
-                    <div className="w-[1px] h-3 bg-white/20 shrink-0" />
+                    <div className="w-px h-3 bg-white/20 shrink-0" />
                     <span className="font-bold">{anime.startDate?.year || 'TBA'}</span>
                     <div className="flex-1" />
                     <div className={cn(
