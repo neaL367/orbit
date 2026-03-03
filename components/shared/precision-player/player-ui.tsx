@@ -10,7 +10,7 @@ interface VideoLayerProps {
     isTerminated: boolean;
     safeVideoId: string;
     isFullscreen: boolean;
-    isMobile: boolean; // Added isMobile
+    isMobile: boolean;
     playerElementRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -160,13 +160,22 @@ export function PlayerUI() {
     } = state
 
     const { playerElementRef } = refs
-    const { handleMouseMove, handlePlayPause, onSetHasStarted } = handlers
+    const {
+        handleMouseMove,
+        handleMouseLeave,
+        handlePlayPause,
+        onSetHasStarted,
+        onControlsPointerEnter,
+        onControlsPointerLeave,
+    } = handlers
 
     const safeVideoId = videoId ?? ""
+    const controlsAreVisible = controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady
 
     return (
         <div
             onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
             onTouchStart={handleMouseMove}
             className={cn(
                 "group relative transition-[border-color,opacity] duration-300 ease-in-out w-full border-white/5",
@@ -204,10 +213,8 @@ export function PlayerUI() {
                         role={hasStarted ? undefined : "button"}
                         aria-label={hasStarted ? undefined : "Initialize Player"}
                     >
-                        {/* Only show custom overlays on desktop */}
                         {!isMobile && <PauseMask />}
 
-                        {/* Video Layer wrapper */}
                         <div className={cn("absolute inset-0 overflow-hidden", isMobile ? "z-50" : "z-20")}>
                             <VideoLayer
                                 isTerminated={isTerminated}
@@ -218,7 +225,6 @@ export function PlayerUI() {
                             />
                         </div>
 
-                        {/* Custom Overlay elements (Desktop only) */}
                         {!isMobile && hasStarted && isPlayerReady && (
                             <div
                                 className="absolute inset-0 z-30 cursor-default"
@@ -237,20 +243,38 @@ export function PlayerUI() {
 
                         {!isMobile && <VolumeUI />}
 
-                        {/* UI Controls (Desktop only) */}
                         {!isMobile && (
                             <div
                                 className={cn(
-                                    "absolute inset-0 z-60 flex flex-col justify-between transition-opacity duration-500 bg-linear-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
-                                    controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady ? "opacity-100" : "opacity-0"
+                                    "absolute inset-0 z-60 flex flex-col justify-between transition-opacity duration-350 bg-linear-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
+                                    controlsAreVisible ? "opacity-100" : "opacity-0"
                                 )}
                                 style={{
                                     willChange: "opacity",
                                     transform: "translate3d(0,0,0)"
                                 }}
                             >
-                                <div className="pointer-events-auto"><TopBar /></div>
-                                <div className="pointer-events-auto mt-auto"><BottomBar /></div>
+                                <div
+                                    className={cn(
+                                        "mt-0 transition-all duration-350",
+                                        controlsAreVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-3 opacity-0 pointer-events-none"
+                                    )}
+                                    onMouseEnter={onControlsPointerEnter}
+                                    onMouseLeave={onControlsPointerLeave}
+                                >
+                                    <TopBar />
+                                </div>
+
+                                <div
+                                    className={cn(
+                                        "mt-auto transition-all duration-350",
+                                        controlsAreVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-4 opacity-0 pointer-events-none"
+                                    )}
+                                    onMouseEnter={onControlsPointerEnter}
+                                    onMouseLeave={onControlsPointerLeave}
+                                >
+                                    <BottomBar />
+                                </div>
                             </div>
                         )}
                     </div>

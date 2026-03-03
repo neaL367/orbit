@@ -30,6 +30,11 @@ export interface ExtendedPlayerOptions extends YT.PlayerOptions {
 
 export interface ExtendedPlayer extends YT.Player {
     setPlaybackQuality(quality: string): void;
+    getVideoData(): { video_id: string; author: string; title: string };
+    getPlaybackQuality(): YT.SuggestedVideoQuality;
+    getAvailablePlaybackRates(): number[];
+    setPlaybackRate(suggestedRate: number): void;
+    getPlaybackRate(): number;
 }
 
 declare global {

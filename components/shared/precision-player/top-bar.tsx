@@ -1,38 +1,47 @@
-import { usePrecisionPlayerState } from "./context"
+import { useState, useEffect } from "react"
+import { usePrecisionPlayerState, usePrecisionPlayerHandlers } from "./context"
 
 export function TopBar() {
-    const { title, id } = usePrecisionPlayerState()
+    const { title: propTitle, isPlayerReady } = usePrecisionPlayerState()
+    const { getVideoData } = usePrecisionPlayerHandlers()
+
+    const [title, setTitle] = useState(propTitle)
+
+    useEffect(() => {
+        if (isPlayerReady) {
+            const data = getVideoData()
+            if (data?.title) {
+                setTitle(data.title)
+            }
+        }
+    }, [isPlayerReady, getVideoData])
 
     return (
         <div
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            className="bg-black/95 border-b border-white/10 flex justify-between items-start z-30 transition-all duration-500 p-2 sm:p-4 lg:p-6"
+            className="z-30 flex justify-between items-start transition-all duration-500 p-4 sm:p-6 lg:p-8"
         >
-            <div className="flex flex-col gap-0 min-w-0 flex-1">
-                <div className="flex items-center gap-2 sm:gap-4">
-                    <div className="w-1.5 h-1.5 bg-primary rotate-45 animate-pulse flex-shrink-0" />
-                    <span className="font-mono text-[9px] sm:text-[11px] md:text-[13px] uppercase tracking-[0.2em] sm:tracking-[0.4em] text-primary font-bold truncate">
+            <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse shrink-0" />
+                    <span className="font-mono text-[10px] sm:text-[12px] uppercase tracking-[0.3em] text-primary font-black">
                         PRECISION_LINK
                     </span>
                 </div>
-                <h3 className="font-mono font-black uppercase tracking-tighter text-foreground leading-tight truncate text-[11px] sm:text-lg lg:text-xl mt-1">
+                <h3 className="font-sans font-black uppercase tracking-tight text-white leading-tight truncate text-[14px] sm:text-2xl lg:text-3xl filter drop-shadow-md">
                     {title}
                 </h3>
             </div>
 
-            <div className="hidden sm:flex flex-col items-end gap-0.5 sm:gap-1.5 font-mono text-[8px] sm:text-[10px] text-muted-foreground/60 uppercase ml-4 flex-shrink-0">
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                    <span className="opacity-40">AUDIO//</span>
-                    <span className="text-primary font-bold">L-PCM 24-bit / 48kHz</span>
+            <div className="hidden md:flex flex-col items-end gap-1 font-mono text-[10px] text-white/50 uppercase ml-4 shrink-0">
+                <div className="flex items-center gap-3">
+                    <span className="opacity-30">ENCODER//</span>
+                    <span className="text-primary font-bold">L-PCM 24-BIT</span>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                    <span className="opacity-40">UPLINK//</span>
-                    <span className="text-foreground font-bold">READY</span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                    <span className="opacity-40">ID//</span>
-                    <span className="text-foreground font-bold truncate max-w-[80px] sm:max-w-none">{id}</span>
+                <div className="flex items-center gap-3">
+                    <span className="opacity-30">UPLINK//</span>
+                    <span className="text-white font-bold tracking-widest">ESTABLISHED</span>
                 </div>
             </div>
         </div>

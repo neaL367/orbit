@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, Minimize } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SeekBar } from "./seek-bar"
@@ -11,64 +12,73 @@ export function BottomBar() {
 
     const {
         handlePlayPause, onSetMuted, onSetVolume,
-        onRestart, formatTime, toggleFullscreen
+        onRestart, formatTime, toggleFullscreen,
+        getAvailablePlaybackRates, setPlaybackRate, getPlaybackRate
     } = usePrecisionPlayerHandlers()
+
+    const [rates, setRates] = useState<number[]>([1]);
+    const [currentRate, setCurrentRate] = useState<number>(1);
+
+    useEffect(() => {
+        if (isPlayerReady) {
+            setRates(getAvailablePlaybackRates());
+            setCurrentRate(getPlaybackRate());
+        }
+    }, [isPlayerReady, getAvailablePlaybackRates, getPlaybackRate]);
+
+
 
     return (
         <div
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             className={cn(
-                "bg-black/95 border-t border-white/10 z-30 transition-all duration-300",
-                "p-2 sm:p-4 lg:p-6"
+                "z-30 px-3 pb-2 sm:px-5 sm:pb-4",
+                "flex flex-col gap-1 sm:gap-2"
             )}
         >
-            <div className="flex items-center gap-2 sm:gap-4 mb-0.5 sm:mb-2 ml-1 sm:ml-0">
-                <div className="flex-1">
-                    <SeekBar />
-                </div>
-            </div>
+            <SeekBar />
 
-            <div className="flex items-center justify-between gap-2 px-1 sm:px-0">
-                <div className="flex items-center gap-1 sm:gap-5">
-                    <div className="flex bg-white/5 border border-white/10 p-0.5 rounded-sm gap-0.5">
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-1 sm:gap-4">
+                    <div className="flex items-center gap-1">
                         <button
                             disabled={!isPlayerReady}
                             onClick={handlePlayPause}
                             className={cn(
-                                "flex items-center justify-center transition-colors text-white w-7 h-7 sm:w-8 sm:h-8",
-                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                                "flex items-center justify-center transition-all text-white w-9 h-9",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:scale-110 active:scale-95 cursor-pointer"
                             )}
                         >
-                            {playing ? <Pause size={14} className="sm:size-5" /> : <Play size={14} className="sm:size-5 translate-x-0.5" />}
+                            {playing ? <Pause size={20} className="fill-white" /> : <Play size={20} className="fill-white translate-x-0.5" />}
                         </button>
                         <button
                             disabled={!isPlayerReady}
                             onClick={onRestart}
                             className={cn(
-                                "hidden xs:flex w-7 h-7 sm:w-8 sm:h-8 items-center justify-center transition-colors text-muted-foreground hover:text-white",
-                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                                "hidden xs:flex w-9 h-9 items-center justify-center transition-all text-white/70 hover:text-white",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:scale-110 active:scale-95 cursor-pointer"
                             )}
                         >
-                            <RotateCcw size={12} className="sm:size-4" />
+                            <RotateCcw size={16} />
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-1 sm:gap-4 sm:border-l sm:pl-5 border-white/10">
+                    <div className="flex items-center gap-1 group/vol-container">
                         <button
                             disabled={!isPlayerReady}
                             onClick={() => onSetMuted(!muted)}
                             className={cn(
-                                "text-muted-foreground hover:text-white transition-colors p-1 flex items-center justify-center",
-                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                                "text-white/80 hover:text-white transition-all p-2 flex items-center justify-center",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-110"
                             )}
                         >
-                            {muted || volume === 0 ? <VolumeX size={14} className="sm:size-5" /> : <Volume2 size={14} className="sm:size-5" />}
+                            {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                         </button>
-                        <div className="hidden sm:flex items-center gap-3">
+                        <div className="hidden sm:flex items-center w-0 group-hover/vol-container:w-20 lg:group-hover/vol-container:w-28 transition-all duration-300 overflow-hidden">
                             <div
                                 className={cn(
-                                    "w-16 lg:w-24 h-5 relative group/vol flex items-center transition-opacity",
+                                    "w-full h-5 relative flex items-center pr-4 ml-1",
                                     !isPlayerReady ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"
                                 )}
                                 onMouseDown={(e) => {
@@ -88,50 +98,73 @@ export function BottomBar() {
                                     window.addEventListener('mouseup', onMouseUp);
                                 }}
                             >
-                                {/* Track Background */}
-                                <div className="absolute inset-x-0 h-[2px] bg-white/10 rounded-full" />
-
-                                {/* Active Fill */}
+                                <div className="absolute inset-x-0 h-[3px] bg-white/20 rounded-full" />
                                 <div
-                                    className="absolute inset-y-0 left-0 h-[2px] bg-primary transition-all duration-75 my-auto"
+                                    className="absolute inset-y-0 left-0 h-[3px] bg-white my-auto rounded-full"
                                     style={{ width: `${volume}%` }}
                                 >
-                                    {/* Handle Glow */}
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
+                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg" />
                                 </div>
-
-                                {/* Interaction Trigger */}
-                                <div className="absolute inset-0 z-10" />
                             </div>
-                            <span className="font-mono text-[10px] sm:text-[11px] text-primary font-black tabular-nums min-w-[32px]">
-                                {Math.round(volume).toString().padStart(2, '0')}%
-                            </span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 sm:px-5 sm:border-l border-white/10 font-mono text-[10px] sm:text-[12px]">
-                        <span className="text-foreground font-black tracking-tighter">{formatTime(played * duration)}</span>
-                        <span className="text-muted-foreground/40 sm:inline hidden">/</span>
-                        <span className="text-muted-foreground/60 sm:inline hidden font-medium">{formatTime(duration)}</span>
+                    <div className="flex items-center gap-2 font-mono text-[11px] sm:text-[13px] text-white/90 ml-2">
+                        <span className="font-bold tabular-nums">{formatTime(played * duration)}</span>
+                        <span className="opacity-40">/</span>
+                        <span className="opacity-60 tabular-nums">{formatTime(duration)}</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 font-mono">
+                <div className="flex items-center gap-2 sm:gap-4">
                     {isBuffer && (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1 bg-primary/10 border border-primary/20 animate-pulse">
-                            <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-primary font-bold">BUF</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/20 rounded-full animate-pulse border border-primary/30">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                            <span className="text-[10px] uppercase tracking-wider text-primary font-bold">Buffering</span>
                         </div>
                     )}
+
+                    <div className="hidden sm:flex items-center relative group">
+                        <button
+                            disabled={!isPlayerReady}
+                            className={cn(
+                                "flex items-center gap-1.5 text-[12px] text-white font-bold transition-all px-3 py-1.5 rounded-md",
+                                !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                            )}
+                        >
+                            <span>{currentRate}x</span>
+                        </button>
+
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
+                            <div className="bg-black/95 border border-white/10 p-1 flex flex-col-reverse shadow-2xl backdrop-blur-xl rounded-lg overflow-hidden min-w-[80px]">
+                                {rates.map(r => (
+                                    <button
+                                        key={r}
+                                        onClick={() => {
+                                            setPlaybackRate(r);
+                                            setCurrentRate(r);
+                                        }}
+                                        className={cn(
+                                            "px-4 py-2 text-[11px] font-bold text-center transition-colors",
+                                            currentRate === r ? "bg-primary text-black" : "text-white/80 hover:bg-white/10"
+                                        )}
+                                    >
+                                        {r}x
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
                     <button
                         disabled={!isPlayerReady}
                         onClick={toggleFullscreen}
                         className={cn(
-                            "flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 transition-colors text-muted-foreground hover:text-white",
-                            !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
+                            "flex items-center justify-center w-9 h-9 transition-all text-white/80 hover:text-white",
+                            !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:scale-110 active:scale-95 cursor-pointer"
                         )}
-                        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                     >
-                        {isFullscreen ? <Minimize size={14} className="sm:size-5" /> : <Maximize size={14} className="sm:size-5" />}
+                        {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
                     </button>
                 </div>
             </div>
