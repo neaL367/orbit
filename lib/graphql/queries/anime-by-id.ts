@@ -1,28 +1,30 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const AnimeByIdQuery = graphql(`
+export const AnimeByIdQuery = gql`
   query AnimeById($id: Int) {
     Media(id: $id, type: ANIME, isAdult: false) {
       id
+      idMal
       title {
         romaji
         english
         native
         userPreferred
       }
-      description
       coverImage {
+        extraLarge
         large
         medium
-        extraLarge
         color
       }
       bannerImage
-      averageScore
-      meanScore
-      popularity
-      favourites
+      description
+      season
+      seasonYear
+      format
       status
+      episodes
+      duration
       genres
       tags {
         id
@@ -30,10 +32,25 @@ export const AnimeByIdQuery = graphql(`
         description
         category
         rank
+        isGeneralSpoiler
+        isMediaSpoiler
       }
-      format
-      duration
-      episodes
+      averageScore
+      meanScore
+      popularity
+      favourites
+      source
+      hashtag
+      synonyms
+      siteUrl
+      countryOfOrigin
+      isLicensed
+      isAdult
+      nextAiringEpisode {
+        airingAt
+        timeUntilAiring
+        episode
+      }
       startDate {
         year
         month
@@ -43,113 +60,6 @@ export const AnimeByIdQuery = graphql(`
         year
         month
         day
-      }
-      season
-      seasonYear
-      countryOfOrigin
-      source
-      hashtag
-      synonyms
-      siteUrl
-      nextAiringEpisode {
-        airingAt
-        timeUntilAiring
-        episode
-      }
-      trending
-      studios(isMain: true) {
-        nodes {
-          id
-          name
-          siteUrl
-          isAnimationStudio
-        }
-      }
-      staff {
-        edges {
-          role
-          node {
-            id
-            name {
-              full
-              native
-            }
-            image {
-              large
-              medium
-            }
-          }
-        }
-      }
-      characters {
-        edges {
-          role
-          voiceActors {
-            id
-            name {
-              full
-              native
-            }
-            image {
-              large
-              medium
-            }
-            languageV2
-          }
-          node {
-            id
-            name {
-              full
-              native
-            }
-            image {
-              large
-              medium
-            }
-          }
-        }
-      }
-      relations {
-        edges {
-          relationType
-          node {
-            id
-            title {
-              romaji
-              english
-            }
-            coverImage {
-              large
-              medium
-            }
-            type
-            isAdult
-          }
-        }
-      }
-      recommendations {
-        nodes {
-          rating
-          userRating
-          mediaRecommendation {
-            id
-            title {
-              romaji
-              english
-            }
-            coverImage {
-              large
-              medium
-            }
-            isAdult
-          }
-        }
-      }
-      streamingEpisodes {
-        title
-        thumbnail
-        url
-        site
       }
       trailer {
         id
@@ -168,7 +78,120 @@ export const AnimeByIdQuery = graphql(`
         notes
         isDisabled
       }
+      streamingEpisodes {
+        title
+        thumbnail
+        url
+        site
+      }
+      studios(isMain: true) {
+        nodes {
+          id
+          name
+          isAnimationStudio
+          siteUrl
+        }
+      }
+      relations {
+        edges {
+          id
+          relationType
+          node {
+            id
+            idMal
+            title {
+              romaji
+              english
+              native
+              userPreferred
+            }
+            type
+            format
+            status
+            bannerImage
+            coverImage {
+              large
+              medium
+            }
+            isAdult
+          }
+        }
+      }
+      characters {
+        edges {
+          id
+          role
+          node {
+            id
+            name {
+              full
+              native
+              userPreferred
+            }
+            image {
+              large
+              medium
+            }
+          }
+          voiceActors {
+            id
+            name {
+              full
+              native
+              userPreferred
+            }
+            image {
+              large
+              medium
+            }
+            languageV2
+          }
+        }
+      }
+      staff {
+        edges {
+          id
+          role
+          node {
+            id
+            name {
+              full
+              native
+              userPreferred
+            }
+            image {
+              large
+              medium
+            }
+          }
+        }
+      }
+      recommendations {
+        nodes {
+          id
+          rating
+          userRating
+          mediaRecommendation {
+            id
+            idMal
+            title {
+              romaji
+              english
+              native
+              userPreferred
+            }
+            type
+            format
+            status
+            bannerImage
+            coverImage {
+              large
+              medium
+            }
+            isAdult
+          }
+        }
+      }
     }
   }
-`)
-
+`

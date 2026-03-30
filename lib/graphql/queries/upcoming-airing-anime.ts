@@ -1,6 +1,6 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const UpcomingAiringAnimeQuery = graphql(`
+export const UpcomingAiringAnimeQuery = gql`
   query UpcomingAiringAnime($page: Int, $perPage: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
@@ -8,13 +8,9 @@ export const UpcomingAiringAnimeQuery = graphql(`
         hasNextPage
         perPage
       }
-      media(
-        type: ANIME
-        sort: [POPULARITY_DESC, TRENDING_DESC]
-        status: RELEASING
-        isAdult: false
-      ) {
+      media(type: ANIME, sort: [POPULARITY_DESC, TRENDING_DESC], status: RELEASING, isAdult: false) {
         id
+        idMal
         title {
           romaji
           english
@@ -35,16 +31,11 @@ export const UpcomingAiringAnimeQuery = graphql(`
         favourites
         status
         genres
-        tags {
-          id
-          name
-          description
-          category
-          rank
-        }
         format
         duration
         episodes
+        season
+        seasonYear
         startDate {
           year
           month
@@ -55,29 +46,20 @@ export const UpcomingAiringAnimeQuery = graphql(`
           month
           day
         }
-        season
-        seasonYear
-        countryOfOrigin
-        source
-        hashtag
-        synonyms
-        siteUrl
-        nextAiringEpisode {
-          airingAt
-          timeUntilAiring
-          episode
+        tags {
+          id
+          name
+          description
+          category
+          rank
         }
-        trending
         studios(isMain: true) {
           nodes {
             id
             name
-            siteUrl
-            isAnimationStudio
           }
         }
       }
     }
   }
-`)
-
+`

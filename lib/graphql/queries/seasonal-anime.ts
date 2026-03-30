@@ -1,24 +1,16 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const SeasonalAnimeQuery = graphql(`
-  query SeasonalAnime($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
+export const SeasonalAnimeQuery = gql`
+  query SeasonalAnime($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
         currentPage
         hasNextPage
         perPage
       }
-      media(
-        type: ANIME
-        season: $season
-        seasonYear: $seasonYear
-        sort: POPULARITY_DESC
-        genre_in: $genres
-        format: $format
-        status: $status
-        isAdult: false
-      ) {
+      media(type: ANIME, season: $season, seasonYear: $seasonYear, genre_in: $genres, format: $format, status: $status, sort: POPULARITY_DESC, isAdult: false) {
         id
+        idMal
         title {
           romaji
           english
@@ -39,16 +31,11 @@ export const SeasonalAnimeQuery = graphql(`
         favourites
         status
         genres
-        tags {
-          id
-          name
-          description
-          category
-          rank
-        }
         format
         duration
         episodes
+        season
+        seasonYear
         startDate {
           year
           month
@@ -59,29 +46,20 @@ export const SeasonalAnimeQuery = graphql(`
           month
           day
         }
-        season
-        seasonYear
-        countryOfOrigin
-        source
-        hashtag
-        synonyms
-        siteUrl
-        nextAiringEpisode {
-          airingAt
-          timeUntilAiring
-          episode
+        tags {
+          id
+          name
+          description
+          category
+          rank
         }
-        trending
         studios(isMain: true) {
           nodes {
             id
             name
-            siteUrl
-            isAnimationStudio
           }
         }
       }
     }
   }
-`)
-
+`

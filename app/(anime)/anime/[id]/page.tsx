@@ -7,6 +7,7 @@ import { AnimeEpisodes } from "@/features/anime/components/anime-episodes"
 import { AnimeTrailer } from "@/features/anime/components/anime-trailer"
 import { IndexImage } from "@/components/shared/index-image"
 import { AnimeRegistryNav } from "@/components/shared/anime-registry-nav"
+import { Container } from "@/components/shared/container"
 
 import { getCachedAnime } from '@/lib/graphql/data'
 import { getAnimeTitle } from '@/lib/utils/anime-utils'
@@ -65,9 +66,11 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
 
     return (
         <>
-            <AnimeRegistryNav anime={anime} title={title} />
+            <Container>
+                <AnimeRegistryNav anime={anime} title={title} />
+            </Container>
 
-            <div className="reveal relative pb-20">
+            <div className="reveal relative pb-20 overflow-x-hidden">
 
                 <script
                     type="application/ld+json"
@@ -92,7 +95,7 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                 />
 
                 {/* Immersive Hero Section */}
-                <div className="w-screen relative left-1/2 -translate-x-1/2 h-[50dvh] group select-none overflow-hidden">
+                <div className="w-full h-[50dvh] group select-none overflow-hidden relative">
                     {/* Background Ambient Component */}
                     <div className="absolute inset-0 z-0">
                         {anime.bannerImage || anime.coverImage?.extraLarge ? (
@@ -167,7 +170,7 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                 </div>
 
                 {/* Main Content Layout */}
-                <main className="w-full -mt-32 md:-mt-56 relative z-30 pb-32">
+                <Container className="-mt-32 md:-mt-56 relative z-30 pb-32">
                     <header className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
                         {/* Poster Section with Technical Frame */}
                         <div className="w-full md:w-80 shrink-0 group/poster relative">
@@ -451,9 +454,8 @@ async function AnimeDetailContent({ params }: { params: Promise<{ id: string }> 
                             </div>
                         </div>
                     </div>
-                </main>
-
-            </div >
+                </Container>
+            </div>
         </>
 
     )

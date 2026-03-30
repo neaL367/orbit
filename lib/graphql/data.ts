@@ -5,14 +5,15 @@ import {
     cacheTag
 } from 'next/cache'
 import { executeGraphQL } from './engine/fetch-server'
-import { AnimeByIdQuery } from './queries/anime-by-id'
-import { TrendingAnimeQuery } from './queries/trending-anime'
-import { PopularAnimeQuery } from './queries/popular-anime'
-import { SeasonalAnimeQuery } from './queries/seasonal-anime'
-import { TopRatedAnimeQuery } from './queries/top-rated-anime'
-import { UpcomingAiringAnimeQuery } from './queries/upcoming-airing-anime'
-import { ScheduleAnimeQuery } from './queries/schedule-anime'
-import { MediaSeason } from './types/graphql'
+import { 
+    AnimeByIdDocument, 
+    TrendingAnimeDocument, 
+    PopularAnimeDocument, 
+    SeasonalAnimeDocument, 
+    TopRatedAnimeDocument, 
+    UpcomingAiringAnimeDocument, 
+    ScheduleAnimeHeroDocument 
+} from './types/graphql'
 import type {
     AnimeByIdQuery as AnimeByIdQueryType,
     TrendingAnimeQuery as TrendingAnimeQueryType,
@@ -20,7 +21,8 @@ import type {
     SeasonalAnimeQuery as SeasonalAnimeQueryType,
     TopRatedAnimeQuery as TopRatedAnimeQueryType,
     UpcomingAiringAnimeQuery as UpcomingAiringAnimeQueryType,
-    ScheduleAnimeHeroQuery as ScheduleAnimeHeroQueryType
+    ScheduleAnimeHeroQuery as ScheduleAnimeHeroQueryType,
+    MediaSeason
 } from './types/graphql'
 
 /**
@@ -32,25 +34,25 @@ import type {
 export async function getCachedAnime(id: number) {
     cacheLife('days')
     cacheTag('anime-detail', `anime-${id}`)
-    return executeGraphQL<AnimeByIdQueryType>(AnimeByIdQuery.toString(), { id })
+    return executeGraphQL<AnimeByIdQueryType>(AnimeByIdDocument.toString(), { id })
 }
 
 export async function getCachedTrending(perPage: number = 6) {
     cacheLife('minutes')
     cacheTag('anime-trending', 'anime-list')
-    return executeGraphQL<TrendingAnimeQueryType>(TrendingAnimeQuery.toString(), { page: 1, perPage })
+    return executeGraphQL<TrendingAnimeQueryType>(TrendingAnimeDocument.toString(), { page: 1, perPage })
 }
 
 export async function getCachedPopular(perPage: number = 6) {
     cacheLife('minutes')
     cacheTag('anime-popular', 'anime-list')
-    return executeGraphQL<PopularAnimeQueryType>(PopularAnimeQuery.toString(), { page: 1, perPage })
+    return executeGraphQL<PopularAnimeQueryType>(PopularAnimeDocument.toString(), { page: 1, perPage })
 }
 
 export async function getCachedSeasonal(season: MediaSeason, year: number, perPage: number = 6) {
     cacheLife('hours')
     cacheTag('anime-seasonal', 'anime-list', `anime-season-${season}-${year}`)
-    return executeGraphQL<SeasonalAnimeQueryType>(SeasonalAnimeQuery.toString(), {
+    return executeGraphQL<SeasonalAnimeQueryType>(SeasonalAnimeDocument.toString(), {
         season,
         seasonYear: year,
         page: 1,
@@ -61,19 +63,19 @@ export async function getCachedSeasonal(season: MediaSeason, year: number, perPa
 export async function getCachedTopRated(perPage: number = 6) {
     cacheLife('hours')
     cacheTag('anime-top-rated', 'anime-list')
-    return executeGraphQL<TopRatedAnimeQueryType>(TopRatedAnimeQuery.toString(), { page: 1, perPage })
+    return executeGraphQL<TopRatedAnimeQueryType>(TopRatedAnimeDocument.toString(), { page: 1, perPage })
 }
 
 export async function getCachedUpcomingAiring(perPage: number = 10) {
     cacheLife('minutes')
     cacheTag('anime-upcoming', 'anime-list')
-    return executeGraphQL<UpcomingAiringAnimeQueryType>(UpcomingAiringAnimeQuery.toString(), { page: 1, perPage })
+    return executeGraphQL<UpcomingAiringAnimeQueryType>(UpcomingAiringAnimeDocument.toString(), { page: 1, perPage })
 }
 
 export async function getScheduleAnime(page: number = 1, perPage: number = 5, airingAtGreater?: number) {
     cacheLife('minutes')
     cacheTag('anime-schedule', 'anime-list')
-    return executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeQuery.toString(), {
+    return executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
         page,
         perPage,
         notYetAired: true,

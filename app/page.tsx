@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { AnimeSection } from '@/features/home/components/section/anime-section'
 import { NextAiring } from '@/features/home/components/next-airing'
+import { Container } from '@/components/shared/container'
 
 function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' | 'list' | 'compact' }) {
   return (
@@ -46,19 +47,15 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
   )
 }
 
-import { getScheduleAnime } from '@/lib/graphql/data'
-
 export default async function HomePage() {
-  const scheduleData = await getScheduleAnime(1, 5)
-
   return (
     <div className="space-y-24">
       {/* Primary Registry Hero (Integrated Next Airing) */}
       <Suspense fallback={<div className="h-[70vh] md:h-[85vh] bg-secondary/5 shimmer" />}>
-        <NextAiring className="h-[70vh] md:h-[85vh]" initialData={scheduleData} />
+        <NextAiring className="h-[70vh] md:h-[85vh]" />
       </Suspense>
 
-      <div className="space-y-40">
+      <Container className="space-y-40">
         <Suspense fallback={<SectionSkeleton variant="featured" />}>
           <AnimeSection
             type="trending"
@@ -112,7 +109,7 @@ export default async function HomePage() {
             perPage={5}
           />
         </Suspense>
-      </div>
+      </Container>
     </div>
   )
 }

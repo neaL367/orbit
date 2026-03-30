@@ -1,6 +1,6 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const SearchAnimeQuery = graphql(`
+export const SearchAnimeQuery = gql`
   query SearchAnime($page: Int, $perPage: Int, $search: String, $genres: [String], $format: MediaFormat, $status: MediaStatus) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
@@ -10,6 +10,7 @@ export const SearchAnimeQuery = graphql(`
       }
       media(type: ANIME, search: $search, genre_in: $genres, format: $format, status: $status, sort: POPULARITY_DESC, isAdult: false) {
         id
+        idMal
         title {
           romaji
           english
@@ -30,16 +31,11 @@ export const SearchAnimeQuery = graphql(`
         favourites
         status
         genres
-        tags {
-          id
-          name
-          description
-          category
-          rank
-        }
         format
         duration
         episodes
+        season
+        seasonYear
         startDate {
           year
           month
@@ -50,29 +46,20 @@ export const SearchAnimeQuery = graphql(`
           month
           day
         }
-        season
-        seasonYear
-        countryOfOrigin
-        source
-        hashtag
-        synonyms
-        siteUrl
-        nextAiringEpisode {
-          airingAt
-          timeUntilAiring
-          episode
+        tags {
+          id
+          name
+          description
+          category
+          rank
         }
-        trending
         studios(isMain: true) {
           nodes {
             id
             name
-            siteUrl
-            isAnimationStudio
           }
         }
       }
     }
   }
-`)
-
+`

@@ -1,6 +1,6 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const ScheduleAnimeQuery = graphql(`
+export const ScheduleAnimeHeroQuery = gql`
   query ScheduleAnimeHero($page: Int, $perPage: Int, $notYetAired: Boolean, $airingAt_greater: Int, $airingAt_lesser: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
@@ -21,6 +21,7 @@ export const ScheduleAnimeQuery = graphql(`
         mediaId
         media {
           id
+          idMal
           title {
             romaji
             english
@@ -39,9 +40,16 @@ export const ScheduleAnimeQuery = graphql(`
           season
           seasonYear
           isAdult
+          startDate {
+            year
+            month
+            day
+          }
+          genres
+          averageScore
+          popularity
         }
       }
     }
   }
-`)
-
+`

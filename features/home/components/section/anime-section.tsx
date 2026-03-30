@@ -1,9 +1,9 @@
 import { extractMediaList } from '@/lib/utils/anime-utils'
-import { SectionView } from './section-view'
 import { getCachedTrending, getCachedPopular, getCachedSeasonal, getCachedTopRated } from '@/lib/graphql/data'
 import { MediaSeason } from '@/lib/graphql/types/graphql'
 import { connection } from 'next/server'
 import { getCurrentSeason, getCurrentYear, getNextSeason, getNextSeasonYear } from '@/lib/utils'
+import { MediaSection } from './media-section'
 
 type SectionType = 'trending' | 'popular' | 'seasonal' | 'top-rated' | 'upcoming'
 
@@ -54,7 +54,6 @@ export async function AnimeSection({
     let title = initialTitle
 
     // Handle dynamic sensing inside the Suspense boundary
-    // Essential because the GraphQL rate limiter uses Date.now()
     await connection()
 
     if (type === 'seasonal' || type === 'upcoming') {
@@ -73,14 +72,13 @@ export async function AnimeSection({
     const animeList = extractMediaList(response.data)
 
     return (
-        <SectionView
+        <MediaSection
             data={animeList}
-            title={title || 'Registry'}
+            title={title || 'Section'}
             subtitle={subtitle}
+            variant={variant === 'compact' ? 'grid' : variant}
             viewAllHref={viewAllHref}
             showRank={showRank}
-            perPage={perPage}
-            variant={variant}
         />
     )
 }

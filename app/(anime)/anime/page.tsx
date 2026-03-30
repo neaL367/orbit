@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import DiscoveryView from '@/features/anime/components/discovery-view'
+import { Container } from '@/components/shared/container'
 
 export const metadata: Metadata = {
     title: 'Discovery Registry — Database Exploration',
@@ -12,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function DiscoveryPage() {
     return (
-        <Suspense fallback={<div className="h-dvh w-full shimmer" />}>
-            <DiscoveryView />
-        </Suspense>
+        <Container className="py-20 lg:py-32">
+            <Suspense fallback={<div className="h-96 w-full shimmer" />}>
+                <DiscoveryView />
+            </Suspense>
+        </Container>
     )
 }

@@ -1,14 +1,11 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { ScheduleView } from "./view";
 import { ScheduleLoading } from "./loading";
-import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime";
-import { execute } from "@/lib/graphql/execute";
+import { useScheduleAnimeHeroQuery } from "@/lib/graphql/types/graphql";
 import { CACHE_TIMES } from "@/lib/constants";
 import type { AiringSchedule } from "@/lib/graphql/types/graphql";
-
 
 function getDayRanges(): Array<{
   dayIndex: number;
@@ -42,122 +39,68 @@ function getDayRanges(): Array<{
 function ScheduleContent() {
   const dayRanges = useMemo(() => getDayRanges(), []);
 
-  const dayQueries = useQueries({
-    queries: dayRanges.map(({ dayIndex, start, end }, index) => {
-      const isToday = index === 0;
-      return {
-        queryKey: ["ScheduleAnime", dayIndex, start, end, isToday],
-        queryFn: async ({ signal }) => {
-          if (isToday) {
-            const [finishedResult, upcomingResult] = await Promise.all([
-              execute(
-                ScheduleAnimeQuery,
-                {
-                  page: 1,
-                  perPage: 50,
-                  notYetAired: false,
-                  airingAt_greater: start,
-                  airingAt_lesser: end,
-                },
-                { signal },
-              ),
-              execute(
-                ScheduleAnimeQuery,
-                {
-                  page: 1,
-                  perPage: 50,
-                  notYetAired: true,
-                  airingAt_greater: start,
-                  airingAt_lesser: end,
-                },
-                { signal },
-              ),
-            ]);
+  // Today's schedule requires two fetches (finished vs upcoming)
+  const todayRange = dayRanges[0];
+  const finishedToday = useScheduleAnimeHeroQuery(
+    {
+      page: 1,
+      perPage: 50,
+      notYetAired: false,
+      airingAt_greater: todayRange.start,
+      airingAt_lesser: todayRange.end,
+    },
+    { staleTime: CACHE_TIMES.MEDIUM }
+  );
 
-            const finishedSchedules =
-              finishedResult.data?.Page?.airingSchedules || [];
-            const upcomingSchedules =
-              upcomingResult.data?.Page?.airingSchedules || [];
+  const upcomingToday = useScheduleAnimeHeroQuery(
+    {
+      page: 1,
+      perPage: 50,
+      notYetAired: true,
+      airingAt_greater: todayRange.start,
+      airingAt_lesser: todayRange.end,
+    },
+    { staleTime: CACHE_TIMES.MEDIUM }
+  );
 
-            return {
-              ...finishedResult.data,
-              Page: {
-                ...finishedResult.data?.Page,
-                airingSchedules: [...finishedSchedules, ...upcomingSchedules],
-              },
-            };
-          }
-
-          const result = await execute(
-            ScheduleAnimeQuery,
-            {
-              page: 1,
-              perPage: 50,
-              notYetAired: true,
-              airingAt_greater: start,
-              airingAt_lesser: end,
-            },
-            { signal },
-          );
-          return result.data;
-        },
-        staleTime: CACHE_TIMES.MEDIUM,
-        retry: 2,
-      };
-    }),
-  });
+  // Subsequent days only need upcoming
+  const weekUpcoming = useScheduleAnimeHeroQuery(
+    {
+      page: 1,
+      perPage: 100,
+      notYetAired: true,
+      airingAt_greater: dayRanges[0].start,
+      airingAt_lesser: dayRanges[6].end,
+    },
+    { staleTime: CACHE_TIMES.MEDIUM }
+  );
 
   const schedules = useMemo(() => {
-    const allSchedules: AiringSchedule[] = [];
-
-    dayQueries.forEach((query) => {
-      if (query.data?.Page?.airingSchedules) {
-        const validSchedules = query.data.Page.airingSchedules.filter(
-          (schedule): schedule is AiringSchedule =>
-            schedule !== null &&
-            schedule.media !== null &&
-            !schedule.media?.isAdult
-        );
-        allSchedules.push(...validSchedules);
+    const finishedItems = finishedToday.data?.Page?.airingSchedules || [];
+    const upcomingItems = upcomingToday.data?.Page?.airingSchedules || [];
+    const weekItems = weekUpcoming.data?.Page?.airingSchedules || [];
+    
+    const allItems = [...finishedItems, ...upcomingItems, ...weekItems] as AiringSchedule[];
+    
+    // Deduplicate and filter
+    const mediaMap = new Map<number, AiringSchedule>();
+    allItems.forEach(item => {
+      if (!item || !item.media || item.media.isAdult) return;
+      const existing = mediaMap.get(item.mediaId);
+      if (!existing || item.airingAt < existing.airingAt) {
+        mediaMap.set(item.mediaId, item);
       }
     });
 
-    const seenIds = new Set<number>();
-    const schedulesById = new Map<number, AiringSchedule>();
+    return Array.from(mediaMap.values());
+  }, [finishedToday.data, upcomingToday.data, weekUpcoming.data]);
 
-    for (const schedule of allSchedules) {
-      if (seenIds.has(schedule.id)) continue;
-      seenIds.add(schedule.id);
-      schedulesById.set(schedule.id, schedule);
-    }
-
-    const schedulesByMedia = new Map<number, AiringSchedule>();
-
-    for (const schedule of schedulesById.values()) {
-      const existing = schedulesByMedia.get(schedule.mediaId);
-      if (!existing || schedule.airingAt < existing.airingAt) {
-        schedulesByMedia.set(schedule.mediaId, schedule);
-      }
-    }
-
-    return Array.from(schedulesByMedia.values());
-  }, [dayQueries]);
-
-  const isLoading = dayQueries.some((query) => query.isLoading);
-  const error = dayQueries.find((query) => query.error)?.error;
+  const isLoading = finishedToday.isLoading || upcomingToday.isLoading || weekUpcoming.isLoading;
+  const isError = finishedToday.isError || upcomingToday.isError || weekUpcoming.isError;
 
   return (
     <div className="reveal">
-      {/* <div className="mb-8">
-        <IndexSectionHeader
-          title="Transmission_Registry"
-          subtitle="Temporal_Log"
-          as="h1"
-          className="mb-4"
-        />
-      </div> */}
-
-      {error ? (
+      {isError ? (
         <div className="border border-border p-12 text-center">
           <span className="font-mono text-[10px] uppercase text-red-500">Registry_Sync_Failure</span>
         </div>
@@ -172,16 +115,7 @@ function ScheduleContent() {
 
 export function Schedule() {
   return (
-    <Suspense
-      fallback={
-        <div>
-          {/* <div className="mb-20">
-            <IndexSectionHeader title="Transmission_Registry" subtitle="Temporal_Log" as="h1" />
-          </div> */}
-          <ScheduleLoading />
-        </div>
-      }
-    >
+    <Suspense fallback={<ScheduleLoading />}>
       <ScheduleContent />
     </Suspense>
   );
