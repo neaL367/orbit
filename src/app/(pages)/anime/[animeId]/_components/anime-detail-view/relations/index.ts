@@ -1,2 +1,0 @@
-export { Relations } from './relations'
-

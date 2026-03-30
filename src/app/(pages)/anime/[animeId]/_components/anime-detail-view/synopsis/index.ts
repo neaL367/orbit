@@ -1,2 +1,0 @@
-export { Synopsis } from './synopsis'
-

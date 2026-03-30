@@ -43,3 +43,8 @@ next-env.d.ts
 schema.graphql
 
 .vscode/
+
+src/lib/graphql/types/
+
+.agent/
+.agents/

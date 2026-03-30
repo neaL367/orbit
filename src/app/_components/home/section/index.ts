@@ -1,2 +1,0 @@
-export { AnimeSection } from './section'
-

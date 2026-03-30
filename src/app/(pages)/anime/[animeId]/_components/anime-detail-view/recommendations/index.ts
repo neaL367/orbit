@@ -1,2 +1,0 @@
-export { Recommendations } from './recommendations'
-

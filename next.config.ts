@@ -3,7 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
+  reactCompiler: {
+    compilationMode: 'annotation',
+  },
   typedRoutes: true,
+  experimental: {
+    inlineCss: true,
+    optimizePackageImports: ['lucide-react', 'date-fns'],
+  },
   images: {
     unoptimized: true,
   },
@@ -12,7 +19,35 @@ const nextConfig: NextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  productionBrowserSourceMaps: process.env.NODE_ENV === 'production',
+  typescript: {
+    ignoreBuildErrors: false,
+    tsconfigPath: 'tsconfig.json',
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
