@@ -1,6 +1,6 @@
-import { graphql } from '@/lib/graphql/types/gql'
+import { gql } from './index'
 
-export const TopRatedAnimeQuery = graphql(`
+export const TopRatedAnimeQuery = gql`
   query TopRatedAnime($page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int) {
     Page(page: $page, perPage: $perPage) {
       pageInfo {
@@ -10,6 +10,7 @@ export const TopRatedAnimeQuery = graphql(`
       }
       media(type: ANIME, sort: SCORE_DESC, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, isAdult: false) {
         id
+        idMal
         title {
           romaji
           english
@@ -30,16 +31,11 @@ export const TopRatedAnimeQuery = graphql(`
         favourites
         status
         genres
-        tags {
-          id
-          name
-          description
-          category
-          rank
-        }
         format
         duration
         episodes
+        season
+        seasonYear
         startDate {
           year
           month
@@ -50,29 +46,20 @@ export const TopRatedAnimeQuery = graphql(`
           month
           day
         }
-        season
-        seasonYear
-        countryOfOrigin
-        source
-        hashtag
-        synonyms
-        siteUrl
-        nextAiringEpisode {
-          airingAt
-          timeUntilAiring
-          episode
+        tags {
+          id
+          name
+          description
+          category
+          rank
         }
-        trending
         studios(isMain: true) {
           nodes {
             id
             name
-            siteUrl
-            isAnimationStudio
           }
         }
       }
     }
   }
-`)
-
+`

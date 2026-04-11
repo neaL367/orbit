@@ -1,179 +1,129 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useInfiniteGraphQL } from '@/lib/graphql/hooks'
 import { CACHE_TIMES } from '@/lib/constants'
-import { TrendingAnimeQuery } from '@/lib/graphql/queries/trending-anime'
-import { PopularAnimeQuery } from '@/lib/graphql/queries/popular-anime'
-import { TopRatedAnimeQuery } from '@/lib/graphql/queries/top-rated-anime'
-import { SeasonalAnimeQuery } from '@/lib/graphql/queries/seasonal-anime'
-import { SearchAnimeQuery } from '@/lib/graphql/queries/search-anime'
 import {
   getCurrentSeason,
   getCurrentYear,
 } from '@/lib/utils'
-import type { Media, MediaFormat, MediaSeason, MediaStatus } from '@/lib/graphql/types/graphql'
+import {
+  useInfiniteTrendingAnimeQuery,
+  useInfinitePopularAnimeQuery,
+  useInfiniteTopRatedAnimeQuery,
+  useInfiniteSeasonalAnimeQuery,
+  useInfiniteSearchAnimeQuery,
+  MediaSeason,
+  MediaFormat,
+  MediaStatus,
+  Media,
+} from '@/lib/graphql/types/graphql'
 
 type SortType = 'trending' | 'popular' | 'top-rated' | 'seasonal' | 'search'
 
 const PER_PAGE = 24
 
 /**
- * Parse search params into filter values
- */
-function parseSearchParams(searchParams: URLSearchParams) {
-  const search = searchParams.get('search') || ''
-  const sort = search ? 'search' : (searchParams.get('sort') || 'trending') as SortType
-  const season = searchParams.get('season') as MediaSeason | null
-  const year = searchParams.get('year') ? parseInt(searchParams.get('year')!, 10) : null
-  const genres = searchParams.get('genres')?.split(',').filter(Boolean) || []
-  const format = searchParams.get('format') as string | null
-  const status = searchParams.get('status') as string | null
-
-  return { sort, search, season, year, genres, format, status }
-}
-
-/**
- * Build GraphQL variables from filters
- */
-function buildGraphQLVariables(
-  filters: ReturnType<typeof parseSearchParams>,
-  dateValues: { currentSeason: MediaSeason; currentYear: number }
-) {
-  const { search, season, year, genres, format, status } = filters
-
-  const genresArray = genres.length > 0 ? genres : undefined
-  const formatValue = format ? (format as MediaFormat) : undefined
-  const statusValue = status ? (status as MediaStatus) : undefined
-  const seasonValue = season ? (season as MediaSeason) : undefined
-  const seasonYearValue = year || undefined
-  const searchValue = search || undefined
-
-  const regularVariables = {
-    perPage: PER_PAGE,
-    search: searchValue,
-    genres: genresArray,
-    format: formatValue,
-    status: statusValue,
-    season: seasonValue,
-    seasonYear: seasonYearValue,
-  }
-
-  const seasonalVariables = {
-    perPage: PER_PAGE,
-    season: (season || dateValues.currentSeason) as MediaSeason,
-    seasonYear: year || dateValues.currentYear,
-    genres: genresArray,
-    format: formatValue,
-    status: statusValue,
-  }
-
-  const searchVariables = {
-    perPage: PER_PAGE,
-    search: searchValue,
-    genres: genresArray,
-    format: formatValue,
-    status: statusValue,
-  }
-
-  return { regularVariables, seasonalVariables, searchVariables }
-}
-
-/**
- * Flatten and deduplicate anime list from infinite query pages
- */
-function flattenAnimeList(pages: unknown[]): Media[] {
-  const mediaMap = new Map<number, Media>()
-
-  pages.forEach((page) => {
-    const pageData = page as { Page?: { media?: Array<Media | null> } } | undefined
-    const media = pageData?.Page?.media?.filter(
-      (anime: Media | null): anime is Media => anime !== null && !anime.isAdult
-    ) || []
-
-    media.forEach((anime) => {
-      if (!mediaMap.has(anime.id)) {
-        mediaMap.set(anime.id, anime)
-      }
-    })
-  })
-
-  return Array.from(mediaMap.values())
-}
-
-/**
  * Custom hook for anime list page
  */
 export function useAnimeList() {
   const searchParams = useSearchParams()
-  const filters = useMemo(() => parseSearchParams(searchParams), [searchParams])
 
   const dateValues = useMemo(() => ({
     currentSeason: getCurrentSeason(),
     currentYear: getCurrentYear(),
   }), [])
 
-  const { regularVariables, seasonalVariables, searchVariables } = useMemo(
-    () => buildGraphQLVariables(filters, dateValues),
-    [filters, dateValues]
-  )
+  // Parse filters
+  const filters = useMemo(() => {
+    const search = searchParams.get('search') || ''
+    const sort = search ? 'search' : (searchParams.get('sort') || 'trending') as SortType
+    const season = searchParams.get('season') as MediaSeason | null
+    const year = searchParams.get('year') ? parseInt(searchParams.get('year')!, 10) : null
+    const genres = searchParams.get('genres')?.split(',').filter(Boolean) || []
+    const format = searchParams.get('format') as MediaFormat | null
+    const status = searchParams.get('status') as MediaStatus | null
 
+    return { sort, search, season, year, genres, format, status }
+  }, [searchParams])
+
+  // Build variables
+  const variables = useMemo(() => {
+    const genresArray = filters.genres.length > 0 ? filters.genres : undefined
+    const base = {
+      perPage: PER_PAGE,
+      genres: genresArray,
+      format: filters.format || undefined,
+      status: filters.status || undefined,
+    }
+
+    if (filters.sort === 'seasonal') {
+      return {
+        ...base,
+        season: (filters.season || dateValues.currentSeason) as MediaSeason,
+        seasonYear: filters.year || dateValues.currentYear,
+      }
+    }
+
+    if (filters.sort === 'search') {
+      return {
+        ...base,
+        search: filters.search || undefined,
+      }
+    }
+
+    return {
+      ...base,
+      season: filters.season || undefined,
+      seasonYear: filters.year || undefined,
+    }
+  }, [filters, dateValues])
+
+  // React Query Options
   const queryOptions = {
-    enabled: true,
     staleTime: CACHE_TIMES.MEDIUM,
     retry: 2,
+    initialPageParam: { page: 1 },
+    getNextPageParam: (lastPage: any) => {
+      const pageInfo = lastPage?.Page?.pageInfo
+      if (pageInfo?.hasNextPage) {
+        return { page: (pageInfo.currentPage || 0) + 1 }
+      }
+      return undefined
+    }
   }
 
-  const trendingData = useInfiniteGraphQL(
-    TrendingAnimeQuery,
-    regularVariables,
-    { ...queryOptions, enabled: filters.sort === 'trending' }
-  )
-
-  const popularData = useInfiniteGraphQL(
-    PopularAnimeQuery,
-    regularVariables,
-    { ...queryOptions, enabled: filters.sort === 'popular' }
-  )
-
-  const topRatedData = useInfiniteGraphQL(
-    TopRatedAnimeQuery,
-    regularVariables,
-    { ...queryOptions, enabled: filters.sort === 'top-rated' }
-  )
-
-  const seasonalData = useInfiniteGraphQL(
-    SeasonalAnimeQuery,
-    seasonalVariables,
-    { ...queryOptions, enabled: filters.sort === 'seasonal' }
-  )
-
-  const searchData = useInfiniteGraphQL(
-    SearchAnimeQuery,
-    searchVariables,
-    { ...queryOptions, enabled: filters.sort === 'search' && !!filters.search }
-  )
+  // Active Hook Selection
+  const trending = useInfiniteTrendingAnimeQuery(variables, { ...queryOptions, enabled: filters.sort === 'trending' })
+  const popular = useInfinitePopularAnimeQuery(variables, { ...queryOptions, enabled: filters.sort === 'popular' })
+  const topRated = useInfiniteTopRatedAnimeQuery(variables, { ...queryOptions, enabled: filters.sort === 'top-rated' })
+  const seasonal = useInfiniteSeasonalAnimeQuery(variables as any, { ...queryOptions, enabled: filters.sort === 'seasonal' })
+  const search = useInfiniteSearchAnimeQuery(variables as any, { ...queryOptions, enabled: filters.sort === 'search' && !!filters.search })
 
   const activeQuery = useMemo(() => {
     switch (filters.sort) {
-      case 'trending':
-        return trendingData
-      case 'popular':
-        return popularData
-      case 'top-rated':
-        return topRatedData
-      case 'seasonal':
-        return seasonalData
-      case 'search':
-        return searchData
-      default:
-        return trendingData
+      case 'trending': return trending
+      case 'popular': return popular
+      case 'top-rated': return topRated
+      case 'seasonal': return seasonal
+      case 'search': return search
+      default: return trending
     }
-  }, [filters.sort, trendingData, popularData, topRatedData, seasonalData, searchData])
+  }, [filters.sort, trending, popular, topRated, seasonal, search])
 
+  // Process data
   const animeList = useMemo(() => {
-    const queryData = activeQuery.data as { pages?: unknown[] } | undefined
-    if (!queryData?.pages) return []
-    return flattenAnimeList(queryData.pages)
+    const pages = activeQuery.data?.pages || []
+    const mediaMap = new Map<number, Media>()
+
+    pages.forEach((page: any) => {
+      const media = page?.Page?.media?.filter(
+        (anime: any): anime is Media => !!anime && !anime.isAdult
+      ) || []
+      media.forEach((anime: any) => {
+        if (!mediaMap.has(anime.id)) mediaMap.set(anime.id, anime)
+      })
+    })
+
+    return Array.from(mediaMap.values())
   }, [activeQuery.data])
 
   return {

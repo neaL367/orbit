@@ -6,8 +6,7 @@ import Image from 'next/image'
 import { Search, X, PlayCircle, Cpu, Terminal, History, ArrowRight } from "lucide-react"
 import { useDebounce } from 'use-debounce'
 import { cn } from '@/lib/utils'
-import { useGraphQL } from '@/lib/graphql/hooks'
-import { SearchAnimeQuery } from '@/lib/graphql/queries/search-anime'
+import { useSearchAnimeQuery } from '@/lib/graphql/types/graphql'
 import type { Route } from 'next'
 import type { Media } from '@/lib/graphql/types/graphql'
 
@@ -263,7 +262,7 @@ LatestVisits.displayName = 'LatestVisits'
 // Isolated Search Results Logic
 const SearchResults = memo(({ query, isOpen, onClose, onVisit }: { query: string; isOpen: boolean; onClose: () => void; onVisit: (a: Media) => void }) => {
     'use memo'
-    const { data: searchData, isLoading: isSearching } = useGraphQL(SearchAnimeQuery, {
+    const { data: searchData, isLoading: isSearching } = useSearchAnimeQuery({
         search: query,
         perPage: 6
     }, {

@@ -41,10 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 schema.graphql
-
-.vscode/
-
-src/lib/graphql/types/
+lib/graphql/types/graphql.ts
+lib/graphql/types/schema.json
+lib/graphql/types/gql.ts
+lib/graphql/types/fragment-masking.ts
 
 .agent/
 .agents/

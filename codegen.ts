@@ -1,17 +1,36 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
 
-const ANILIST_API_URL = 'https://graphql.anilist.co/'
-
 const config: CodegenConfig = {
-  schema: ANILIST_API_URL,
-  documents: ['app/**/*.{ts,tsx}', 'lib/graphql/queries/**/*.{ts,tsx}'],
-  ignoreNoDocuments: true, // for better experience with the watcher
+  schema: 'https://graphql.anilist.co/',
+  documents: [
+    'app/**/*.{ts,tsx}', 
+    'lib/graphql/queries/**/*.{ts,tsx}', 
+    'features/**/*.{ts,tsx}'
+  ],
+  ignoreNoDocuments: true,
   generates: {
-    './lib/graphql/types/': {
-      preset: 'client',
+    './lib/graphql/types/graphql.ts': {
+      plugins: [
+        'typescript',
+        'typescript-operations',
+        'typescript-react-query',
+        {
+          add: {
+            content: "import { TypedDocumentString } from './typed-document';",
+          },
+        },
+      ],
       config: {
-        documentMode: 'string'
-      }
+        documentMode: 'string',
+        fetcher: {
+          func: '../fetcher#fetcher',
+          isReactHook: false,
+        },
+        reactQueryVersion: 5,
+        addInfiniteQuery: true,
+        exposeQueryKeys: true,
+        exposeFetcher: true,
+      },
     },
     './schema.graphql': {
       plugins: ['schema-ast'],

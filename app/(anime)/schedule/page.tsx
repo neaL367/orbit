@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { Schedule } from "@/features/schedule/components/schedule/schedule"
 import { NextAiring } from "@/features/home/components/next-airing"
-import { getScheduleAnime } from "@/lib/graphql/data"
+import { Container } from "@/components/shared/container"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -14,14 +14,15 @@ export const metadata: Metadata = {
 
 
 export default async function SchedulePage() {
-    const scheduleData = await getScheduleAnime(1, 5)
-
     return (
-        <div className="space-y-12">
+        <div className="space-y-40">
             <Suspense fallback={<div className="h-[70dvh] md:h-[85dvh] bg-secondary/5 shimmer" />}>
-                <NextAiring className="h-[70dvh] md:h-[85dvh]" initialData={scheduleData} />
+                <NextAiring className="h-[70dvh] md:h-[85dvh]" />
             </Suspense>
-            <Schedule />
+            
+            <Container>
+                <Schedule />
+            </Container>
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import type { ExecutionResult } from 'graphql'
-import type { TypedDocumentString } from '@/lib/graphql/types/graphql'
+import { TypedDocumentString } from './types/typed-document'
 import { GRAPHQL_TIMEOUT } from '@/lib/constants'
 import { handleGraphQLErrors, isAbortError, createTimeoutError } from './engine/errors'
 import { executeClientGraphQL } from './engine/fetch-client'
