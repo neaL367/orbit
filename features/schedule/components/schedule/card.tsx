@@ -8,6 +8,23 @@ import { useCurrentTime } from "@/hooks/use-current-time";
 import { IndexImage } from "@/components/shared/index-image";
 import type { AiringSchedule } from "@/lib/graphql/types/graphql";
 
+function formatMediaKind(format: string | null | undefined): string {
+  if (!format) return "Series";
+  const map: Record<string, string> = {
+    TV: "TV",
+    TV_SHORT: "Short TV",
+    MOVIE: "Movie",
+    SPECIAL: "Special",
+    OVA: "OVA",
+    ONA: "ONA",
+    MUSIC: "Music",
+    MANGA: "Manga",
+    NOVEL: "Novel",
+    ONE_SHOT: "One shot",
+  };
+  return map[format] ?? format.replace(/_/g, " ");
+}
+
 type ScheduleCardProps = {
   schedule: AiringSchedule;
   media: NonNullable<AiringSchedule["media"]>;
@@ -47,44 +64,52 @@ function ScheduleCardComponent({
   }, [router, media.id]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleCardClick();
     }
   }, [handleCardClick]);
+
+  const statusLabel = isFinished ? "Ended" : isAiringNow ? "On air" : "Upcoming";
 
   return (
     <div
       role="button"
       tabIndex={0}
       className={cn(
-        "group relative flex flex-col sm:flex-row items-stretch sm:items-center p-3 transition-all duration-300 cursor-pointer overflow-hidden outline-none focus-visible:ring-1 focus-visible:ring-primary",
-        "bg-white/1 border border-white/5 hover:bg-white/3 hover:border-white/10",
-        isAiringNow && "border-primary/30 bg-primary/2"
+        "group relative flex cursor-pointer flex-col items-stretch overflow-hidden p-3 outline-none transition-all duration-300 sm:flex-row sm:items-center",
+        "border border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]",
+        "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        isAiringNow && "border-primary/35 bg-primary/[0.04] ring-1 ring-primary/15"
       )}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
     >
-      {/* 1. Temporal Axis (Time Rail) */}
-      <div className="sm:w-32 flex flex-col items-start sm:items-center py-4 border-b sm:border-b-0 sm:border-r border-white/5 shrink-0 relative bg-white/2">
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-linear-to-r from-primary/20 via-primary/5 to-transparent sm:hidden" />
-        <span className={cn(
-          "font-mono text-2xl font-black tracking-tighter tabular-nums",
-          isAiringNow ? "text-primary animate-pulse" : "text-foreground"
-        )}>
+      <div className="relative flex shrink-0 flex-col items-start border-b border-white/5 bg-white/[0.02] py-4 sm:w-32 sm:border-b-0 sm:border-r sm:items-center">
+        <div className="absolute left-0 top-0 h-0.5 w-full bg-linear-to-r from-primary/25 via-primary/5 to-transparent sm:hidden" />
+        <span
+          className={cn(
+            "font-mono text-2xl font-bold tabular-nums tracking-tight",
+            isAiringNow ? "text-primary motion-reduce:animate-none motion-safe:animate-pulse" : "text-foreground"
+          )}
+        >
           {formatTimeAction(airingAt)}
         </span>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <div className={cn("w-1 h-1 rotate-45", isAiringNow ? "bg-primary animate-pulse" : "bg-white/10")} />
-          <span className="font-mono text-[8px] uppercase text-muted-foreground/40 tracking-[0.3em] font-bold">
-            UTC_SYN
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <div
+            className={cn(
+              "h-1 w-1 rotate-45",
+              isAiringNow ? "bg-primary motion-safe:animate-pulse" : "bg-white/15"
+            )}
+          />
+          <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+            Local time
           </span>
         </div>
       </div>
 
-      {/* 2. Primary Identity (Image & Branding) */}
-      <div className="flex-1 flex flex-col sm:flex-row items-center gap-5 px-5 py-3 sm:py-0">
-        <div className="w-full sm:w-20 h-40 sm:h-28 bg-secondary border border-white/5 shrink-0 overflow-hidden relative group-hover:border-white/20 transition-colors shadow-2xl">
+      <div className="flex flex-1 flex-col items-center gap-5 px-5 py-3 sm:flex-row sm:py-0">
+        <div className="relative h-40 w-full shrink-0 overflow-hidden border border-white/5 bg-secondary shadow-xl transition-colors group-hover:border-white/15 sm:h-28 sm:w-20">
           {coverImage && (
             <IndexImage
               src={coverImage}
@@ -92,55 +117,58 @@ function ScheduleCardComponent({
               fill
               sizes="120px"
               showTechnicalDetails={false}
-              className="w-full h-full object-cover active grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
+              className="h-full w-full object-cover grayscale-[0.15] transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0 motion-reduce:group-hover:scale-100"
               priority={priority}
             />
           )}
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="absolute bottom-2 right-2 flex gap-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-            <div className="w-1.5 h-1.5 bg-primary/40" />
-            <div className="w-1.5 h-1.5 bg-primary" />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+          <div className="pointer-events-none absolute bottom-2 right-2 flex translate-y-4 gap-1 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-0">
+            <div className="h-1.5 w-1.5 bg-primary/40" />
+            <div className="h-1.5 w-1.5 bg-primary" />
           </div>
           {isAiringNow && (
-            <div className="absolute inset-0 bg-primary/5 animate-pulse" />
+            <div className="pointer-events-none absolute inset-0 bg-primary/5 motion-safe:animate-pulse motion-reduce:animate-none" />
           )}
         </div>
 
-        <div className="flex-1 min-w-0 flex flex-col gap-3 text-center sm:text-left">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 text-center sm:text-left">
           <div className="space-y-1">
-            <div className="flex items-center justify-center sm:justify-start gap-3">
-              <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-primary/40 font-bold">Registry // {media.format || "ARCHIVE"}</span>
-              <div className="flex-1 h-px bg-white/5 hidden sm:block" />
+            <div className="flex items-center justify-center gap-3 sm:justify-start">
+              <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.18em] text-primary/55">
+                {formatMediaKind(media.format ?? undefined)}
+              </span>
+              <div className="hidden h-px flex-1 bg-white/8 sm:block" />
             </div>
-            <h3 className="font-mono text-base md:text-lg font-black uppercase truncate group-hover:text-primary transition-colors leading-tight">
+            <h3 className="line-clamp-2 font-sans text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary md:text-lg">
               {title}
             </h3>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
-            <div className="flex items-center gap-2 px-2.5 py-1 bg-white/5 border border-white/10">
-              <span className="font-mono text-[9px] text-muted-foreground/60">EP//</span>
-              <span className="font-mono text-[10px] text-foreground font-black">{schedule.episode.toString().padStart(2, '0')}</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
+            <div className="flex items-center gap-2 border border-white/10 bg-white/[0.04] px-2.5 py-1">
+              <span className="font-mono text-[9px] text-muted-foreground/70">Ep</span>
+              <span className="font-mono text-[10px] font-bold tabular-nums text-foreground">
+                {schedule.episode.toString().padStart(2, "0")}
+              </span>
             </div>
 
             {timeUntilFormatted ? (
               <div className="flex items-center gap-2">
-                <span className="w-1 h-1 bg-primary animate-ping" />
-                <span className="font-mono text-[9px] font-black uppercase text-primary tracking-widest tabular-nums">
-                  T-MINUS: {timeUntilFormatted}
+                <span className="h-1 w-1 shrink-0 rounded-full bg-primary motion-safe:animate-ping motion-reduce:animate-none" />
+                <span className="font-mono text-[9px] font-semibold uppercase tracking-wider tabular-nums text-primary">
+                  In {timeUntilFormatted}
                 </span>
               </div>
             ) : !isFinished && (
-              <div className="font-mono text-[9px] uppercase text-muted-foreground/40 tracking-widest flex items-center gap-2">
-                <span className="w-1 h-1 bg-white/10" />
-                EST_DUR: {media.duration || 24}M
+              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground/60">
+                <span className="h-1 w-1 bg-white/15" />
+                ~{media.duration || 24} min
               </div>
             )}
           </div>
 
-          {/* Sub-Transmission Nodes */}
           {streamingLinks.length > 0 && (
-            <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-1 opacity-30 group-hover:opacity-100 transition-opacity duration-500">
+            <div className="mt-1 flex flex-wrap justify-center gap-3 opacity-40 transition-opacity duration-500 group-hover:opacity-100 sm:justify-start">
               {streamingLinks.slice(0, 4).map((link) => (
                 <a
                   key={link.url}
@@ -148,7 +176,7 @@ function ScheduleCardComponent({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="font-mono text-[8px] font-black uppercase tracking-[0.2em] hover:text-primary transition-colors underline underline-offset-4 decoration-white/10 hover:decoration-primary/40"
+                  className="font-mono text-[8px] font-semibold uppercase tracking-wider underline decoration-white/15 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/40"
                 >
                   {link.site}
                 </a>
@@ -158,38 +186,45 @@ function ScheduleCardComponent({
         </div>
       </div>
 
-      {/* 3. Status Terminal (Transmission State) */}
-      <div className="sm:w-40 flex flex-col justify-center items-center sm:items-end px-5 py-4 sm:py-0 border-t sm:border-t-0 sm:border-l border-white/5 bg-white/1">
-        <div className={cn(
-          "relative w-full text-center px-4 py-2 transition-all duration-500",
-          isAiringNow ? "bg-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]" :
-            isFinished ? "bg-white/5 border border-white/10" : "bg-white/2 border border-white/5"
-        )}>
-          <span className={cn(
-            "font-mono text-[10px] font-black uppercase tracking-[0.3em] relative z-10",
-            isAiringNow ? "text-background" : isFinished ? "text-muted-foreground" : "text-foreground"
-          )}>
-            {isFinished ? "ARCHIVED" : isAiringNow ? "LIVE_SYN" : "PENDING"}
+      <div className="flex flex-col items-center justify-center border-t border-white/5 bg-white/[0.02] px-5 py-4 sm:w-40 sm:border-l sm:border-t-0 sm:items-end sm:py-0">
+        <div
+          className={cn(
+            "relative w-full px-4 py-2 text-center transition-all duration-300",
+            isAiringNow
+              ? "bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30"
+              : isFinished
+                ? "border border-white/10 bg-white/[0.04]"
+                : "border border-white/8 bg-white/[0.02]"
+          )}
+        >
+          <span
+            className={cn(
+              "relative z-10 font-mono text-[10px] font-bold uppercase tracking-[0.2em]",
+              isAiringNow ? "text-primary-foreground" : isFinished ? "text-muted-foreground" : "text-foreground"
+            )}
+          >
+            {statusLabel}
           </span>
           {isAiringNow && (
-            <div className="absolute inset-0 bg-primary animate-pulse blur-md opacity-20" />
+            <div className="pointer-events-none absolute inset-0 bg-primary motion-safe:animate-pulse motion-reduce:animate-none motion-safe:blur-md opacity-15" />
           )}
         </div>
-        <div className="hidden sm:flex flex-col items-end mt-2 opacity-20 group-hover:opacity-40 transition-opacity">
-          <div className="w-16 h-0.5 bg-white/40 mb-1" />
-          <span className="font-mono text-[7px] uppercase tracking-tighter">Status_Buffer</span>
+        <div className="mt-2 hidden flex-col items-end opacity-25 transition-opacity group-hover:opacity-45 sm:flex">
+          <div className="mb-1 h-0.5 w-16 bg-white/35" />
+          <span className="font-mono text-[7px] uppercase tracking-wide text-muted-foreground">Status</span>
         </div>
       </div>
 
-      {/* 4. Global Detail Notches */}
-      <div className="absolute top-0 right-0 w-12 h-12 pointer-events-none overflow-hidden">
-        <div className={cn(
-          "absolute top-0 right-0 w-[40px] h-[40px] translate-x-1/2 -translate-y-1/2 rotate-45 transition-colors duration-500",
-          isAiringNow ? "bg-primary" : "bg-white/5"
-        )} />
+      <div className="pointer-events-none absolute right-0 top-0 h-12 w-12 overflow-hidden">
+        <div
+          className={cn(
+            "absolute right-0 top-0 h-[40px] w-[40px] translate-x-1/2 -translate-y-1/2 rotate-45 transition-colors duration-500",
+            isAiringNow ? "bg-primary" : "bg-white/6"
+          )}
+        />
       </div>
-      <div className="absolute bottom-0 left-0 w-2 h-8 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="h-full w-[2px] bg-primary animate-[height_1s_ease-out]" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-8 w-2 opacity-0 transition-opacity group-hover:opacity-100 motion-reduce:opacity-0">
+        <div className="h-full w-0.5 bg-primary" />
       </div>
     </div>
   );

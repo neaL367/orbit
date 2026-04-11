@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, memo, useCallback } from "react"
+import { useMemo, memo } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
@@ -19,23 +19,16 @@ interface PosterCardProps {
  * High information density with technical metadata overlays.
  */
 export const PosterCard = memo(function PosterCard({ anime, rank, priority = false, className }: PosterCardProps) {
-    const [isHovered, setIsHovered] = useState(false)
-
     const title = useMemo(() => getAnimeTitle(anime), [anime])
     const coverImage = anime.coverImage?.extraLarge || anime.coverImage?.large
-
-    const handleMouseEnter = useCallback(() => setIsHovered(true), [])
-    const handleMouseLeave = useCallback(() => setIsHovered(false), [])
 
     return (
         <Link
             href={`/anime/${anime.id}`}
             className={cn(
-                "group relative block aspect-2/3 w-full bg-secondary border border-white/5 overflow-hidden transition-all duration-700 hover:border-primary/50 rounded-sm shadow-xl",
+                "group relative block aspect-2/3 w-full overflow-hidden rounded-sm border border-white/5 bg-secondary shadow-xl transition-[border-color,box-shadow] duration-700 hover:border-primary/50",
                 className
             )}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
         >
             {/* Metadata Registry Indicator (Top) */}
             <div className="absolute top-2.5 left-2.5 right-2.5 z-40 flex justify-between items-start pointer-events-none">
@@ -53,11 +46,6 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                     <span className="font-mono text-[9px] px-2 py-0.5 bg-primary text-primary-foreground uppercase font-black tracking-widest border border-primary/20">
                         {anime.status?.replace(/_/g, " ")}
                     </span>
-                    {anime.averageScore && (
-                        <span key="score-indicator" className="font-mono text-[10px] text-white font-black bg-black/60 px-2 py-0.5 backdrop-blur-md border border-white/5">
-                            {anime.averageScore}%
-                        </span>
-                    )}
                 </div>
             </div>
 
@@ -71,10 +59,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                         priority={priority}
                         showTechnicalDetails={false}
-                        className={cn(
-                            "transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                            isHovered ? "scale-105 brightness-110 saturate-120 blur-0 grayscale-0" : "scale-100 brightness-[0.8] grayscale-[0.4]"
-                        )}
+                        className="scale-100 brightness-[0.8] grayscale-[0.4] transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:brightness-110 group-hover:saturate-120 group-hover:grayscale-0 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     />
                 </div>
             )}
@@ -83,35 +68,41 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black via-black/90 to-transparent z-10" />
 
             {/* Information Layer */}
-            <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-5 space-y-3 sm:space-y-4">
-                <div className="space-y-1.5 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+            <div className="absolute inset-x-0 bottom-0 z-30 space-y-3 p-4 sm:space-y-4 sm:p-5">
+                <div className="translate-y-4 space-y-1.5 transition-transform duration-500 group-hover:translate-y-0">
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-px bg-primary group-hover:w-10 transition-all duration-700" />
-                        <span className="font-mono text-[8px] text-primary/80 tracking-[0.4em] uppercase font-black">SUBJECT_DATA</span>
+                        <div className="h-px w-4 bg-primary transition-[width] duration-700 group-hover:w-10" />
+                        <span className="font-mono text-[8px] font-black uppercase tracking-[0.35em] text-primary/80">
+                            Title
+                        </span>
                     </div>
-                    <h3 className="line-clamp-2 font-mono text-sm sm:text-base font-black leading-[1.1] uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors duration-500">
+                    <h3 className="line-clamp-2 font-mono text-sm font-black uppercase leading-[1.1] tracking-tighter text-foreground transition-colors duration-500 group-hover:text-primary sm:text-base">
                         {title}
                     </h3>
 
-                    {/* Quick Scan Genres */}
-                    <div className="flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
-                        {anime.genres?.slice(0, 3).map((genre) => (
-                            <span key={genre} className="font-mono text-[7px] uppercase tracking-widest text-white/40 border border-white/10 px-1.5 py-0.5 whitespace-nowrap">
+                    <div className="flex min-h-[1.25rem] flex-wrap gap-1">
+                        {anime.genres?.slice(0, 2).map((genre) => (
+                            <span
+                                key={genre}
+                                className="whitespace-nowrap border border-white/15 bg-black/30 px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest text-white/70"
+                            >
                                 {genre}
                             </span>
                         ))}
+                        {anime.genres?.[2] ? (
+                            <span className="hidden whitespace-nowrap border border-white/10 px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-widest text-white/45 lg:inline">
+                                {anime.genres[2]}
+                            </span>
+                        ) : null}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 sm:gap-4 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/40 border-t border-white/10 pt-3 sm:pt-4">
+                <div className="flex items-center gap-3 border-t border-white/10 pt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white/40 sm:gap-4 sm:pt-4 sm:text-[10px]">
                     <span className="text-white/80 font-black">{anime.format?.replace(/_/g, " ")}</span>
                     <div className="w-px h-3 bg-white/20 shrink-0" />
                     <span className="font-bold">{anime.startDate?.year || 'TBA'}</span>
                     <div className="flex-1" />
-                    <div className={cn(
-                        "w-2 h-2 rotate-45 border transition-all duration-500",
-                        anime.averageScore && anime.averageScore > 75 ? "bg-primary border-primary shadow-[0_0_8px_rgba(var(--primary),0.6)]" : "border-white/20"
-                    )} />
+                    <div className="h-2 w-2 rotate-45 border border-white/25 bg-white/5 transition-all duration-500" />
                 </div>
             </div>
 

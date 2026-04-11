@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import { startTransition, useCallback, useMemo } from "react"
 import { useDebouncedCallback } from "use-debounce"
 import type { Route } from "next"
 
@@ -54,7 +54,9 @@ export function useAnimeFilters() {
       params.delete("page")
     }
 
-    router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
+    })
   }, 300)
 
   const setSearch = useCallback((term: string) => {
@@ -68,13 +70,28 @@ export function useAnimeFilters() {
     updateUrl({ genres: newGenres })
   }, [currentFilters.genres, updateUrl])
 
-  const setFilter = useCallback((key: keyof typeof currentFilters, value: string) => {
-    updateUrl({ [key]: value === currentFilters[key] ? "" : value })
-  }, [currentFilters, updateUrl])
+  const setFilter = useCallback(
+    (key: keyof typeof currentFilters, value: string) => {
+      if (key === "sort") {
+        if (value && value !== currentFilters.sort) {
+          updateUrl({ sort: value })
+        }
+        return
+      }
+      updateUrl({ [key]: value === currentFilters[key] ? "" : value })
+    },
+    [currentFilters, updateUrl]
+  )
 
+  /** Clears search and facet filters; keeps current sort mode (stable URL). */
   const clearFilters = useCallback(() => {
-    router.push(pathname as Route, { scroll: false })
-  }, [pathname, router])
+    const sort = currentFilters.sort || "trending"
+    const params = new URLSearchParams()
+    params.set("sort", sort)
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}` as Route, { scroll: false })
+    })
+  }, [pathname, router, currentFilters.sort])
 
   return {
     filters: currentFilters,

@@ -183,6 +183,7 @@ export function useAnimeList() {
     perPage: PER_PAGE,
     dateValues,
     filters,
+    dataUpdatedAt: activeQuery.dataUpdatedAt,
   }
 }
 

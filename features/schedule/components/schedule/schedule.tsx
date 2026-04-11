@@ -158,8 +158,11 @@ function ScheduleContent() {
       </div> */}
 
       {error ? (
-        <div className="border border-border p-12 text-center">
-          <span className="font-mono text-[10px] uppercase text-red-500">Registry_Sync_Failure</span>
+        <div className="border border-border bg-secondary/5 p-10 text-center md:p-14">
+          <p className="font-sans text-sm font-medium text-foreground">Couldn&apos;t load the schedule</p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Check your connection and try again
+          </p>
         </div>
       ) : isLoading ? (
         <ScheduleLoading />

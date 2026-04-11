@@ -48,3 +48,4 @@ src/lib/graphql/types/
 
 .agent/
 .agents/
+skills-lock.json

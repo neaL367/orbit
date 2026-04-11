@@ -197,12 +197,16 @@ export function SectionView({
               </div>
               <div className="grid grid-cols-2 gap-6 content-start">
                 {data.slice(1, 5).map((anime, index) => (
-                  <PosterCard
+                  <div
                     key={anime.id}
-                    anime={anime}
-                    rank={showRank ? (page - 1) * perPage + index + 2 : undefined}
-                    className="w-full"
-                  />
+                    className="[contain-intrinsic-size:240px_360px] [content-visibility:auto]"
+                  >
+                    <PosterCard
+                      anime={anime}
+                      rank={showRank ? (page - 1) * perPage + index + 2 : undefined}
+                      className="w-full"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -215,7 +219,7 @@ export function SectionView({
               <Link
                 key={anime.id}
                 href={`/anime/${anime.id}`}
-                className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/1 border border-white/5 hover:bg-white/3 hover:border-primary/20 transition-all relative overflow-hidden index-cut-tr"
+                className="group/list relative flex items-center gap-4 overflow-hidden border border-white/5 bg-white/1 p-4 transition-all [contain-intrinsic-size:auto_120px] [content-visibility:auto] index-cut-tr hover:border-primary/20 hover:bg-white/3 sm:gap-10"
               >
                 {/* Ranking / Index */}
                 <div className="font-mono text-2xl sm:text-4xl font-black text-white/[0.03] group-hover/list:text-primary/10 transition-colors w-12 sm:w-16 text-center shrink-0 tracking-tighter tabular-nums">
@@ -253,18 +257,10 @@ export function SectionView({
                     </div>
                   </div>
 
-                  {/* Technical Telemetry Row */}
-                  <div className="flex items-center gap-8 sm:gap-12 shrink-0 border-l border-white/5 sm:pl-10 h-12">
+                  <div className="flex h-12 shrink-0 items-center gap-8 border-l border-white/5 sm:gap-12 sm:pl-10">
                     <div className="flex flex-col items-end gap-1 font-mono">
-                      <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">FORMAT</span>
-                      <span className="text-[10px] text-foreground font-black group-hover/list:text-primary transition-colors">{anime.format || '??'}</span>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 font-mono">
-                      <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">SCORE</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-foreground font-black tracking-widest">{anime.averageScore ? `${anime.averageScore}%` : '---'}</span>
-                        <div className={cn("w-1.5 h-1.5 rotate-45", anime.averageScore && anime.averageScore > 75 ? "bg-primary animate-pulse" : "bg-white/10")} />
-                      </div>
+                      <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-muted-foreground/50">FORMAT</span>
+                      <span className="text-[10px] font-black text-foreground transition-colors group-hover/list:text-primary">{anime.format || "??"}</span>
                     </div>
                   </div>
                 </div>
@@ -285,12 +281,12 @@ export function SectionView({
               if (!anime) return null
               const rank = showRank ? (page - 1) * perPage + index + 1 : undefined
               return (
-                <PosterCard
+                <div
                   key={anime.id}
-                  anime={anime}
-                  rank={rank}
-                  priority={index < 2}
-                />
+                  className="[contain-intrinsic-size:320px_480px] [content-visibility:auto]"
+                >
+                  <PosterCard anime={anime} rank={rank} priority={index < 2} />
+                </div>
               )
             })}
           </div>

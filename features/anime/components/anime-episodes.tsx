@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { IndexSectionHeader } from "@/components/shared/index-section-header"
 import type { MediaStreamingEpisode } from "@/lib/graphql/types/graphql"
 
@@ -12,10 +12,16 @@ interface AnimeEpisodesProps {
 export function AnimeEpisodes({ episodes }: AnimeEpisodesProps) {
     const [showAll, setShowAll] = useState(false)
 
-    if (!episodes || episodes.length === 0) return null
+    const validEpisodes = useMemo(
+        () => (episodes ?? []).filter((ep) => ep !== null) as MediaStreamingEpisode[],
+        [episodes]
+    )
+    const displayedEpisodes = useMemo(
+        () => (showAll ? validEpisodes : validEpisodes.slice(0, 4)),
+        [showAll, validEpisodes]
+    )
 
-    const validEpisodes = episodes.filter(ep => ep !== null) as MediaStreamingEpisode[]
-    const displayedEpisodes = showAll ? validEpisodes : validEpisodes.slice(0, 4)
+    if (!episodes || episodes.length === 0) return null
 
     return (
         <section className="space-y-6">
@@ -23,7 +29,7 @@ export function AnimeEpisodes({ episodes }: AnimeEpisodesProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displayedEpisodes.map((ep, i) => (
                     <a
-                        key={i}
+                        key={ep.url ?? `${ep.site ?? "ep"}-${ep.title ?? i}`}
                         href={ep?.url || '#'}
                         target="_blank"
                         rel="noopener noreferrer"

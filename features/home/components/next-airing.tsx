@@ -4,362 +4,379 @@ import Link from "next/link"
 import Image from "next/image"
 import { useQueries } from "@tanstack/react-query"
 import React, { useMemo, useState, useEffect, useRef } from "react"
-import { Zap } from "lucide-react"
+import { Radio } from "lucide-react"
 
 import { execute } from "@/lib/graphql/execute"
 import { ScheduleAnimeQuery } from "@/lib/graphql/queries/schedule-anime"
 import { getAnimeTitle } from "@/lib/utils/anime-utils"
 import { useCurrentTime } from "@/hooks/use-current-time"
 import { extractDominantColors } from "@/lib/utils/dominant-colors"
+import { cn } from "@/lib/utils"
 import type { ScheduleAnimeHeroQuery, Media } from "@/lib/graphql/types/graphql"
 
 type ColorPalette = {
-    topLeft: string
-    topCenter: string
-    topRight: string
-    midLeft: string
-    midCenter: string
-    midRight: string
-    bottomLeft: string
-    bottomCenter: string
-    bottomRight: string
+  topLeft: string
+  topCenter: string
+  topRight: string
+  midLeft: string
+  midCenter: string
+  midRight: string
+  bottomLeft: string
+  bottomCenter: string
+  bottomRight: string
 }
 
-export function NextAiring({ className, initialData }: { className?: string, initialData?: { data?: ScheduleAnimeHeroQuery } }) {
-    const now = useCurrentTime()
-    const [activeIndex, setActiveIndex] = useState(0)
-    const [colors, setColors] = useState<ColorPalette[]>([])
+const COUNTDOWN_LABELS = ["Days", "Hrs", "Min", "Sec"] as const
 
+export function NextAiring({
+  className,
+  initialData,
+}: {
+  className?: string
+  initialData?: { data?: ScheduleAnimeHeroQuery }
+}) {
+  const now = useCurrentTime()
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [colors, setColors] = useState<ColorPalette[]>([])
 
-    // Get stable mount time to avoid partial refetches
-    const [currentUnix] = useState(() => Math.floor(Date.now() / 1000))
+  const [currentUnix] = useState(() => Math.floor(Date.now() / 1000))
 
-    const { data, isLoading } = useQueries({
-        queries: [{
-            queryKey: ["NextAiringHero"],
-            queryFn: () => execute(ScheduleAnimeQuery, {
-                page: 1,
-                perPage: 5,
-                notYetAired: true,
-                airingAt_greater: currentUnix
-            }),
-            initialData: initialData,
-            staleTime: 5000,
-            refetchOnWindowFocus: true
-        }]
-    })[0]
+  const { data, isLoading } = useQueries({
+    queries: [
+      {
+        queryKey: ["NextAiringHero"],
+        queryFn: () =>
+          execute(ScheduleAnimeQuery, {
+            page: 1,
+            perPage: 5,
+            notYetAired: true,
+            airingAt_greater: currentUnix,
+          }),
+        initialData: initialData,
+        staleTime: 5000,
+        refetchOnWindowFocus: true,
+      },
+    ],
+  })[0]
 
-    const schedules = useMemo(() => data?.data?.Page?.airingSchedules || [], [data])
-    const activeSchedule = schedules[activeIndex]
+  const schedules = useMemo(() => data?.data?.Page?.airingSchedules || [], [data])
+  const activeSchedule = schedules[activeIndex]
 
-    // Cache for extracted colors to avoid re-processing
-    const colorCache = useRef<Map<string, ColorPalette>>(new Map())
+  const colorCache = useRef<Map<string, ColorPalette>>(new Map())
 
-    // Extract colors from all schedule images
-    useEffect(() => {
-        if (schedules.length === 0) return
+  useEffect(() => {
+    if (schedules.length === 0) return
 
-        // Only extract colors for items we might need (current + next 2)
-        const itemsToExtract = schedules.slice(0, Math.min(3, schedules.length))
+    const itemsToExtract = schedules.slice(0, Math.min(3, schedules.length))
 
-        Promise.all(
-            itemsToExtract.map(async (schedule) => {
-                const imageUrl = schedule?.media?.bannerImage ||
-                    schedule?.media?.coverImage?.extraLarge ||
-                    schedule?.media?.coverImage?.large
+    Promise.all(
+      itemsToExtract.map(async (schedule) => {
+        const imageUrl =
+          schedule?.media?.bannerImage ||
+          schedule?.media?.coverImage?.extraLarge ||
+          schedule?.media?.coverImage?.large
 
-                if (!imageUrl) {
-                    return {
-                        topLeft: '#2a2a35', topCenter: '#2a2a35', topRight: '#252530',
-                        midLeft: '#20202a', midCenter: '#2a2a35', midRight: '#1a1a25',
-                        bottomLeft: '#20202a', bottomCenter: '#1a1a25', bottomRight: '#1a1a25'
-                    }
-                }
+        if (!imageUrl) {
+          return {
+            topLeft: "#2a2a35",
+            topCenter: "#2a2a35",
+            topRight: "#252530",
+            midLeft: "#20202a",
+            midCenter: "#2a2a35",
+            midRight: "#1a1a25",
+            bottomLeft: "#20202a",
+            bottomCenter: "#1a1a25",
+            bottomRight: "#1a1a25",
+          }
+        }
 
-                // Check cache first
-                if (colorCache.current.has(imageUrl)) {
-                    return colorCache.current.get(imageUrl)!
-                }
+        if (colorCache.current.has(imageUrl)) {
+          return colorCache.current.get(imageUrl)!
+        }
 
-                // Extract and cache extractDominantColors now returns 9 zones
-                const colors = await extractDominantColors(imageUrl)
-                // Cast to local type if needed, though structure should match
-                const typedColors = colors as unknown as ColorPalette
-                colorCache.current.set(imageUrl, typedColors)
-                return typedColors
-            })
-        ).then(extractedColors => {
-            // Fill remaining slots with default colors if needed
-            const allColors = [...extractedColors]
-            while (allColors.length < schedules.length) {
-                allColors.push({
-                    topLeft: '#2a2a35', topCenter: '#2a2a35', topRight: '#252530',
-                    midLeft: '#20202a', midCenter: '#2a2a35', midRight: '#1a1a25',
-                    bottomLeft: '#20202a', bottomCenter: '#1a1a25', bottomRight: '#1a1a25'
-                })
-            }
-            setColors(allColors)
+        const extracted = await extractDominantColors(imageUrl)
+        const typedColors = extracted as unknown as ColorPalette
+        colorCache.current.set(imageUrl, typedColors)
+        return typedColors
+      })
+    ).then((extractedColors) => {
+      const allColors = [...extractedColors]
+      while (allColors.length < schedules.length) {
+        allColors.push({
+          topLeft: "#2a2a35",
+          topCenter: "#2a2a35",
+          topRight: "#252530",
+          midLeft: "#20202a",
+          midCenter: "#2a2a35",
+          midRight: "#1a1a25",
+          bottomLeft: "#20202a",
+          bottomCenter: "#1a1a25",
+          bottomRight: "#1a1a25",
         })
-    }, [schedules])
+      }
+      setColors(allColors)
+    })
+  }, [schedules])
 
-    // Auto-rotate ticker
-    useEffect(() => {
-        if (schedules.length <= 1) return
-
-        const duration = 8000
-        const rotateTimeout = setTimeout(() => {
-            setActiveIndex(prev => (prev + 1) % schedules.length)
-        }, duration)
-
-        return () => clearTimeout(rotateTimeout)
-    }, [schedules.length, activeIndex])
-
-    const title = useMemo(() => activeSchedule?.media ? getAnimeTitle(activeSchedule.media as unknown as Media) : null, [activeSchedule])
-    const timeUntilSec = (activeSchedule?.airingAt && now) ? (activeSchedule.airingAt - now) : null
-
-    // Detailed    // Countdown calculation
-    const countdown = useMemo(() => {
-        if (!timeUntilSec || timeUntilSec <= 0 || now === null) return null
-        const days = Math.floor(timeUntilSec / (3600 * 24))
-        const hours = Math.floor((timeUntilSec % (3600 * 24)) / 3600)
-        const minutes = Math.floor((timeUntilSec % 3600) / 60)
-        const seconds = timeUntilSec % 60
-
-        const pad = (n: number) => n.toString().padStart(2, '0')
-        return `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
-    }, [timeUntilSec, now])
-
-    if (isLoading || !activeSchedule) {
-        return <div className={`w-full relative border-b border-border bg-secondary/5 shimmer ${className || "h-[50vh] md:h-[60vh]"}`} />
+  useEffect(() => {
+    if (schedules.length <= 1) return
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return
     }
 
+    const duration = 8000
+    const rotateTimeout = setTimeout(() => {
+      setActiveIndex((prev) => (prev + 1) % schedules.length)
+    }, duration)
 
+    return () => clearTimeout(rotateTimeout)
+  }, [schedules.length, activeIndex])
 
-    const currentColors = colors[activeIndex] || {
-        topLeft: '#1a1a1a', topCenter: '#1a1a1a', topRight: '#1a1a1a',
-        midLeft: '#0a0a0a', midCenter: '#1a1a1a', midRight: '#0a0a0a',
-        bottomLeft: '#0a0a0a', bottomCenter: '#0a0a0a', bottomRight: '#0a0a0a'
-    }
+  const title = useMemo(
+    () => (activeSchedule?.media ? getAnimeTitle(activeSchedule.media as unknown as Media) : null),
+    [activeSchedule]
+  )
+  const timeUntilSec = activeSchedule?.airingAt && now ? activeSchedule.airingAt - now : null
 
+  const countdown = useMemo(() => {
+    if (!timeUntilSec || timeUntilSec <= 0 || now === null) return null
+    const days = Math.floor(timeUntilSec / (3600 * 24))
+    const hours = Math.floor((timeUntilSec % (3600 * 24)) / 3600)
+    const minutes = Math.floor((timeUntilSec % 3600) / 60)
+    const seconds = timeUntilSec % 60
+    const pad = (n: number) => n.toString().padStart(2, "0")
+    return [pad(days), pad(hours), pad(minutes), pad(seconds)]
+  }, [timeUntilSec, now])
+
+  if (isLoading || !activeSchedule) {
     return (
-        <section
-            className={`w-screen relative left-1/2 -translate-x-1/2 z-0 group ${className || "min-h-[550px] md:h-[70vh]"} overflow-hidden bg-background flex flex-col`}
-            style={{
-                '--current-top-left': currentColors.topLeft,
-                '--current-top-center': currentColors.topCenter,
-                '--current-top-right': currentColors.topRight,
-                '--current-mid-left': currentColors.midLeft,
-                '--current-mid-center': currentColors.midCenter,
-                '--current-mid-right': currentColors.midRight,
-                '--current-bottom-left': currentColors.bottomLeft,
-                '--current-bottom-center': currentColors.bottomCenter,
-                '--current-bottom-right': currentColors.bottomRight,
-            } as React.CSSProperties}
-        >
-            {/* 1. Precision Ambient Base (High Intensity) */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden will-change-transform translate-z-0 bg-black">
-                {/* 9-Zone Ambient Field (Alive & Breathing) */}
-                <div className="absolute inset-[-40%] blur-[100px] sm:blur-[140px] saturate-[2.5] brightness-[1.15] transition-opacity duration-1000 will-change-opacity translate-z-0">
-                    <div className="w-full h-full grid grid-cols-3 grid-rows-3 opacity-80">
-                        {/* Row 1 */}
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topLeft }} />
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topCenter }} />
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.topRight }} />
-
-                        {/* Row 2 */}
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.midLeft }} />
-                        <div className="transition-colors duration-2000 ease-in-out scale-150 z-10 rounded-full blur-xl" style={{ backgroundColor: currentColors.midCenter }} />
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.midRight }} />
-
-                        {/* Row 3 */}
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomLeft }} />
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomCenter }} />
-                        <div className="transition-colors duration-2000 ease-in-out" style={{ backgroundColor: currentColors.bottomRight }} />
-                    </div>
-                </div>
-            </div>
-
-            {/* 3. Main Interface Logic */}
-            <div className="w-full h-full relative z-10 flex flex-col flex-1 isolate">
-                <Link href={`/anime/${activeSchedule.media?.id}`} className="block w-full h-full relative">
-                    {/* Background Visual Layer */}
-                    <div className="absolute inset-0 bg-secondary/30">
-                        {schedules.map((schedule, index) => {
-                            if (index !== activeIndex) return null
-                            const scheduleImage = schedule?.media?.bannerImage || schedule?.media?.coverImage?.extraLarge
-                            if (!scheduleImage) return null
-                            return (
-                                <div
-                                    key={schedule?.id || index}
-                                    className="absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100 will-change-opacity"
-                                >
-                                    <Image
-                                        src={scheduleImage}
-                                        alt=""
-                                        fill
-                                        className="object-cover opacity-40 md:opacity-20 blur-[30px] md:blur-[60px] scale-110 saturate-[2]"
-                                        loading="eager"
-                                        priority={true}
-                                    />
-                                </div>
-                            )
-                        })}
-                        <div className="absolute inset-0 bg-linear-to-t from-background via-background/60 to-transparent" />
-                        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/50 to-transparent" />
-                    </div>
-
-                    {/* Interactive Content Container */}
-                    <div className="absolute inset-0 flex justify-center">
-                        <div className="max-w-[1600px] w-full h-full flex items-center px-6 md:px-12 lg:px-24 pt-8 md:pt-0 pb-20 md:pb-0 relative">
-                            <div className="max-w-4xl md:max-w-[50%] lg:max-w-md xl:max-w-2xl 2xl:max-w-3xl w-full space-y-8 md:space-y-10 z-10 transition-all duration-500">
-                                {/* Technical Header */}
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex items-center gap-3 text-primary">
-                                        <div className="relative">
-                                            <Zap className="h-4 w-4 fill-current" />
-                                            <div className="absolute inset-0 animate-ping opacity-50"><Zap className="h-4 w-4 fill-current" /></div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-mono text-[9px] md:text-xs font-bold uppercase tracking-[0.4em]">Broadcast_Signal_Detected</span>
-                                            <div className="flex gap-1">
-                                                <div className="w-0.5 h-3 bg-primary/40 animate-[bounce_2s_infinite]" />
-                                                <div className="w-0.5 h-3 bg-primary/60 animate-[bounce_2s_infinite_0.2s]" />
-                                                <div className="w-0.5 h-3 bg-primary animate-[bounce_2s_infinite_0.4s]" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="h-px w-full bg-linear-to-r from-primary/40 via-primary/10 to-transparent" />
-                                </div>
-
-                                <div key={activeSchedule.id} className="space-y-8 md:space-y-12 animate-in fade-in duration-1000">
-                                    <div className="space-y-4 md:space-y-6">
-                                        <div className="min-h-[60px] md:min-h-[140px] flex flex-col justify-end">
-                                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-mono font-black uppercase tracking-tighter leading-[0.85] text-foreground drop-shadow-2xl line-clamp-2 md:line-clamp-3 mix-blend-screen">
-                                                {title}
-                                            </h2>
-                                        </div>
-
-                                        {/* Ultra-Dense Telemetry Strip */}
-                                        <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-center gap-3 lg:gap-10 font-mono text-[10px] md:text-[11px] uppercase tracking-widest text-muted-foreground bg-white/3 border border-white/10 p-4 lg:px-6 lg:py-5 index-cut-tr transition-colors group-hover:border-primary/20">
-                                            <div className="flex items-center gap-2.5">
-                                                <span className="opacity-30">EP//</span>
-                                                <span className="text-primary font-bold">{activeSchedule.episode}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2.5 overflow-hidden">
-                                                <span className="opacity-30 md:hidden block shrink-0">STS//</span>
-                                                <span className="text-foreground/80 font-bold truncate">{activeSchedule.media?.status?.replace(/_/g, " ")}</span>
-                                            </div>
-                                            <div className="w-px h-3 bg-white/10 hidden lg:block" />
-                                            <div className="flex items-center gap-2.5">
-                                                <span className="opacity-30">ATTR//</span>
-                                                <span className="text-foreground font-bold">{activeSchedule.media?.format}</span>
-                                            </div>
-                                            <div className="w-px h-3 bg-white/10 hidden lg:block" />
-                                            <div className="hidden sm:flex items-center gap-2.5">
-                                                <span className="opacity-30">HEX_PTR//</span>
-                                                <span className="text-primary/60 font-bold">0x{activeSchedule.media?.id?.toString(16).toUpperCase()}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Countdown Sync Interface */}
-                                    <div className="flex flex-col items-start gap-4">
-                                        <div className="flex items-center gap-3 pl-1">
-                                            <div className="w-1.5 h-1.5 bg-primary rotate-45 animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
-                                            <span className="font-mono text-[10px] uppercase text-muted-foreground/60 tracking-[0.4em] font-black">T-Minus_Synchronization</span>
-                                        </div>
-
-                                        <div className="relative group/counter w-full sm:w-auto">
-                                            {/* Technical Brackets */}
-                                            <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-primary/60 group-hover/counter:border-primary transition-colors" />
-                                            <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-primary/60 group-hover/counter:border-primary transition-colors" />
-
-                                            <div className="bg-foreground text-background px-6 py-4 md:px-12 md:py-8 relative overflow-hidden transition-all group-hover/counter:bg-primary group-hover/counter:scale-[1.02]">
-                                                <div className="font-mono text-3xl sm:text-4xl md:text-7xl font-black tracking-tight tabular-nums relative z-10 flex items-center justify-center gap-1.5 md:gap-3">
-                                                    {now === null ? (
-                                                        <span className="opacity-40 animate-pulse text-[0.8em]">SYNCING...</span>
-                                                    ) : countdown ? (
-                                                        countdown.split(':').map((unit, i) => (
-                                                            <React.Fragment key={i}>
-                                                                <div className="relative flex flex-col items-center">
-                                                                    <span>{unit}</span>
-                                                                    <div className="absolute -bottom-1 w-[80%] h-px bg-current opacity-20" />
-                                                                </div>
-                                                                {i < 3 && <span className="opacity-20 text-[0.7em] -mt-1">:</span>}
-                                                            </React.Fragment>
-                                                        ))
-                                                    ) : (
-                                                        <span className="text-primary animate-pulse text-[0.6em] tracking-[0.2em]">BROADCAST_LIVE</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right Side Cover (Desktop) */}
-                            <div className="hidden md:flex absolute right-4 lg:right-24 top-1/2 -translate-y-1/2 h-[60%] md:h-[65%] lg:h-[75%] aspect-2/3 transition-all duration-1000 group-hover:scale-105 items-center justify-center">
-                                <div className="relative w-full h-full">
-                                    <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b border-l border-primary/40" />
-                                    <div className="w-full h-full border border-primary/20 bg-secondary/30 relative z-10 overflow-hidden shadow-2xl transition-all duration-700 group-hover:border-primary/50">
-                                        {schedules.map((schedule, index) => {
-                                            if (index !== activeIndex) return null
-                                            const coverImage = schedule?.media?.coverImage?.extraLarge
-                                            if (!coverImage) return null
-                                            return (
-                                                <div key={schedule.id} className="absolute inset-0">
-                                                    <Image
-                                                        src={coverImage}
-                                                        alt="Cover"
-                                                        fill
-                                                        className="object-cover transition-transform duration-[4s] group-hover:scale-110"
-                                                        priority
-                                                    />
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                    <div className="absolute -inset-4 border border-primary/5 -z-10 translate-x-4 translate-y-4" />
-                                </div>
-                            </div>
-
-                            {/* Navigation Interface */}
-                            <div className="absolute bottom-6 left-0 right-0 h-12 z-20 pointer-events-none flex justify-center">
-                                <div className="max-w-[1600px] w-full px-6 md:px-12 lg:px-24 flex items-center justify-between">
-                                    <div className="flex gap-2 sm:gap-4 pointer-events-auto items-center">
-                                        {schedules.map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    setActiveIndex(i)
-                                                }}
-                                                aria-label={`Select item ${i + 1}`}
-                                                className={`group relative h-4 flex items-center justify-center transition-all ${i === activeIndex ? 'w-10 sm:w-16' : 'w-3 sm:w-4 hover:w-8'}`}
-                                            >
-                                                <div className={`h-px w-full transition-all duration-500 ${i === activeIndex ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                                                {i === activeIndex && (
-                                                    <>
-                                                        <div className="absolute inset-0 bg-primary/20 animate-pulse" />
-                                                        <div className="absolute left-0 w-1 h-3 bg-primary" />
-                                                    </>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="hidden md:flex items-center gap-4">
-                                        <span className="font-mono text-[7px] text-muted-foreground uppercase tracking-[0.3em] font-bold">Registry_Sync</span>
-                                        <div className="w-32 h-px bg-white/10 relative overflow-hidden">
-                                            <div className="absolute inset-0 bg-primary/20 animate-progress" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-        </section>
+      <div
+        className={cn(
+          "relative left-1/2 w-screen -translate-x-1/2 border-b border-border bg-secondary/5 shimmer",
+          className || "h-[50vh] md:h-[60vh]"
+        )}
+      />
     )
+  }
+
+  const currentColors = colors[activeIndex] || {
+    topLeft: "#1a1a1a",
+    topCenter: "#1a1a1a",
+    topRight: "#1a1a1a",
+    midLeft: "#0a0a0a",
+    midCenter: "#1a1a1a",
+    midRight: "#0a0a0a",
+    bottomLeft: "#0a0a0a",
+    bottomCenter: "#0a0a0a",
+    bottomRight: "#0a0a0a",
+  }
+
+  return (
+    <section
+      className={cn(
+        "group relative left-1/2 z-0 flex w-screen -translate-x-1/2 flex-col overflow-hidden bg-background",
+        className || "min-h-[520px] md:min-h-[62vh]"
+      )}
+      style={
+        {
+          "--current-top-left": currentColors.topLeft,
+          "--current-top-center": currentColors.topCenter,
+          "--current-top-right": currentColors.topRight,
+          "--current-mid-left": currentColors.midLeft,
+          "--current-mid-center": currentColors.midCenter,
+          "--current-mid-right": currentColors.midRight,
+          "--current-bottom-left": currentColors.bottomLeft,
+          "--current-bottom-center": currentColors.bottomCenter,
+          "--current-bottom-right": currentColors.bottomRight,
+        } as React.CSSProperties
+      }
+    >
+      <div className="pointer-events-none absolute inset-0 z-0 translate-z-0 overflow-hidden bg-black will-change-transform">
+        <div className="absolute inset-[-32%] translate-z-0 blur-[72px] saturate-150 brightness-110 transition-opacity duration-1000 will-change-opacity sm:blur-[96px] motion-reduce:blur-none motion-reduce:saturate-100">
+          <div className="grid h-full w-full grid-cols-3 grid-rows-3 opacity-75 motion-reduce:opacity-50">
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.topLeft }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.topCenter }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.topRight }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.midLeft }} />
+            <div
+              className="z-10 scale-125 rounded-full blur-xl transition-colors duration-[2s] ease-in-out motion-reduce:scale-100 motion-reduce:blur-none"
+              style={{ backgroundColor: currentColors.midCenter }}
+            />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.midRight }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.bottomLeft }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.bottomCenter }} />
+            <div className="transition-colors duration-[2s] ease-in-out" style={{ backgroundColor: currentColors.bottomRight }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10 isolate flex min-h-0 flex-1 flex-col">
+        <Link href={`/anime/${activeSchedule.media?.id}`} className="relative block min-h-[inherit] w-full flex-1">
+          <div className="absolute inset-0 bg-secondary/25">
+            {schedules.map((schedule, index) => {
+              if (index !== activeIndex) return null
+              const scheduleImage = schedule?.media?.bannerImage || schedule?.media?.coverImage?.extraLarge
+              if (!scheduleImage) return null
+              return (
+                <div key={schedule?.id || index} className="absolute inset-0 opacity-100 transition-opacity duration-700 ease-out">
+                  <Image
+                    src={scheduleImage}
+                    alt=""
+                    fill
+                    className="scale-105 object-cover opacity-35 blur-2xl saturate-125 md:opacity-25 md:blur-3xl motion-reduce:blur-none motion-reduce:saturate-100"
+                    loading="eager"
+                    priority
+                  />
+                </div>
+              )
+            })}
+            <div className="absolute inset-0 bg-linear-to-t from-background via-background/55 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-background/90 via-background/45 to-transparent" />
+          </div>
+
+          <div className="absolute inset-0 flex justify-center">
+            <div className="relative flex h-full w-full max-w-[1600px] items-center px-6 pb-24 pt-10 md:px-12 md:pb-20 md:pt-0 lg:px-24">
+              <div className="relative z-10 w-full max-w-xl space-y-8 transition-all duration-500 md:max-w-[52%] lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2.5 text-primary">
+                    <Radio className="h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden />
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/90 md:text-[11px] md:tracking-[0.28em]">
+                      Next on air
+                    </span>
+                  </div>
+                  <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+                    Upcoming episode — opens full series page.
+                  </p>
+                  <div className="h-px w-full max-w-xs bg-linear-to-r from-primary/35 via-white/10 to-transparent" />
+                </div>
+
+                <div key={activeSchedule.id} className="animate-in fade-in duration-500 space-y-8 md:space-y-10">
+                  <div className="space-y-4 md:space-y-5">
+                    <div className="flex min-h-14 flex-col justify-end md:min-h-20">
+                      <h2 className="line-clamp-2 text-balance font-sans text-3xl font-semibold leading-[1.05] tracking-tight text-foreground drop-shadow-md sm:text-4xl md:line-clamp-3 md:text-5xl lg:text-6xl">
+                        {title}
+                      </h2>
+                    </div>
+
+                    <dl className="grid grid-cols-2 gap-3 rounded-md border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm sm:grid-cols-4 md:flex md:flex-wrap md:items-center md:gap-x-8 md:gap-y-2 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+                      <div className="flex flex-col gap-0.5">
+                        <dt className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Episode</dt>
+                        <dd className="font-mono text-sm font-semibold tabular-nums text-foreground">{activeSchedule.episode}</dd>
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <dt className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Status</dt>
+                        <dd className="truncate font-mono text-sm font-medium text-foreground/90">
+                          {activeSchedule.media?.status?.replace(/_/g, " ") ?? "—"}
+                        </dd>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <dt className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">Format</dt>
+                        <dd className="font-mono text-sm font-medium text-foreground">{activeSchedule.media?.format ?? "—"}</dd>
+                      </div>
+                      <div className="col-span-2 flex flex-col gap-0.5 sm:col-span-1">
+                        <dt className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">AniList</dt>
+                        <dd className="font-mono text-sm font-medium tabular-nums text-primary/90">#{activeSchedule.media?.id}</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <p className="pl-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                      Countdown
+                    </p>
+                    <div className="relative w-full sm:w-fit">
+                      <div className="absolute -left-1 -top-1 h-3 w-3 border-l-2 border-t-2 border-primary/50 motion-reduce:hidden" />
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 border-b-2 border-r-2 border-primary/50 motion-reduce:hidden" />
+
+                      <div className="rounded-md border border-white/10 bg-foreground px-4 py-4 text-background shadow-xl transition-colors hover:border-primary/40 md:px-8 md:py-6">
+                        {now === null ? (
+                          <span className="font-mono text-sm opacity-50 motion-reduce:animate-none animate-pulse">Syncing clock…</span>
+                        ) : countdown ? (
+                          <div className="flex flex-wrap items-end justify-start gap-3 sm:gap-4 md:gap-5">
+                            {countdown.map((unit, i) => (
+                              <div key={COUNTDOWN_LABELS[i]} className="flex flex-col items-center gap-1">
+                                <span className="font-mono text-2xl font-bold tabular-nums tracking-tight sm:text-3xl md:text-5xl">
+                                  {unit}
+                                </span>
+                                <span className="font-mono text-[9px] uppercase tracking-widest text-background/50">
+                                  {COUNTDOWN_LABELS[i]}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="font-mono text-sm font-semibold uppercase tracking-widest text-primary">Airing now</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="inline-flex text-sm font-medium text-primary underline-offset-4 group-hover:underline">
+                      View series →
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute right-4 top-1/2 hidden h-[58%] max-h-[420px] -translate-y-1/2 transition-transform duration-700 md:flex lg:right-16 xl:right-24 aspect-2/3 group-hover:scale-[1.02]">
+                <div className="relative h-full w-full">
+                  <div className="absolute -bottom-3 -left-3 h-8 w-8 border-b border-l border-primary/30 md:h-10 md:w-10" />
+                  <div className="relative z-10 h-full w-full overflow-hidden rounded-sm border border-white/15 bg-secondary/40 shadow-2xl ring-1 ring-black/30">
+                    {schedules.map((schedule, index) => {
+                      if (index !== activeIndex) return null
+                      const coverImage = schedule?.media?.coverImage?.extraLarge
+                      if (!coverImage) return null
+                      return (
+                        <div key={schedule.id} className="absolute inset-0">
+                          <Image
+                            src={coverImage}
+                            alt=""
+                            fill
+                            className="object-cover transition-transform duration-[3s] group-hover:scale-105 motion-reduce:transition-none"
+                            priority
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-20 flex h-12 justify-center md:bottom-8">
+                <div className="flex w-full max-w-[1600px] items-center justify-between px-6 md:px-12 lg:px-24">
+                  <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
+                    {schedules.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setActiveIndex(i)
+                        }}
+                        aria-label={`Show airing ${i + 1} of ${schedules.length}`}
+                        aria-current={i === activeIndex ? "true" : undefined}
+                        className={cn(
+                          "relative flex h-8 items-center justify-center rounded-sm transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                          i === activeIndex ? "w-12 bg-primary/15 px-1" : "w-8 hover:bg-white/5"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "block h-0.5 w-full rounded-full transition-colors",
+                            i === activeIndex ? "bg-primary" : "bg-muted-foreground/35 group-hover:bg-muted-foreground/55"
+                          )}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="pointer-events-auto hidden font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 md:block">
+                    {schedules.length} in rotation
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </div>
+    </section>
+  )
 }

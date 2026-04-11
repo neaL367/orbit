@@ -1,8 +1,12 @@
 export function ScheduleLoading() {
   return (
-    <div className="space-y-24">
+    <div className="space-y-20 md:space-y-24">
       {[...Array(3)].map((_, dayIndex) => (
-        <section key={dayIndex} className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4" style={{ animationDelay: `${dayIndex * 150}ms` }}>
+        <section
+          key={dayIndex}
+          className="motion-reduce:animate-none space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4 motion-reduce:slide-in-from-bottom-0"
+          style={{ animationDelay: `${dayIndex * 150}ms` }}
+        >
           {/* Day Header skeleton */}
           <div className="flex items-end gap-4 pb-4 border-b border-border">
             <div className="h-8 w-48 bg-secondary/50 shimmer" />

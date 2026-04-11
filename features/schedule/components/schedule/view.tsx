@@ -101,7 +101,7 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       />
 
       {/* Day Sections */}
-      <div className="space-y-32 pt-12">
+      <div className="space-y-24 pt-8 md:space-y-28 md:pt-10">
         {displayedDays.map(({ index: dayIndex, name: dayName, isToday }, arrayIndex) => {
           // Calculate the correct offset from "Today" based on the sorted list
           // This ensures the date is always correct regardless of filtering

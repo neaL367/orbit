@@ -144,47 +144,41 @@ function HeaderContent() {
           <div className="flex items-center gap-6 xl:gap-10 ml-auto">
             {/* Minimal Search Trigger */}
             <button
+              type="button"
               onClick={() => setIsSearchOpen(true)}
-              className="hidden xl:flex items-center gap-3 px-3 py-1.5 bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/3 transition-all index-cut-tr group/search"
+              aria-label="Open command palette to search"
+              className="hidden xl:flex items-center gap-3 px-3 py-1.5 bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/3 transition-[border-color,background-color] index-cut-tr group/search"
             >
-              <Search className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50">Command_Inquiry</span>
+              <Search className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" aria-hidden />
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50">Search</span>
               <div className="flex items-center gap-1 border border-white/10 px-1 py-0.5 rounded-sm">
-                <Command className="w-2.5 h-2.5 text-muted-foreground/30" />
+                <Command className="w-2.5 h-2.5 text-muted-foreground/30" aria-hidden />
                 <span className="font-mono text-[8px] font-bold text-muted-foreground/30">K</span>
               </div>
             </button>
 
-            <div className="hidden xl:block h-8 w-px bg-white/10" />
+            <div className="hidden xl:block h-8 w-px bg-white/10" aria-hidden />
 
-            {/* Condensed Telemetry */}
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="hidden items-center gap-6 lg:flex" aria-hidden>
               <div className="flex flex-col items-end">
-                <span className="font-mono text-[7px] font-black text-muted-foreground/30 uppercase tracking-widest leading-none mb-1">
-                  SYS_CLK
+                <span className="mb-1 font-mono text-[7px] font-black uppercase leading-none tracking-widest text-muted-foreground/40">
+                  Local time
                 </span>
-                <div className="font-mono text-[11px] font-black text-foreground/70 tracking-tighter text-right">
+                <div className="text-right font-mono text-[11px] font-black tracking-tighter text-foreground/80 tabular-nums">
                   <SystemClock />
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end">
-                <span className="font-mono text-[7px] font-black text-muted-foreground/30 uppercase tracking-widest leading-none mb-1">
-                  LNK_STT
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="font-mono text-[9px] font-black text-foreground/50 uppercase tracking-widest">ACTIVE</span>
                 </div>
               </div>
             </div>
 
             {/* Mobile Toggle */}
             <button
+              type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 text-foreground/60 transition-all border border-white/5 bg-white/2 hover:bg-white/5 rounded-md active:scale-95 ml-4"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              className="ml-4 rounded-md border border-white/5 bg-white/2 p-2 text-foreground/60 transition-[background-color,transform] hover:bg-white/5 active:scale-95 lg:hidden"
             >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {isMenuOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
             </button>
           </div>
         </div>
@@ -261,20 +255,12 @@ function HeaderContent() {
             </nav>
           </div>
 
-          <div className="mt-auto pb-12 space-y-8">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 border border-white/5 bg-white/1">
-                <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Uptime</span>
-                <span className="font-mono text-xs font-black text-emerald-500">99.98%</span>
-              </div>
-              <div className="p-4 border border-white/5 bg-white/1">
-                <span className="block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30 mb-2">Protocol</span>
-                <span className="font-mono text-xs font-black text-blue-500">HTTPS_V3</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 py-6 border-t border-white/10">
-              <Cpu className="w-5 h-5 text-primary/40" />
-              <span className="font-mono text-[10px] uppercase font-black tracking-[0.3em] text-muted-foreground">RegistryCore_v1.2.0</span>
+          <div className="mt-auto flex flex-col gap-6 pb-12">
+            <div className="flex items-center gap-4 border-t border-white/10 py-4">
+              <Cpu className="h-5 w-5 text-primary/40" aria-hidden />
+              <span className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">
+                AnimeX · discovery build
+              </span>
             </div>
           </div>
         </div>

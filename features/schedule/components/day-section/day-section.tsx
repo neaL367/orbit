@@ -1,18 +1,18 @@
-'use client'
+"use client"
 
-import { useRef, useState, useEffect } from 'react'
-import { ScheduleCard } from '../schedule/card'
-import { cn } from '@/lib/utils'
-import type { AiringSchedule } from '@/lib/graphql/types/graphql'
+import { useRef, useState, useEffect } from "react"
+import { ScheduleCard } from "../schedule/card"
+import { cn } from "@/lib/utils"
+import type { AiringSchedule } from "@/lib/graphql/types/graphql"
 
-const FORMAT_ORDER = ['TV', 'TV_SHORT', 'MOVIE', 'SPECIAL', 'OVA', 'ONA'] as const
+const FORMAT_ORDER = ["TV", "TV_SHORT", "MOVIE", "SPECIAL", "OVA", "ONA"] as const
 const FORMAT_LABELS: Record<string, string> = {
-  TV: 'TV_BROADCAST',
-  TV_SHORT: 'TV_SHORT',
-  MOVIE: 'CINEMATIC',
-  OVA: 'OVA_DOC',
-  ONA: 'NET_ARCHIVE',
-  SPECIAL: 'RESERVED',
+  TV: "TV",
+  TV_SHORT: "Short TV",
+  MOVIE: "Movie",
+  OVA: "OVA",
+  ONA: "ONA",
+  SPECIAL: "Special",
 }
 
 type DaySectionProps = {
@@ -43,7 +43,6 @@ export function DaySection({
   const sentinelRef = useRef<HTMLDivElement>(null)
   const [isStuck, setIsStuck] = useState(false)
 
-  // Detect when header becomes stuck (debounced for performance)
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel) return
@@ -52,7 +51,6 @@ export function DaySection({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Use RAF to debounce updates for smooth scrolling
         if (rafId) cancelAnimationFrame(rafId)
         rafId = requestAnimationFrame(() => {
           setIsStuck(!entry.isIntersecting)
@@ -70,82 +68,78 @@ export function DaySection({
 
   const totalSchedules = Object.values(schedulesByFormat).reduce((sum, schedules) => sum + schedules.length, 0)
   const hasSchedules = totalSchedules > 0
-  const formats = FORMAT_ORDER.filter(format => schedulesByFormat[format] && schedulesByFormat[format].length > 0)
+  const formats = FORMAT_ORDER.filter((format) => schedulesByFormat[format] && schedulesByFormat[format].length > 0)
 
   return (
-    <section className="reveal first:pt-0 pt-20">
-      {/* Sentinel element to detect sticky state */}
-      <div ref={sentinelRef} className="h-px -mt-px" />
+    <section className="reveal pt-16 first:pt-0 md:pt-20">
+      <div ref={sentinelRef} className="-mt-px h-px" />
 
-      <div className="space-y-12">
+      <div className="space-y-10 md:space-y-12">
         <div
           ref={headerRef}
           className={cn(
-            "sticky z-30 pb-4 pt-2 -mx-4 px-4 transition-all duration-500",
-            isStuck ? "bg-background border-b border-white/5 opacity-100 shadow-[0_10px_20px_rgba(0,0,0,0.3)]" : "bg-transparent opacity-100",
+            "sticky z-30 -mx-4 px-4 pb-4 pt-2 transition-all duration-500",
+            isStuck
+              ? "border-b border-white/8 bg-background/95 opacity-100 shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-md supports-[backdrop-filter]:bg-background/80"
+              : "bg-transparent opacity-100",
             "will-change-[background-color,opacity,top]"
           )}
           style={{
-            top: `calc(var(--nav-visible, 1) * 80px + 78px)`
+            top: `calc(var(--nav-visible, 1) * 80px + 78px)`,
           }}
         >
-          <div className="flex items-center gap-6">
-            <h2 className={cn(
-              "font-mono text-xl md:text-3xl font-black uppercase tracking-tighter flex items-center gap-4",
-              isToday ? "text-primary" : "text-foreground"
-            )}>
+          <div className="flex items-center gap-4 md:gap-6">
+            <h2
+              className={cn(
+                "flex items-center gap-3 font-sans text-xl font-semibold tracking-tight md:text-3xl md:gap-4",
+                isToday ? "text-primary" : "text-foreground"
+              )}
+            >
               {dayName}
               {isToday && (
-                <span className="flex items-center gap-2 px-3 py-0.5 bg-primary/10 border border-primary/20 text-[10px] tracking-[0.3em] font-black">
-                  LIVE_ACTIVE
+                <span className="border border-primary/25 bg-primary/10 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-primary">
+                  Today
                 </span>
               )}
             </h2>
-            <div className="flex-1 h-px bg-white/5" />
+            <div className="h-px flex-1 bg-white/8" />
             <div className="flex flex-col items-end">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                {isToday ? "ACTIVE_CYCLE//" : "TEMPORAL//"} {dateString}
+              <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {dateString}
               </span>
-              <div className="flex gap-1 mt-1">
-                <div className="w-12 h-0.5 bg-primary/20" />
-                <div className="w-4 h-0.5 bg-primary" />
+              <div className="mt-1 flex gap-1">
+                <div className="h-0.5 w-12 bg-primary/25" />
+                <div className="h-0.5 w-4 bg-primary" />
               </div>
             </div>
           </div>
         </div>
 
         {!hasSchedules ? (
-          <div className="flex flex-col items-center justify-center py-20 border border-white/5 bg-white/1 index-cut-tr">
-            <div className="flex items-center gap-2 text-muted-foreground/20 mb-2">
-              <div className="w-2 h-2 bg-current rotate-45" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.5em]">No_Data_Flux</span>
-            </div>
-            <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/30">
-              Registry_Scan_Complete: NULL_BROADCAST_FOUND
+          <div className="flex flex-col items-center justify-center border border-white/8 bg-white/[0.02] py-16 md:py-20 index-cut-tr">
+            <p className="font-sans text-sm font-medium text-muted-foreground">No episodes this day</p>
+            <p className="mt-2 max-w-sm text-center font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60">
+              Try another day or check back after the list updates
             </p>
           </div>
         ) : (
-          <div className="space-y-16">
+          <div className="space-y-12 md:space-y-14">
             {formats.map((format, formatIndex) => {
               const schedules = schedulesByFormat[format] || []
               if (schedules.length === 0) return null
 
               return (
-                <div key={format} className="space-y-6">
-                  {/* Format Sub-header */}
+                <div key={format} className="space-y-5 md:space-y-6">
                   <div className="flex items-center gap-4 group/format">
-                    <div className="px-3 py-1 font-mono text-[9px] font-black uppercase tracking-[0.4em] text-foreground bg-white/5 border border-white/10 group-hover/format:border-primary/30 transition-colors">
-                      {FORMAT_LABELS[format] || format}
+                    <div className="border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-foreground transition-colors group-hover/format:border-primary/35">
+                      {FORMAT_LABELS[format] || format.replace(/_/g, " ")}
                     </div>
-                    <div className="flex-1 h-px bg-linear-to-r from-white/10 via-white/5 to-transparent" />
-                    <div className="flex items-center gap-4">
-                      <span className="font-mono text-[9px] uppercase text-muted-foreground/30 tracking-widest flex items-center gap-2">
-                        ENTRY_LOG: <span className="text-foreground/60">{schedules.length.toString().padStart(2, '0')}</span>
-                      </span>
-                    </div>
+                    <div className="h-px flex-1 bg-linear-to-r from-white/12 via-white/5 to-transparent" />
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/70">
+                      {schedules.length} {schedules.length === 1 ? "title" : "titles"}
+                    </span>
                   </div>
 
-                  {/* Schedule Cards Stack (Registry Flow) */}
                   <div className="grid grid-cols-1 gap-1">
                     {schedules.map((schedule, index) => {
                       const media = schedule.media

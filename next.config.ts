@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   experimental: {
     inlineCss: true,
     optimizePackageImports: ['lucide-react', 'date-fns'],
+    useLightningcss: true,
   },
   images: {
     unoptimized: true,

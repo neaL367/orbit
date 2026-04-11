@@ -3,7 +3,7 @@
 import { useState, useEffect, memo, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, X, Star, PlayCircle, Cpu, Terminal, History, ArrowRight } from 'lucide-react'
+import { Search, X, PlayCircle, Cpu, Terminal, History, ArrowRight } from "lucide-react"
 import { useDebounce } from 'use-debounce'
 import { cn } from '@/lib/utils'
 import { useGraphQL } from '@/lib/graphql/hooks'
@@ -110,15 +110,9 @@ const RegistryNode = memo(({ anime, onClose, onVisit }: { anime: Media; onClose:
 
                 <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
                     <div className="flex items-center gap-2.5 group/stat">
-                        <Star className="w-3.5 h-3.5 text-yellow-500/50 group-hover/stat:text-yellow-500 transition-colors" />
-                        <span className="font-mono text-xs font-black text-foreground/60 tracking-wider">
-                            {anime.averageScore ? `${anime.averageScore}%` : '---'}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2.5 group/stat">
-                        <PlayCircle className="w-3.5 h-3.5 text-primary/40 group-hover/stat:text-primary transition-colors" />
+                        <PlayCircle className="h-3.5 w-3.5 text-primary/40 transition-colors group-hover/stat:text-primary" />
                         <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
-                            {anime.status?.replace(/_/g, ' ')}
+                            {anime.status?.replace(/_/g, " ")}
                         </span>
                     </div>
                 </div>

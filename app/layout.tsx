@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import { Footer } from "@/components/layout/footer/footer";
 import { Header } from "@/components/layout/header/header";
 import { ScrollToTop } from "@/components/shared/scroll-to-top";
@@ -12,13 +12,6 @@ import { BASE_URL } from "@/lib/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
   preload: true,
@@ -83,12 +76,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={cn(
           geistSans.variable,
-          geistMono.variable,
-          'antialiased font-sans bg-background text-foreground relative overflow-x-hidden'
+          "bg-background font-sans text-foreground relative overflow-x-hidden antialiased"
         )}
       >
         <QueryProviders>
           <Analytics />
+          <a
+            href="#main-content"
+            className="pointer-events-none fixed left-4 top-4 z-[300] -translate-y-24 rounded-sm bg-primary px-4 py-2 font-mono text-xs font-bold uppercase tracking-wide text-primary-foreground opacity-0 transition-transform focus:pointer-events-auto focus:translate-y-0 focus:opacity-100 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+          >
+            Skip to main content
+          </a>
           <Header />
           <script
             type="application/ld+json"
@@ -118,7 +116,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               }),
             }}
           />
-          <main className="min-h-screen pb-20 relative px-6 md:px-12 lg:px-24">
+          <main id="main-content" className="scroll-mt-24 min-h-screen pb-20 relative px-6 md:px-12 lg:px-24">
             <div className="max-w-[1600px] mx-auto">
               {children}
             </div>

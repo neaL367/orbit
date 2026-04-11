@@ -46,9 +46,16 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
   )
 }
 
+import { connection } from 'next/server'
 import { getScheduleAnime } from '@/lib/graphql/data'
+import { getNextSeason, getNextSeasonYear } from '@/lib/utils'
 
 export default async function HomePage() {
+  await connection()
+  const upcomingSeason = getNextSeason()
+  const upcomingYear = getNextSeasonYear()
+  const upcomingBrowseHref = `/anime?sort=seasonal&season=${upcomingSeason}&year=${upcomingYear}`
+
   const scheduleData = await getScheduleAnime(1, 5)
 
   return (
@@ -85,7 +92,7 @@ export default async function HomePage() {
             type="upcoming"
             title="Upcoming"
             subtitle="Future_Log"
-            viewAllHref="/anime?sort=seasonal"
+            viewAllHref={upcomingBrowseHref}
             variant="list"
             perPage={5}
           />

@@ -16,37 +16,35 @@ function FooterContent() {
 
           <div className="space-y-8">
             <div className="flex flex-col gap-2">
-              <span className="font-mono text-[8px] uppercase tracking-[0.4em] text-primary/60">Core_Registry_System</span>
+              <span className="font-mono text-[8px] uppercase tracking-[0.35em] text-primary/60">About</span>
               <div className="font-mono text-xl font-black uppercase tracking-tighter">
                 Anime<span className="text-primary italic">X</span>
               </div>
             </div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground max-w-xs leading-relaxed opacity-60">
-              Autonomous search engine and indexing protocol for modern animation archives.
-              Operated by community nodes. No Tracking. No Cookies.
+            <p className="max-w-xs font-mono text-[9px] uppercase leading-relaxed tracking-[0.2em] text-muted-foreground opacity-70">
+              Anime discovery and schedule views powered by the AniList GraphQL API. Built with Next.js and React.
             </p>
           </div>
 
           <div className="space-y-8 font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60">
             <div className="flex flex-col gap-4">
-              <span className="text-[8px] text-white/20">External_Links</span>
+              <span className="text-[8px] text-white/25">Links</span>
               <div className="flex flex-col gap-3">
-                <Link href="https://anilist.co" target="_blank" className="hover:text-primary transition-colors flex items-center justify-between group">
-                  <span>ANILIST_API_PROTOCOL</span> <ExternalLink className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />
+                <Link href="https://anilist.co" target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between transition-colors hover:text-primary">
+                  <span>AniList</span> <ExternalLink className="h-2.5 w-2.5 opacity-40 group-hover:opacity-100" aria-hidden />
                 </Link>
-                <Link href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors flex items-center justify-between group">
-                  <span>FETCH_SOURCE_CODE</span> <ExternalLink className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />
+                <Link href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between transition-colors hover:text-primary">
+                  <span>Source</span> <ExternalLink className="h-2.5 w-2.5 opacity-40 group-hover:opacity-100" aria-hidden />
                 </Link>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col md:items-end justify-end gap-6 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-            <div className="flex flex-col md:items-end gap-1.5 order-2 md:order-1">
-              <span className="text-[10px] text-foreground font-black tracking-tighter">COMMUNITY_DRIVEN_v1.0</span>
-              <div className="text-[7px] text-muted-foreground opacity-40 text-right">
-                RUNNING: NEXT_GEN_APP_ROUTER // SHAD_CN_CORE<br />
-                SERIAL: 0x77-00-AX-99 // ST_SYNCHRONIZED
+            <div className="order-2 flex flex-col gap-1.5 md:order-1 md:items-end">
+              <span className="text-[10px] font-black tracking-tight text-foreground">Open data · AniList</span>
+              <div className="text-right text-[8px] uppercase tracking-wider text-muted-foreground/50">
+                Next.js App Router · React 19
               </div>
             </div>
             <div className="order-1 md:order-2 px-3 py-1 border border-white/5 bg-white/5 w-fit">
