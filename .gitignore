@@ -49,3 +49,5 @@ lib/graphql/types/fragment-masking.ts
 .agent/
 .agents/
 skills-lock.json
+
+.vscode/
