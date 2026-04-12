@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { Schedule } from "@/features/schedule/components/schedule/schedule"
+import { ScheduleLoading } from "@/features/schedule/components/schedule/loading"
 import { NextAiring } from "@/features/home/components/next-airing"
 import { Container } from "@/components/shared/container"
 import type { Metadata } from "next"
@@ -21,7 +22,9 @@ export default async function SchedulePage() {
             </Suspense>
             
             <Container>
-                <Schedule />
+                <Suspense fallback={<ScheduleLoading />}>
+                    <Schedule />
+                </Suspense>
             </Container>
         </div>
     )

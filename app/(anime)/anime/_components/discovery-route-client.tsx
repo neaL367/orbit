@@ -3,9 +3,9 @@
 import DiscoveryView from "@/features/anime/components/discovery-view"
 
 /**
- * Discovery stays client-first: infinite scroll + React Query need a living client tree.
- * A future server shell could stream static chrome + metadata, but the grid would still
- * hydrate here—document that tradeoff before splitting routes further.
+ * Discovery client island: URL-driven filters + infinite scroll (React Query).
+ * Default `sort=trending` is enforced on the server in `app/(anime)/anime/page.tsx` so this
+ * tree never renders a blank shell waiting for a client-side redirect.
  */
 export function DiscoveryRouteClient() {
   return <DiscoveryView />

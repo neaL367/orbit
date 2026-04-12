@@ -1,8 +1,13 @@
 import { extractMediaList } from '@/lib/utils/anime-utils'
-import { getCachedTrending, getCachedPopular, getCachedSeasonal, getCachedTopRated } from '@/lib/graphql/data'
+import {
+    getCachedTrending,
+    getCachedPopular,
+    getCachedSeasonal,
+    getCachedTopRated,
+    getCachedUpcomingAiring,
+} from '@/lib/graphql/data'
 import { MediaSeason } from '@/lib/graphql/types/graphql'
-import { connection } from 'next/server'
-import { getCurrentSeason, getCurrentYear, getNextSeason, getNextSeasonYear } from '@/lib/utils'
+import { getCurrentSeason, getCurrentYear } from '@/lib/utils'
 import { MediaSection } from './media-section'
 
 type SectionType = 'trending' | 'popular' | 'seasonal' | 'top-rated' | 'upcoming'
@@ -31,8 +36,7 @@ async function fetchData(type: SectionType, season?: MediaSeason, year?: number,
         case 'top-rated':
             return getCachedTopRated(perPage)
         case 'upcoming':
-            if (!season || !year) throw new Error('Season and year are required for upcoming section')
-            return getCachedSeasonal(season, year, perPage)
+            return getCachedUpcomingAiring(perPage)
         default:
             throw new Error(`Invalid section type: ${type}`)
     }
@@ -53,19 +57,13 @@ export async function AnimeSection({
     let year = initialYear
     let title = initialTitle
 
-    // Handle dynamic sensing inside the Suspense boundary
-    await connection()
-
-    if (type === 'seasonal' || type === 'upcoming') {
-        if (type === 'seasonal') {
-            season = season || getCurrentSeason()
-            year = year || getCurrentYear()
-            title = title || `${season} ${year}`
-        } else if (type === 'upcoming') {
-            season = season || getNextSeason()
-            year = year || getNextSeasonYear()
-            title = title || `${season} ${year}`
-        }
+    // Calendar math uses request time; parent route should call `connection()` once (see app/page.tsx).
+    if (type === 'seasonal') {
+        season = season || getCurrentSeason()
+        year = year || getCurrentYear()
+        title = title || `${season} ${year}`
+    } else if (type === 'upcoming') {
+        title = title || 'On air now'
     }
 
     const response = await fetchData(type, season, year, perPage)

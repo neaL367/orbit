@@ -3,7 +3,14 @@
 @theme {
   /* Geist via next/font variables on <body> — single family sitewide */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
+
+  /* Semantic layout tokens (Precision Registry — use instead of ad-hoc white/5) */
+  --spacing-section: 10rem;
+  --spacing-rail: 1.5rem;
+  --surface-elevated: oklch(0.2 0 0 / 0.45);
+  --border-subtle: oklch(1 0 0 / 0.06);
+  --text-label: 0.65rem;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -30,30 +37,10 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-:root {
-  color-scheme: dark;
-  --background: #ffffff;
-  --foreground: #0a0a0b;
-  --card: #ffffff;
-  --card-foreground: #0a0a0b;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0b;
-  --primary: #0a0a0b;
-  --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #0a0a0b;
-  --muted: #f4f4f5;
-  --muted-foreground: #737373;
-  --accent: #f4f4f5;
-  --accent-foreground: #0a0a0b;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #0a0a0b;
-}
+/* Light palette omitted: root layout pins `class="dark"` until a real theme toggle ships. */
 
-.dark {
+.dark,
+html.dark {
   color-scheme: dark;
   --background: #0A0A0B;
   --foreground: #F2F2F2;
@@ -114,6 +101,26 @@
 
 .animate-progress {
   animation: progress-bar 8s linear forwards;
+}
+
+/* Registry “precision” frame (from legacy precision player, trimmed to clip only) */
+.precision-frame-cut {
+  clip-path: polygon(
+    8px 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    24px 100%,
+    0 calc(100% - 24px),
+    0 8px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .precision-frame-cut {
+    clip-path: none;
+  }
 }
 
 /* Custom Utilities */

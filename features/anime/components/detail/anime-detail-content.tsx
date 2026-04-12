@@ -1,4 +1,3 @@
-import { connection } from "next/server"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -43,7 +42,6 @@ type Props = { params: Promise<{ id: string }> }
 export async function AnimeDetailContent({ params }: Props) {
   const { id: idStr } = await params
   const id = parseInt(idStr, 10)
-  await connection()
   const result = await getCachedAnime(id)
   const anime = result.data?.Media as Media | undefined
 
@@ -93,7 +91,6 @@ export async function AnimeDetailContent({ params }: Props) {
                   fill
                   className="object-cover blur-3xl opacity-20 scale-125 transition-[transform,opacity] duration-1000 group-hover:scale-110 motion-reduce:transition-none"
                   sizes="100vw"
-                  unoptimized
                   aria-hidden
                 />
                 <div className="absolute inset-0 bg-background/25" />
@@ -243,6 +240,7 @@ export async function AnimeDetailContent({ params }: Props) {
                     videoId={anime.trailer.id}
                     title={title}
                     thumbnail={anime.trailer.thumbnail || anime.bannerImage || anime.coverImage?.extraLarge}
+                    className="mx-auto max-w-6xl"
                   />
                 </div>
               </section>

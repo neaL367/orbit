@@ -48,13 +48,12 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
 }
 
 import { connection } from 'next/server'
-import { getNextSeason, getNextSeasonYear } from '@/lib/utils'
 
 export default async function HomePage() {
+  // Single dynamic boundary for the homepage: season/year links and any time-based copy
+  // use request time. Child Suspense boundaries (e.g. AnimeSection) must not call
+  // `connection()` again — that only adds noise without changing semantics.
   await connection()
-  const upcomingSeason = getNextSeason()
-  const upcomingYear = getNextSeasonYear()
-  const upcomingBrowseHref = `/anime?sort=seasonal&season=${upcomingSeason}&year=${upcomingYear}`
   return (
     <div className="space-y-24">
       {/* Primary Registry Hero (Integrated Next Airing) */}
@@ -67,7 +66,7 @@ export default async function HomePage() {
           <AnimeSection
             type="trending"
             title="Trending"
-            subtitle="Archive_Pulse"
+            subtitle="Live index"
             viewAllHref="/anime?sort=trending"
             variant="featured"
             perPage={5}
@@ -78,7 +77,7 @@ export default async function HomePage() {
           <AnimeSection
             type="seasonal"
             title="Seasonal"
-            subtitle="Current_Cycle"
+            subtitle="This season"
             viewAllHref="/anime?sort=seasonal"
             variant="grid"
           />
@@ -88,8 +87,8 @@ export default async function HomePage() {
           <AnimeSection
             type="upcoming"
             title="Upcoming"
-            subtitle="Future_Log"
-            viewAllHref={upcomingBrowseHref}
+            subtitle="Currently releasing"
+            viewAllHref="/schedule"
             variant="list"
             perPage={5}
           />
@@ -99,7 +98,7 @@ export default async function HomePage() {
           <AnimeSection
             type="popular"
             title="Popular"
-            subtitle="Mass_Registry"
+            subtitle="Community picks"
             viewAllHref="/anime?sort=popular"
             variant="grid"
           />
@@ -108,8 +107,8 @@ export default async function HomePage() {
         <Suspense fallback={<SectionSkeleton variant="list" />}>
           <AnimeSection
             type="top-rated"
-            title="Top_Rated"
-            subtitle="Elite_Index"
+            title="Top rated"
+            subtitle="Curated scores"
             viewAllHref="/anime?sort=top-rated"
             showRank={true}
             variant="list"

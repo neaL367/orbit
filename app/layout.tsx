@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/layout/footer/footer";
 import { Header } from "@/components/layout/header/header";
 import { ScrollToTop } from "@/components/shared/scroll-to-top";
@@ -12,6 +12,13 @@ import { BASE_URL } from "@/lib/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
   preload: true,
@@ -76,6 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={cn(
           geistSans.variable,
+          geistMono.variable,
           "bg-background font-sans text-foreground relative overflow-x-hidden antialiased"
         )}
       >

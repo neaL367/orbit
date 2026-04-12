@@ -18,18 +18,26 @@ export type CacheOptions = {
 export async function fetchGraphQLServer<T>(
     query: string,
     variables?: unknown,
-    options?: { signal?: AbortSignal } & CacheOptions
+    options?: { signal?: AbortSignal; headers?: HeadersInit } & CacheOptions
 ): Promise<ExecutionResult<T>> {
     const cacheConfig = options?.tags && options?.revalidate !== undefined
         ? { tags: options.tags, revalidate: options.revalidate }
         : getCacheConfig(query, variables as Record<string, unknown>)
 
+    const headers = new Headers({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+    })
+    if (options?.headers) {
+        const extra = new Headers(options.headers)
+        extra.forEach((value, key) => {
+            headers.set(key, value)
+        })
+    }
+
     const response = await fetch(ANILIST_API_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-        },
+        headers,
         body: JSON.stringify({
             query,
             variables: variables || undefined,
@@ -67,7 +75,7 @@ export async function executeServerGraphQL<TResult>(
     query: string,
     variables: unknown,
     signal: AbortSignal,
-    options?: CacheOptions
+    options?: CacheOptions & { headers?: HeadersInit }
 ): Promise<ExecutionResult<TResult>> {
     return fetchGraphQLServer<TResult>(query, variables, {
         signal,

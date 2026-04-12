@@ -39,8 +39,8 @@ export function IndexImage({
                     <div className="space-y-4 text-center">
                         <div className="flex items-center gap-3">
                             <div className="w-6 h-[1px] bg-primary/20" />
-                            <span className="font-mono text-[8px] uppercase tracking-[0.5em] text-muted-foreground/40 animate-pulse">
-                                Syncing_Buffer
+                            <span className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground/50 animate-pulse">
+                                Loading
                             </span>
                             <div className="w-6 h-[1px] bg-primary/20" />
                         </div>
@@ -63,13 +63,13 @@ export function IndexImage({
             {/* Technical Metadata Bar (Bottom) */}
             {showTechnicalDetails && (
                 <div className={cn(
-                    "absolute bottom-0 left-0 w-full px-3 py-1.5 flex justify-between items-center bg-black/60 backdrop-blur-md border-t border-white/5 transition-all duration-700 z-30",
+                    "absolute bottom-0 left-0 w-full px-3 py-1.5 flex justify-between items-center bg-black/60 backdrop-blur-md border-t border-border transition-all duration-700 z-30",
                     isLoading ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"
                 )}>
                     <div className="flex items-center gap-3">
                         <div className="w-1.5 h-1.5 bg-primary/40 animate-pulse" />
-                        <span className="font-mono text-[7px] uppercase text-muted-foreground tracking-[0.3em]">
-                            Registry_Verified
+                        <span className="font-mono text-[7px] uppercase text-muted-foreground tracking-wide">
+                            Verified
                         </span>
                     </div>
                     <span

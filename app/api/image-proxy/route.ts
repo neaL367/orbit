@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { assertAllowedImageProxyUrl } from '@/lib/security/allowed-image-proxy-url'
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
@@ -9,13 +10,27 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const response = await fetch(imageUrl)
+        assertAllowedImageProxyUrl(imageUrl)
+    } catch {
+        return new NextResponse('URL not allowed', { status: 400 })
+    }
+
+    try {
+        const response = await fetch(imageUrl, { redirect: 'manual' })
+
+        if (response.status >= 300 && response.status < 400) {
+            return new NextResponse('Redirects are not allowed', { status: 400 })
+        }
 
         if (!response.ok) {
             return new NextResponse('Failed to fetch image', { status: response.status })
         }
 
-        const contentType = response.headers.get('content-type')
+        const contentType = response.headers.get('content-type') || ''
+        if (!contentType.startsWith('image/')) {
+            return new NextResponse('Not an image response', { status: 400 })
+        }
+
         const buffer = await response.arrayBuffer()
 
         return new NextResponse(buffer, {

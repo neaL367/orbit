@@ -11,7 +11,9 @@ export const fetcher = <TData, TVariables>(
 ): (() => Promise<TData>) => {
   return async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await (execute as any)(query, variables, { headers })
+    const result = await (execute as any)(query, variables, {
+      headers: headers as HeadersInit | undefined,
+    })
     if (result.errors) {
       throw new Error(result.errors[0].message)
     }

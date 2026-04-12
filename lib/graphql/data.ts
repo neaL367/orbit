@@ -1,10 +1,16 @@
 'use cache'
 
+/**
+ * Server-side cached loaders for RSC. See CACHE_STRATEGY.md for how this relates
+ * to fetch-server `next.tags` / revalidate and to the client `/api/graphql` path.
+ */
+
 import {
     cacheLife,
     cacheTag
 } from 'next/cache'
 import { executeGraphQL } from './engine/fetch-server'
+import { getScheduleDayRanges } from '@/lib/schedule/day-ranges'
 import { 
     AnimeByIdDocument, 
     TrendingAnimeDocument, 
@@ -81,4 +87,42 @@ export async function getScheduleAnime(page: number = 1, perPage: number = 5, ai
         notYetAired: true,
         airingAt_greater: airingAtGreater || Math.floor(Date.now() / 1000)
     })
+}
+
+/** Parallel schedule slices for /schedule (matches prior client query split). */
+export async function getCachedScheduleWeekBundle() {
+    cacheLife('minutes')
+    cacheTag('anime-schedule', 'anime-list')
+    const dayRanges = getScheduleDayRanges()
+    const today = dayRanges[0]
+
+    const [finishedRes, upcomingRes, weekRes] = await Promise.all([
+        executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+            page: 1,
+            perPage: 50,
+            notYetAired: false,
+            airingAt_greater: today.start,
+            airingAt_lesser: today.end,
+        }),
+        executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+            page: 1,
+            perPage: 50,
+            notYetAired: true,
+            airingAt_greater: today.start,
+            airingAt_lesser: today.end,
+        }),
+        executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+            page: 1,
+            perPage: 100,
+            notYetAired: true,
+            airingAt_greater: dayRanges[0].start,
+            airingAt_lesser: dayRanges[6].end,
+        }),
+    ])
+
+    return {
+        finished: finishedRes.data?.Page?.airingSchedules ?? [],
+        upcomingToday: upcomingRes.data?.Page?.airingSchedules ?? [],
+        week: weekRes.data?.Page?.airingSchedules ?? [],
+    }
 }

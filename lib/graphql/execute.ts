@@ -67,12 +67,12 @@ export async function execute<TResult, TVariables>(
 export async function execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
   variables: TVariables,
-  options: { signal?: AbortSignal }
+  options: { signal?: AbortSignal; headers?: HeadersInit }
 ): Promise<ExecutionResult<TResult>>
 export async function execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
   variablesOrEmpty?: TVariables | undefined,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; headers?: HeadersInit }
 ): Promise<ExecutionResult<TResult>> {
   const variables = variablesOrEmpty as TVariables | undefined
   const queryString = query.toString()
@@ -85,7 +85,9 @@ export async function execute<TResult, TVariables>(
     // Execute query (client uses batcher, server uses direct fetch)
     const result = isClient
       ? await executeClientGraphQL<TResult>(queryString, variables, signal)
-      : await executeServerGraphQL<TResult>(queryString, variables, signal)
+      : await executeServerGraphQL<TResult>(queryString, variables, signal, {
+          headers: options?.headers,
+        })
 
     cleanup()
 

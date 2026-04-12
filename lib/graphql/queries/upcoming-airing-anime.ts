@@ -10,6 +10,7 @@ export const UpcomingAiringAnimeQuery = gql`
       }
       media(type: ANIME, sort: [POPULARITY_DESC, TRENDING_DESC], status: RELEASING, isAdult: false) {
         id
+        isAdult
         idMal
         title {
           romaji

@@ -1,6 +1,9 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 import { DiscoveryRouteClient } from "./_components/discovery-route-client"
+import { DiscoveryPageSkeleton } from "./discovery-page-skeleton"
+import { withDefaultDiscoverySort } from "@/lib/anime/discovery-search-params"
 
 export const metadata: Metadata = {
   title: "Discovery Registry — Database Exploration",
@@ -11,9 +14,19 @@ export const metadata: Metadata = {
   },
 }
 
-export default function DiscoveryPage() {
+export default async function DiscoveryPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const raw = await searchParams
+  const sort = typeof raw.sort === "string" ? raw.sort : undefined
+  if (!sort) {
+    redirect(withDefaultDiscoverySort(raw))
+  }
+
   return (
-    <Suspense fallback={<div className="h-dvh w-full shimmer" />}>
+    <Suspense fallback={<DiscoveryPageSkeleton />}>
       <DiscoveryRouteClient />
     </Suspense>
   )

@@ -37,9 +37,6 @@
       "implementsReplacesDocs": false,
       "exemptDestructuredRootsFromChecks": false,
       "tagNamePreference": {}
-    },
-    "vitest": {
-      "typecheck": false
     }
   },
   "env": {

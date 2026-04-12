@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import React, { useState } from "react"
 
 import { useAnimeFilters } from "@/features/anime/hooks/use-anime-filters"
 import { useAnimeList } from "@/features/anime/hooks/use-anime-list"
@@ -29,18 +28,6 @@ export default function DiscoveryView() {
   } = useAnimeList()
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    setMounted(true)
-    if (!searchParams.get("sort")) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set("sort", "trending")
-      router.replace(`/anime?${params.toString()}`, { scroll: false })
-    }
-  }, [searchParams, router])
 
   const activeFilterCount =
     (filters.genres.length > 0 ? 1 : 0) +
@@ -59,8 +46,6 @@ export default function DiscoveryView() {
     Boolean(filters.status) ||
     filters.sort !== "trending" ||
     Boolean(filters.search?.trim())
-
-  if (!mounted) return null
 
   const typedSeason = filters.season as MediaSeason | null
   const typedYear = filters.year ? parseInt(filters.year, 10) : null
