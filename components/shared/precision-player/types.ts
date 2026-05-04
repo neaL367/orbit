@@ -24,6 +24,8 @@ export type ExtendedPlayerVars = YT.PlayerVars & {
     autoplay?: 0 | 1;
     vq?: string;
     suggestedQuality?: string;
+    /** IFrame API: embedding page URL (policy / player chrome). */
+    widget_referrer?: string;
 }
 
 export interface ExtendedPlayerOptions extends YT.PlayerOptions {

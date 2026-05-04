@@ -15,26 +15,41 @@ type SheetProps = {
 
 export function Sheet({ open, onClose, children, panelClassName, title }: SheetProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  /** Only true while `open` — reset when panel closes so the next open traps focus again. */
+  const openedRoundRef = useRef(false)
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      openedRoundRef.current = false
+      document.body.style.overflow = ""
+      return
+    }
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") onCloseRef.current()
     }
     document.addEventListener("keydown", onKey)
     document.body.style.overflow = "hidden"
 
-    const focusable = panelRef.current?.querySelector<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )
-    queueMicrotask(() => focusable?.focus())
+    // Focus only when the sheet *opens*, not when the parent re-renders with a new `onClose`
+    // or when children change (e.g. "Clear all" appearing). Otherwise the first focusable
+    // steals focus from the search field while typing.
+    if (!openedRoundRef.current) {
+      openedRoundRef.current = true
+      const focusable = panelRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      queueMicrotask(() => focusable?.focus())
+    }
 
     return () => {
       document.removeEventListener("keydown", onKey)
       document.body.style.overflow = ""
     }
-  }, [open, onClose])
+  }, [open])
 
   return (
     <div

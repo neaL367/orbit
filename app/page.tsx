@@ -62,6 +62,18 @@ export default async function HomePage() {
       </Suspense>
 
       <Container className="space-y-40">
+        <header className="reveal border-b border-white/8 pb-10 pt-2 md:pb-14">
+          <p className="font-mono text-[10px] uppercase tracking-[0.38em] text-primary/55">
+            Registry
+          </p>
+          <h1 className="mt-4 max-w-3xl font-sans text-3xl font-semibold leading-[1.12] tracking-tight text-foreground md:text-4xl">
+            Seasonal anime, trending indices, and live broadcast windows—in one index.
+          </h1>
+          <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+            Explore curated lists below or jump to the schedule for time-accurate air times.
+          </p>
+        </header>
+
         <Suspense fallback={<SectionSkeleton variant="featured" />}>
           <AnimeSection
             type="trending"

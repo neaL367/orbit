@@ -1,7 +1,7 @@
 'use client'
 
 import Image, { ImageProps } from 'next/image'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 interface IndexImageProps extends ImageProps {
@@ -18,7 +18,12 @@ export function IndexImage({
     ...props
 }: IndexImageProps) {
     const [isLoading, setIsLoading] = useState(!props.priority)
-    const [registryId] = useState(() => `0x${Math.random().toString(16).slice(2, 8).toUpperCase()}`)
+    const reactId = useId()
+    const registryLabel = (() => {
+        let h = 0
+        for (let i = 0; i < reactId.length; i++) h = (h + reactId.charCodeAt(i)) % 0xffffff
+        return `0x${h.toString(16).toUpperCase().padStart(6, "0")}`
+    })()
 
     return (
         <div className={cn(
@@ -72,11 +77,8 @@ export function IndexImage({
                             Verified
                         </span>
                     </div>
-                    <span
-                        className="font-mono text-[6px] uppercase text-muted-foreground/30"
-                        suppressHydrationWarning
-                    >
-                        {registryId}
+                    <span className="font-mono text-[6px] uppercase text-muted-foreground/30">
+                        {registryLabel}
                     </span>
                 </div>
             )}

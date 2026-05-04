@@ -10,6 +10,10 @@ import {
 } from "react"
 import { usePlayerUIState } from "./use-player-ui-state";
 import { useYouTube } from "./use-youtube";
+import {
+    persistTrailerPlaybackRatePreference,
+    readTrailerPlaybackRatePreference,
+} from "@/lib/youtube/trailer-playback-rate-storage"
 
 interface UsePrecisionPlayerProps {
     url?: string
@@ -168,6 +172,16 @@ async function sampleImagePalette(src: string): Promise<RGBTuple[]> {
     });
 }
 
+/** Let the embed paint and auto-hide native chrome before we stack PRECISION chrome on top. */
+const YOUTUBE_EMBED_UI_SETTLE_MS = 1150;
+
+/** Hide PRECISION chrome only after YouTube's own auto-hide window; base delay for idle playback. */
+const CONTROLS_AUTOHIDE_MS = 3800;
+/** Initial reveal + scrubbing - native chrome stays up longer. */
+const CONTROLS_AUTOHIDE_LINGER_MS = 5200;
+/** After click play/pause or seek release - align with transport + YT bar. */
+const CONTROLS_AUTOHIDE_TRANSPORT_MS = 4400;
+
 export function usePrecisionPlayer({
     url,
     videoId: propVideoId,
@@ -180,6 +194,9 @@ export function usePrecisionPlayer({
     const hideControlsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
     const isSeekingRef = useRef(false);
     const controlsLockRef = useRef(false);
+    const precisionChromeGateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const [precisionChromeGate, setPrecisionChromeGate] = useState(false);
 
     const {
         isMounted,
@@ -192,6 +209,8 @@ export function usePrecisionPlayer({
         setControlsVisible,
         isFullscreen,
     } = usePlayerUIState();
+
+    const [playbackRatePreference, setPlaybackRatePreference] = useState(() => readTrailerPlaybackRatePreference() ?? 1)
 
     const videoId = useMemo(() => {
         const extractId = (str: string) => {
@@ -253,7 +272,37 @@ export function usePrecisionPlayer({
         getPlaybackRate,
         handleSeekMouseDown: youtubeHandleSeekMouseDown,
         handleSeekMouseUp: youtubeHandleSeekMouseUp,
-    } = useYouTube({ videoId, isMounted, muted, volume, isMobile, autoPlay });
+    } = useYouTube({ videoId, isMounted, muted, volume, playbackRate: playbackRatePreference, autoPlay });
+
+    const openPrecisionChromeGate = useCallback(() => {
+        if (precisionChromeGateTimerRef.current) {
+            clearTimeout(precisionChromeGateTimerRef.current);
+            precisionChromeGateTimerRef.current = null;
+        }
+        setPrecisionChromeGate(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isPlayerReady) {
+            setPrecisionChromeGate(false);
+            if (precisionChromeGateTimerRef.current) {
+                clearTimeout(precisionChromeGateTimerRef.current);
+                precisionChromeGateTimerRef.current = null;
+            }
+            return;
+        }
+        setPrecisionChromeGate(false);
+        precisionChromeGateTimerRef.current = setTimeout(() => {
+            precisionChromeGateTimerRef.current = null;
+            setPrecisionChromeGate(true);
+        }, YOUTUBE_EMBED_UI_SETTLE_MS);
+        return () => {
+            if (precisionChromeGateTimerRef.current) {
+                clearTimeout(precisionChromeGateTimerRef.current);
+                precisionChromeGateTimerRef.current = null;
+            }
+        };
+    }, [isPlayerReady]);
 
     useEffect(() => {
         if (!isMounted || !videoId) {
@@ -392,7 +441,7 @@ export function usePrecisionPlayer({
         }
     }, []);
 
-    const scheduleControlsHide = useCallback((delay = 2600) => {
+    const scheduleControlsHide = useCallback((delay = CONTROLS_AUTOHIDE_MS) => {
         clearHideControlsTimeout();
 
         if (!playing || controlsLockRef.current) return;
@@ -403,7 +452,7 @@ export function usePrecisionPlayer({
         }, delay);
     }, [playing, setControlsVisible, clearHideControlsTimeout]);
 
-    const showControls = useCallback((hideDelay = 2600) => {
+    const showControls = useCallback((hideDelay = CONTROLS_AUTOHIDE_MS) => {
         setControlsVisible(true);
         if (playing) {
             scheduleControlsHide(hideDelay);
@@ -414,7 +463,7 @@ export function usePrecisionPlayer({
 
     useEffect(() => {
         if (isPlayerReady) {
-            showControls(3800);
+            showControls(CONTROLS_AUTOHIDE_LINGER_MS);
         }
     }, [isPlayerReady, showControls]);
 
@@ -423,21 +472,24 @@ export function usePrecisionPlayer({
     }, [clearHideControlsTimeout]);
 
     const handleSeekMouseDown = useCallback(() => {
+        openPrecisionChromeGate();
         isSeekingRef.current = true;
         controlsLockRef.current = true;
         clearHideControlsTimeout();
         youtubeHandleSeekMouseDown();
-    }, [clearHideControlsTimeout, youtubeHandleSeekMouseDown]);
+    }, [clearHideControlsTimeout, openPrecisionChromeGate, youtubeHandleSeekMouseDown]);
 
     const handleSeekMouseUp = useCallback(() => {
+        openPrecisionChromeGate();
         isSeekingRef.current = false;
         controlsLockRef.current = false;
         youtubeHandleSeekMouseUp();
-        showControls(3000);
-    }, [youtubeHandleSeekMouseUp, showControls]);
+        showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS);
+    }, [openPrecisionChromeGate, youtubeHandleSeekMouseUp, showControls]);
 
     const handleMouseMove = useCallback((event?: ReactMouseEvent<HTMLDivElement> | ReactTouchEvent<HTMLDivElement>) => {
-        let hideDelay = 2600;
+        openPrecisionChromeGate();
+        let hideDelay = CONTROLS_AUTOHIDE_MS;
 
         if (event?.currentTarget) {
             const rect = event.currentTarget.getBoundingClientRect();
@@ -453,13 +505,13 @@ export function usePrecisionPlayer({
                 const positionY = clientY - rect.top;
                 const ratio = positionY / Math.max(rect.height, 1);
                 if (ratio > 0.72) {
-                    hideDelay = 4400;
+                    hideDelay = 6200;
                 }
             }
         }
 
         showControls(hideDelay);
-    }, [showControls]);
+    }, [openPrecisionChromeGate, showControls]);
 
     const handleMouseLeave = useCallback(() => {
         if (!playing || controlsLockRef.current || isSeekingRef.current) return;
@@ -467,10 +519,11 @@ export function usePrecisionPlayer({
     }, [playing, scheduleControlsHide]);
 
     const onControlsPointerEnter = useCallback(() => {
+        openPrecisionChromeGate();
         controlsLockRef.current = true;
         setControlsVisible(true);
         clearHideControlsTimeout();
-    }, [clearHideControlsTimeout, setControlsVisible]);
+    }, [clearHideControlsTimeout, openPrecisionChromeGate, setControlsVisible]);
 
     const onControlsPointerLeave = useCallback(() => {
         controlsLockRef.current = false;
@@ -478,23 +531,24 @@ export function usePrecisionPlayer({
     }, [scheduleControlsHide]);
 
     const handleSeekChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        openPrecisionChromeGate();
         const val = parseFloat(e.target.value);
         const time = val * duration;
         setPlayed(val);
         seekTo(time);
-        showControls(3800);
-    }, [duration, setPlayed, seekTo, showControls]);
+        showControls(CONTROLS_AUTOHIDE_LINGER_MS);
+    }, [duration, openPrecisionChromeGate, setPlayed, seekTo, showControls]);
 
     const onSetMuted = useCallback((val: boolean) => {
         setMuted(val);
         setMute(val);
-        showControls(3800);
+        showControls(CONTROLS_AUTOHIDE_LINGER_MS);
     }, [setMute, setMuted, showControls]);
 
     const onSetVolume = useCallback((val: number) => {
         setVolume(val);
         setPlayerVolume(val);
-        showControls(3800);
+        showControls(CONTROLS_AUTOHIDE_LINGER_MS);
     }, [setPlayerVolume, setVolume, showControls]);
 
     const toggleFullscreen = useCallback(() => {
@@ -535,12 +589,14 @@ export function usePrecisionPlayer({
                 return
             }
 
+            openPrecisionChromeGate()
+
             switch (e.key.toLowerCase()) {
                 case " ":
                 case "k":
                     e.preventDefault()
                     handlePlayPause()
-                    showControls(2600)
+                    showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS)
                     break
                 case "f":
                     e.preventDefault()
@@ -554,23 +610,23 @@ export function usePrecisionPlayer({
                 case "j":
                     e.preventDefault()
                     seekTo(Math.max(0, played * duration - 5))
-                    showControls(2600)
+                    showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS)
                     break
                 case "arrowright":
                 case "l":
                     e.preventDefault()
                     seekTo(Math.min(duration, played * duration + 5))
-                    showControls(2600)
+                    showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS)
                     break
                 case ",":
                     e.preventDefault()
                     seekTo(Math.max(0, played * duration - 1 / 24))
-                    showControls(2600)
+                    showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS)
                     break
                 case ".":
                     e.preventDefault()
                     seekTo(Math.min(duration, played * duration + 1 / 24))
-                    showControls(2600)
+                    showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS)
                     break
                 default:
             }
@@ -584,6 +640,7 @@ export function usePrecisionPlayer({
             duration,
             seekTo,
             showControls,
+            openPrecisionChromeGate,
         ]
     )
 
@@ -597,14 +654,16 @@ export function usePrecisionPlayer({
     }, []);
 
     const onPlayPause = useCallback(() => {
+        openPrecisionChromeGate();
         handlePlayPause();
-        showControls(3200);
-    }, [handlePlayPause, showControls]);
+        showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS);
+    }, [openPrecisionChromeGate, handlePlayPause, showControls]);
 
     const onRestart = useCallback(() => {
+        openPrecisionChromeGate();
         restart();
-        showControls(3200);
-    }, [restart, showControls]);
+        showControls(CONTROLS_AUTOHIDE_TRANSPORT_MS);
+    }, [openPrecisionChromeGate, restart, showControls]);
 
     const handlers = useMemo(
         () => ({
@@ -624,7 +683,11 @@ export function usePrecisionPlayer({
             toggleFullscreen,
             getVideoData,
             getAvailablePlaybackRates,
-            setPlaybackRate,
+            setPlaybackRate: (rate: number) => {
+                setPlaybackRatePreference(rate)
+                persistTrailerPlaybackRatePreference(rate)
+                setPlaybackRate(rate)
+            },
             getPlaybackRate,
             handleContainerKeyDown,
         }),
@@ -674,6 +737,7 @@ export function usePrecisionPlayer({
             videoId,
             isMobile,
             controlsVisible,
+            precisionChromeGate,
             isFullscreen,
             thumbnailUrl,
             ambientColorRgb,

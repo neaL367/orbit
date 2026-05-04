@@ -1,235 +1,164 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { useMemo, useCallback, memo } from "react";
-import { cn } from "@/lib/utils";
-import { getAnimeTitle, formatTimeUntilAiring } from "@/lib/utils/anime-utils";
-import { useCurrentTime } from "@/hooks/use-current-time";
-import { IndexImage } from "@/components/shared/index-image";
-import type { AiringSchedule } from "@/lib/graphql/types/graphql";
+import Link from "next/link"
+import { memo } from "react"
+import { IndexImage } from "@/components/shared/index-image"
+import { cn } from "@/lib/utils"
+import type { ScheduleAgendaEntry } from "./types"
 
-function formatMediaKind(format: string | null | undefined): string {
-  if (!format) return "Series";
-  const map: Record<string, string> = {
-    TV: "TV",
-    TV_SHORT: "Short TV",
-    MOVIE: "Movie",
-    SPECIAL: "Special",
-    OVA: "OVA",
-    ONA: "ONA",
-    MUSIC: "Music",
-    MANGA: "Manga",
-    NOVEL: "Novel",
-    ONE_SHOT: "One shot",
-  };
-  return map[format] ?? format.replace(/_/g, " ");
+type ScheduleAgendaRowProps = {
+  entry: ScheduleAgendaEntry
+  priority?: boolean
 }
 
-type ScheduleCardProps = {
-  schedule: AiringSchedule;
-  media: NonNullable<AiringSchedule["media"]>;
-  formatTimeAction: (timestamp: number) => string;
-  getStreamingLinksAction: (schedule: AiringSchedule) => Array<{
-    site: string;
-    url: string;
-    icon?: string | null;
-    color?: string | null;
-  }>;
-  priority?: boolean;
-};
+export function ScheduleStatusBadge({ entry }: { entry: ScheduleAgendaEntry }) {
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1.5 border px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.18em]",
+        entry.isAiringNow
+          ? "border-primary/30 bg-primary text-primary-foreground shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+          : entry.isFinished
+            ? "border-white/10 bg-white/3 text-muted-foreground"
+            : "border-white/10 bg-white/2 text-foreground"
+      )}
+    >
+      <div
+        className={cn(
+          "h-1.5 w-1.5 rotate-45",
+          entry.isAiringNow ? "bg-primary-foreground" : entry.isFinished ? "bg-white/20" : "bg-primary/70"
+        )}
+      />
+      {entry.statusLabel}
+    </div>
+  )
+}
 
-function ScheduleCardComponent({
-  schedule,
-  media,
-  formatTimeAction,
-  getStreamingLinksAction,
+export function ScheduleMiniThumb({
+  entry,
   priority = false,
-}: ScheduleCardProps) {
-  const router = useRouter();
-  const now = useCurrentTime();
+}: {
+  entry: ScheduleAgendaEntry
+  priority?: boolean
+}) {
+  const coverImage =
+    entry.media.coverImage?.large ||
+    entry.media.coverImage?.medium ||
+    entry.media.coverImage?.extraLarge ||
+    null
+  if (!coverImage) {
+    return (
+      <div
+        className="relative flex h-13 w-[2.35rem] shrink-0 items-center justify-center rounded-sm border border-white/12 bg-secondary/40 sm:h-16 sm:w-[2.85rem]"
+        aria-hidden
+      >
+        <span className="px-0.5 text-center font-mono text-[6px] uppercase leading-tight tracking-wider text-muted-foreground/45">
+          N/C
+        </span>
+      </div>
+    )
+  }
 
-  const title = useMemo(() => getAnimeTitle(media), [media]);
-  const coverImage = media.coverImage?.large || media.coverImage?.extraLarge || undefined;
+  return (
+    <div className="relative h-13 w-[2.35rem] shrink-0 overflow-hidden rounded-sm border border-white/18 bg-secondary shadow-[0_6px_20px_rgba(0,0,0,0.45)] ring-1 ring-white/10 sm:h-16 sm:w-[2.85rem]">
+      <IndexImage
+        src={coverImage}
+        alt={entry.title}
+        fill
+        sizes="(max-width: 640px) 48px, 56px"
+        priority={priority}
+        showTechnicalDetails={false}
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+      />
+      {entry.isAiringNow ? (
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-primary/35 motion-safe:animate-pulse motion-reduce:animate-none" />
+      ) : null}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/55 to-transparent" />
+    </div>
+  )
+}
 
-  const airingAt = schedule.airingAt;
-  const isAiringNow = now ? (now >= airingAt && now <= airingAt + (media.duration || 30) * 60) : false;
-  const isFinished = now ? (now > airingAt + (media.duration || 30) * 60) : false;
-  const timeUntilSec = now ? (airingAt - now) : 0;
-  const timeUntilFormatted = timeUntilSec > 0 ? formatTimeUntilAiring(timeUntilSec) : null;
-
-  const streamingLinks = useMemo(() => getStreamingLinksAction(schedule), [schedule, getStreamingLinksAction]);
-
-  const handleCardClick = useCallback(() => {
-    router.push(`/anime/${media.id}`);
-  }, [router, media.id]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleCardClick();
-    }
-  }, [handleCardClick]);
-
-  const statusLabel = isFinished ? "Ended" : isAiringNow ? "On air" : "Upcoming";
+function ScheduleAgendaRowComponent({ entry, priority = false }: ScheduleAgendaRowProps) {
+  const links = entry.streamingLinks
+  const visibleLinks = links.slice(0, 4)
+  const overflowLinkCount = links.length - visibleLinks.length
 
   return (
     <div
-      role="button"
-      tabIndex={0}
       className={cn(
-        "group relative flex cursor-pointer flex-col items-stretch overflow-hidden p-3 outline-none transition-all duration-300 sm:flex-row sm:items-center",
-        "border border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]",
-        "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        isAiringNow && "border-primary/35 bg-primary/[0.04] ring-1 ring-primary/15"
+        "group relative flex items-start justify-between gap-2.5 border border-white/6 bg-white/2 px-2.5 py-2.5 transition-all duration-300 sm:items-center sm:gap-3",
+        "hover:border-white/12 hover:bg-white/4",
+        entry.isAiringNow && "border-primary/25 bg-primary/5"
       )}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
     >
-      <div className="relative flex shrink-0 flex-col items-start border-b border-white/5 bg-white/[0.02] py-4 sm:w-32 sm:border-b-0 sm:border-r sm:items-center">
-        <div className="absolute left-0 top-0 h-0.5 w-full bg-linear-to-r from-primary/25 via-primary/5 to-transparent sm:hidden" />
-        <span
-          className={cn(
-            "font-mono text-2xl font-bold tabular-nums tracking-tight",
-            isAiringNow ? "text-primary motion-reduce:animate-none motion-safe:animate-pulse" : "text-foreground"
-          )}
-        >
-          {formatTimeAction(airingAt)}
-        </span>
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <div
-            className={cn(
-              "h-1 w-1 rotate-45",
-              isAiringNow ? "bg-primary motion-safe:animate-pulse" : "bg-white/15"
-            )}
-          />
-          <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
-            Local time
-          </span>
-        </div>
-      </div>
+      <Link
+        href={`/anime/${entry.media.id}`}
+        aria-label={`View ${entry.title}`}
+        className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      />
 
-      <div className="flex flex-1 flex-col items-center gap-5 px-5 py-3 sm:flex-row sm:py-0">
-        <div className="relative h-40 w-full shrink-0 overflow-hidden border border-white/5 bg-secondary shadow-xl transition-colors group-hover:border-white/15 sm:h-28 sm:w-20">
-          {coverImage && (
-            <IndexImage
-              src={coverImage}
-              alt={title}
-              fill
-              sizes="120px"
-              showTechnicalDetails={false}
-              className="h-full w-full object-cover grayscale-[0.15] transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0 motion-reduce:group-hover:scale-100"
-              priority={priority}
-            />
-          )}
-          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          <div className="pointer-events-none absolute bottom-2 right-2 flex translate-y-4 gap-1 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-0">
-            <div className="h-1.5 w-1.5 bg-primary/40" />
-            <div className="h-1.5 w-1.5 bg-primary" />
-          </div>
-          {isAiringNow && (
-            <div className="pointer-events-none absolute inset-0 bg-primary/5 motion-safe:animate-pulse motion-reduce:animate-none" />
-          )}
-        </div>
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-px bg-linear-to-b from-primary/70 via-primary/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-3 text-center sm:text-left">
-          <div className="space-y-1">
-            <div className="flex items-center justify-center gap-3 sm:justify-start">
-              <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.18em] text-primary/55">
-                {formatMediaKind(media.format ?? undefined)}
-              </span>
-              <div className="hidden h-px flex-1 bg-white/8 sm:block" />
-            </div>
-            <h3 className="line-clamp-2 font-sans text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary md:text-lg">
-              {title}
-            </h3>
+      <div className="relative z-10 flex min-w-0 flex-1 items-start gap-2.5 pointer-events-none sm:items-center">
+        <ScheduleMiniThumb entry={entry} priority={priority} />
+
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.22em] text-primary/65">
+              {entry.formatLabel}
+            </span>
+            <span className="border border-white/10 bg-white/4 px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-foreground">
+              Ep {entry.episodeLabel}
+            </span>
+            <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-muted-foreground/60">
+              ~{entry.durationMinutes} min
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
-            <div className="flex items-center gap-2 border border-white/10 bg-white/[0.04] px-2.5 py-1">
-              <span className="font-mono text-[9px] text-muted-foreground/70">Ep</span>
-              <span className="font-mono text-[10px] font-bold tabular-nums text-foreground">
-                {schedule.episode.toString().padStart(2, "0")}
-              </span>
-            </div>
+          <h3 className="line-clamp-2 font-sans text-[13px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary sm:line-clamp-1 sm:text-sm">
+            {entry.title}
+          </h3>
 
-            {timeUntilFormatted ? (
-              <div className="flex items-center gap-2">
-                <span className="h-1 w-1 shrink-0 rounded-full bg-primary motion-safe:animate-ping motion-reduce:animate-none" />
-                <span className="font-mono text-[9px] font-semibold uppercase tracking-wider tabular-nums text-primary">
-                  In {timeUntilFormatted}
-                </span>
-              </div>
-            ) : !isFinished && (
-              <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground/60">
-                <span className="h-1 w-1 bg-white/15" />
-                ~{media.duration || 24} min
-              </div>
-            )}
-          </div>
-
-          {streamingLinks.length > 0 && (
-            <div className="mt-1 flex flex-wrap justify-center gap-3 opacity-40 transition-opacity duration-500 group-hover:opacity-100 sm:justify-start">
-              {streamingLinks.slice(0, 4).map((link) => (
+          {links.length > 0 ? (
+            <div className="relative z-20 flex flex-wrap items-center gap-x-2 gap-y-1 pt-0.5">
+              {visibleLinks.map((link) => (
                 <a
                   key={link.url}
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-mono text-[8px] font-semibold uppercase tracking-wider underline decoration-white/15 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/40"
+                  className="pointer-events-auto font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-primary/75 underline decoration-primary/25 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/55 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  style={link.color ? { color: link.color } : undefined}
                 >
                   {link.site}
                 </a>
               ))}
+              {overflowLinkCount > 0 ? (
+                <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-muted-foreground/50">
+                  +{overflowLinkCount}
+                </span>
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center border-t border-white/5 bg-white/[0.02] px-5 py-4 sm:w-40 sm:border-l sm:border-t-0 sm:items-end sm:py-0">
-        <div
-          className={cn(
-            "relative w-full px-4 py-2 text-center transition-all duration-300",
-            isAiringNow
-              ? "bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30"
-              : isFinished
-                ? "border border-white/10 bg-white/[0.04]"
-                : "border border-white/8 bg-white/[0.02]"
-          )}
-        >
-          <span
-            className={cn(
-              "relative z-10 font-mono text-[10px] font-bold uppercase tracking-[0.2em]",
-              isAiringNow ? "text-primary-foreground" : isFinished ? "text-muted-foreground" : "text-foreground"
-            )}
-          >
-            {statusLabel}
-          </span>
-          {isAiringNow && (
-            <div className="pointer-events-none absolute inset-0 bg-primary motion-safe:animate-pulse motion-reduce:animate-none motion-safe:blur-md opacity-15" />
-          )}
-        </div>
-        <div className="mt-2 hidden flex-col items-end opacity-25 transition-opacity group-hover:opacity-45 sm:flex">
-          <div className="mb-1 h-0.5 w-16 bg-white/35" />
-          <span className="font-mono text-[7px] uppercase tracking-wide text-muted-foreground">Status</span>
-        </div>
-      </div>
-
-      <div className="pointer-events-none absolute right-0 top-0 h-12 w-12 overflow-hidden">
-        <div
-          className={cn(
-            "absolute right-0 top-0 h-[40px] w-[40px] translate-x-1/2 -translate-y-1/2 rotate-45 transition-colors duration-500",
-            isAiringNow ? "bg-primary" : "bg-white/6"
-          )}
-        />
-      </div>
-      <div className="pointer-events-none absolute bottom-0 left-0 h-8 w-2 opacity-0 transition-opacity group-hover:opacity-100 motion-reduce:opacity-0">
-        <div className="h-full w-0.5 bg-primary" />
+      <div className="relative z-10 flex shrink-0 flex-col items-end gap-1.5 self-start pointer-events-none sm:self-auto">
+        <ScheduleStatusBadge entry={entry} />
+        <span className="max-w-36 text-right font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/60 sm:max-w-none">
+          {entry.countdownLabel
+            ? `Starts in ${entry.countdownLabel}`
+            : entry.isAiringNow
+              ? 'Live feed active'
+              : entry.isFinished
+                ? 'Broadcast ended'
+                : 'Queued'}
+        </span>
       </div>
     </div>
-  );
+  )
 }
 
-export const ScheduleCard = memo(ScheduleCardComponent, (prev, next) => {
-  return prev.schedule.id === next.schedule.id && prev.schedule.airingAt === next.schedule.airingAt;
-});
+export const ScheduleAgendaRow = memo(ScheduleAgendaRowComponent, (prev, next) => {
+  return prev.entry.schedule.id === next.entry.schedule.id && prev.entry.airingAt === next.entry.airingAt
+})

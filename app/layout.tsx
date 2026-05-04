@@ -79,14 +79,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark custom-scrollbar">
-      <body
-        className={cn(
-          geistSans.variable,
-          geistMono.variable,
-          "bg-background font-sans text-foreground relative overflow-x-hidden antialiased"
-        )}
-      >
+    <html
+      lang="en"
+      className={cn(
+        "dark custom-scrollbar font-sans antialiased",
+        geistSans.variable,
+        geistMono.variable
+      )}
+    >
+      <body className="bg-background text-foreground relative min-h-dvh overflow-x-hidden">
         <QueryProviders>
           <Analytics />
           <a

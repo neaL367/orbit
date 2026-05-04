@@ -11,7 +11,8 @@ interface AnimeTrailerProps {
 }
 
 /**
- * Detail-page trailer: registry precision player (ambient palette, supersampled desktop path).
+ * Detail-page trailer: precision player (ambient palette, supersampled desktop path).
+ * Autoplay is off — user explicitly starts playback to avoid surprise audio and YouTube UI flashes.
  */
 export function AnimeTrailer({
   videoId,
@@ -30,7 +31,6 @@ export function AnimeTrailer({
         title={displayTitle}
         externalPosterUrl={thumbnail ?? undefined}
         id={`anime-trailer-${videoId}`}
-        autoPlay
       />
     </div>
   )

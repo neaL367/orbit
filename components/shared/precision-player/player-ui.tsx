@@ -15,18 +15,22 @@ interface VideoLayerProps {
 }
 
 const VideoLayer = memo(({ isTerminated, safeVideoId, isFullscreen, isMobile, playerElementRef }: VideoLayerProps) => (
-    <div className={cn(isMobile ? "w-full h-full bg-black relative" : "supersampled-container")}>
-        {!isTerminated && (
-            <div
-                ref={playerElementRef}
-                className={cn(
-                    isMobile ? "w-full h-full relative z-10" : "supersampled-frame pointer-events-none",
-                    !safeVideoId && "hidden",
-                    isFullscreen ? "max-h-screen" : ""
-                )}
-            />
+    <div
+        className={cn(
+            isMobile ? "w-full h-full bg-black relative overflow-hidden" : "supersampled-container",
+            "pointer-events-none"
         )}
-        {!isMobile && <div className="precision-dither-overlay" />}
+    >
+        <div
+            ref={playerElementRef}
+            className={cn(
+                isMobile ? "w-full h-full relative z-10 pointer-events-none precision-yt-host" : "supersampled-frame pointer-events-none",
+                !safeVideoId && "hidden",
+                isFullscreen ? "max-h-screen" : "",
+                isTerminated && "hidden"
+            )}
+            aria-hidden={isTerminated}
+        />
     </div>
 ));
 
@@ -34,30 +38,14 @@ VideoLayer.displayName = "VideoLayer";
 
 const PrecisionFilters = memo(() => (
     <>
-        <svg className="absolute w-0 h-0 pointer-events-none opacity-0" aria-hidden="true">
-            <filter id="precision-ultrasharpen" colorInterpolationFilters="sRGB">
-                <feConvolveMatrix
-                    order="3"
-                    kernelMatrix="-0.3 -0.3 -0.3 -0.3 3.4 -0.3 -0.3 -0.3 -0.3"
-                    preserveAlpha="true"
-                    result="sharpened"
-                />
-                <feComponentTransfer in="sharpened">
-                    <feFuncR type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
-                    <feFuncG type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
-                    <feFuncB type="gamma" amplitude="1.05" exponent="1.1" offset="-0.02" />
-                </feComponentTransfer>
-            </filter>
-            <filter id="imax-grain">
-                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" result="noise" />
-                <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.1 0" />
-            </filter>
-        </svg>
-
         <style jsx global>{`
             .precision-player-root {
-                --ps-scale-window: 1.5;
-                --ps-scale-full: 2.25;
+                /* Balanced grade: avoids crushing mids and clipping clouds; heavy corner masks looked worse than occasional YT chrome. */
+                --ps-hdr-contrast: 1.06;
+                --ps-hdr-sat: 1.08;
+                --ps-hdr-bright: 0.95;
+                --ps-bloom: 0.12;
+                --ps-vignette: 0.58;
             }
 
             /* Scoped: avoids affecting other embeds; iframe-internal chrome is usually not targetable cross-origin. */
@@ -68,64 +56,70 @@ const PrecisionFilters = memo(() => (
                 display: none !important;
             }
 
+            /* Cannot reach inside the iframe; block all direct hits so YouTube chrome never opens from hover/tap. */
+            .precision-player-root iframe {
+                pointer-events: none !important;
+            }
+
+            /* Edge-to-edge iframe; no scale/clip (those change effective framing / aspect). Grade only. */
+            .precision-player-root .precision-yt-host iframe {
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                border: 0;
+                transform: none !important;
+                filter: contrast(var(--ps-hdr-contrast)) brightness(var(--ps-hdr-bright))
+                    saturate(var(--ps-hdr-sat));
+            }
             .precision-player-root .supersampled-frame {
                 position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                width: calc(var(--ps-scale-window) * 100%) !important;
-                height: calc(var(--ps-scale-window) * 100%) !important;
-                transform: translate3d(-50%, -50%, 0) scale(calc(1 / var(--ps-scale-window))) !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                transform: none !important;
                 transform-origin: center center;
                 backface-visibility: hidden;
-                will-change: transform;
-                contain: strict;
             }
 
             .precision-player-root .supersampled-container {
                 position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate3d(-50%, -50%, 0);
+                inset: 0;
                 width: 100%;
                 height: 100%;
-                aspect-ratio: 16 / 9;
                 overflow: hidden;
-                contain: strict;
                 isolation: isolate;
                 background: black;
             }
 
+            /* Per-frame SVG filters + heavy blend stacks were forcing full-GPU readbacks and made playback feel laggy.
+               Keep a mild CSS-only grade so the compositor can stay on the fast path. */
             .precision-player-root .supersampled-frame iframe {
+                position: absolute !important;
+                inset: 0 !important;
                 width: 100% !important;
                 height: 100% !important;
                 border: 0;
-                transform: scale(1.08) !important;
-                filter: url(#precision-ultrasharpen) contrast(1.04) brightness(1) saturate(1.4);
-                image-rendering: -webkit-optimize-contrast;
+                transform: none !important;
+                filter: contrast(var(--ps-hdr-contrast)) brightness(var(--ps-hdr-bright))
+                    saturate(var(--ps-hdr-sat));
             }
             
-            .precision-player-root .precision-dither-overlay {
+            /* Ambient bloom: screen blend was blowing out speculars on SDR web video; soft-light + lower weight keeps depth without clipping. */
+            .precision-player-root .supersampled-container::before {
+                content: '';
                 position: absolute;
-                inset: -5px;
-                z-index: 20;
+                inset: -8%;
                 pointer-events: none;
-                filter: url(#imax-grain);
-                mix-blend-mode: overlay;
-                opacity: 0.12;
-                animation: dither-cycle 0.1s steps(2) infinite;
-            }
-
-            @keyframes dither-cycle {
-                0% { transform: translate(0,0); }
-                50% { transform: translate(1px, 1px); }
-                100% { transform: translate(0,0); }
-            }
-
-            @media (prefers-reduced-motion: reduce) {
-                .precision-player-root .precision-dither-overlay {
-                    animation: none !important;
-                    opacity: 0.05;
-                }
+                z-index: 12;
+                background:
+                    radial-gradient(circle at 40% 30%, rgba(255,255,255, calc(var(--ps-bloom) * 0.1)) 0%, transparent 38%),
+                    radial-gradient(circle at 70% 55%, rgba(255,255,255, calc(var(--ps-bloom) * 0.07)) 0%, transparent 45%),
+                    radial-gradient(circle at 30% 70%, rgba(255,255,255, calc(var(--ps-bloom) * 0.05)) 0%, transparent 48%);
+                filter: blur(12px) saturate(1.04);
+                mix-blend-mode: soft-light;
+                opacity: 0.32;
+                transform: translate3d(0, 0, 0);
             }
 
             .precision-player-root .supersampled-container::after {
@@ -133,10 +127,11 @@ const PrecisionFilters = memo(() => (
                 position: absolute;
                 inset: 0;
                 pointer-events: none;
-                background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.3) 100%);
-                backdrop-filter: brightness(1.02);
-                opacity: 0.4;
-                z-index: 10;
+                background:
+                    radial-gradient(circle at center, transparent 38%, rgba(0,0,0, var(--ps-vignette)) 100%),
+                    linear-gradient(to bottom, rgba(0,0,0,0.26), transparent 18%, transparent 82%, rgba(0,0,0,0.36));
+                opacity: 0.52;
+                z-index: 14;
             }
         `}</style>
     </>
@@ -155,11 +150,22 @@ export function PlayerUI() {
         isTerminated,
         videoId,
         controlsVisible,
+        precisionChromeGate,
         youtubeUIWait,
         isSyncing,
         isFullscreen,
         isMobile,
+        playing,
     } = state
+
+    const safeVideoId = videoId ?? ""
+    const controlsAreVisible =
+        controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady && precisionChromeGate
+
+    /** Edge masks use the same visibility window as PRECISION chrome (auto-hide timing stays in sync). */
+    const edgeChromeFadeVisible =
+        hasStarted &&
+        ((!isPlayerReady || youtubeUIWait || isSyncing || !precisionChromeGate) || controlsAreVisible)
 
     const { playerElementRef } = refs
     const {
@@ -172,9 +178,6 @@ export function PlayerUI() {
         handleContainerKeyDown,
     } = handlers
 
-    const safeVideoId = videoId ?? ""
-    const controlsAreVisible = controlsVisible && !youtubeUIWait && !isSyncing && isPlayerReady
-
     const videoStageClassName = cn(
         "group/video relative z-50 h-full w-full overflow-hidden pointer-events-auto",
         !hasStarted && "cursor-pointer",
@@ -183,9 +186,9 @@ export function PlayerUI() {
 
     const videoStageContent = (
         <>
-            {!isMobile && <PauseMask />}
+            <PauseMask />
 
-            <div className={cn("absolute inset-0 overflow-hidden", isMobile ? "z-50" : "z-20")}>
+            <div className={cn("absolute inset-0 overflow-hidden z-20")}>
                 <VideoLayer
                     isTerminated={isTerminated}
                     safeVideoId={safeVideoId}
@@ -195,25 +198,56 @@ export function PlayerUI() {
                 />
             </div>
 
-            {!isMobile && hasStarted && isPlayerReady && (
+            {hasStarted && safeVideoId && (
+                <>
+                    <div
+                        aria-hidden
+                        className={cn(
+                            "absolute inset-x-0 top-0 z-25 h-[min(44%,13rem)] pointer-events-none ease-in-out will-change-[opacity] transition-opacity duration-350",
+                            edgeChromeFadeVisible ? "opacity-100" : "opacity-0"
+                        )}
+                        style={{
+                            background:
+                                "linear-gradient(to bottom, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.88) 10%, rgba(0,0,0,0.7) 28%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0.14) 78%, transparent 100%)",
+                        }}
+                    />
+                    <div
+                        aria-hidden
+                        className={cn(
+                            "absolute inset-x-0 bottom-0 z-25 h-[min(50%,15rem)] pointer-events-none ease-in-out will-change-[opacity] transition-opacity duration-350",
+                            edgeChromeFadeVisible ? "opacity-100" : "opacity-0"
+                        )}
+                        style={{
+                            background:
+                                "linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.92) 9%, rgba(0,0,0,0.76) 22%, rgba(0,0,0,0.48) 48%, rgba(0,0,0,0.2) 74%, transparent 100%)",
+                        }}
+                    />
+                    <div
+                        aria-hidden
+                        className={cn(
+                            "absolute inset-0 z-25 pointer-events-none ease-in-out will-change-[opacity] transition-opacity duration-350",
+                            edgeChromeFadeVisible ? "opacity-100" : "opacity-0"
+                        )}
+                        style={{
+                            background: !playing
+                                ? "radial-gradient(ellipse 76% 62% at 50% 46%, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.38) 32%, rgba(0,0,0,0.12) 58%, transparent 74%)"
+                                : "radial-gradient(ellipse 68% 54% at 50% 48%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.16) 48%, transparent 68%)",
+                        }}
+                    />
+                </>
+            )}
+
+            {hasStarted && isPlayerReady && (
                 <div
-                    className="absolute inset-0 z-30 cursor-default"
+                    aria-hidden
+                    className="absolute inset-0 z-30 cursor-default touch-manipulation [-webkit-tap-highlight-color:transparent]"
                     onClick={handlePlayPause}
-                    onKeyDown={(e) => {
-                        if (e.key === " " || e.key === "k") {
-                            e.preventDefault()
-                            handlePlayPause()
-                        }
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-label="Toggle Play/Pause"
                 />
             )}
 
             {!isMobile && <VolumeUI />}
 
-            {!isMobile && (
+            {(
                 <div
                     className={cn(
                         "absolute inset-0 z-60 flex flex-col justify-between transition-opacity duration-350 bg-linear-to-b from-black/60 via-transparent to-black/60 pointer-events-none",
@@ -250,24 +284,24 @@ export function PlayerUI() {
         </>
     )
 
-    const videoStage = !hasStarted ? (
+    const videoStage = (
         <div
-            role="button"
-            tabIndex={0}
-            aria-label="Initialize trailer playback"
+            role={hasStarted ? "group" : "button"}
+            tabIndex={hasStarted ? -1 : 0}
+            aria-label={hasStarted ? "Video" : "Initialize trailer playback"}
             className={videoStageClassName}
-            onClick={() => onSetHasStarted(true)}
-            onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault()
-                    onSetHasStarted(true)
-                }
-            }}
+            onClick={hasStarted ? undefined : () => onSetHasStarted(true)}
+            onKeyDown={
+                hasStarted
+                    ? undefined
+                    : (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault()
+                              onSetHasStarted(true)
+                          }
+                      }
+            }
         >
-            {videoStageContent}
-        </div>
-    ) : (
-        <div role="group" aria-label="Video" tabIndex={-1} className={videoStageClassName}>
             {videoStageContent}
         </div>
     )
@@ -284,16 +318,16 @@ export function PlayerUI() {
             className={cn(
                 "precision-player-root group relative w-full border-white/5 outline-none transition-[border-color,opacity] duration-300 ease-in-out focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 isFullscreen
-                    ? "fixed inset-0 z-[99999] m-0 h-dvh w-dvw overflow-hidden bg-black p-0 is-fullscreen"
+                    ? "fixed inset-0 z-99999 m-0 h-dvh w-dvw overflow-hidden bg-black p-0 is-fullscreen"
                     : "aspect-video h-auto overflow-hidden border shadow-2xl"
             )}
             style={{
-                transform: isFullscreen || isMobile ? 'none' : 'translate3d(0,0,0)',
-                perspective: isMobile ? 'none' : '1000px',
-                backfaceVisibility: isMobile ? 'visible' : 'hidden'
+                transform: isFullscreen || isMobile ? "none" : "translate3d(0,0,0)",
+                /* perspective promoted an extra 3D compositing pass over the iframe; not needed for controls */
+                backfaceVisibility: isMobile ? "visible" : "hidden",
             }}
         >
-            {!isMobile && <PrecisionFilters />}
+            <PrecisionFilters />
 
             <div className={cn(
                 "w-full h-full relative overflow-hidden bg-black flex items-center justify-center",

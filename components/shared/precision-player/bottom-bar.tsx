@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize, Minimize } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SeekBar } from "./seek-bar"
@@ -18,6 +18,8 @@ export function BottomBar() {
 
     const [rates, setRates] = useState<number[]>([1]);
     const [currentRate, setCurrentRate] = useState<number>(1);
+    const [isRateMenuOpen, setIsRateMenuOpen] = useState(false)
+    const rateMenuRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (isPlayerReady) {
@@ -25,6 +27,25 @@ export function BottomBar() {
             setCurrentRate(getPlaybackRate());
         }
     }, [isPlayerReady, getAvailablePlaybackRates, getPlaybackRate]);
+
+    useEffect(() => {
+        if (!isRateMenuOpen) return
+        const onPointerDown = (e: PointerEvent) => {
+            const el = rateMenuRef.current
+            if (!el) return
+            if (e.target instanceof Node && el.contains(e.target)) return
+            setIsRateMenuOpen(false)
+        }
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsRateMenuOpen(false)
+        }
+        window.addEventListener("pointerdown", onPointerDown, { capture: true })
+        window.addEventListener("keydown", onKeyDown)
+        return () => {
+            window.removeEventListener("pointerdown", onPointerDown, { capture: true } as any)
+            window.removeEventListener("keydown", onKeyDown)
+        }
+    }, [isRateMenuOpen])
 
 
 
@@ -128,9 +149,16 @@ export function BottomBar() {
                         </div>
                     )}
 
-                    <div className="hidden sm:flex items-center relative group">
+                    <div ref={rateMenuRef} className="hidden sm:flex items-center relative">
                         <button
                             disabled={!isPlayerReady}
+                            type="button"
+                            aria-haspopup="menu"
+                            aria-expanded={isRateMenuOpen}
+                            onClick={() => {
+                                if (!isPlayerReady) return
+                                setIsRateMenuOpen((v) => !v)
+                            }}
                             className={cn(
                                 "flex items-center gap-1.5 text-[12px] text-white font-bold transition-all px-3 py-1.5 rounded-md",
                                 !isPlayerReady ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10 cursor-pointer"
@@ -139,14 +167,23 @@ export function BottomBar() {
                             <span>{currentRate}x</span>
                         </button>
 
-                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50">
-                            <div className="bg-black/95 border border-white/10 p-1 flex flex-col-reverse shadow-2xl backdrop-blur-xl rounded-lg overflow-hidden min-w-[80px]">
+                        {isRateMenuOpen && (
+                            <div
+                                role="menu"
+                                aria-label="Playback speed"
+                                className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50"
+                            >
+                                <div className="bg-black/95 border border-white/10 p-1 flex flex-col-reverse shadow-2xl backdrop-blur-xl rounded-lg overflow-hidden min-w-[80px]">
                                 {rates.map(r => (
                                     <button
+                                        type="button"
+                                        role="menuitemradio"
+                                        aria-checked={currentRate === r}
                                         key={r}
                                         onClick={() => {
                                             setPlaybackRate(r);
                                             setCurrentRate(r);
+                                            setIsRateMenuOpen(false)
                                         }}
                                         className={cn(
                                             "px-4 py-2 text-[11px] font-bold text-center transition-colors",
@@ -157,7 +194,8 @@ export function BottomBar() {
                                     </button>
                                 ))}
                             </div>
-                        </div>
+                            </div>
+                        )}
                     </div>
 
                     <button

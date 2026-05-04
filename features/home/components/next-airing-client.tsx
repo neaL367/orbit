@@ -136,7 +136,7 @@ export function NextAiringClient({ className, data }: NextAiringClientProps) {
           </div>
 
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 motion-reduce:animate-none">
-            <h2 className="line-clamp-2 font-mono text-4xl font-black uppercase leading-none tracking-tighter text-foreground drop-shadow-2xl md:text-7xl">
+            <h2 className="line-clamp-2 max-w-4xl font-sans text-4xl font-semibold leading-[1.05] tracking-tight text-balance text-foreground drop-shadow-2xl md:text-6xl lg:text-7xl">
               {title}
             </h2>
 

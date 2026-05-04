@@ -11,11 +11,13 @@ export type AniListRateLimit = {
 
 // Global AniList rate limit tracker (shared across all requests)
 // NOTE: AniList API is currently in degraded state: 30 requests/minute (temporary)
+// Use numeric placeholders only — `Date.now()` here runs at module evaluation time and breaks
+// Next.js prerender when this module is reachable from Client Components (e.g. codegen imports).
 let anilistRateLimit: AniListRateLimit = {
     limit: 30,
     remaining: 30,
-    resetTime: Date.now() + 60000,
-    lastUpdated: Date.now(),
+    resetTime: 0,
+    lastUpdated: 0,
 }
 
 export function updateAniListRateLimit(headers: Headers): void {
@@ -32,7 +34,14 @@ export function updateAniListRateLimit(headers: Headers): void {
 export function getAniListRateLimit(): AniListRateLimit {
     const now = Date.now()
 
-    if (now > anilistRateLimit.resetTime) {
+    if (anilistRateLimit.resetTime === 0 && anilistRateLimit.lastUpdated === 0) {
+        anilistRateLimit = {
+            limit: 30,
+            remaining: 30,
+            resetTime: now + 60000,
+            lastUpdated: now,
+        }
+    } else if (anilistRateLimit.resetTime > 0 && now > anilistRateLimit.resetTime) {
         anilistRateLimit = {
             limit: 30,
             remaining: 30,

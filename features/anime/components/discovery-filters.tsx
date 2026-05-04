@@ -79,17 +79,16 @@ export function DiscoveryFilters({ isOpen, onClose }: DiscoveryFiltersProps) {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {hasActiveFilters && (
-              <Button
-                type="button"
-                variant="destructiveGhost"
-                size="sm"
-                onClick={clearFilters}
-                className="mr-1 normal-case"
-              >
-                Clear all
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="destructiveGhost"
+              size="sm"
+              disabled={!hasActiveFilters}
+              onClick={clearFilters}
+              className="mr-1 normal-case"
+            >
+              Clear all
+            </Button>
             <button
               type="button"
               onClick={onClose}

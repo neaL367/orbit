@@ -96,7 +96,34 @@ export async function getCachedScheduleWeekBundle() {
     const dayRanges = getScheduleDayRanges()
     const today = dayRanges[0]
 
-    const [finishedRes, upcomingRes, weekRes] = await Promise.all([
+    type ScheduleAiringVars = {
+        page: number
+        perPage: number
+        notYetAired?: boolean
+        airingAt_greater?: number
+        airingAt_lesser?: number
+    }
+
+    const fetchAiringSchedulesPaged = async (opts: Omit<ScheduleAiringVars, 'page'> & { maxPages?: number }) => {
+        const maxPages = opts.maxPages ?? 6
+        const all: NonNullable<ScheduleAnimeHeroQueryType['Page']>['airingSchedules'] = []
+        let page = 1
+        // pageInfo.hasNextPage is reliable; hard cap prevents runaway on API regressions.
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const res = await executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+                ...opts,
+                page,
+            })
+            all.push(...(res.data?.Page?.airingSchedules ?? []))
+            const hasNext = Boolean(res.data?.Page?.pageInfo?.hasNextPage)
+            if (!hasNext || page >= maxPages) break
+            page += 1
+        }
+        return all
+    }
+
+    const [finishedRes, upcomingRes, week] = await Promise.all([
         executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
             page: 1,
             perPage: 50,
@@ -111,9 +138,9 @@ export async function getCachedScheduleWeekBundle() {
             airingAt_greater: today.start,
             airingAt_lesser: today.end,
         }),
-        executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
-            page: 1,
-            perPage: 100,
+        fetchAiringSchedulesPaged({
+            perPage: 50,
+            maxPages: 8,
             notYetAired: true,
             airingAt_greater: dayRanges[0].start,
             airingAt_lesser: dayRanges[6].end,
@@ -123,6 +150,6 @@ export async function getCachedScheduleWeekBundle() {
     return {
         finished: finishedRes.data?.Page?.airingSchedules ?? [],
         upcomingToday: upcomingRes.data?.Page?.airingSchedules ?? [],
-        week: weekRes.data?.Page?.airingSchedules ?? [],
+        week,
     }
 }

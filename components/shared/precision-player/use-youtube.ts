@@ -1,20 +1,54 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import { loadYouTubeIframeApi } from "@/lib/youtube/load-iframe-api"
-import { ExtendedPlayer, YTEvent, YTOnStateChangeEvent, YTPlayerState } from "./types"
+import { ExtendedPlayer, ExtendedPlayerOptions, YTEvent, YTOnStateChangeEvent, YTPlayerState } from "./types"
 
 interface UseYouTubeProps {
     videoId: string | null;
     isMounted: boolean;
     muted: boolean;
     volume: number;
-    isMobile?: boolean;
+    playbackRate?: number;
     autoPlay?: boolean;
 }
 
 const STARTUP_RECOVERY_MS = 1800;
 const HARD_RECOVERY_MS = 8000;
 
-export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false, autoPlay = false }: UseYouTubeProps) {
+/** Inert iframe hits/focus so native chrome does not appear; IFrame API still controls playback. */
+function suppressNativeYtChrome(player: ExtendedPlayer | null | undefined) {
+    try {
+        if (!player || typeof player.getIframe !== "function") return;
+        const iframe = player.getIframe();
+        if (!iframe) return;
+        iframe.setAttribute("tabindex", "-1");
+        iframe.style.pointerEvents = "none";
+        if (typeof document !== "undefined" && document.activeElement === iframe) {
+            iframe.blur();
+        }
+    } catch {
+        /* noop */
+    }
+}
+
+/** YouTube often injects title/play overlays a frame after transport commands; re-run suppress over the next ~500ms. */
+function kickSuppressAfterTransport(getPlayer: () => ExtendedPlayer | null | undefined) {
+    const run = () => suppressNativeYtChrome(getPlayer() ?? undefined);
+    run();
+    queueMicrotask(run);
+    if (typeof requestAnimationFrame !== "undefined") {
+        requestAnimationFrame(() => {
+            run();
+            requestAnimationFrame(run);
+        });
+    }
+    if (typeof window !== "undefined") {
+        for (const ms of [24, 72, 180, 420] as const) {
+            window.setTimeout(run, ms);
+        }
+    }
+}
+
+export function useYouTube({ videoId, isMounted, muted, volume, playbackRate, autoPlay = false }: UseYouTubeProps) {
     const [hasStarted, setHasStarted] = useState(autoPlay);
     const [playing, setPlaying] = useState(false);
     const [played, setPlayed] = useState(0);
@@ -29,10 +63,16 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
 
     const playerRef = useRef<ExtendedPlayer | null>(null);
     const playerElementRef = useRef<HTMLDivElement>(null);
+    /** Inner node passed to `YT.Player` — must not be a React-managed text/child tree. */
+    const ytSurfaceRef = useRef<HTMLDivElement | null>(null);
     const progressInterval = useRef<number | null>(null);
+    /** Avoid `setPlayed` every rAF tick — that re-renders the whole player context and competes with video decode. */
+    const progressUiLastRef = useRef(-1);
+    const progressUiAtRef = useRef(0);
     const leaderReadyRef = useRef(false);
     const startupRecoveryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const restorationTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+    const seekSuppressChainRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const clearStartupRecoveryTimeout = useCallback(() => {
         if (startupRecoveryTimeoutRef.current) {
@@ -51,6 +91,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         duration,
         volume,
         muted,
+        playbackRate: 1,
         playing,
         isSyncing,
         youtubeUIWait,
@@ -64,6 +105,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
             duration,
             volume,
             muted,
+            playbackRate: syncStateRef.current.playbackRate,
             playing,
             isSyncing,
             youtubeUIWait,
@@ -72,10 +114,34 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         };
     }, [played, duration, volume, muted, playing, isSyncing, youtubeUIWait, isPlayerReady, isPlayPending]);
 
+    useEffect(() => {
+        if (typeof playbackRate === "number" && Number.isFinite(playbackRate) && playbackRate > 0) {
+            syncStateRef.current.playbackRate = playbackRate
+            try {
+                playerRef.current?.setPlaybackRate(playbackRate)
+            } catch {
+                /* noop */
+            }
+        }
+    }, [playbackRate])
+
     const unlockCustomUI = useCallback(() => {
         setIsPlayerReady(true);
         setIsSyncing(false);
         setYoutubeUIWait(false);
+    }, []);
+
+    /** `getDuration()` is often `0` on `onReady` until PLAYING / BUFFERING / CUED — poll state handlers too. */
+    const trySetDuration = useCallback((player: ExtendedPlayer | null | undefined) => {
+        try {
+            if (!player || typeof player.getDuration !== "function") return;
+            const d = player.getDuration();
+            if (typeof d === "number" && Number.isFinite(d) && d > 0) {
+                setDuration((prev) => (prev === d ? prev : d));
+            }
+        } catch {
+            /* torn down or API hiccup */
+        }
     }, []);
 
     const markPlayRequested = useCallback(() => {
@@ -116,7 +182,17 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
 
                 if (dur > 0) {
                     setDuration((prev) => (prev === dur ? prev : dur));
-                    setPlayed(currentTime / dur);
+                    const ratio = Math.min(1, Math.max(0, currentTime / dur));
+                    const now =
+                        typeof performance !== "undefined" ? performance.now() : Date.now();
+                    const last = progressUiLastRef.current;
+                    const intervalOk = now - progressUiAtRef.current >= 88;
+                    const jumped = last >= 0 && Math.abs(ratio - last) >= 0.012;
+                    if (last < 0 || intervalOk || jumped) {
+                        progressUiLastRef.current = ratio;
+                        progressUiAtRef.current = now;
+                        setPlayed(ratio);
+                    }
                 }
             } catch {
                 /* torn down or API hiccup */
@@ -140,8 +216,24 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
             setIsTerminated(false);
             setIsPlayerReady(true);
 
-            const dur = event.target.getDuration();
-            if (dur) setDuration(dur);
+            const target = event.target as ExtendedPlayer;
+            let dur = 0;
+            try {
+                dur = typeof target.getDuration === "function" ? target.getDuration() : 0;
+            } catch {
+                dur = 0;
+            }
+            if (dur > 0) {
+                setDuration(dur);
+            } else {
+                queueMicrotask(() => trySetDuration(target));
+                requestAnimationFrame(() => trySetDuration(target));
+                for (const ms of [120, 400, 1200] as const) {
+                    restorationTimeoutsRef.current.push(
+                        setTimeout(() => trySetDuration(target), ms)
+                    );
+                }
+            }
 
             const startPoint = currentPlayed * (dur || 0);
             const naturalVolume = Math.pow(currentVol / 100, 2) * 100;
@@ -157,6 +249,15 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
 
             if (typeof event.target.setPlaybackQuality === "function") {
                 event.target.setPlaybackQuality("highres");
+            }
+
+            try {
+                const rate = syncStateRef.current.playbackRate
+                if (rate && typeof event.target.setPlaybackRate === "function") {
+                    event.target.setPlaybackRate(rate)
+                }
+            } catch {
+                /* noop */
             }
 
             if (startPoint > 0 && typeof event.target.seekTo === "function") {
@@ -176,9 +277,18 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                 unlockCustomUI();
             }
 
+            suppressNativeYtChrome(target);
             startProgressLoop();
         },
-        [autoPlay, hasStarted, markPlayRequested, scheduleStartupRecovery, startProgressLoop, unlockCustomUI]
+        [
+            autoPlay,
+            hasStarted,
+            markPlayRequested,
+            scheduleStartupRecovery,
+            startProgressLoop,
+            trySetDuration,
+            unlockCustomUI,
+        ]
     );
 
     const onPlayerStateChange = useCallback(
@@ -196,6 +306,8 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                     setIsTerminated(false);
                     setIsEnded(false);
                     unlockCustomUI();
+                    trySetDuration(event.target as ExtendedPlayer);
+                    suppressNativeYtChrome(event.target as ExtendedPlayer);
 
                     const enforce = () => {
                         const activePlayer = playerRef.current;
@@ -210,6 +322,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                             if (typeof activePlayer.setPlaybackQuality === "function") {
                                 activePlayer.setPlaybackQuality("highres");
                             }
+                            suppressNativeYtChrome(activePlayer);
                         } catch { }
                     };
 
@@ -229,16 +342,22 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                     setIsBuffer(false);
                     setIsEnded(false);
                     unlockCustomUI();
+                    trySetDuration(event.target as ExtendedPlayer);
+                    suppressNativeYtChrome(event.target as ExtendedPlayer);
                     break;
 
                 case YTPlayerState.BUFFERING:
                     setIsBuffer(true);
                     setIsEnded(false);
                     setIsPlayerReady(true);
+                    trySetDuration(event.target as ExtendedPlayer);
+                    suppressNativeYtChrome(event.target as ExtendedPlayer);
                     break;
 
                 case YTPlayerState.CUED:
                 case YTPlayerState.UNSTARTED:
+                    trySetDuration(event.target as ExtendedPlayer);
+                    suppressNativeYtChrome(event.target as ExtendedPlayer);
                     clearStartupRecoveryTimeout();
                     setPlaying(false);
                     setIsEnded(false);
@@ -263,10 +382,11 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                     setIsEnded(true);
                     setPlayed(1);
                     unlockCustomUI();
+                    suppressNativeYtChrome(event.target as ExtendedPlayer);
                     break;
             }
         },
-        [clearRestorationTimeouts, clearStartupRecoveryTimeout, unlockCustomUI]
+        [clearRestorationTimeouts, clearStartupRecoveryTimeout, trySetDuration, unlockCustomUI]
     );
 
     useEffect(() => {
@@ -274,7 +394,7 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         else if (progressInterval.current) cancelAnimationFrame(progressInterval.current);
     }, [playing, startProgressLoop]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!hasStarted || !videoId || !isMounted) {
             return
         }
@@ -308,8 +428,19 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
             if (!isEffectMounted || playerRef.current || !playerElementRef.current) {
                 return
             }
+            const host = playerElementRef.current
+            host.querySelectorAll("[data-precision-yt-root]").forEach((el) => el.remove())
+
+            const surface = document.createElement("div")
+            surface.setAttribute("data-precision-yt-root", "")
+            surface.style.cssText = "position:absolute;inset:0;width:100%;height:100%;min-width:100%;min-height:100%"
+            host.appendChild(surface)
+            ytSurfaceRef.current = surface
+
             const cleanVideoId = (videoId || "").trim()
             if (!cleanVideoId || cleanVideoId.length < 5) {
+                surface.remove()
+                ytSurfaceRef.current = null
                 return
             }
 
@@ -317,21 +448,24 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
             const initialVolume = Math.pow(v / 100, 2) * 100
 
             try {
-                playerRef.current = new window.YT.Player(playerElementRef.current, {
+                playerRef.current = new window.YT.Player(surface, {
                     videoId: cleanVideoId,
                     host: "https://www.youtube-nocookie.com",
                     playerVars: {
-                        autoplay: 1,
-                        controls: isMobile ? 1 : 0,
-                        disablekb: isMobile ? 0 : 1,
+                        autoplay: 0,
+                        controls: 0,
+                        /* Always 1: keeps YouTube from handling keys and surfacing native overlays on Tab. */
+                        disablekb: 1,
                         enablejsapi: 1,
-                        fs: isMobile ? 1 : 0,
+                        fs: 0,
                         iv_load_policy: 3,
                         playsinline: 1,
                         mute: m ? 1 : 0,
                         rel: 0,
                         modestbranding: 1,
+                        showinfo: 0 as unknown as 0 | 1,
                         origin: window.location.origin,
+                        widget_referrer: window.location.href,
                         cc_load_policy: 0,
                         hl: "en",
                     },
@@ -342,14 +476,24 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                         },
                         onStateChange: onPlayerStateChange,
                         onError: () => {
+                            if (playerRef.current) {
+                                try {
+                                    playerRef.current.destroy()
+                                } catch { /* noop */ }
+                                playerRef.current = null
+                            }
+                            ytSurfaceRef.current?.remove()
+                            ytSurfaceRef.current = null
                             setIsTerminated(true);
                             setIsPlayPending(false);
                             setIsBuffer(false);
                             unlockCustomUI();
                         },
                     },
-                });
+                } as unknown as ExtendedPlayerOptions);
             } catch {
+                surface.remove()
+                ytSurfaceRef.current = null
                 setIsTerminated(true);
                 setIsPlayPending(false);
                 setIsBuffer(false);
@@ -373,6 +517,10 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         return () => {
             isEffectMounted = false
             leaderReadyRef.current = false
+            if (seekSuppressChainRef.current) {
+                clearTimeout(seekSuppressChainRef.current)
+                seekSuppressChainRef.current = null
+            }
 
             if (playerRef.current) {
                 try {
@@ -380,6 +528,9 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
                 } catch { }
                 playerRef.current = null;
             }
+
+            ytSurfaceRef.current?.remove();
+            ytSurfaceRef.current = null;
 
             clearStartupRecoveryTimeout();
             clearRestorationTimeouts();
@@ -398,7 +549,6 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         clearStartupRecoveryTimeout,
         clearRestorationTimeouts,
         markPlayRequested,
-        isMobile,
     ]);
 
     useEffect(() => {
@@ -418,6 +568,11 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         }
     }, [muted, volume, isPlayerReady]);
 
+    useEffect(() => {
+        if (!isPlayerReady) return;
+        suppressNativeYtChrome(playerRef.current ?? undefined);
+    }, [isPlayerReady]);
+
     const handlePlayPause = useCallback(() => {
         const player = playerRef.current;
         if (!player) return;
@@ -425,20 +580,56 @@ export function useYouTube({ videoId, isMounted, muted, volume, isMobile = false
         if (playing) {
             setIsPlayPending(false);
             setIsBuffer(false);
+            suppressNativeYtChrome(player);
             player.pauseVideo();
+            kickSuppressAfterTransport(() => playerRef.current);
         } else {
-            markPlayRequested();
-            setIsSyncing(true);
-            setYoutubeUIWait(true);
-            scheduleStartupRecovery();
-            player.playVideo();
+            const { isPlayerReady: ready } = syncStateRef.current;
+            // Resume after pause: do not flip `youtubeUIWait` / `isSyncing` — that hides
+            // our chrome and flashes the iframe's native overlay while the mask animates.
+            if (ready) {
+                setIsEnded(false);
+                setIsBuffer(true);
+                suppressNativeYtChrome(player);
+                player.playVideo();
+                kickSuppressAfterTransport(() => playerRef.current);
+            } else {
+                markPlayRequested();
+                setIsSyncing(true);
+                setYoutubeUIWait(true);
+                scheduleStartupRecovery();
+                suppressNativeYtChrome(player);
+                player.playVideo();
+                kickSuppressAfterTransport(() => playerRef.current);
+            }
         }
-    }, [playing, markPlayRequested, scheduleStartupRecovery]);
+    }, [playing, markPlayRequested, scheduleStartupRecovery]);  
 
     const seekTo = useCallback((time: number) => {
-        if (playerRef.current && typeof playerRef.current.seekTo === "function") {
-            playerRef.current.seekTo(time, true);
+        const player = playerRef.current;
+        if (!player || typeof player.seekTo !== "function") return;
+
+        suppressNativeYtChrome(player);
+        player.seekTo(time, true);
+        suppressNativeYtChrome(player);
+
+        if (seekSuppressChainRef.current) {
+            clearTimeout(seekSuppressChainRef.current);
+            seekSuppressChainRef.current = null;
         }
+        seekSuppressChainRef.current = setTimeout(() => {
+            seekSuppressChainRef.current = null;
+            const run = () => suppressNativeYtChrome(playerRef.current ?? undefined);
+            run();
+            queueMicrotask(run);
+            if (typeof requestAnimationFrame !== "undefined") {
+                requestAnimationFrame(() => requestAnimationFrame(run));
+            }
+            if (typeof window !== "undefined") {
+                window.setTimeout(run, 90);
+                window.setTimeout(run, 280);
+            }
+        }, 35);
     }, []);
 
     const setMute = useCallback((val: boolean) => {

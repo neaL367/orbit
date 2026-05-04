@@ -17,7 +17,7 @@ export function PauseMask() {
 
     const { handlePlayPause, onSetHasStarted, onRestart } = usePrecisionPlayerHandlers()
 
-    if (isTerminated) return <div className="absolute inset-0 bg-black z-[60]" />
+    if (isTerminated) return <div className="absolute inset-0 bg-black z-60" />
 
     const isLoading = isPlayPending || isBuffer || (hasStarted && !isPlayerReady && !isEnded)
 
@@ -53,7 +53,7 @@ export function PauseMask() {
                         className="object-cover object-center"
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/10 to-transparent h-1/2 w-full animate-pulse z-10" />
+                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-primary/10 to-transparent h-1/2 w-full animate-pulse z-10" />
                 </div>
             )}
 
@@ -66,7 +66,8 @@ export function PauseMask() {
                     }}
                     className={cn(
                         "w-16 h-16 border border-primary/40 flex items-center justify-center rotate-45 bg-primary/5 transition-all duration-300",
-                        isLoading ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-primary/20 hover:scale-110"
+                        "shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_20px_60px_-20px_rgba(255,255,255,0.18),0_0_36px_-12px_rgba(255,255,255,0.12)]",
+                        isLoading ? "cursor-wait opacity-60" : "cursor-pointer hover:bg-primary/20 hover:scale-110 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_24px_80px_-24px_rgba(255,255,255,0.26),0_0_54px_-14px_rgba(255,255,255,0.18)]"
                     )}
                 >
                     {isLoading ? (

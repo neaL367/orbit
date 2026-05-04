@@ -68,8 +68,12 @@ html.dark {
     @apply border-border outline-ring/50;
   }
 
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
   }
 
   /* Consistent pointer on elements that accept clicks (native + common patterns) */

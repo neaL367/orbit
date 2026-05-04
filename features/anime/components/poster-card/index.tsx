@@ -14,6 +14,9 @@ interface PosterCardProps {
     className?: string
 }
 
+const badgeFrame =
+    "index-cut-tr border border-white/12 bg-black/72 backdrop-blur-md shadow-[0_8px_24px_-8px_rgba(0,0,0,0.85)] transition-[border-color,box-shadow,transform] duration-500 group-hover:border-primary/35 group-hover:shadow-[0_12px_28px_-10px_rgba(0,0,0,0.9)]"
+
 export const PosterCard = memo(function PosterCard({ anime, rank, priority = false, className }: PosterCardProps) {
     const title = useMemo(() => getAnimeTitle(anime), [anime])
     const coverImage = anime.coverImage?.extraLarge || anime.coverImage?.large
@@ -22,31 +25,58 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
         <Link
             href={`/anime/${anime.id}`}
             className={cn(
-                "group relative block aspect-[2/3] w-full bg-secondary overflow-hidden transition-all duration-700 hover:ring-2 hover:ring-primary/40 rounded-sm shadow-xl",
+                "group relative block aspect-2/3 w-full bg-secondary overflow-hidden transition-all duration-700 hover:ring-2 hover:ring-primary/40 rounded-sm shadow-xl",
                 className
             )}
         >
-            {/* Rank/ID Badge */}
-            <div className="absolute top-3 left-3 z-40">
-                {rank !== undefined ? (
-                    <div className="bg-primary text-primary-foreground font-mono text-xs font-black px-2.5 py-1 index-cut-tr shadow-lg uppercase tracking-tight">
-                        #{rank.toString().padStart(2, '0')}
-                    </div>
-                ) : (
-                    <div className="font-mono text-[9px] text-muted-foreground/70 uppercase tracking-wider bg-black/40 px-2 py-0.5 border border-border">
-                        ID_{anime.id}
-                    </div>
-                )}
-            </div>
-
-            {/* Score Badge (Top Right) */}
-            {anime.averageScore && (
-                <div className="absolute top-3 right-3 z-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-black/60 backdrop-blur-md border border-border px-2 py-1">
-                        <span className="font-mono text-[10px] text-foreground font-semibold tracking-wide">{anime.averageScore}%</span>
+            {/* Index + score: shared shell, symmetric top corners */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-40 flex items-start justify-between gap-2 p-3">
+                <div
+                    className={cn(
+                        badgeFrame,
+                        "flex min-w-0 items-stretch overflow-hidden",
+                        rank !== undefined ? "ring-1 ring-primary/25" : "ring-0"
+                    )}
+                >
+                    <div
+                        className={cn(
+                            "w-px shrink-0",
+                            rank !== undefined ? "bg-primary" : "bg-white/25"
+                        )}
+                        aria-hidden
+                    />
+                    <div className="flex flex-col gap-0.5 px-2 py-1.5">
+                        <span className="font-mono text-[8px] font-black uppercase leading-none tracking-[0.22em] text-muted-foreground/90">
+                            {rank !== undefined ? "Index" : "Ref"}
+                        </span>
+                        <span
+                            className={cn(
+                                "font-mono text-sm font-black tabular-nums leading-none tracking-tight",
+                                rank !== undefined ? "text-primary" : "text-foreground"
+                            )}
+                        >
+                            {rank !== undefined ? rank.toString().padStart(2, "0") : anime.id}
+                        </span>
                     </div>
                 </div>
-            )}
+
+                {typeof anime.averageScore === "number" ? (
+                    <div
+                        className={cn(
+                            badgeFrame,
+                            "flex flex-col items-end gap-0.5 px-2 py-1.5 opacity-95 group-hover:opacity-100 group-hover:-translate-y-px"
+                        )}
+                    >
+                        <span className="font-mono text-[8px] font-black uppercase leading-none tracking-[0.22em] text-muted-foreground/90">
+                            Score
+                        </span>
+                        <span className="flex items-baseline gap-0.5 font-mono leading-none">
+                            <span className="text-base font-black tabular-nums text-primary">{anime.averageScore}</span>
+                            <span className="text-[9px] font-bold text-primary/75">%</span>
+                        </span>
+                    </div>
+                ) : null}
+            </div>
 
             {/* Visuals */}
             {coverImage && (
@@ -64,7 +94,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
             )}
 
             {/* Mask */}
-            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+            <div className="absolute inset-x-0 bottom-0 z-10 h-2/3 bg-linear-to-t from-black via-black/80 to-transparent" />
 
             {/* Info Layer */}
             <div className="absolute inset-x-0 bottom-0 z-30 p-5 space-y-3">

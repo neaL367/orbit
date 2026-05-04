@@ -129,14 +129,50 @@ export async function AnimeDetailContent({ params }: Props) {
                 <div className="h-px w-16 bg-white/10" />
               </div>
 
-              <div className="absolute inset-0 z-10 bg-linear-to-t from-background from-28% via-background/70 via-45% to-transparent to-100%" />
-              <div className="absolute inset-0 z-10 bg-linear-to-b from-background/35 via-transparent to-transparent" />
+              <div className="absolute inset-0 z-10 bg-linear-to-t from-background from-26% via-background/75 via-46% to-transparent to-100%" />
+              <div className="absolute inset-0 z-10 bg-linear-to-b from-background/40 via-transparent to-transparent" />
+
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden md:block">
+                <div className="px-6 pb-8 md:px-12 lg:px-24">
+                  <div className="mx-auto w-full max-w-[1600px]">
+                    <div className="flex w-full min-w-0 flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/12 pt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      <span className="font-semibold text-foreground/90">#{anime.id}</span>
+                      {anime.format ? (
+                        <>
+                          <span className="text-white/25" aria-hidden>
+                            ·
+                          </span>
+                          <span>{anime.format.replace(/_/g, " ")}</span>
+                        </>
+                      ) : null}
+                      {anime.averageScore != null ? (
+                        <>
+                          <span className="text-white/25" aria-hidden>
+                            ·
+                          </span>
+                          <span className="tabular-nums text-primary/85">{anime.averageScore}%</span>
+                        </>
+                      ) : null}
+                      {anime.favourites != null ? (
+                        <>
+                          <span className="text-white/25" aria-hidden>
+                            ·
+                          </span>
+                          <span className="tabular-nums">
+                            {anime.favourites.toLocaleString("en-US")} saved
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="relative z-30 -mt-16 w-full pb-24 md:-mt-28 md:pb-32 lg:-mt-36">
-          <div className="pointer-events-none absolute inset-x-0 -top-px h-32 bg-linear-to-b from-background to-transparent md:h-40" />
+        <main className="relative z-30 -mt-14 w-full pb-20 md:-mt-24 md:pb-28 lg:-mt-32">
+          <div className="pointer-events-none absolute inset-x-0 -top-px h-28 bg-linear-to-b from-background to-transparent md:h-36" />
 
           <div className="relative flex flex-col gap-10 md:flex-row md:items-start md:gap-14 lg:gap-20">
             <div className="relative z-10 w-full md:-mt-4 md:w-80 md:shrink-0 group/poster">
@@ -157,12 +193,12 @@ export async function AnimeDetailContent({ params }: Props) {
                 <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover/poster:opacity-20 transition-opacity mix-blend-overlay" />
               </div>
 
-              <div className="mt-8 border border-white/5 bg-white/5 p-px tabular-nums">
-                <div className="bg-background/40 p-4">
-                  <span className="mb-1 block font-mono text-[8px] uppercase leading-none tracking-widest text-primary/40">
+              <div className="mt-8 border border-white/8 bg-linear-to-b from-white/5 to-transparent p-px">
+                <div className="bg-background/55 p-5 backdrop-blur-sm">
+                  <span className="mb-2 block font-mono text-[8px] uppercase leading-none tracking-[0.35em] text-primary/45">
                     Popularity
                   </span>
-                  <span className="font-mono text-xl font-black text-foreground">
+                  <span className="font-mono text-2xl font-black tabular-nums tracking-tight text-foreground">
                     #{anime.popularity?.toLocaleString("en-US") ?? "—"}
                   </span>
                 </div>
@@ -170,7 +206,7 @@ export async function AnimeDetailContent({ params }: Props) {
             </div>
 
             <div className="relative z-10 min-w-0 flex-1 space-y-10 pt-2 md:pt-0">
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="flex flex-wrap items-baseline gap-4">
                   <p className="text-sm leading-relaxed text-muted-foreground">
                     <a
@@ -186,11 +222,11 @@ export async function AnimeDetailContent({ params }: Props) {
                   </p>
                 </div>
 
-                <h1 className="text-balance font-sans text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+                <h1 className="text-balance font-sans text-4xl font-semibold leading-[1.04] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                   {title}
                 </h1>
 
-                <p className="max-w-3xl text-base leading-relaxed text-muted-foreground">
+                <ul className="flex flex-wrap gap-2 pt-1">
                   {[
                     anime.status?.replace(/_/g, " "),
                     anime.format,
@@ -202,15 +238,86 @@ export async function AnimeDetailContent({ params }: Props) {
                         : null,
                   ]
                     .filter((s): s is string => Boolean(s))
-                    .join(" · ")}
-                </p>
+                    .map((label, i) => (
+                      <li key={`${label}-${i}`}>
+                        <span className="inline-block border border-white/10 bg-white/4 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          {label}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+
+                {(anime.averageScore != null || anime.meanScore != null || anime.favourites != null) && (
+                  <ul className="grid grid-cols-2 gap-2 sm:max-w-2xl sm:grid-cols-3">
+                    {anime.averageScore != null ? (
+                      <li className="border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3">
+                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
+                          List score
+                        </span>
+                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+                          {anime.averageScore}
+                          <span className="text-sm font-normal text-muted-foreground">%</span>
+                        </span>
+                      </li>
+                    ) : null}
+                    {anime.meanScore != null ? (
+                      <li className="border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3">
+                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
+                          Mean
+                        </span>
+                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+                          {anime.meanScore}
+                          <span className="text-sm font-normal text-muted-foreground">%</span>
+                        </span>
+                      </li>
+                    ) : null}
+                    {anime.favourites != null ? (
+                      <li className="col-span-2 border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3 sm:col-span-1">
+                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
+                          Saved
+                        </span>
+                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+                          {anime.favourites.toLocaleString("en-US")}
+                        </span>
+                      </li>
+                    ) : null}
+                  </ul>
+                )}
+
+                <div className="md:hidden border-t border-white/10 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <span className="font-semibold text-foreground/90">#{anime.id}</span>
+                  {anime.format ? (
+                    <>
+                      <span className="mx-2 text-white/25" aria-hidden>
+                        ·
+                      </span>
+                      <span>{anime.format.replace(/_/g, " ")}</span>
+                    </>
+                  ) : null}
+                  {anime.averageScore != null ? (
+                    <>
+                      <span className="mx-2 text-white/25" aria-hidden>
+                        ·
+                      </span>
+                      <span className="tabular-nums text-primary/85">{anime.averageScore}%</span>
+                    </>
+                  ) : null}
+                </div>
               </div>
 
-              <div className="max-w-3xl">
-                <AnimeDescription description={anime.description} />
-              </div>
+              <section className="max-w-3xl space-y-3" aria-labelledby="synopsis-heading">
+                <h2
+                  id="synopsis-heading"
+                  className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                >
+                  Synopsis
+                </h2>
+                <div className="rounded-sm border border-white/10 bg-white/4 p-5 md:p-7">
+                  <AnimeDescription description={anime.description} />
+                </div>
+              </section>
 
-              <div className="flex flex-wrap gap-2 pt-4">
+              <div className="flex flex-wrap gap-2 pt-2">
                 {anime.genres?.map((genre) => (
                   <Link
                     key={genre}
@@ -226,22 +333,32 @@ export async function AnimeDetailContent({ params }: Props) {
 
           <div className="mt-24 space-y-24 md:mt-32 md:space-y-32 lg:mt-40 lg:space-y-40">
             {anime.trailer?.id && anime.trailer?.site === "youtube" && (
-              <section className="space-y-12 reveal">
-                <div className="flex items-end justify-between border-b border-white/5 pb-4 mb-16">
-                  <IndexSectionHeader title="Trailer" className="mb-0 px-0" />
-                  <span className="hidden sm:block font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50">
-                    Official trailer
+              <section className="space-y-8 reveal">
+                <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="space-y-2">
+                    <IndexSectionHeader title="Trailer" className="mb-0 px-0" />
+                    <p className="max-w-md font-mono text-[10px] uppercase leading-relaxed tracking-[0.28em] text-muted-foreground/55">
+                      Click to initialize · No autoplay
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground/40">
+                    Encoded stream
                   </span>
                 </div>
-                <div className="relative group/trailer-box">
-                  <div className="absolute -top-4 -right-4 w-12 h-12 border-t border-r border-primary/20 opacity-0 group-hover/trailer-box:opacity-100 transition-opacity duration-700" />
-                  <div className="absolute -bottom-4 -left-4 w-12 h-12 border-b border-l border-primary/20 opacity-0 group-hover/trailer-box:opacity-100 transition-opacity duration-700" />
-                  <AnimeTrailer
-                    videoId={anime.trailer.id}
-                    title={title}
-                    thumbnail={anime.trailer.thumbnail || anime.bannerImage || anime.coverImage?.extraLarge}
-                    className="mx-auto max-w-6xl"
+                <div className="relative mx-auto max-w-6xl">
+                  <div
+                    className="pointer-events-none absolute -inset-px rounded-sm bg-linear-to-br from-primary/12 via-transparent to-transparent opacity-70"
+                    aria-hidden
                   />
+                  <div className="relative rounded-sm border border-white/10 bg-zinc-950/50 p-1 shadow-[0_32px_120px_-52px_rgba(0,0,0,0.95)] backdrop-blur-[2px]">
+                    <div className="overflow-hidden rounded-[3px] ring-1 ring-inset ring-white/5">
+                      <AnimeTrailer
+                        videoId={anime.trailer.id}
+                        title={title}
+                        thumbnail={anime.trailer.thumbnail || anime.bannerImage || anime.coverImage?.extraLarge}
+                      />
+                    </div>
+                  </div>
                 </div>
               </section>
             )}

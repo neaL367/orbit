@@ -13,8 +13,8 @@ export function AnimeDescription({ description }: AnimeDescriptionProps) {
 
     if (!description) {
         return (
-            <div className="font-mono text-sm text-muted-foreground">
-                No_Data_Available
+            <div className="font-sans text-sm text-muted-foreground">
+                No description available.
             </div>
         )
     }

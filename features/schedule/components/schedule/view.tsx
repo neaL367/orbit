@@ -2,14 +2,20 @@
 
 import { addDays, format, fromUnixTime, getDay } from 'date-fns'
 import { useMemo, useState } from 'react'
+import { useCurrentTime } from '@/hooks/use-current-time'
+import { getAnimeTitle, formatTimeUntilAiring } from '@/lib/utils/anime-utils'
 import { DaySection } from '../day-section/day-section'
 import { DaySelector } from '../day-selector/day-selector'
+import { ScheduleBroadcastHeader } from './broadcast-header'
 import { formatTime, getStreamingLinks } from './utils'
 import type { AiringSchedule } from '@/lib/graphql/types/graphql'
+import type { ScheduleAgendaEntry, ScheduleAgendaHour, ScheduleDayModel } from './types'
 
 type ScheduleViewProps = {
   data: AiringSchedule[]
 }
+
+const SOON_WINDOW_SECONDS = 3 * 60 * 60
 
 const DAYS_OF_WEEK = [
   { index: 1, name: 'Monday' },
@@ -22,17 +28,37 @@ const DAYS_OF_WEEK = [
 ] as const
 
 export function ScheduleView({ data }: ScheduleViewProps) {
-  const [selectedDay, setSelectedDay] = useState<number | null>(null)
+  const today = new Date()
+  const todayIndex = getDay(today)
+  const todayKey = format(today, 'yyyy-MM-dd')
+  const now = useCurrentTime()
+  const [selectedDay, setSelectedDay] = useState<number>(todayIndex)
 
-  const schedulesByDay = useMemo(() => {
-    const grouped: Record<number, Record<string, AiringSchedule[]>> = {
-      1: {}, // Monday
-      2: {}, // Tuesday
-      3: {}, // Wednesday
-      4: {}, // Thursday
-      5: {}, // Friday
-      6: {}, // Saturday
-      0: {}, // Sunday
+  const rotatedDays = useMemo(() => {
+    const todayDayIndex = DAYS_OF_WEEK.findIndex((day) => day.index === todayIndex)
+
+    if (todayDayIndex === -1) {
+      return DAYS_OF_WEEK.map((day) => ({ ...day, isToday: false }))
+    }
+
+    return [
+      { ...DAYS_OF_WEEK[todayDayIndex], isToday: true },
+      ...DAYS_OF_WEEK.slice(todayDayIndex + 1).map((day) => ({ ...day, isToday: false })),
+      ...DAYS_OF_WEEK.slice(0, todayDayIndex).map((day) => ({ ...day, isToday: false })),
+    ]
+  }, [todayIndex])
+
+  const days = useMemo<ScheduleDayModel[]>(() => {
+    const [year, month, dayOfMonth] = todayKey.split('-').map(Number)
+    const baseDate = new Date(year, month - 1, dayOfMonth)
+    const grouped: Record<number, AiringSchedule[]> = {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      6: [],
+      0: [],
     }
 
     const seenPerDay: Record<number, Set<number>> = {
@@ -45,84 +71,153 @@ export function ScheduleView({ data }: ScheduleViewProps) {
       0: new Set(),
     }
 
-    data.forEach((schedule) => {
-      const airingAt = schedule.airingAt
-      const date = fromUnixTime(airingAt)
-      const dayOfWeek = getDay(date)
-      const format = schedule.media?.format
-      const formatKey = format ? String(format) : 'UNKNOWN'
+    for (const schedule of data) {
+      const dayOfWeek = getDay(fromUnixTime(schedule.airingAt))
 
-      if (seenPerDay[dayOfWeek].has(schedule.id)) return
+      if (seenPerDay[dayOfWeek].has(schedule.id)) continue
 
-      if (!grouped[dayOfWeek][formatKey]) {
-        grouped[dayOfWeek][formatKey] = []
-      }
-      grouped[dayOfWeek][formatKey].push(schedule)
+      grouped[dayOfWeek].push(schedule)
       seenPerDay[dayOfWeek].add(schedule.id)
+    }
+
+    for (const day of Object.keys(grouped)) {
+      grouped[Number(day)].sort((a, b) => a.airingAt - b.airingAt)
+    }
+
+    return rotatedDays.map((day, offset) => {
+      const date = addDays(baseDate, offset)
+      const entries = grouped[day.index]
+        .filter((schedule): schedule is AiringSchedule & { media: NonNullable<AiringSchedule['media']> } => Boolean(schedule.media))
+        .map<ScheduleAgendaEntry>((schedule) => {
+          const media = schedule.media
+          const durationMinutes = media.duration || 24
+          const isAiringNow = now != null && now >= schedule.airingAt && now <= schedule.airingAt + durationMinutes * 60
+          const isFinished = now != null && now > schedule.airingAt + durationMinutes * 60
+          const timeUntilSec = now != null ? schedule.airingAt - now : null
+          const countdownLabel = timeUntilSec && timeUntilSec > 0 ? formatTimeUntilAiring(timeUntilSec) : null
+
+          return {
+            schedule,
+            media,
+            title: getAnimeTitle(media),
+            airingAt: schedule.airingAt,
+            timeLabel: formatTime(schedule.airingAt),
+            episodeLabel: schedule.episode.toString().padStart(2, '0'),
+            formatLabel: formatMediaKind(media.format ? String(media.format) : undefined),
+            durationMinutes,
+            isAiringNow,
+            isFinished,
+            timeUntilSec,
+            statusLabel: isFinished ? 'Ended' : isAiringNow ? 'On air' : countdownLabel ? `In ${countdownLabel}` : 'Upcoming',
+            countdownLabel,
+            streamingLinks: getStreamingLinks(schedule),
+          }
+        })
+
+      const live = entries.filter((entry) => entry.isAiringNow)
+      const soon = entries.filter(
+        (entry) =>
+          !entry.isAiringNow &&
+          !entry.isFinished &&
+          entry.timeUntilSec != null &&
+          entry.timeUntilSec > 0 &&
+          entry.timeUntilSec <= SOON_WINDOW_SECONDS
+      )
+      const later = entries.filter(
+        (entry) =>
+          !entry.isAiringNow &&
+          !entry.isFinished &&
+          (entry.timeUntilSec == null || entry.timeUntilSec > SOON_WINDOW_SECONDS)
+      )
+
+      return {
+        index: day.index,
+        name: day.name,
+        shortName: day.name.slice(0, 3),
+        dateString: format(date, 'EEEE, do MMM'),
+        compactDate: format(date, 'd MMM'),
+        isToday: day.isToday,
+        totalCount: entries.length,
+        liveCount: live.length,
+        nextLabel: live.length > 0 ? 'Live now' : soon[0]?.timeLabel ?? later[0]?.timeLabel ?? null,
+        entries,
+        summary: {
+          live,
+          soon,
+          later,
+        },
+        agendaHours: buildAgendaHours(entries),
+      }
     })
+  }, [data, now, rotatedDays, todayKey])
 
-    Object.keys(grouped).forEach((day) => {
-      Object.keys(grouped[Number(day)]).forEach((format) => {
-        grouped[Number(day)][format].sort((a, b) => a.airingAt - b.airingAt)
-      })
-    })
-
-    return grouped
-  }, [data])
-
-  const today = new Date()
-  const todayIndex = getDay(today)
-
-  const todayDayIndex = DAYS_OF_WEEK.findIndex(day => day.index === todayIndex)
-  const sortedDays = todayDayIndex === -1
-    ? DAYS_OF_WEEK.map(day => ({ ...day, isToday: false }))
-    : [
-      { ...DAYS_OF_WEEK[todayDayIndex], isToday: true },
-      ...DAYS_OF_WEEK.slice(todayDayIndex + 1).map(day => ({ ...day, isToday: false })),
-      ...DAYS_OF_WEEK.slice(0, todayDayIndex).map(day => ({ ...day, isToday: false }))
-    ]
-
-  // Filter days based on selection
-  const displayedDays = selectedDay === null
-    ? sortedDays
-    : sortedDays.filter(day => day.index === selectedDay)
-
-  const formatDateLabel = (date: Date): string => {
-    return format(date, 'do MMM')
-  }
+  const activeDay = days.find((day) => day.index === selectedDay) ?? days[0]
 
   return (
-    <div className="space-y-0">
-      {/* Day Selector */}
+    <div className="space-y-4 md:space-y-5">
+      <ScheduleBroadcastHeader days={days} activeDay={activeDay} />
+
       <DaySelector
-        days={sortedDays}
+        days={days}
         selectedDay={selectedDay}
         onSelectDayAction={setSelectedDay}
       />
 
-      {/* Day Sections */}
-      <div className="space-y-24 pt-8 md:space-y-28 md:pt-10">
-        {displayedDays.map(({ index: dayIndex, name: dayName, isToday }, arrayIndex) => {
-          // Calculate the correct offset from "Today" based on the sorted list
-          // This ensures the date is always correct regardless of filtering
-          const offset = sortedDays.findIndex(d => d.index === dayIndex)
-
-          const date = addDays(today, offset)
-          const dateString = formatDateLabel(date)
-          return (
-            <DaySection
-              key={dayIndex}
-              dayName={dayName}
-              dateString={dateString}
-              isToday={isToday}
-              schedulesByFormat={schedulesByDay[dayIndex]}
-              formatTimeAction={formatTime}
-              getStreamingLinksAction={getStreamingLinks}
-              priority={arrayIndex === 0}
-            />
-          )
-        })}
-      </div>
+      {activeDay ? <DaySection day={activeDay} /> : null}
     </div>
   )
+}
+
+function formatMediaKind(format: string | undefined): string {
+  if (!format) return 'Series'
+
+  const labels: Record<string, string> = {
+    TV: 'TV',
+    TV_SHORT: 'Short TV',
+    MOVIE: 'Movie',
+    OVA: 'OVA',
+    ONA: 'ONA',
+    SPECIAL: 'Special',
+    MUSIC: 'Music',
+  }
+
+  return labels[format] ?? format.replace(/_/g, ' ')
+}
+
+function buildAgendaHours(entries: ScheduleAgendaEntry[]): ScheduleAgendaHour[] {
+  const hourMap = new Map<string, ScheduleAgendaHour>()
+
+  for (const entry of entries) {
+    const date = fromUnixTime(entry.airingAt)
+    const hourKey = format(date, 'yyyy-MM-dd-HH')
+    const slotKey = format(date, 'yyyy-MM-dd-HH-mm')
+
+    let hourGroup = hourMap.get(hourKey)
+    if (!hourGroup) {
+      hourGroup = {
+        hourKey,
+        hourLabel: format(date, 'h a'),
+        slotCount: 0,
+        entryCount: 0,
+        slots: [],
+      }
+      hourMap.set(hourKey, hourGroup)
+    }
+
+    let slot = hourGroup.slots.find((candidate) => candidate.slotKey === slotKey)
+    if (!slot) {
+      slot = {
+        slotKey,
+        slotLabel: format(date, 'h:mm a'),
+        entries: [],
+      }
+      hourGroup.slots.push(slot)
+      hourGroup.slotCount += 1
+    }
+
+    slot.entries.push(entry)
+    hourGroup.entryCount += 1
+  }
+
+  return [...hourMap.values()].sort((a, b) => a.hourKey.localeCompare(b.hourKey))
 }
