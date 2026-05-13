@@ -49,10 +49,11 @@ type CachedRequest = {
 const requestCache = new Map<string, CachedRequest>()
 const DEDUPLICATION_CACHE_TTL = 1000
 
+import { createHash } from 'crypto'
+
 function generateCacheKey(query: string, variables?: unknown): string {
   const key = JSON.stringify({ query, variables })
-  // @ts-ignore - Bun global
-  return new Bun.CryptoHasher('sha256').update(key).digest('hex')
+  return createHash('sha256').update(key).digest('hex')
 }
 
 function cleanupCache() {
