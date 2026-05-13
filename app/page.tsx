@@ -5,29 +5,28 @@ import { Container } from '@/components/shared/container'
 
 function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' | 'list' | 'compact' }) {
   return (
-    <div className="mb-24 space-y-12 animate-pulse opacity-50">
-      <div className="h-10 w-48 bg-secondary/40 border border-white/5 index-cut-tr" />
+    <div className="mb-24 space-y-12">
+      <div className="h-10 w-48 bg-secondary/20 border border-white/10 index-cut-tr shimmer flex items-center px-4 font-mono text-[9px] text-white/30 tracking-widest">AWAITING_INDEX</div>
 
       {variant === 'featured' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-7 aspect-[16/9] bg-secondary/20 border border-white/5" />
+          <div className="lg:col-span-7 aspect-[16/9] bg-secondary/20 border border-white/10 shimmer shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)] ring-1 ring-black/40" />
           <div className="lg:col-span-5 grid grid-cols-2 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] bg-secondary/20 border border-white/5" />
+              <div key={i} className="aspect-[2/3] bg-secondary/20 border border-white/10 shimmer shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)] ring-1 ring-black/40" />
             ))}
           </div>
         </div>
       )}
 
       {variant === 'list' && (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-px bg-white/5 border border-white/5 p-px">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-28 border border-white/5 bg-secondary/10 flex gap-6 p-4">
-              <div className="w-12 h-full bg-white/5" />
-              <div className="w-16 h-full bg-white/5 border border-white/5" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-1/4 bg-white/5" />
-                <div className="h-6 w-1/2 bg-white/5" />
+            <div key={i} className="h-28 bg-background flex gap-6 overflow-hidden">
+              <div className="w-16 shrink-0 border-r border-white/5 bg-secondary/20 shimmer" />
+              <div className="flex-1 flex flex-col justify-center gap-3 px-4">
+                <div className="h-3 w-1/4 bg-white/10 shimmer" />
+                <div className="h-4 w-1/2 bg-white/12 shimmer" />
               </div>
             </div>
           ))}
@@ -38,7 +37,7 @@ function SectionSkeleton({ variant = 'grid' }: { variant?: 'grid' | 'featured' |
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="space-y-3">
-              <div className="aspect-[2/3] bg-secondary/20 border border-white/5" />
+              <div className="aspect-[2/3] bg-secondary/20 border border-white/10 shimmer shadow-[0_24px_80px_-20px_rgba(0,0,0,0.85)] ring-1 ring-black/40" />
             </div>
           ))}
         </div>

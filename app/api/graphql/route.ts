@@ -1,4 +1,4 @@
-import crypto from 'node:crypto'
+
 import { NextRequest, NextResponse, after } from 'next/server'
 import { fetchGraphQLServer } from '@/lib/graphql/engine/fetch-server'
 import { getAniListRateLimit, canMakeAniListRequest, type AniListRateLimit } from '@/lib/graphql/engine/rate-limit'
@@ -51,7 +51,8 @@ const DEDUPLICATION_CACHE_TTL = 1000
 
 function generateCacheKey(query: string, variables?: unknown): string {
   const key = JSON.stringify({ query, variables })
-  return crypto.createHash('sha256').update(key).digest('hex')
+  // @ts-ignore - Bun global
+  return new Bun.CryptoHasher('sha256').update(key).digest('hex')
 }
 
 function cleanupCache() {

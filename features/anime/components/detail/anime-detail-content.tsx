@@ -81,7 +81,13 @@ export async function AnimeDetailContent({ params }: Props) {
           }}
         />
 
-        <header className="w-screen relative left-1/2 -translate-x-1/2 min-h-[42dvh] max-h-[min(72dvh,820px)] h-[52dvh] group select-none overflow-hidden">
+        <header className="w-screen relative left-1/2 -translate-x-1/2 min-h-[42dvh] max-h-[min(72dvh,820px)] h-[52dvh] group select-none overflow-hidden bg-secondary/15">
+          <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay" aria-hidden>
+            <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px)', backgroundSize: '100% 4px' }} />
+            <div className="absolute top-0 left-0 w-full h-[10%] bg-linear-to-b from-white/10 to-transparent animate-scan" />
+            <div className="absolute top-0 left-0 w-[5%] h-full bg-linear-to-r from-white/5 to-transparent animate-scan-vertical" />
+          </div>
+          
           <div className="absolute inset-0 z-0">
             {bannerSrc ? (
               <div className="relative h-full w-full overflow-hidden">
@@ -89,11 +95,11 @@ export async function AnimeDetailContent({ params }: Props) {
                   src={bannerSrc}
                   alt=""
                   fill
-                  className="object-cover blur-3xl opacity-20 scale-125 transition-[transform,opacity] duration-1000 group-hover:scale-110 motion-reduce:transition-none"
+                  className="object-cover blur-3xl opacity-10 scale-125 transition-[transform,opacity] duration-1000 group-hover:scale-110 motion-reduce:transition-none"
                   sizes="100vw"
                   aria-hidden
                 />
-                <div className="absolute inset-0 bg-background/25" />
+                <div className="absolute inset-0 bg-background/50" />
               </div>
             ) : null}
           </div>
@@ -129,8 +135,8 @@ export async function AnimeDetailContent({ params }: Props) {
                 <div className="h-px w-16 bg-white/10" />
               </div>
 
-              <div className="absolute inset-0 z-10 bg-linear-to-t from-background from-26% via-background/75 via-46% to-transparent to-100%" />
-              <div className="absolute inset-0 z-10 bg-linear-to-b from-background/40 via-transparent to-transparent" />
+              <div className="absolute inset-0 z-10 bg-linear-to-t from-background from-28% via-background/70 via-45% to-transparent to-100%" />
+              <div className="absolute inset-0 z-10 bg-linear-to-b from-background/35 via-transparent to-transparent" />
 
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 hidden md:block">
                 <div className="px-6 pb-8 md:px-12 lg:px-24">
@@ -230,7 +236,7 @@ export async function AnimeDetailContent({ params }: Props) {
                   {[
                     anime.status?.replace(/_/g, " "),
                     anime.format,
-                    anime.episodes != null ? `${anime.episodes} episodes` : null,
+                    anime.episodes != null ? `${anime.episodes} EP` : null,
                     anime.season && anime.startDate?.year
                       ? `${anime.season} ${anime.startDate.year}`
                       : anime.startDate?.year != null
@@ -240,7 +246,7 @@ export async function AnimeDetailContent({ params }: Props) {
                     .filter((s): s is string => Boolean(s))
                     .map((label, i) => (
                       <li key={`${label}-${i}`}>
-                        <span className="inline-block border border-white/10 bg-white/4 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        <span className="inline-block border border-white/15 bg-white/5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground">
                           {label}
                         </span>
                       </li>
@@ -248,40 +254,42 @@ export async function AnimeDetailContent({ params }: Props) {
                 </ul>
 
                 {(anime.averageScore != null || anime.meanScore != null || anime.favourites != null) && (
-                  <ul className="grid grid-cols-2 gap-2 sm:max-w-2xl sm:grid-cols-3">
-                    {anime.averageScore != null ? (
-                      <li className="border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3">
-                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
-                          List score
-                        </span>
-                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
-                          {anime.averageScore}
-                          <span className="text-sm font-normal text-muted-foreground">%</span>
-                        </span>
-                      </li>
-                    ) : null}
-                    {anime.meanScore != null ? (
-                      <li className="border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3">
-                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
-                          Mean
-                        </span>
-                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
-                          {anime.meanScore}
-                          <span className="text-sm font-normal text-muted-foreground">%</span>
-                        </span>
-                      </li>
-                    ) : null}
-                    {anime.favourites != null ? (
-                      <li className="col-span-2 border border-white/10 bg-linear-to-b from-white/5 to-transparent px-4 py-3 sm:col-span-1">
-                        <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-muted-foreground/75">
-                          Saved
-                        </span>
-                        <span className="font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
-                          {anime.favourites.toLocaleString("en-US")}
-                        </span>
-                      </li>
-                    ) : null}
-                  </ul>
+                  <div className="mt-8 border border-white/5 bg-white/5 p-px tabular-nums">
+                    <ul className="grid grid-cols-2 gap-px sm:max-w-2xl sm:grid-cols-3 bg-background/40">
+                      {anime.averageScore != null ? (
+                        <li className="bg-background/40 px-4 py-3 group hover:bg-secondary/40 transition-colors">
+                          <span className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/75 group-hover:text-primary/70 transition-colors">
+                            List score
+                          </span>
+                          <span className="font-sans text-xl font-black tracking-tighter text-foreground sm:text-2xl drop-shadow-sm">
+                            {anime.averageScore}
+                            <span className="text-sm font-bold text-muted-foreground/60 ml-0.5">%</span>
+                          </span>
+                        </li>
+                      ) : null}
+                      {anime.meanScore != null ? (
+                        <li className="bg-background/40 px-4 py-3 group hover:bg-secondary/40 transition-colors">
+                          <span className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/75 group-hover:text-primary/70 transition-colors">
+                            Mean
+                          </span>
+                          <span className="font-sans text-xl font-black tracking-tighter text-foreground sm:text-2xl drop-shadow-sm">
+                            {anime.meanScore}
+                            <span className="text-sm font-bold text-muted-foreground/60 ml-0.5">%</span>
+                          </span>
+                        </li>
+                      ) : null}
+                      {anime.favourites != null ? (
+                        <li className="col-span-2 bg-background/40 px-4 py-3 sm:col-span-1 group hover:bg-secondary/40 transition-colors">
+                          <span className="block font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/75 group-hover:text-primary/70 transition-colors">
+                            Saved
+                          </span>
+                          <span className="font-sans text-xl font-black tracking-tighter text-foreground sm:text-2xl drop-shadow-sm">
+                            {anime.favourites.toLocaleString("en-US")}
+                          </span>
+                        </li>
+                      ) : null}
+                    </ul>
+                  </div>
                 )}
 
                 <div className="md:hidden border-t border-white/10 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -308,11 +316,11 @@ export async function AnimeDetailContent({ params }: Props) {
               <section className="max-w-3xl space-y-3" aria-labelledby="synopsis-heading">
                 <h2
                   id="synopsis-heading"
-                  className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                  className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground/70"
                 >
                   Synopsis
                 </h2>
-                <div className="rounded-sm border border-white/10 bg-white/4 p-5 md:p-7">
+                <div className="border-l-2 border-primary/40 bg-white/5 p-5 md:p-6 transition-colors hover:border-primary/80 hover:bg-white/10">
                   <AnimeDescription description={anime.description} />
                 </div>
               </section>
@@ -365,7 +373,7 @@ export async function AnimeDetailContent({ params }: Props) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
               <aside className="lg:col-span-4 space-y-16 order-1 lg:order-1">
-                <section className="space-y-8">
+                <section className="space-y-6">
                   <div className="flex flex-col gap-1">
                     <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground/60 leading-none font-black">
                       Record
@@ -374,7 +382,7 @@ export async function AnimeDetailContent({ params }: Props) {
                       Parameters
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-px bg-white/5 border border-white/5 p-px">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-px bg-white/10 border border-white/10 p-px shadow-lg">
                     {[
                       { label: "Popularity", value: anime.popularity?.toLocaleString("en-US") || "N/A" },
                       { label: "Source", value: anime.source?.replace(/_/g, " ") || "Unknown" },
@@ -390,17 +398,18 @@ export async function AnimeDetailContent({ params }: Props) {
                     ].map((item, i) => (
                       <div
                         key={item.label}
-                        className="flex justify-between items-center bg-background/50 p-4 font-mono text-[10px] uppercase tracking-wider group/item hover:bg-white/5 transition-colors gap-4"
+                        className="relative flex justify-between items-center bg-background/90 p-4 font-mono text-[10px] uppercase tracking-wider group/item hover:bg-secondary/40 transition-colors gap-4 overflow-hidden"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-primary/30 text-[8px] shrink-0 tabular-nums">
+                        <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary scale-y-0 group-hover/item:scale-y-100 transition-transform duration-300 origin-bottom" />
+                        <div className="flex items-center gap-3 min-w-0 z-10">
+                          <span className="text-primary/30 text-[8px] shrink-0 tabular-nums font-black group-hover/item:text-primary/70 transition-colors">
                             {i < 9 ? `0${i + 1}` : i + 1}
                           </span>
-                          <span className="text-muted-foreground/70 group-hover/item:text-primary/80 transition-colors truncate">
+                          <span className="text-muted-foreground/70 group-hover/item:text-foreground transition-colors truncate font-bold">
                             {item.label}
                           </span>
                         </div>
-                        <span className="text-foreground font-black tracking-widest shrink-0 tabular-nums">
+                        <span className="text-foreground font-black tracking-widest shrink-0 tabular-nums z-10">
                           {item.value}
                         </span>
                       </div>
@@ -411,22 +420,30 @@ export async function AnimeDetailContent({ params }: Props) {
                 <AnimeEpisodes episodes={anime.streamingEpisodes || []} />
 
                 {anime.relations?.edges && anime.relations.edges.length > 0 && (
-                  <section className="space-y-10">
-                    <IndexSectionHeader title="Related" />
-                    <div className="flex flex-col gap-3">
+                  <section className="space-y-6">
+                    <div className="flex flex-col gap-1 mb-2">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground/60 leading-none font-black">
+                        System
+                      </span>
+                      <span className="font-mono text-sm font-black uppercase tracking-widest text-foreground">
+                        Relations
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-px bg-white/10 border border-white/10 p-px shadow-lg">
                       {anime.relations.edges
                         .filter((edge) => edge?.node && edge.node.type === "ANIME" && !edge.node.isAdult)
                         .map((edge) => (
                           <Link
                             key={edge?.node?.id}
                             href={`/anime/${edge?.node?.id}`}
-                            className="block p-4 border border-white/5 hover:border-primary/40 bg-white/2 hover:bg-primary/5 transition-colors group relative overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                            className="block p-4 bg-background/90 hover:bg-secondary/60 transition-colors group relative overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                           >
-                            <div className="absolute right-[-20px] top-[-20px] w-12 h-12 bg-primary/5 rotate-45 transform translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-                            <span className="font-mono text-[8px] uppercase block text-primary/40 mb-2 font-bold tracking-[0.2em]">
+                            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top" />
+                            <div className="absolute right-[-20px] top-[-20px] w-12 h-12 bg-primary/10 rotate-45 transform translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                            <span className="font-mono text-[8px] uppercase block text-muted-foreground/70 group-hover:text-primary/70 mb-1.5 font-black tracking-[0.2em] transition-colors">
                               {edge?.relationType?.replace(/_/g, " ")}
                             </span>
-                            <span className="font-mono text-[12px] font-black uppercase block truncate text-foreground group-hover:text-primary transition-colors pr-8">
+                            <span className="font-mono text-[11px] font-black uppercase block truncate text-foreground group-hover:text-primary transition-colors pr-8">
                               {getAnimeTitle(edge?.node as Media)}
                             </span>
                           </Link>
@@ -438,14 +455,21 @@ export async function AnimeDetailContent({ params }: Props) {
 
               <div className="lg:col-span-8 space-y-32 order-2 lg:order-2">
                 {anime.characters?.edges && anime.characters.edges.length > 0 && (
-                  <section className="space-y-12">
+                  <section className="space-y-8">
                     <div className="flex items-center justify-between">
-                      <IndexSectionHeader title="Cast" className="mb-0" />
-                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 hidden sm:block tabular-nums">
-                        {anime.characters.edges.length} roles
+                      <div className="flex flex-col gap-1">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground/60 leading-none font-black">
+                          Assigned
+                        </span>
+                        <span className="font-mono text-sm font-black uppercase tracking-widest text-foreground">
+                          Personnel
+                        </span>
+                      </div>
+                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/50 hidden sm:block tabular-nums font-black">
+                        {anime.characters.edges.length} ROLES
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 border border-white/5 p-px">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10 p-px shadow-xl">
                       {anime.characters.edges.slice(0, 10).map((edge) => {
                         if (!edge?.node) return null
                         const voiceActor = edge.voiceActors?.[0]
@@ -453,9 +477,9 @@ export async function AnimeDetailContent({ params }: Props) {
                         return (
                           <div
                             key={edge.node.id}
-                            className="flex h-24 bg-background group relative overflow-hidden hover:bg-secondary/40 transition-colors"
+                            className="flex h-20 sm:h-24 bg-background/90 group relative overflow-hidden hover:bg-secondary/60 transition-colors"
                           >
-                            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top" />
+                            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top z-20" />
 
                             <div className="w-16 bg-secondary relative shrink-0 overflow-hidden border-r border-white/5">
                               <IndexImage
@@ -464,12 +488,12 @@ export async function AnimeDetailContent({ params }: Props) {
                                 fill
                                 sizes="64px"
                                 showTechnicalDetails={false}
-                                className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+                                className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-80 group-hover:opacity-100"
                               />
                             </div>
 
-                            <div className="flex-1 flex flex-col justify-center px-4 overflow-hidden border-r border-white/5 min-w-0">
-                              <div className="font-mono text-[11px] font-black uppercase truncate text-foreground group-hover:text-primary transition-colors">
+                            <div className="flex-1 flex flex-col justify-center px-4 overflow-hidden border-r border-white/5 min-w-0 z-10">
+                              <div className="font-mono text-[10px] sm:text-[11px] font-black uppercase truncate text-foreground group-hover:text-primary transition-colors tracking-tight">
                                 {edge.node.name?.full}
                               </div>
                               <div className="font-mono text-[8px] uppercase text-muted-foreground/50 font-bold tracking-widest mt-1">
@@ -479,11 +503,11 @@ export async function AnimeDetailContent({ params }: Props) {
 
                             {voiceActor && (
                               <>
-                                <div className="flex-1 flex flex-col justify-center px-4 overflow-hidden text-right min-w-0">
-                                  <div className="font-mono text-[10px] font-bold uppercase truncate text-foreground/70 group-hover:text-foreground transition-colors">
+                                <div className="flex-1 flex flex-col justify-center px-4 overflow-hidden text-right min-w-0 z-10">
+                                  <div className="font-mono text-[9px] sm:text-[10px] font-bold uppercase truncate text-muted-foreground/80 group-hover:text-foreground transition-colors tracking-tight">
                                     {voiceActor.name?.full}
                                   </div>
-                                  <div className="font-mono text-[8px] uppercase text-muted-foreground/40 font-bold tracking-tighter">
+                                  <div className="font-mono text-[8px] uppercase text-muted-foreground/40 font-bold tracking-[0.2em] mt-1">
                                     {voiceActor.languageV2}
                                   </div>
                                 </div>
@@ -494,7 +518,7 @@ export async function AnimeDetailContent({ params }: Props) {
                                     fill
                                     sizes="64px"
                                     showTechnicalDetails={false}
-                                    className="object-cover grayscale group-hover:grayscale-0 group-hover:rotate-2 transition-all duration-700"
+                                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 opacity-80 group-hover:opacity-100"
                                   />
                                 </div>
                               </>

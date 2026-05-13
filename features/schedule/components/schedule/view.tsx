@@ -108,7 +108,7 @@ export function ScheduleView({ data }: ScheduleViewProps) {
             isAiringNow,
             isFinished,
             timeUntilSec,
-            statusLabel: isFinished ? 'Ended' : isAiringNow ? 'On air' : countdownLabel ? `In ${countdownLabel}` : 'Upcoming',
+            statusLabel: timeUntilSec === null ? 'SYNC...' : isFinished ? 'Ended' : isAiringNow ? 'On air' : countdownLabel ? `In ${countdownLabel}` : 'Upcoming',
             countdownLabel,
             streamingLinks: getStreamingLinks(schedule),
           }
@@ -139,7 +139,7 @@ export function ScheduleView({ data }: ScheduleViewProps) {
         isToday: day.isToday,
         totalCount: entries.length,
         liveCount: live.length,
-        nextLabel: live.length > 0 ? 'Live now' : soon[0]?.timeLabel ?? later[0]?.timeLabel ?? null,
+        nextLabel: now === null ? 'SYNCING...' : live.length > 0 ? 'Live now' : soon[0]?.timeLabel ?? later[0]?.timeLabel ?? null,
         entries,
         summary: {
           live,

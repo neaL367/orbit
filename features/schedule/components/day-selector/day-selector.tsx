@@ -47,7 +47,7 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
         className={cn(
           "sticky z-40 py-2 transition-all duration-300 will-change-transform",
           isStuck
-            ? "border-b border-white/8 bg-background/95 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-md supports-backdrop-filter:bg-background/80"
+            ? "border-b border-white/10 bg-black/80 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl supports-backdrop-filter:bg-background/60"
             : "bg-transparent",
           "select-none"
         )}
@@ -56,7 +56,7 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
         }}
       >
         <div className="mx-auto max-w-[1600px] px-6 md:px-12 lg:px-24">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide no-scrollbar">
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide no-scrollbar">
             {days.map((day) => {
               const isSelected = selectedDay === day.index
               return (
@@ -65,38 +65,38 @@ export function DaySelector({ days, selectedDay, onSelectDayAction }: DaySelecto
                   type="button"
                   onClick={() => onSelectDayAction(day.index)}
                   className={cn(
-                    "group relative flex min-w-[108px] shrink-0 flex-col items-stretch gap-1 overflow-hidden border px-2.5 py-2 text-left transition-all duration-200 index-cut-tr",
+                    "group relative flex min-w-[120px] shrink-0 flex-col items-stretch gap-1.5 overflow-hidden border px-3 py-2.5 text-left transition-all duration-300 index-cut-tr",
                     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                     isSelected
-                      ? "border-white/30 bg-white text-black shadow-md ring-1 ring-white/15"
+                      ? "border-primary bg-primary/10 text-primary shadow-[0_0_20px_rgba(var(--primary),0.15)] ring-1 ring-primary/30"
                       : day.isToday
-                        ? "border-primary/30 bg-primary/5 text-foreground hover:border-primary/50"
-                        : "border-white/10 bg-white/2 text-muted-foreground hover:border-white/20 hover:text-foreground"
+                        ? "border-primary/30 bg-primary/5 text-foreground hover:border-primary/50 hover:bg-primary/10"
+                        : "border-white/10 bg-white/2 text-muted-foreground hover:border-white/30 hover:bg-white/5 hover:text-foreground"
                   )}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.22em] opacity-70">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
                       {day.shortName}
                     </span>
                     {day.liveCount > 0 ? (
                       <span
                         className={cn(
-                          "h-1.5 w-1.5 shrink-0 rounded-full bg-primary",
-                          isSelected ? "bg-black" : "motion-safe:animate-pulse motion-reduce:animate-none"
+                          "h-2 w-2 shrink-0 bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]",
+                          isSelected ? "bg-primary" : "motion-safe:animate-pulse motion-reduce:animate-none"
                         )}
                         aria-hidden
                       />
                     ) : null}
                   </div>
-                  <span className="font-sans text-[12px] font-semibold leading-tight tracking-tight text-current">
+                  <span className={cn("font-sans text-sm font-bold leading-tight tracking-tight", isSelected ? "text-primary drop-shadow-sm" : "text-current")}>
                     {day.compactDate}
                   </span>
-                  <div className="flex items-center justify-between gap-1 border-t border-current/10 pt-1 font-mono text-[9px] uppercase tracking-[0.12em] opacity-80">
-                    <span>{day.totalCount}</span>
-                    <span className="truncate opacity-60">{day.liveCount > 0 ? `${day.liveCount} live` : "—"}</span>
+                  <div className="flex items-center justify-between gap-2 border-t border-current/20 pt-1.5 font-mono text-[10px] uppercase tracking-widest opacity-80">
+                    <span className="font-bold">{day.totalCount}</span>
+                    <span className="truncate opacity-60 font-semibold">{day.liveCount > 0 ? `${day.liveCount} live` : "—"}</span>
                   </div>
                   {isSelected ? (
-                    <div className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-full bg-black/30" />
+                    <div className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-full bg-primary/50" />
                   ) : null}
                 </button>
               )

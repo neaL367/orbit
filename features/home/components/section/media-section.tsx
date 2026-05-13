@@ -38,7 +38,7 @@ export function MediaSection({
   return (
     <section className={cn("mb-32 group/section reveal relative", className)}>
       {/* Universal Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10 mb-12 border-b border-white/5 pb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 relative z-10 mb-12 border-b border-white/10 pb-8">
         <IndexSectionHeader
           title={title}
           subtitle={subtitle || (variant === 'featured' ? "Featured_Archive" : "General_Archive")}
@@ -48,7 +48,7 @@ export function MediaSection({
         {viewAllHref && (
           <Link
             href={viewAllHref as Route}
-            className="group/btn relative inline-flex items-center gap-4 px-8 py-3 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-primary index-cut-tr shadow-[4px_4px_0_0_rgba(255,255,255,0.05)]"
+            className="group/btn relative inline-flex items-center gap-4 px-8 py-3 bg-foreground text-background font-mono text-xs font-black uppercase tracking-[0.3em] transition-all hover:bg-primary hover:text-primary-foreground index-cut-tr shadow-[4px_4px_0_0_rgba(255,255,255,0.05)] hover:shadow-[6px_6px_0_0_rgba(var(--primary),0.2)]"
           >
             ACCESS_REGISTRY
             <div className="w-1.5 h-1.5 bg-current rotate-45 transform group-hover/btn:translate-x-1.5 transition-all" />
@@ -83,8 +83,8 @@ export function MediaSection({
       )}
 
       {/* Global Decorative Brackets */}
-      <div className="absolute -top-6 -left-2 w-4 h-4 border-t border-l border-white/10 pointer-events-none" />
-      <div className="absolute -top-6 -right-2 w-4 h-4 border-t border-r border-white/10 pointer-events-none" />
+      <div className="absolute -top-6 -left-2 w-4 h-4 border-t border-l border-white/20 pointer-events-none" />
+      <div className="absolute -top-6 -right-2 w-4 h-4 border-t border-r border-white/20 pointer-events-none" />
     </section>
   )
 }
@@ -96,50 +96,50 @@ function ListItem({ anime, index }: { anime: Media; index: number }) {
   return (
     <Link
       href={`/anime/${anime.id}`}
-      className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/1 border border-white/5 hover:bg-white/3 hover:border-primary/20 transition-all relative overflow-hidden index-cut-tr"
+      className="group/list flex items-center gap-4 sm:gap-10 p-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/40 transition-all duration-300 relative overflow-hidden index-cut-tr hover:shadow-[0_0_20px_rgba(var(--primary),0.05)]"
     >
-      <div className="font-mono text-2xl sm:text-4xl font-black text-white/[0.03] group-hover/list:text-primary/10 transition-colors w-12 sm:w-16 text-center shrink-0 tracking-tighter tabular-nums">
+      <div className="font-mono text-2xl sm:text-4xl font-black text-white/10 group-hover/list:text-primary/30 transition-colors w-12 sm:w-16 text-center shrink-0 tracking-tighter tabular-nums">
         {(index + 1).toString().padStart(2, '0')}
       </div>
 
-      <div className="w-14 h-20 sm:w-20 sm:h-28 border border-white/10 overflow-hidden shrink-0 relative bg-secondary">
+      <div className="w-14 h-20 sm:w-20 sm:h-28 border border-white/15 overflow-hidden shrink-0 relative bg-black">
         <Image
           src={anime.coverImage?.large || anime.coverImage?.medium || ''}
           alt={anime.title?.romaji || ''}
           fill
           sizes="100px"
-          className="w-full h-full object-cover grayscale brightness-75 group-hover/list:grayscale-0 group-hover/list:brightness-100 group-hover/list:scale-110 transition-all duration-700"
+          className="w-full h-full object-cover grayscale brightness-75 group-hover/list:grayscale-0 group-hover/list:brightness-100 group-hover/list:scale-105 transition-all duration-500 ease-out"
         />
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2 min-w-0">
-          <h3 className="font-mono text-sm sm:text-lg lg:text-xl font-black uppercase tracking-tight truncate group-hover/list:text-primary transition-colors">
+          <h3 className="font-sans text-[15px] sm:text-lg lg:text-xl font-bold uppercase tracking-tight truncate group-hover/list:text-primary transition-colors text-foreground/90">
             {anime.title?.userPreferred || anime.title?.romaji}
           </h3>
           <div className="flex flex-wrap gap-1.5">
             {anime.genres?.slice(0, 2).map(g => (
-              <span key={g} className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 bg-white/5 text-muted-foreground/80 border border-white/5 group-hover/list:border-primary/20 transition-colors">{g}</span>
+              <span key={g} className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-black/40 text-muted-foreground/80 border border-white/10 group-hover/list:border-primary/30 transition-colors">{g}</span>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-8 sm:gap-12 shrink-0 border-l border-white/5 sm:pl-10 h-10">
+        <div className="flex items-center gap-8 sm:gap-12 shrink-0 border-l border-white/10 sm:pl-10 h-12">
           <div className="flex flex-col items-end gap-1 font-mono">
-            <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">FORMAT</span>
-            <span className="text-[10px] text-foreground font-black group-hover/list:text-primary transition-colors">{anime.format || '??'}</span>
+            <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.3em] font-bold">FORMAT</span>
+            <span className="text-xs text-foreground font-black group-hover/list:text-primary transition-colors">{anime.format || '??'}</span>
           </div>
           <div className="flex flex-col items-end gap-1 font-mono">
-            <span className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.3em] font-bold">SCORE</span>
+            <span className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.3em] font-bold">SCORE</span>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-foreground font-black tracking-widest">{anime.averageScore ? `${anime.averageScore}%` : '---'}</span>
-              <div className={cn("w-1.5 h-1.5 rotate-45", anime.averageScore && anime.averageScore > 75 ? "bg-primary animate-pulse" : "bg-white/10")} />
+              <span className="text-xs text-foreground font-black tracking-widest">{anime.averageScore ? `${anime.averageScore}%` : '---'}</span>
+              <div className={cn("w-2 h-2 rotate-45 transition-colors duration-300", anime.averageScore && anime.averageScore > 75 ? "bg-primary animate-pulse" : "bg-white/20 group-hover/list:bg-primary/50")} />
             </div>
           </div>
         </div>
       </div>
-      <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/list:opacity-100 transition-opacity">
-        <span className="font-mono text-[8px] text-primary font-bold">0x{anime.id}</span>
+      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover/list:opacity-100 transition-opacity">
+        <span className="font-mono text-[10px] text-primary font-bold">0x{anime.id}</span>
       </div>
     </Link>
   )
@@ -152,40 +152,41 @@ function FeaturedLayout({ featured, secondaries }: { featured: Media; secondarie
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
       <div className="lg:col-span-7">
-        <div className="relative group/feat overflow-hidden border border-white/5 bg-secondary/5 hover:border-primary/20 transition-all duration-700">
-          <div className="aspect-[16/9] w-full overflow-hidden relative">
+        <div className="relative group/feat overflow-hidden border border-white/10 bg-secondary/5 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(var(--primary),0.1)]">
+          <div className="aspect-[16/9] w-full overflow-hidden relative bg-black">
             <Image
               src={featured.bannerImage || featured.coverImage?.extraLarge || ''}
               alt={featured.title?.romaji || ''}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 800px"
-              className="w-full h-full object-cover grayscale brightness-75 group-hover/feat:grayscale-0 group-hover/feat:scale-105 transition-all duration-[1.5s] ease-out"
+              className="w-full h-full object-cover grayscale brightness-75 opacity-90 group-hover/feat:grayscale-0 group-hover/feat:scale-105 group-hover/feat:opacity-100 transition-all duration-[1s] ease-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
           </div>
 
-          <div className="absolute top-0 right-0 p-6 flex flex-col items-end gap-1 font-mono">
-            <div className="flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/20">
-              <span className="text-[8px] font-black text-primary uppercase tracking-[0.3em]">Registry_Pulse</span>
+          <div className="absolute top-0 right-0 p-6 flex flex-col items-end gap-1.5 font-mono">
+            <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 backdrop-blur-md">
+              <div className="w-1.5 h-1.5 bg-primary animate-pulse rounded-full" />
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Registry_Pulse</span>
             </div>
-            <span className="text-[10px] text-white/20 uppercase tracking-[0.4em] font-bold">ARC-0x{featured.id}</span>
+            <span className="text-[10px] text-white/30 uppercase tracking-[0.4em] font-bold">ARC-0x{featured.id}</span>
           </div>
 
           <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 z-10">
-            <div className="space-y-6 max-w-2xl">
-              <h3 className="text-3xl sm:text-5xl md:text-6xl font-mono font-black uppercase leading-[0.9] tracking-tighter text-foreground group-hover/feat:text-primary transition-colors duration-700 line-clamp-2 mix-blend-screen drop-shadow-2xl">
+            <div className="space-y-6 max-w-2xl transform translate-y-2 group-hover/feat:translate-y-0 transition-transform duration-500 ease-out">
+              <h3 className="text-3xl sm:text-5xl md:text-6xl font-sans font-bold uppercase leading-[1.05] tracking-tight text-foreground/90 group-hover/feat:text-white transition-colors duration-500 line-clamp-2 drop-shadow-2xl">
                 {featured.title?.userPreferred || featured.title?.romaji}
               </h3>
               {featured.description && (
-                <p className="text-muted-foreground/50 font-mono text-[11px] leading-relaxed line-clamp-2 uppercase tracking-wide max-w-xl border-l-[3px] border-primary/30 pl-4 py-1">
+                <p className="text-muted-foreground/70 font-mono text-[11px] leading-relaxed line-clamp-2 uppercase tracking-wider max-w-xl border-l-[3px] border-primary/50 pl-5 py-1 bg-black/40 backdrop-blur-sm">
                   {featured.description.replace(/<[^>]*>?/gm, '')}
                 </p>
               )}
               <div className="pt-4">
                 <Link
                   href={`/anime/${featured.id}`}
-                  className="group/btn relative inline-flex items-center gap-4 px-10 py-4 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-primary index-cut-tr"
+                  className="group/btn relative inline-flex items-center gap-4 px-10 py-4 bg-foreground text-background font-mono text-[11px] font-black uppercase tracking-[0.3em] transition-all hover:bg-primary hover:text-primary-foreground index-cut-tr shadow-lg"
                 >
                   Access_Archive
                   <div className="w-1.5 h-1.5 bg-current rotate-45 transform group-hover/btn:translate-x-1 group-hover/btn:scale-125 transition-all" />
@@ -197,8 +198,8 @@ function FeaturedLayout({ featured, secondaries }: { featured: Media; secondarie
       </div>
 
       <div className="lg:col-span-5 flex flex-col gap-8">
-        <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border-l border-primary/40 self-start">
-          <span className="font-mono text-[9px] font-black text-muted-foreground uppercase tracking-widest">Secondary_Nodes [0x04]</span>
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 border-l-2 border-primary/50 self-start">
+          <span className="font-mono text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest">Secondary_Nodes [0x04]</span>
         </div>
         <div className="grid grid-cols-2 gap-6 content-start">
           {secondaries.map((anime) => (

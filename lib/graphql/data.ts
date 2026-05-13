@@ -107,19 +107,33 @@ export async function getCachedScheduleWeekBundle() {
     const fetchAiringSchedulesPaged = async (opts: Omit<ScheduleAiringVars, 'page'> & { maxPages?: number }) => {
         const maxPages = opts.maxPages ?? 6
         const all: NonNullable<ScheduleAnimeHeroQueryType['Page']>['airingSchedules'] = []
-        let page = 1
-        // pageInfo.hasNextPage is reliable; hard cap prevents runaway on API regressions.
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            const res = await executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
-                ...opts,
-                page,
-            })
-            all.push(...(res.data?.Page?.airingSchedules ?? []))
-            const hasNext = Boolean(res.data?.Page?.pageInfo?.hasNextPage)
-            if (!hasNext || page >= maxPages) break
-            page += 1
+        
+        // Fetch page 1 first
+        const firstPageRes = await executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+            ...opts,
+            page: 1,
+        })
+        
+        all.push(...(firstPageRes.data?.Page?.airingSchedules ?? []))
+        
+        // If there are more pages, fetch the rest in parallel to eliminate waterfall
+        if (firstPageRes.data?.Page?.pageInfo?.hasNextPage && maxPages > 1) {
+            const remainingPromises = Array.from({ length: maxPages - 1 }, (_, i) => i + 2).map(page => 
+                executeGraphQL<ScheduleAnimeHeroQueryType>(ScheduleAnimeHeroDocument.toString(), {
+                    ...opts,
+                    page,
+                })
+            )
+            
+            const remainingResults = await Promise.all(remainingPromises)
+            for (const res of remainingResults) {
+                const schedules = res.data?.Page?.airingSchedules ?? []
+                if (schedules.length > 0) {
+                    all.push(...schedules)
+                }
+            }
         }
+        
         return all
     }
 

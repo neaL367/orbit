@@ -15,7 +15,7 @@ interface PosterCardProps {
 }
 
 const badgeFrame =
-    "index-cut-tr border border-white/12 bg-black/72 backdrop-blur-md shadow-[0_8px_24px_-8px_rgba(0,0,0,0.85)] transition-[border-color,box-shadow,transform] duration-500 group-hover:border-primary/35 group-hover:shadow-[0_12px_28px_-10px_rgba(0,0,0,0.9)]"
+    "index-cut-tr border border-white/15 bg-black/95 shadow-md transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_15px_rgba(var(--primary),0.2)] group-hover:bg-primary/5"
 
 export const PosterCard = memo(function PosterCard({ anime, rank, priority = false, className }: PosterCardProps) {
     const title = useMemo(() => getAnimeTitle(anime), [anime])
@@ -25,7 +25,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
         <Link
             href={`/anime/${anime.id}`}
             className={cn(
-                "group relative block aspect-2/3 w-full bg-secondary overflow-hidden transition-all duration-700 hover:ring-2 hover:ring-primary/40 rounded-sm shadow-xl",
+                "group relative block aspect-2/3 w-full bg-secondary overflow-hidden transition-all duration-500 rounded-sm ring-1 ring-white/10 hover:ring-primary/50 hover:shadow-[0_8px_30px_rgba(var(--primary),0.15)]",
                 className
             )}
         >
@@ -35,23 +35,23 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                     className={cn(
                         badgeFrame,
                         "flex min-w-0 items-stretch overflow-hidden",
-                        rank !== undefined ? "ring-1 ring-primary/25" : "ring-0"
+                        rank !== undefined ? "ring-1 ring-primary/40" : "ring-0"
                     )}
                 >
                     <div
                         className={cn(
-                            "w-px shrink-0",
-                            rank !== undefined ? "bg-primary" : "bg-white/25"
+                            "w-1 shrink-0 transition-colors duration-300",
+                            rank !== undefined ? "bg-primary" : "bg-white/20 group-hover:bg-primary/50"
                         )}
                         aria-hidden
                     />
-                    <div className="flex flex-col gap-0.5 px-2 py-1.5">
-                        <span className="font-mono text-[8px] font-black uppercase leading-none tracking-[0.22em] text-muted-foreground/90">
+                    <div className="flex flex-col gap-0.5 px-2.5 py-1.5">
+                        <span className="font-mono text-[10px] font-bold uppercase leading-none tracking-[0.25em] text-muted-foreground/80 group-hover:text-primary/80 transition-colors">
                             {rank !== undefined ? "Index" : "Ref"}
                         </span>
                         <span
                             className={cn(
-                                "font-mono text-sm font-black tabular-nums leading-none tracking-tight",
+                                "font-mono text-[15px] font-black tabular-nums leading-none tracking-tight",
                                 rank !== undefined ? "text-primary" : "text-foreground"
                             )}
                         >
@@ -64,15 +64,15 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                     <div
                         className={cn(
                             badgeFrame,
-                            "flex flex-col items-end gap-0.5 px-2 py-1.5 opacity-95 group-hover:opacity-100 group-hover:-translate-y-px"
+                            "flex flex-col items-end gap-0.5 px-2.5 py-1.5 opacity-95 group-hover:opacity-100 group-hover:-translate-y-px"
                         )}
                     >
-                        <span className="font-mono text-[8px] font-black uppercase leading-none tracking-[0.22em] text-muted-foreground/90">
+                        <span className="font-mono text-[10px] font-bold uppercase leading-none tracking-[0.25em] text-muted-foreground/80 group-hover:text-primary/80 transition-colors">
                             Score
                         </span>
                         <span className="flex items-baseline gap-0.5 font-mono leading-none">
-                            <span className="text-base font-black tabular-nums text-primary">{anime.averageScore}</span>
-                            <span className="text-[9px] font-bold text-primary/75">%</span>
+                            <span className="text-[15px] font-black tabular-nums text-primary">{anime.averageScore}</span>
+                            <span className="text-[10px] font-bold text-primary/75">%</span>
                         </span>
                     </div>
                 ) : null}
@@ -80,7 +80,7 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
 
             {/* Visuals */}
             {coverImage && (
-                <div className="relative h-full w-full overflow-hidden">
+                <div className="relative h-full w-full overflow-hidden bg-black">
                     <IndexImage
                         src={coverImage}
                         alt={title}
@@ -88,28 +88,28 @@ export const PosterCard = memo(function PosterCard({ anime, rank, priority = fal
                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                         priority={priority}
                         showTechnicalDetails={false}
-                        className="transition-all duration-700 ease-out group-hover:scale-[1.02] group-hover:brightness-105 brightness-95"
+                        className="transition-transform duration-500 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
                     />
                 </div>
             )}
 
             {/* Mask */}
-            <div className="absolute inset-x-0 bottom-0 z-10 h-2/3 bg-linear-to-t from-black via-black/80 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 z-10 h-3/5 bg-linear-to-t from-black via-black/80 to-transparent pointer-events-none" />
 
             {/* Info Layer */}
-            <div className="absolute inset-x-0 bottom-0 z-30 p-5 space-y-3">
-                <div className="space-y-2 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-500">
-                    <h3 className="line-clamp-2 font-sans text-sm font-semibold leading-snug tracking-tight text-foreground group-hover:text-primary transition-colors duration-300 md:text-base">
+            <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-5 space-y-3 pointer-events-none">
+                <div className="space-y-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                    <h3 className="line-clamp-2 font-sans text-[15px] font-bold leading-snug tracking-tight text-foreground/90 group-hover:text-primary transition-colors duration-300 drop-shadow-md">
                         {title}
                     </h3>
 
-                    <div className="flex items-center gap-3 border-t border-border pt-3 font-mono text-[9px] uppercase tracking-wide text-muted-foreground">
-                        <span className="text-foreground/90">{anime.format?.replace(/_/g, " ")}</span>
-                        <div className="h-3 w-px bg-border" />
+                    <div className="flex items-center gap-2.5 border-t border-white/10 pt-2.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/80">
+                        <span className="text-foreground group-hover:text-foreground transition-colors">{anime.format?.replace(/_/g, " ")}</span>
+                        <div className="h-3 w-px bg-white/20 group-hover:bg-primary/40 transition-colors" />
                         <span>{anime.startDate?.year || "TBA"}</span>
                         <div className="flex-1" />
                         {anime.status ? (
-                            <span className="text-muted-foreground">{anime.status.replace(/_/g, " ")}</span>
+                            <span className="text-muted-foreground/60">{anime.status.replace(/_/g, " ")}</span>
                         ) : null}
                     </div>
                 </div>
